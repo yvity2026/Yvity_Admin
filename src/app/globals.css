@@ -1,1 +1,12 @@
 @import "tailwindcss";
+
+
+.advisor-theme {
+  --primary: #0F3D3E;
+  --bg: #F8F9FA;
+  --card: #FFFFFF;
+  --border: #E5E7EB;
+  --text-muted: #6B7280;
+  --success: #16A34A;
+  --warning: #F59E0B;
+}
