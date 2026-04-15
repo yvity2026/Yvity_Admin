@@ -43,9 +43,9 @@ export default function RootLayout({ children }) {
     >
       <body className="min-h-full max-w-384 mx-auto flex flex-col">
         <AppShell>
-        {children}
-        </AppShell>
-        </body>
+          {children}
+          </AppShell>
+      </body>
     </html>
   );
 }
