@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { AiOutlineUser } from "react-icons/ai";
 import { BiPulse } from "react-icons/bi";
@@ -47,6 +48,11 @@ const menuItems = [
 
 export default function AppShell({ children }) {
   const [collapsed, setCollapsed] = useState(false);
+  const pathname = usePathname();
+  const hideSidebarRoutes = ["/advisor/public-view"];
+  if (hideSidebarRoutes.includes(pathname)) {
+    return <>{children}</>;
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -54,7 +60,7 @@ export default function AppShell({ children }) {
       <motion.aside
         className={`
       ${collapsed ? "w-20" : "w-64"}
-      h-full
+      h-full sticky top-0
       border-r
       bg-(--primary-900,#0A4A4A)
       transition-all duration-300
@@ -90,7 +96,7 @@ export default function AppShell({ children }) {
                 className="flex items-center gap-4 font-semibold px-10 py-2 text-[#8BBEBE] cursor-pointer"
               >
                 <span className="text-xl">{item.icon}</span>
-                {!collapsed && <Link href="/">{item.label}</Link>}
+                {!collapsed && <Link href="/advisor/subscriptions">{item.label}</Link>}
               </div>
             ))}
           </div>
@@ -98,7 +104,7 @@ export default function AppShell({ children }) {
       </motion.aside>
 
       {/* RIGHT SIDE (HEADER + MAIN) */}
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 ">
         {/* HEADER (TOP RIGHT) */}
         <header className="h-[60px] flex items-center justify-between border-b px-4">
           {/* <button onClick={() => setCollapsed((prev) => !prev)}>
@@ -115,7 +121,7 @@ export default function AppShell({ children }) {
         </header>
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 p-4 bg-gray-50">{children}</main>
+        <main className="flex-1 bg-gray-50">{children}</main>
       </div>
     </div>
   );
