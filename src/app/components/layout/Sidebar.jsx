@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { AiOutlineUser } from "react-icons/ai";
 import { BiPulse } from "react-icons/bi";
@@ -107,6 +108,11 @@ const menuItems = [
 
 export default function AppShell({ children }) {
   const [collapsed, setCollapsed] = useState(false);
+  const pathname = usePathname();
+  const hideSidebarRoutes = ["/advisor/public-view"];
+  if (hideSidebarRoutes.includes(pathname)) {
+    return <>{children}</>;
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -114,7 +120,7 @@ export default function AppShell({ children }) {
       <motion.aside
         className={`
       ${collapsed ? "w-20" : "w-64"}
-      h-full
+      h-full sticky top-0
       border-r
       bg-(--primary-900,#0A4A4A)
       transition-all duration-300
@@ -166,7 +172,7 @@ export default function AppShell({ children }) {
       </motion.aside>
 
       {/* RIGHT SIDE (HEADER + MAIN) */}
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 ">
         {/* HEADER (TOP RIGHT) */}
         {/* <header className="h-[60px] flex items-center justify-between border-b px-4">
           
