@@ -1,33 +1,12 @@
-// export default function ProfileProgress() {
-//   return (
-//     <div className="bg-white rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-//       <div>
-//         <p className="font-medium">Profile is 87% Complete</p>
-//         <p className="text-sm text-gray-500">
-//           Add intro video to reach 95%
-//         </p>
-//       </div>
-
-//       <div className="flex items-center gap-4 w-full sm:w-auto">
-//         <div className="w-full sm:w-48 h-2 bg-gray-200 rounded-full">
-//           <div className="w-[87%] h-full bg-[#0F3D3E] rounded-full" />
-//         </div>
-//         <button className="bg-[#0F3D3E] text-white px-4 py-2 rounded-lg text-sm">
-//           Complete Now
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }
-
-
 export default function ProfileProgress() {
   return (
     <div className="bg-white rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm border border-gray-100">
       <div className="flex items-center gap-4">
         <div className="text-3xl">💪</div>
         <div>
-          <p className="font-semibold text-gray-900 text-lg">Profile is 87% Complete</p>
+          <p className="font-semibold text-gray-900 text-lg">
+            Profile is 87% Complete
+          </p>
           <p className="text-sm text-gray-500 mt-1">
             Add intro video to reach 95% and earn +2 score points
           </p>

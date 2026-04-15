@@ -1,27 +1,9 @@
-// export default function RecentActivity() {
-//   const activities = [
-//     "New Testimonial Received",
-//     "Recommendation Received",
-//     "Gallery Photo Added",
-//     "Achievement Added",
-//   ];
-
-//   return (
-//     <div className="bg-white p-6 rounded-xl space-y-4">
-//       <h3 className="font-semibold">Recent Activity</h3>
-
-//       {activities.map((item, i) => (
-//         <div key={i} className="text-sm text-gray-600">
-//           • {item}
-//         </div>
-//       ))}
-//     </div>
-//   );
-// }
-
-
-
-import { MessageSquare, ThumbsUp, Image as ImageIcon, Trophy } from "lucide-react";
+import {
+  MessageSquare,
+  ThumbsUp,
+  Image as ImageIcon,
+  Trophy,
+} from "lucide-react";
 
 export default function RecentActivity() {
   const activities = [
@@ -30,7 +12,7 @@ export default function RecentActivity() {
       subtext: "Ravi Shankar • ⭐⭐⭐⭐⭐ • Text",
       time: "10 mins ago",
       badge: "Pending Review",
-      badgeColor: "bg-[#D1FAE5] text-[#065F46]", // Light Green
+      badgeColor: "bg-[#D1FAE5] text-[#065F46]",
       icon: MessageSquare,
       iconBg: "bg-[#D1FAE5]",
       iconColor: "text-[#059669]",
@@ -40,7 +22,7 @@ export default function RecentActivity() {
       subtext: "Priya Devi • Verified",
       time: "2 hours ago",
       badge: "+2 pts",
-      badgeColor: "bg-[#FEF3C7] text-[#B45309]", // Light Yellow/Orange
+      badgeColor: "bg-[#FEF3C7] text-[#B45309]",
       icon: ThumbsUp,
       iconBg: "bg-[#FEF3C7]",
       iconColor: "text-[#D97706]",
@@ -78,7 +60,6 @@ export default function RecentActivity() {
           const Icon = item.icon;
           return (
             <div key={i} className="relative">
-              {/* Timeline Node */}
               <div
                 className={`absolute -left-[35px] top-0 w-8 h-8 rounded-full ${item.iconBg} flex items-center justify-center border-4 border-white`}
               >
@@ -86,8 +67,12 @@ export default function RecentActivity() {
               </div>
 
               <div className="pl-2">
-                <h4 className="text-sm font-bold text-gray-900">{item.title}</h4>
-                <p className="text-xs text-gray-500 mt-1 font-medium">{item.subtext}</p>
+                <h4 className="text-sm font-bold text-gray-900">
+                  {item.title}
+                </h4>
+                <p className="text-xs text-gray-500 mt-1 font-medium">
+                  {item.subtext}
+                </p>
                 <div className="flex items-center gap-3 mt-2">
                   <span className="text-[11px] text-gray-400 font-medium">
                     {item.time}
