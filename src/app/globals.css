@@ -1,4 +1,7 @@
 @import "tailwindcss";
 
-
-
+@theme {
+  --font-cormorant: var(--font-cormorant), serif;
+  --font-nunito: var(--font-nunito), sans-serif;
+  --font-poppins: var(--font-poppins), sans-serif;
+}

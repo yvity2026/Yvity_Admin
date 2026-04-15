@@ -8,10 +8,10 @@ export default function IdentitySection() {
       <ProgressRow label="Mobile Verification" icon="📱" score={5} max={5} />
       <ProgressRow label="IRDAI License" icon="🏛️" score={5} max={5} />
       <ProgressRow label="Intro Video" icon="🎥" score={8} max={10} />
-      
+
       <div className="pl-8 pr-2 mt-4">
-        <InfoBox 
-          title="Add intro video to earn full points" 
+        <InfoBox
+          title="Add intro video to earn full points"
           subtitle="Upload a short intro video on your profile to earn maximum score"
           badge="+2 pts available"
         />

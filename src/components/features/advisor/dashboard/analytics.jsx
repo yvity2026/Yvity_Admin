@@ -1,34 +1,3 @@
-// export default function Analytics() {
-//   const data = [
-//     { label: "Views", value: 90 },
-//     { label: "Shares", value: 70 },
-//     { label: "Contacts", value: 40 },
-//     { label: "Saves", value: 20 },
-//   ];
-
-//   return (
-//     <div className="bg-white p-6 rounded-xl">
-//       <h3 className="font-semibold mb-4">Analytics</h3>
-
-//       <div className="space-y-4">
-//         {data.map((item, i) => (
-//           <div key={i}>
-//             <div className="flex justify-between text-sm">
-//               <span>{item.label}</span>
-//             </div>
-//             <div className="h-2 bg-gray-200 rounded-full mt-1">
-//               <div
-//                 className="h-full bg-[#0F3D3E] rounded-full"
-//                 style={{ width: `${item.value}%` }}
-//               />
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
 export default function Analytics() {
   const data = [
     { label: "Views", value: "1,247", width: "90%", color: "bg-[#124B48]" },

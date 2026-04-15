@@ -174,14 +174,14 @@ export default function AppShell({ children }) {
       {/* RIGHT SIDE (HEADER + MAIN) */}
       <div className="flex flex-col flex-1 ">
         {/* HEADER (TOP RIGHT) */}
-        {/* <header className="h-[60px] flex items-center justify-between border-b px-4">
+        <header className="h-[60px] flex items-center justify-between border-b px-4">
           
           <h3 className="text-black text-base font-bold">Dashboard</h3>
           <div className="h-10 flex gap-4 py-[10px] items-center">
             <button className="rounded-full h-10 w-10 bg-green-300"></button>
             <button className="rounded-full h-10 w-10 bg-green-300"></button>
           </div>
-        </header> */}
+        </header>
 
         {/* MAIN CONTENT */}
         <main className="flex-1 bg-gray-50">{children}</main>

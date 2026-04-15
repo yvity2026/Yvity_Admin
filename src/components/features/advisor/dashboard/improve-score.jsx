@@ -1,30 +1,3 @@
-// export default function ImproveScore() {
-//   const items = [
-//     { title: "Add 1 Video testimonial", pts: "+3 pts" },
-//     { title: "Get 2 more recommendations", pts: "+4 pts" },
-//     { title: "Add intro video", pts: "+2 pts" },
-//   ];
-
-//   return (
-//     <div className="bg-white p-6 rounded-xl space-y-4">
-//       <h3 className="font-semibold">Improve Your Score</h3>
-
-//       {items.map((item, i) => (
-//         <div
-//           key={i}
-//           className="flex justify-between items-center bg-gray-50 p-3 rounded-lg"
-//         >
-//           <span className="text-sm">{item.title}</span>
-//           <button className="bg-[#0F3D3E] text-white px-3 py-1 rounded">
-//             Add
-//           </button>
-//         </div>
-//       ))}
-//     </div>
-//   );
-// }
-
-
 import { ArrowRight } from "lucide-react";
 
 export default function ImproveScore() {
@@ -48,10 +21,14 @@ export default function ImproveScore() {
           >
             <div className="flex items-center gap-3">
               <span className="text-xl">{item.icon}</span>
-              <span className="text-sm font-medium text-gray-700">{item.title}</span>
+              <span className="text-sm font-medium text-gray-700">
+                {item.title}
+              </span>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm font-bold text-[#2E7D32]">{item.pts}</span>
+              <span className="text-sm font-bold text-[#2E7D32]">
+                {item.pts}
+              </span>
               <button className="bg-[#124B48] hover:bg-[#0a2e2c] transition-colors text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5">
                 Add <ArrowRight className="w-3.5 h-3.5 text-[#EAB308]" />
               </button>
