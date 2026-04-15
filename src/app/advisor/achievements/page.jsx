@@ -1,0 +1,74 @@
+import PageHeader from "@/components/features/advisor/achievements/page-header";
+import InfoBanner from "@/components/features/advisor/achievements/info-banner";
+import AchievementCard from "@/components/features/advisor/achievements/achievement-card";
+
+// MOCK DATA: Structured for future backend API integration
+const achievementsData = [
+  {
+    id: "ach-1",
+    icon: "🏆",
+    iconBg: "bg-[#FEF3C7]", // Light yellow
+    title: "MDRT Qualifier",
+    description: "Million Dollar Round Table — Global recognition for top advisors",
+    highlightText: "2022, 2023, 2024",
+  },
+  {
+    id: "ach-2",
+    icon: "🏵️",
+    iconBg: "bg-[#F3F4F6]", // Light gray
+    title: "Branch Champion",
+    description: "Highest premium collection in Nellore LIC branch",
+    highlightText: "2023",
+  },
+  {
+    id: "ach-3",
+    icon: "🌟",
+    iconBg: "bg-[#FEF3C7]",
+    title: "500+ Clients Served",
+    description: "Successfully secured coverage for 500+ families",
+    highlightText: "2024 milestone",
+  },
+  {
+    id: "ach-4",
+    icon: "📜",
+    iconBg: "bg-[#F3F4F6]",
+    title: "IRDAI Certified",
+    description: "Valid IRDAI license verified by YVITY platform",
+    highlightText: "Active",
+  },
+  {
+    id: "ach-5",
+    icon: "💎",
+    iconBg: "bg-[#EFF6FF]", // Light blue
+    title: "YVITY Founding Advisor",
+    description: "Among first 500 verified advisors on YVITY",
+    highlightText: "2024",
+  },
+  {
+    id: "ach-6",
+    icon: "🎓",
+    iconBg: "bg-[#F4ECE1]", // Light tan/brown
+    title: "Licentiate Cleared",
+    description: "Insurance Institute of India — Professional certification",
+    highlightText: "2015",
+  },
+];
+
+export default function AchievementsPage() {
+  return (
+    <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
+      <PageHeader />
+      
+      <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto w-full pb-12">
+        <InfoBanner />
+        
+        {/* Achievements Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {achievementsData.map((achievement) => (
+            <AchievementCard key={achievement.id} data={achievement} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
