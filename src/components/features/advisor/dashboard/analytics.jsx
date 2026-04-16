@@ -7,25 +7,25 @@ export default function Analytics() {
   ];
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="font-bold text-gray-900 text-lg">Analytics</h3>
-        <span className="text-xs text-gray-400 font-medium">Last 30 days</span>
+    <div className="bg-white px-6 pt-4 pb-4 rounded-2xl  flex flex-col border border-[#E2E1DC] shadow-none">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-bold text-[#111827] text-[clamp(12px,1.5vw,16px)]">Analytics</h3>
+        <span className="text-[clamp(8px,1vw,12px)] text-[#6B7280] font-medium">Last 30 days</span>
       </div>
 
-      <div className="space-y-6 mt-2 flex-1 justify-center flex flex-col">
+      <div className="space-y-1 mt-2 flex-1 justify-center flex flex-col">
         {data.map((item, i) => (
-          <div key={i} className="flex items-center gap-4">
-            <span className="text-sm text-gray-600 font-medium w-16 flex-shrink-0">
+          <div key={i} className="flex items-center gap-3 mb-2">
+            <span className="text-[clamp(8px,1vw,12px)] text-[#6B7280] font-medium w-16 flex-shrink-0">
               {item.label}
             </span>
-            <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="flex-1 h-2 bg-[#E8F4F4] rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full ${item.color}`}
                 style={{ width: item.width }}
               />
             </div>
-            <span className="text-sm font-bold text-gray-900 w-10 text-right flex-shrink-0">
+            <span className="text-[clamp(10px,1vw,14px)] font-bold text-[#374151] w-10 text-right flex-shrink-0">
               {item.value}
             </span>
           </div>

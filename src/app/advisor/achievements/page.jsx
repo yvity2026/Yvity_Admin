@@ -1,6 +1,10 @@
+"use client";
+import { useState } from "react";
 import PageHeader from "@/components/features/advisor/achievements/page-header";
 import InfoBanner from "@/components/features/advisor/achievements/info-banner";
 import AchievementCard from "@/components/features/advisor/achievements/achievement-card";
+import AchievementFormModal from "@/components/features/advisor/achievements/achievement-form-modal";
+import AchievementDeleteModal from "@/components/features/advisor/achievements/achievement-delete-modal";
 
 // MOCK DATA: Structured for future backend API integration
 const achievementsData = [
@@ -55,20 +59,79 @@ const achievementsData = [
 ];
 
 export default function AchievementsPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingAchievement, setEditingAchievement] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingAchievement, setDeletingAchievement] = useState(null);
+
+  const handleAddClick = () => {
+    setEditingAchievement(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditClick = (achievement) => {
+    setEditingAchievement(achievement);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteClick = (achievement) => {
+    setDeletingAchievement(achievement);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingAchievement(null);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setDeletingAchievement(null);
+  };
+
+  const handleFormSubmit = (data) => {
+    console.log("Form Submitted:", data);
+    // Ready for backend integration
+  };
+
+  const handleDeleteSubmit = (achievement) => {
+    console.log("Delete Submitted:", achievement);
+    // Ready for backend integration
+  };
+
   return (
     <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
-      <PageHeader />
+      <PageHeader onAddClick={handleAddClick} />
       
-      <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto w-full pb-12">
+      <div className="p-4 md:p-6 lg:p-10 xl:px-15 space-y-6 mx-auto w-full pb-12">
         <InfoBanner />
         
         {/* Achievements Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {achievementsData.map((achievement) => (
-            <AchievementCard key={achievement.id} data={achievement} />
+            <AchievementCard 
+              key={achievement.id} 
+              data={achievement} 
+              onEditClick={() => handleEditClick(achievement)} 
+              onDeleteClick={() => handleDeleteClick(achievement)}
+            />
           ))}
         </div>
       </div>
+
+      <AchievementFormModal 
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        initialData={editingAchievement}
+        onSubmit={handleFormSubmit}
+      />
+
+      <AchievementDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        achievement={deletingAchievement}
+        onDelete={handleDeleteSubmit}
+      />
     </div>
   );
 }

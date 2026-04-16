@@ -12,7 +12,7 @@ export default function RecentActivity() {
       subtext: "Ravi Shankar • ⭐⭐⭐⭐⭐ • Text",
       time: "10 mins ago",
       badge: "Pending Review",
-      badgeColor: "bg-[#D1FAE5] text-[#065F46]",
+      badgeColor: "bg-[#D1FAE4] text-[#065F46]",
       icon: MessageSquare,
       iconBg: "bg-[#D1FAE5]",
       iconColor: "text-[#059669]",
@@ -22,7 +22,7 @@ export default function RecentActivity() {
       subtext: "Priya Devi • Verified",
       time: "2 hours ago",
       badge: "+2 pts",
-      badgeColor: "bg-[#FEF3C7] text-[#B45309]",
+      badgeColor: "bg-[#FEF3C6] text-[#B45309]",
       icon: ThumbsUp,
       iconBg: "bg-[#FEF3C7]",
       iconColor: "text-[#D97706]",
@@ -32,9 +32,9 @@ export default function RecentActivity() {
       subtext: "Team meeting photo",
       time: "Yesterday",
       badge: "+1 pt",
-      badgeColor: "bg-[#D1FAE5] text-[#065F46]",
+      badgeColor: "bg-[#E7F4F4] text-[#065F46]",
       icon: ImageIcon,
-      iconBg: "bg-[#FFEDD5]",
+      iconBg: "bg-[#D0FAE4]",
       iconColor: "text-[#EA580C]",
     },
     {
@@ -44,14 +44,14 @@ export default function RecentActivity() {
       badge: "+2 pts",
       badgeColor: "bg-[#FEF3C7] text-[#B45309]",
       icon: Trophy,
-      iconBg: "bg-[#FEF08A]",
+      iconBg: "bg-[#F2EFE9]",
       iconColor: "text-[#CA8A04]",
     },
   ];
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-      <h3 className="font-bold text-gray-900 text-lg mb-6 flex items-center gap-2">
+      <h3 className="font-bold text-[#111827] text-[clamp(12px,1.5vw,16px)] mb-6 flex items-center gap-2">
         <span className="text-xl">🕒</span> Recent Activity
       </h3>
 
@@ -61,20 +61,20 @@ export default function RecentActivity() {
           return (
             <div key={i} className="relative">
               <div
-                className={`absolute -left-[35px] top-0 w-8 h-8 rounded-full ${item.iconBg} flex items-center justify-center border-4 border-white`}
+                className={`absolute -left-[40px] top-0 w-12 h-12 rounded-full ${item.iconBg} flex items-center justify-center border-4 border-white`}
               >
                 <Icon className={`w-3.5 h-3.5 ${item.iconColor}`} />
               </div>
 
-              <div className="pl-2">
-                <h4 className="text-sm font-bold text-gray-900">
+              <div className="pl-6">
+                <h4 className="font-bold text-[#111827] text-[clamp(12px,1.5vw,16px)]">
                   {item.title}
                 </h4>
-                <p className="text-xs text-gray-500 mt-1 font-medium">
+                <p className="text-xs text-[#6B7280] mt-1 font-medium">
                   {item.subtext}
                 </p>
                 <div className="flex items-center gap-3 mt-2">
-                  <span className="text-[11px] text-gray-400 font-medium">
+                  <span className="text-[11px] text-[#6B7280] font-medium">
                     {item.time}
                   </span>
                   <span

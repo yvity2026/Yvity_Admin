@@ -40,7 +40,7 @@ export default function TrustSection() {
       <ProgressRow label="Recommendations" icon="👍" score={11} max={15} />
       <div className="pl-8 pr-2 mt-2 mb-4">
         <InfoBox>
-          <div className="flex justify-between items-start text-sm">
+          <div className="flex justify-between items-start text-sm w-full">
             <ul className="text-gray-600 space-y-1 font-medium list-disc ml-4">
               <li>Each recommendation → 2 points</li>
               <li>Current : 5 recommendations received</li>

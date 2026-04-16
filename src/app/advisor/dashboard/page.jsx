@@ -2,14 +2,8 @@
 import { useEffect, useState } from "react";
 
 // Actual Components
-import DashboardHeader from "@/components/features/advisor/dashboard/dashboard-header";
-import WelcomeCard from "@/components/features/advisor/dashboard/welcome-card";
-import ProfileProgress from "@/components/features/advisor/dashboard/profile-progress";
-import StatsCards from "@/components/features/advisor/dashboard/stats-cards";
-import ScoreSection from "@/components/features/advisor/dashboard/score-section";
-import QuickActions from "@/components/features/advisor/dashboard/quick-actions";
-import ImproveScore from "@/components/features/advisor/dashboard/improve-score";
-import RecentActivity from "@/components/features/advisor/dashboard/recent-activity";
+// import DashboardHeader from "@/components/features/advisor/dashboard/dashboard-header";
+
 
 // Shimmers
 import WelcomeCardShimmer from "./shimmers/WelcomeCardShimmer";
@@ -21,7 +15,14 @@ import QuickActionsShimmer from "./shimmers/QuickActionsShimmer";
 import ImproveScoreShimmer from "./shimmers/ImproveScoreShimmer";
 import RecentActivityShimmer from "./shimmers/RecentActivityShimmer";
 import DashboardHeaderShimmer from "./shimmers/dashboard-header-shimmer";
+import WelcomeCard from "@/components/features/advisor/dashboard/welcome-card";
+import ProfileProgress from "@/components/features/advisor/dashboard/profile-progress";
+import StatsCards from "@/components/features/advisor/dashboard/stats-cards";
+import ScoreSection from "@/components/features/advisor/dashboard/score-section";
 import Analytics from "@/components/features/advisor/dashboard/analytics";
+import QuickActions from "@/components/features/advisor/dashboard/quick-actions";
+import ImproveScore from "@/components/features/advisor/dashboard/improve-score";
+import RecentActivity from "@/components/features/advisor/dashboard/recent-activity";
 
 export default function AdvisorDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);

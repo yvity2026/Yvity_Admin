@@ -11,20 +11,20 @@ const actions = [
 export default function QuickActions() {
   return (
     <div className="space-y-4">
-      <h3 className="font-bold text-gray-900 text-lg">Quick Actions</h3>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <h3 className="font-bold text-[#111827] text-[clamp(12px,1.5vw,16px)]">Quick Actions</h3>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 ">
         {actions.map((action, i) => {
           const Icon = action.icon;
           return (
             <button
               key={i}
-              className="bg-white py-6 px-4 rounded-2xl shadow-sm border border-gray-100 hover:border-[#124B48] hover:shadow-md transition-all flex flex-col items-center justify-center gap-3 group"
+              className="bg-white py-6 px-4 rounded-2xl hover:border-[#124B48] hover:shadow-md transition-all flex flex-col items-center justify-center gap-3 group cursor-pointer border border-[#E2E1DC] shadow-none"
             >
               <Icon
-                className="w-6 h-6 text-gray-700 group-hover:text-[#124B48] transition-colors"
+                className="text-gray-700 group-hover:text-[#124B48] transition-colors"
                 strokeWidth={1.5}
               />
-              <span className="text-xs font-bold text-gray-800">
+              <span className="text-[clamp(8px,1vw,12px)] font-bold text-[#374151]">
                 {action.label}
               </span>
             </button>

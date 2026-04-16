@@ -24,14 +24,14 @@ export default function WelcomeCard() {
   return (
     <div className="bg-[#124B48] text-white rounded-2xl p-6 md:p-8 flex flex-col justify-center shadow-sm font-poppins">
       <div className="flex items-center gap-2 mb-1">
-        <p className="lg:text-[] xl:text-[16px] text-[#89B5B7] font-['Nunito'] text-base font-bold leading-normal">
+        <p className="text-[clamp(12px,1.5vw,16px)] text-[#89B5B7] font-['Nunito'] text-base font-bold leading-normal">
           {greeting}
         </p>
       </div>
-      <h2 className=" lg:text-[26px] xl:text-[27px] tracking-wide font-cormorant mb-1 text-[#FFF]  text-base font-bold leading-normal">
+      <h2 className="text-[clamp(16px,4vw,27px)] font-cormorant mb-1 text-[#FFF]  text-base font-bold leading-normal">
         Krishna Mohan!
       </h2>
-      <p className=" lg:text-[] xl:text-[14px] text-[#89B5B7]">
+      <p className="text-[clamp(10px,1.2vw,14px)] text-[#89B5B7]">
         Your credibility profile is active and growing{" "}
         <span className="ml-2"> 🚀</span>
       </p>
