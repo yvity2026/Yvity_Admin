@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import JourneyTimelineItem from "./journey-timeline-item";
 
-export default function JourneySection({ data }) {
+export default function JourneySection({ data, onEditClick, onDeleteClick }) {
   const Icon = data.icon;
 
   return (
@@ -17,10 +17,7 @@ export default function JourneySection({ data }) {
           </span>
         </div>
 
-        <button className="bg-white text-[#065F46] hover:bg-gray-50 transition-colors px-4 py-1.5 rounded-full text-[clamp(8px,1vw,12px)] font-bold flex items-center gap-1.5 shadow-sm cursor-pointer">
-          <Plus className="w-4 h-4" />
-          Add
-        </button>
+       
       </div>
 
       <div className="p-6">
@@ -32,6 +29,8 @@ export default function JourneySection({ data }) {
               themeColor={data.themeColor}
               textColor={data.textColor}
               isLast={index === data.entries.length - 1}
+              onEditClick={() => onEditClick(entry)}
+              onDeleteClick={() => onDeleteClick(entry)}
             />
           ))}
         </div>

@@ -1,7 +1,10 @@
-
+"use client";
+import { useState } from "react";
 import InfoBanner from "@/components/features/advisor/professional-journey/info-banner";
 import JourneySection from "@/components/features/advisor/professional-journey/journey-section";
 import PageHeader from "@/components/features/advisor/professional-journey/page-header";
+import EntryFormModal from "@/components/features/advisor/professional-journey/entry-form-modal";
+import EntryDeleteModal from "@/components/features/advisor/professional-journey/entry-delete-modal";
 import { Shield, HeartPulse, GraduationCap } from "lucide-react";
 
 // MOCK DATA: Structured exactly how your backend API should return it
@@ -95,19 +98,78 @@ const journeyData = [
 ];
 
 export default function ProfessionalJourneyPage() {
+  const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
+  const [editingEntry, setEditingEntry] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingEntry, setDeletingEntry] = useState(null);
+
+  const handleAddClick = () => {
+    setEditingEntry(null);
+    setIsEntryModalOpen(true);
+  };
+
+  const handleEditClick = (entry) => {
+    setEditingEntry(entry);
+    setIsEntryModalOpen(true);
+  };
+
+  const handleDeleteClick = (entry) => {
+    setDeletingEntry(entry);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsEntryModalOpen(false);
+    setEditingEntry(null);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setDeletingEntry(null);
+  };
+
+  const handleFormSubmit = (data) => {
+    console.log("Form Submitted:", data);
+    // Ready for backend integration
+  };
+
+  const handleDeleteSubmit = (entry) => {
+    console.log("Delete Submitted:", entry);
+    // Ready for backend integration
+  };
+
   return (
     <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
-      {/* <PageHeader /> */}
-      
+      <PageHeader onAddClick={handleAddClick} />
+
       <div className="p-4 md:p-6 space-y-6 lg:p-10 xl:px-15 mx-auto w-full pb-12">
         <InfoBanner />
-        
+
         <div className="space-y-8">
           {journeyData.map((section) => (
-            <JourneySection key={section.id} data={section} />
+            <JourneySection
+              key={section.id}
+              data={section}
+              onEditClick={handleEditClick}
+              onDeleteClick={handleDeleteClick}
+            />
           ))}
         </div>
       </div>
+
+      <EntryFormModal
+        isOpen={isEntryModalOpen}
+        onClose={handleCloseModal}
+        initialData={editingEntry}
+        onSubmit={handleFormSubmit}
+      />
+
+      <EntryDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        entry={deletingEntry}
+        onDelete={handleDeleteSubmit}
+      />
     </div>
   );
 }
