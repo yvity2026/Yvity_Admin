@@ -1,6 +1,14 @@
-import { Geist, Geist_Mono,Cormorant_Garamond, Nunito, Poppins  } from "next/font/google";
+import {
+  Geist,
+  Geist_Mono,
+  Cormorant_Garamond,
+  Nunito,
+  Poppins,
+} from "next/font/google";
 import "./globals.css";
 import AppShell from "./components/layout/Sidebar";
+import { SidebarProvider } from "@/context/SidebarContext";
+import { ModalProvider } from "@/context/ModalContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,21 +21,21 @@ const geistMono = Geist_Mono({
 });
 
 const cormorant = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-cormorant',
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-cormorant",
 });
 
 const nunito = Nunito({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-nunito',
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-nunito",
 });
 
 const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-poppins',
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-poppins",
 });
 
 export const metadata = {
@@ -42,9 +50,11 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${nunito.variable} ${poppins.variable} h-full antialiased`}
     >
       <body className="min-h-full max-w-384 mx-auto flex flex-col">
-        <AppShell>
-          {children}
-          </AppShell>
+        <ModalProvider>
+          <SidebarProvider>
+            <AppShell>{children}</AppShell>
+          </SidebarProvider>
+        </ModalProvider>
       </body>
     </html>
   );

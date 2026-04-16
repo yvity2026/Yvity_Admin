@@ -7,7 +7,6 @@ import WelcomeCard from "@/components/features/advisor/dashboard/welcome-card";
 import ProfileProgress from "@/components/features/advisor/dashboard/profile-progress";
 import StatsCards from "@/components/features/advisor/dashboard/stats-cards";
 import ScoreSection from "@/components/features/advisor/dashboard/score-section";
-import Analytics from "@/components/features/advisor/dashboard/analytics";
 import QuickActions from "@/components/features/advisor/dashboard/quick-actions";
 import ImproveScore from "@/components/features/advisor/dashboard/improve-score";
 import RecentActivity from "@/components/features/advisor/dashboard/recent-activity";
@@ -22,6 +21,7 @@ import QuickActionsShimmer from "./shimmers/QuickActionsShimmer";
 import ImproveScoreShimmer from "./shimmers/ImproveScoreShimmer";
 import RecentActivityShimmer from "./shimmers/RecentActivityShimmer";
 import DashboardHeaderShimmer from "./shimmers/dashboard-header-shimmer";
+import Analytics from "@/components/features/advisor/dashboard/analytics";
 
 export default function AdvisorDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
