@@ -1,98 +1,147 @@
-import { Eye, CheckCircle2 } from "lucide-react";
+import { Eye, CheckCircle2, Globe, Share, RefreshCw, Zap } from "lucide-react";
 import { SectionWrapper, ProgressRow, InfoBox } from "./score-components";
 
 export default function VisibilitySection() {
   return (
     <SectionWrapper title="Visibility" icon={Eye} score={26} max={30}>
+      
+      {/* 1. Public Profile Active */}
       <ProgressRow
         label="Public Profile Active"
-        icon="🌐"
+        icon={<Globe className="w-5 h-5 text-blue-500" />}
         score={10}
         max={10}
+        colorClass="bg-[#0A4A4A]"
+        textClass="text-[#0A4A4A]"
       />
 
-      <ProgressRow label="Profile Sharing (self)" icon="📤" score={3} max={5} />
-      <div className="pl-8 pr-2 mt-2 mb-6">
-        <InfoBox>
-          <div className="flex justify-between items-start">
-            <ul className="text-sm text-gray-600 space-y-1 font-medium list-disc ml-4">
-              <li>Every 5 shares → 1 point</li>
-              <li>25 total shares → 5 points</li>
-              <li className="text-xs text-gray-400 list-none -ml-4 mt-1">
-                Share your profile 10 more times to earn full 5 points
+      {/* 2. Profile Sharing (self) */}
+      <ProgressRow 
+        label="Profile Sharing (self)" 
+        icon={<Share className="w-5 h-5 text-gray-700" />} 
+        score={3} 
+        max={5} 
+        colorClass="bg-[#F59E0B]"
+        textClass="text-[#F59E0B]"
+      />
+      <InfoBox className="ml-8 mt-3 mb-7">
+        <div className="flex justify-between w-full items-start">
+          <div>
+            <ul className="text-[13px] text-[#4B5563] space-y-1.5 font-medium">
+              <li className="flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                <span>Every 5 shares → 1 point</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                <span>25 total shares → 5 points</span>
               </li>
             </ul>
-            <div className="text-right text-sm font-bold text-[#124B48]">
-              <div>Max : 5 pts</div>
-              <div>Current : 15 shares</div>
+            <div className="text-[11px] text-gray-400 mt-1.5 ml-3 font-normal">
+              Share your profile 10 more times to earn full 5 points
             </div>
           </div>
-        </InfoBox>
-      </div>
+          <div className="text-right text-[13px] font-bold text-[#0A4A4A] flex flex-col gap-1 ">
+            <div>Max : 5 pts</div>
+            <div>Current : 15 shares</div>
+          </div>
+        </div>
+      </InfoBox>
 
+      {/* 3. Profile Sharing (client) */}
       <ProgressRow
         label="Profile Sharing (client)"
-        icon="🔄"
+        icon={<RefreshCw className="w-5 h-5 text-purple-500" />}
         score={2}
         max={5}
+        colorClass="bg-[#F59E0B]"
+        textClass="text-[#F59E0B]"
       />
-      <div className="pl-8 pr-2 mt-2 mb-6">
-        <InfoBox>
-          <div className="flex justify-between items-start">
-            <ul className="text-sm text-gray-600 space-y-1 font-medium list-disc ml-4">
-              <li>Every user share → 1 point</li>
-              <li>Current : 2 users shared your profile</li>
-              <li className="text-xs text-gray-400 list-none -ml-4 mt-1">
-                Encourage clients to share your profile link to earn more points
+      <InfoBox className="ml-8 mt-3 mb-7">
+        <div className="flex justify-between items-start w-full">
+          <div>
+            <ul className="text-[13px] text-[#4B5563] space-y-1.5 font-medium">
+              <li className="flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                <span>Every user share → 1 point</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                <span>Current : 2 users shared your profile</span>
               </li>
             </ul>
-            <div className="text-right text-sm font-bold text-[#1E7145]">
-              <div>Max : 5 pts</div>
-              <div>+3 more needed</div>
+            <div className="text-[11px] text-gray-400 mt-1.5 ml-3 font-normal">
+              Encourage clients to share your profile link to earn more points
             </div>
           </div>
-        </InfoBox>
-      </div>
+          <div className="text-right text-[13px] font-bold text-[#0A4A4A] flex flex-col gap-1">
+            <div>Max : 5 pts</div>
+            <div>+3 more needed</div>
+          </div>
+        </div>
+      </InfoBox>
 
-      <ProgressRow label="Profile Strength" icon="💪" score={5} max={5} />
-      <div className="pl-8 pr-2 mt-2 mb-6">
-        <InfoBox>
-          <ul className="text-sm text-gray-600 space-y-2 font-medium">
-            {[
-              "Professional Journey added",
-              "Services added",
-              "Achievements added",
-              "Gallery photos added",
-              "Testimonials received",
-            ].map((item, i) => (
-              <li key={i} className="flex justify-between items-center">
-                <span>• {item}</span>
-                <span className="flex items-center gap-1 text-[#1E7145] font-bold">
-                  <CheckCircle2 className="w-4 h-4" /> 1 pt
-                </span>
-              </li>
-            ))}
-          </ul>
-        </InfoBox>
-      </div>
-
-      <ProgressRow label="Activity" icon="⚡" score={5} max={5} />
-      <div className="pl-8 pr-2 mt-2">
-        <InfoBox>
-          <div className="flex justify-between items-start">
-            <ul className="text-sm text-gray-600 space-y-1 font-medium list-disc ml-4">
-              <li>Each active day → 1 point</li>
-              <li>Active last 6 of 7 days</li>
-            </ul>
-            <div className="text-right text-sm font-bold text-[#1E7145]">
-              <div>Max : 5 pts</div>
-              <div className="flex items-center gap-1 justify-end">
-                <CheckCircle2 className="w-4 h-4" /> Full score
+      {/* 4. Profile Strength */}
+      <ProgressRow 
+        label="Profile Strength" 
+        icon={<span className="text-[18px]">💪</span>} 
+        score={5} 
+        max={5} 
+        colorClass="bg-[#0A4A4A]"
+        textClass="text-[#0A4A4A]"
+      />
+      <InfoBox className="ml-8 mt-3 mb-7">
+        <ul className="text-[13px] text-[#4B5563] space-y-2.5 font-medium w-full">
+          {[
+            "Professional Journey added",
+            "Services added",
+            "Achievements added",
+            "Gallery photos added",
+            "Testimonials received",
+          ].map((item, i) => (
+            <li key={i} className="flex justify-between items-center pr-1">
+              <div className="flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                <span>{item}</span>
               </div>
+              <span className="flex items-center gap-1.5 text-[#0A4A4A] font-bold">
+                <CheckCircle2 className="w-[18px] h-[18px] text-[#0A4A4A]" /> 1 pt
+              </span>
+            </li>
+          ))}
+        </ul>
+      </InfoBox>
+
+      {/* 5. Activity */}
+      <ProgressRow 
+        label="Activity" 
+        icon={<Zap className="w-5 h-5 fill-orange-500 text-orange-500" />} 
+        score={5} 
+        max={5} 
+        colorClass="bg-[#0A4A4A]"
+        textClass="text-[#0A4A4A]"
+      />
+      <InfoBox className="ml-8 mt-3 mb-2">
+        <div className="flex justify-between items-start pr-1 w-full">
+          <ul className="text-[13px] text-[#4B5563] space-y-1.5 font-medium">
+            <li className="flex items-center gap-2">
+              <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+              <span>Each active day → 1 point</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+              <span>Active last 6 of 7 days</span>
+            </li>
+          </ul>
+          <div className="text-right text-[13px] font-bold text-[#0A4A4A] flex flex-col gap-1">
+            <div>Max : 5 pts</div>
+            <div className="flex items-center gap-1.5 justify-end">
+              <CheckCircle2 className="w-[18px] h-[18px]" /> Full score
             </div>
           </div>
-        </InfoBox>
-      </div>
+        </div>
+      </InfoBox>
+      
     </SectionWrapper>
   );
 }

@@ -11,7 +11,7 @@ const journeyData = [
     category: "Life Insurance",
     count: "3 entries",
     themeColor: "bg-[#2A9D8F]", // Teal
-    textColor: "text-[#2A9D8F]",
+    textColor: "text-[#F8F6F1]",
     icon: Shield,
     entries: [
       {
@@ -42,7 +42,7 @@ const journeyData = [
     category: "Health Insurance",
     count: "2 entries",
     themeColor: "bg-[#3498DB]", // Blue
-    textColor: "text-[#3498DB]",
+    textColor: "text-[#F8F6F1]",
     icon: HeartPulse,
     entries: [
       {
@@ -65,8 +65,8 @@ const journeyData = [
     id: "education",
     category: "Education",
     count: "3 entries",
-    themeColor: "bg-[#F39C12]", // Orange
-    textColor: "text-[#F39C12]",
+    themeColor: "bg-[#E89C0F]", // Orange
+    textColor: "text-[#F8F6F1]",
     icon: GraduationCap,
     entries: [
       {
@@ -97,9 +97,9 @@ const journeyData = [
 export default function ProfessionalJourneyPage() {
   return (
     <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
-      <PageHeader />
+      {/* <PageHeader /> */}
       
-      <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto w-full pb-12">
+      <div className="p-4 md:p-6 space-y-6 lg:p-10 xl:px-15 mx-auto w-full pb-12">
         <InfoBanner />
         
         <div className="space-y-8">

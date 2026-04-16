@@ -41,7 +41,7 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${nunito.variable} ${poppins.variable} h-full antialiased`}
     >
-      <body className="min-h-full max-w-384 mx-auto flex flex-col">
+      <body className="min-h-full max-w-384 mx-auto flex flex-col font-poppins ">
         <AppShell>
           {children}
           </AppShell>

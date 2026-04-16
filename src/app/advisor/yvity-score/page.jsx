@@ -9,9 +9,9 @@ import VisibilitySection from "@/components/features/advisor/yvity-score/visibil
 export default function YvityScorePage() {
   return (
     <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
-      <PageHeader />
+      {/* <PageHeader /> */}
       
-      <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto w-full pb-12">
+      <div className="p-4 md:p-6 lg:p-10 xl:px-15 space-y-6 mx-auto w-full pb-12 ">
         <ScoreHero />
         <IdentitySection />
         <VisibilitySection />

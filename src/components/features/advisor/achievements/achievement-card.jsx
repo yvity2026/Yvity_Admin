@@ -1,33 +1,34 @@
 export default function AchievementCard({ data }) {
   return (
-    <div className="bg-white border-2 border-[#124B48] rounded-2xl p-6 flex items-start gap-5 hover:shadow-md transition-shadow">
-      <div
-        className={`w-12 h-12 flex-shrink-0 rounded-full flex items-center justify-center text-2xl ${data.iconBg}`}
-      >
+    <div className="bg-white border-t-[5px] border-[#00796B] rounded-[24px] p-3 sm:p-5 lg:p-7 flex items-start gap-2 lg:gap-3 shadow-sm">
+      
+      <div className="p-2 flex-shrink-0 rounded-[12px] flex items-center justify-center bg-[#FBF3E6]">
         {data.icon}
       </div>
 
-      <div className="flex-1 space-y-2">
-        <div>
-          <h3 className="text-base font-bold text-gray-900">{data.title}</h3>
-          <p className="text-sm text-gray-500 font-medium leading-snug mt-1 max-w-[90%]">
-            {data.description}
-          </p>
-        </div>
+      <div className="flex-1">
+        <h3 className="text-[clamp(12px,1.5vw,16px)] font-bold text-[#111827] leading-tight">
+          {data.title}
+        </h3>
+        
+        <p className="text-[clamp(8px,1vw,12px)] text-[#6B7280] mt-1.5 font-normal">
+          {data.description}
+        </p>
 
-        <p className="text-xs font-bold text-[#124B48] tracking-wide">
+        <p className="text-[clamp(8px,1vw,12px)] font-bold text-[#065F46] tracking-wide mt-4">
           {data.highlightText}
         </p>
 
-        <div className="flex items-center gap-3 pt-3">
-          <button className="px-4 py-1.5 bg-white border border-gray-200 rounded-md text-xs font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all">
+        <div className="flex items-center gap-3 mt-3">
+          <button className="px-5 py-1.5 rounded-lg text-[clamp(8px,1vw,12px)] font-bold text-[#0A4A4A] hover:bg-[#D8E6E3] transition-all border border-[#D5D5D5] bg-[var(--background-highlights,#E8F4F4)]">
             Edit
           </button>
-          <button className="px-4 py-1.5 bg-red-50 border border-red-100 rounded-md text-xs font-bold text-red-500 hover:bg-red-100 hover:border-red-200 transition-all">
+          <button className="px-5 py-1.5 rounded-lg text-[clamp(8px,1vw,12px)] font-bold text-[#D32323] hover:bg-[#FEE2E2] transition-all border border-[#F7C6C6] bg-[#FFF2F2]">
             Delete
           </button>
         </div>
       </div>
+      
     </div>
   );
 }

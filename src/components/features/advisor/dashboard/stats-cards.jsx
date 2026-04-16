@@ -33,27 +33,27 @@ const stats = [
 
 export default function StatsCards() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 md:gap-3 lg:gap-6">
       {stats.map((item, i) => {
         const Icon = item.icon;
         return (
           <div
             key={i}
-            className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-full"
+            className=" p-6 flex flex-col justify-between h-full rounded-2xl border border-[#E2E1DC] bg-white shadow-[0_0_0_0_rgba(0,0,0,0.20)]"
           >
-            <div className="mb-4">
+            <div className="mb-1">
               <Icon className="w-5 h-5 text-gray-600" strokeWidth={1.5} />
             </div>
 
             <div className="flex items-end gap-3 mb-1">
-              <span className="text-3xl font-bold text-gray-900">
+              <span className="text-[clamp(24px,4vw,32px)] font-bold text-[#111827]">
                 {item.value}
               </span>
-              <span className="flex items-center gap-1 bg-[#E8F5E9] text-[#2E7D32] px-2 py-0.5 rounded-full text-xs font-semibold mb-1.5">
+              <span className="flex items-center gap-1 bg-[#D0FAE4] text-[#065F46] px-2 py-0.5 rounded-2xl text-xs font-semibold mb-1.5">
                 ↑ {item.growth}
               </span>
             </div>
-            <p className="text-xs text-gray-500 font-medium">{item.label}</p>
+            <p className="text-[clamp(8px,1vw,12px)] text-[#6B7280] font-medium">{item.label}</p>
           </div>
         );
       })}

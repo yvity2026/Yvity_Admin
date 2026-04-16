@@ -1,14 +1,14 @@
 export function SectionWrapper({ title, icon: Icon, score, max, children }) {
   const isFull = score === max;
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-2">
       {/* Section Header */}
       <div className="p-5 md:p-6 border-b border-gray-100 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-[#F0F7F6] text-[#124B48] flex items-center justify-center">
-            <Icon className="w-4 h-4" />
+          <div className="p-2 rounded-full bg-[#F0F7F6] text-[#124B48] flex items-center justify-center">
+            <Icon className="" />
           </div>
-          <h2 className="text-lg font-bold text-gray-900">{title}</h2>
+          <h2 className="text-[clamp(16px,2.5vw,20px)] font-bold text-[#111827]">{title}</h2>
         </div>
 
         {/* Main Section Progress Bar */}
@@ -34,7 +34,7 @@ export function ProgressRow({ label, icon, score, max }) {
   const isFull = score === max;
   return (
     <div className="flex items-center justify-between gap-4">
-      <div className="flex items-center gap-3 font-bold text-sm text-gray-800">
+      <div className="flex items-center gap-3 font-bold text-[clamp(10px,1vw,14px)]  text-[#374151]">
         <span className="text-lg w-6 text-center">{icon}</span>
         {label}
       </div>
@@ -45,7 +45,7 @@ export function ProgressRow({ label, icon, score, max }) {
             style={{ width: `${(score / max) * 100}%` }}
           />
         </div>
-        <span className="text-xs font-bold text-[#124B48] w-8 text-right">
+        <span className="text-[clamp(14px,2vw,18px)] font-bold text-[#0A4A4A] w-8 text-right">
           {score}/{max}
         </span>
       </div>
