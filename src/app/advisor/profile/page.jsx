@@ -1,7 +1,7 @@
 "use client";
 import Toggle from "@/app/components/ui/ToggleButton";
 import React, { useState } from "react";
-import { FaCamera, FaFile, FaFolder, FaLightbulb } from "react-icons/fa";
+import { FaCamera, FaFile, FaFolder, FaLightbulb, FaPen } from "react-icons/fa";
 import { FaTriangleExclamation } from "react-icons/fa6";
 import { FiEye } from "react-icons/fi";
 import { IoIosCamera } from "react-icons/io";
@@ -13,8 +13,8 @@ const page = () => {
   return (
     <div className="p-4 md:p-8 flex flex-col gap-4 md:gap-6">
       {/* stage-1 */}
-      <div className="md:h-[212px] border flex flex-col p-4 sm:p-6 md:py-[34px] md:pl-[30px] md:pr-[87px] gap-4 rounded-2xl bg-white shadow-sm">
-        <span className="flex items-center  justify-center md:justify-start md:text-left gap-2 font-nunito ">
+      <div className="md:h-[212px] border flex flex-col p-4 sm:p-6 md:py-[34px] xl:pl-[30px] md:pr-[87px] gap-4 rounded-2xl bg-white shadow-sm">
+        <span className="flex items-center  justify-center md:justify-start md:text-left gap-2 font-nunito text-[clamp(10px,1vw,14px)]">
           <IoIosCamera />
           <p className="font-semibold font-poppins">Profile Photo</p> - Last
           updated 6 months ago
@@ -22,16 +22,16 @@ const page = () => {
         {/* <div className="w-[883px] flex flex-col md:flex-row items-center gap-[17px]"> */}
         <div className="w-full flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-[17px]">
           {/* profile image */}
-          <div className="relative w-26 h-26">
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-26 md:h-26">
             <div className="w-26 h-26 rounded-full bg-blue-200"></div>
 
             {/* edit icon */}
             <div className="absolute bottom-0 right-0 w-8 h-8 bg-[#0A4A4A] rounded-full flex items-center justify-center text-white shadow-md">
-              <FaCamera size={14} />
+              <FaPen size={14} />
             </div>
           </div>
-          <div className="flex flex-col h-full justify-between items-center md:items-start gap-6 md:gap-0">
-            <span className="flex items-center gap-4 py-[12px] pl-[21px] text-amber-600 text-sm font-semibold leading-4 font-nunito rounded-lg border border-[#ECE4C8] bg-[#FDF9ED] shadow-none">
+          <div className="flex flex-col h-full justify-between items-center md:items-start gap-6 xl:gap-0">
+            <span className="flex items-start sm:items-center text-left gap-4 py-[12px] px-[10px] xl:pl-[21px] text-amber-600 text-[clamp(10px,1vw,14px)] font-semibold leading-4 font-nunito rounded-lg border border-[#ECE4C8] bg-[#FDF9ED] shadow-none">
               <FaTriangleExclamation />
               <p className="">
                 You can update your profile photo only once a year. Next update
@@ -39,7 +39,7 @@ const page = () => {
               </p>
             </span>
             <button
-              className="w-[139px] h-[40px] flex py-[14px] px-[14px] gap-2 rounded-lg bg-[#0A4A4A] items-center text-[#F8F6F1] text-xs font-semibold leading-normal font-poppins"
+              className="w-full sm:w-auto px-4 h-[40px] flex py-[14px] px-[14px] gap-2 rounded-lg bg-[#0A4A4A] items-center text-[#F8F6F1] text-[clamp(8px,1vw,12px)] font-semibold leading-normal font-poppins"
               onClick={() => setIsUpload(true)}
             >
               <FaCamera />
@@ -62,7 +62,7 @@ const page = () => {
             <input
               type="text"
               placeholder="Krishna Mohan"
-              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 md:pl-[30px] text-sm md:text-base font-nunito"
+              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
             />
           </div>
           {/* DOB */}
@@ -71,7 +71,7 @@ const page = () => {
             <input
               type="date"
               placeholder="15-06-1985"
-              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 md:pl-[30px] text-sm md:text-base font-nunito"
+              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
             />
           </div>
           {/* Gender */}
@@ -81,8 +81,8 @@ const page = () => {
             <div className="flex gap-2 xl:gap-3 mt-2">
               {/* Male */}
               <label
-                className="flex items-center justify-center flex-1 min-w-[100px] h-[42px] px-6 py-4 gap-2 border rounded-md cursor-pointer font-poppins
-      hover:bg-gray-100 has-[:checked]:bg-blue-500 has-[:checked]:text-white"
+                className="flex items-center justify-center flex-1 h-10 px-3 sm:px-4 border rounded-md cursor-pointer text-sm
+hover:bg-gray-100 has-[:checked]:bg-blue-500 has-[:checked]:text-white"
               >
                 <input
                   type="radio"
@@ -95,8 +95,8 @@ const page = () => {
 
               {/* Female */}
               <label
-                className="flex items-center justify-center flex-1 min-w-[100px] h-[42px] px-6 py-4 gap-2 border rounded-md cursor-pointer
-      hover:bg-gray-100 has-[:checked]:bg-blue-500 has-[:checked]:text-white font-poppins"
+                className="flex items-center justify-center flex-1 h-10 px-3 sm:px-4 border rounded-md cursor-pointer text-sm
+hover:bg-gray-100 has-[:checked]:bg-blue-500 has-[:checked]:text-white"
               >
                 <input
                   type="radio"
@@ -104,13 +104,13 @@ const page = () => {
                   value="female"
                   className="hidden w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[16px] px-4 md:px-[24px] text-sm md:text-base font-nunito"
                 />
-                Female <p>*</p>
+                Female
               </label>
 
               {/* Other */}
               <label
-                className="flex items-center justify-center flex-1 min-w-[100px] h-[42px] px-6 py-4 gap-2 border rounded-md cursor-pointer
-      hover:bg-gray-100 has-[:checked]:bg-blue-500 has-[:checked]:text-white font-poppins"
+                className="flex items-center justify-center flex-1 h-10 px-3 sm:px-4 border rounded-md cursor-pointer text-sm
+hover:bg-gray-100 has-[:checked]:bg-blue-500 has-[:checked]:text-white"
               >
                 <input
                   type="radio"
@@ -128,7 +128,7 @@ const page = () => {
             <input
               type="text"
               placeholder="Nellore, AP"
-              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 md:pl-[30px] text-sm md:text-base font-nunito"
+              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
             />
           </div>
           {/* email */}
@@ -137,16 +137,16 @@ const page = () => {
             <input
               type="email"
               placeholder="Krishna@email.com"
-              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 md:pl-[30px] text-sm md:text-base font-nunito"
+              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
             />
           </div>
           {/* mobile */}
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-2">
             <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">Phone Number<p className="text-[#D11717]">*</p></label>
             <input
               type="tel"
               placeholder="+91  9876543210"
-              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 md:pl-[30px] text-sm md:text-base font-nunito"
+              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
             />
           </div>
           <div className="flex flex-col gap-2 lg:col-span-2">
@@ -155,7 +155,7 @@ const page = () => {
               type="text"
               name="irdaiLicenseNumber"
               placeholder="CM123456789"
-              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 md:pl-[30px] text-sm md:text-base font-nunito"
+              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
               required
             />
           </div>
@@ -171,8 +171,8 @@ const page = () => {
           - Control what clients see on your public profile
         </span>
         <div className="flex flex-col justify-between gap-3 md:gap-[16px] bg-white">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between  gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
+            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
               {/* icon */}
               <FaFolder className="text-sm md:text-base" />
               <span className="flex flex-col gap-1 md:gap-2">
@@ -184,7 +184,7 @@ const page = () => {
                 </p>
               </span>
             </span>
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
               {/* public */}
               <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
                 Public
@@ -193,8 +193,8 @@ const page = () => {
             </span>
           </div>
           {/* 2ND */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between  gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
+            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
               {/* icon */}
               <IoShieldHalfOutline className="text-md md:text-base" />
               <span className="flex flex-col gap-1 md:gap-2">
@@ -206,7 +206,7 @@ const page = () => {
                 </p>
               </span>
             </span>
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
               {/* public */}
               <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
                 Public
@@ -215,8 +215,8 @@ const page = () => {
             </span>
           </div>
           {/* 3rd */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
+            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
               {/* icon */}
               <FaFolder className="text-sm md:text-base" />
               <span className="flex flex-col gap-1 md:gap-2">
@@ -228,7 +228,7 @@ const page = () => {
                 </p>
               </span>
             </span>
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
               {/* public */}
               <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
                 Public
@@ -237,8 +237,8 @@ const page = () => {
             </span>
           </div>
           {/* 4th */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
+            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
               {/* icon */}
               <FaFolder className="text-sm md:text-base" />
               <span className="flex flex-col gap-1 md:gap-2">
@@ -250,7 +250,7 @@ const page = () => {
                 </p>
               </span>
             </span>
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
               {/* public */}
               <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
                 Public
@@ -259,8 +259,8 @@ const page = () => {
             </span>
           </div>
           {/* 5th */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
+            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
               {/* icon */}
               <FaFolder className="text-sm md:text-base" />
               <span className="flex flex-col gap-1 md:gap-2">
@@ -272,7 +272,7 @@ const page = () => {
                 </p>
               </span>
             </span>
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
               {/* public */}
               <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
                 Public
@@ -281,7 +281,7 @@ const page = () => {
             </span>
           </div>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
               {/* icon */}
               <FaFolder className="text-sm md:text-base" />
               <span className="flex flex-col gap-1 md:gap-2">
@@ -293,7 +293,7 @@ const page = () => {
                 </p>
               </span>
             </span>
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
               {/* public */}
               <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
                 Public
@@ -305,17 +305,17 @@ const page = () => {
       </div>
       {/* stage-4 */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 px-4 md:px-6 py-4 md:py-[26px] bg-white">
-        <p className="text-gray-500 text-xs md:text-sm font-normal leading-normal font-nunito">
+        <p className="text-gray-500 ttext-[clamp(10px,1vw,14px)] font-normal leading-normal font-nunito">
           Make Changes Above To Save
         </p>
         <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3 md:gap-4">
-          <button className="w-full md:w-auto h-[40px] px-4 md:px-[22px] flex items-center justify-center gap-2 text-xs md:text-xs font-semibold font-poppins rounded-lg flex items-center gap-[8px] text-teal-950 text-xs font-semibold leading-normal font-poppins rounded-lg border border-[#D8D8D8]">
+          <button className="w-full md:w-auto  px-4 py-[7px] lg:px-[22px] lg:py-[14px] flex items-center justify-center gap-2 text-[clamp(8px,1vw,12px)] font-semibold font-poppins rounded-lg flex items-center gap-[8px] text-teal-950 text-xs font-semibold leading-normal font-poppins rounded-lg border border-[#D8D8D8] cursor-pointer">
             <FiEye />
             preview Proile
           </button>
-          <button className="w-full md:w-auto h-[40px] px-4 md:px-[22px] flex items-center justify-center gap-2 text-xs md:text-xs font-semibold font-poppins rounded-lg flex items-center gap-[8px] rounded-lg bg-[#0A4A4A] text-[#F8F6F1] text-xs font-semibold leading-normal font-poppins">
+          <button className="w-full md:w-auto px-4 md:px-[22px] flex items-center justify-center gap-2 text-xs text-[clamp(8px,1vw,12px)]  font-semibold font-poppins rounded-lg flex items-center gap-[8px] rounded-lg bg-[#0A4A4A] text-[#F8F6F1] text-xs font-semibold leading-normal font-poppins cursor-pointer">
             <FiEye />
-            preview Proile
+            Save changes
           </button>
         </div>
       </div>

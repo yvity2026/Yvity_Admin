@@ -1,6 +1,7 @@
 "use client";
 import { ModalWrapper } from "@/app/components/layout/ModalWrapper";
-import React, { useState } from "react";
+import { useModal } from "@/context/ModalContext";
+import React, { useEffect, useState } from "react";
 import { FaCross, FaMehBlank, FaPlus } from "react-icons/fa";
 import { FaPencil, FaShield } from "react-icons/fa6";
 import { HiPlus } from "react-icons/hi";
@@ -50,6 +51,19 @@ export default function Page() {
     }));
   };
 
+  const { trigger, clearTrigger } = useModal();
+
+
+  const [isService, setIsService] = useState(false);
+  useEffect(() => {
+    if (trigger === "ADD_SERVICE") {
+      setIsService(true);
+      clearTrigger(); // IMPORTANT
+    }
+  }, [trigger]);
+
+
+
   const removeServicePoint = (index) => {
     const updated = form.services.filter((_, i) => i !== index);
     setForm((prev) => ({ ...prev, services: updated }));
@@ -72,13 +86,13 @@ export default function Page() {
             </span>
             <span className="flex flex-wrap gap-2 sm:gap-[11px]">
               <button
-                className="p-[10px] rounded-[6px] h-[26px] flex items-center border border-[#D5D5D5] bg-white text-[#0A4A4A] font-[Poppins] text-[16px] font-bold leading-normal"
+                className="p-[10px] rounded-[6px] h-[26px] flex items-center border border-[#D5D5D5] bg-white text-[#0A4A4A] font-poppins text-xs font-bold leading-normal"
                 onClick={() => setEdit(true)}
               >
                 Edit
               </button>
               <button
-                className="p-[10px] rounded-[6px] h-[26px] flex items-center border border-[#F7C6C6] bg-white  text-[#D32323] font-[Poppins] text-xs font-medium leading-normal"
+                className="p-[10px] rounded-[6px] h-[26px] flex items-center border border-[#F7C6C6] bg-white  text-[#D32323] font-poppins text-xs font-medium leading-normal"
                 onClick={() => setIsDelete(true)}
               >
                 Delete
@@ -112,233 +126,276 @@ export default function Page() {
       </div>
 
       {/* Edit popup */}
-      {isOpen && (
-        <ModalWrapper onClose={() => setOpen(false)}>
-          <div className="px-5 md:px-[30px] pb-6">
-            {/* HEADER */}
-            <div className="h-[62px] flex justify-between items-center border-b">
-              <span className="flex items-center gap-2 font-semibold">
-                <FaPlus />
-                Add Service
-              </span>
-              <MdClose onClick={() => setOpen(false)} />
-            </div>
 
-            {/* BODY */}
-            <div className="mt-5 flex flex-col gap-4">
-              {/* Service Type */}
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold">
-                  Service Type <span className="text-red-600">*</span>
-                </label>
+{isService && (
+  <ModalWrapper onClose={() => setIsService(false)}>
+    {/* 1. Added h-auto and removed scroll constraints.
+        2. Set bg-white and overflow-hidden for the clean card look.
+        3. Match the specific max-w-lg from your designs.
+    */}
+    <div className="bg-white w-[calc(100vw-2rem)] sm:w-full max-w-lg overflow-hidden flex flex-col rounded-[2rem] shadow-xl border border-gray-100 h-auto">
+      
+      {/* HEADER - Updated to match image icon/style */}
+      <div className="px-8 py-5 flex justify-between items-center border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <FaPlus className="text-[#6333C0] text-lg" />
+          <h2 className="text-xl font-bold text-slate-900">Add Service</h2>
+        </div>
+        <button 
+          onClick={() => setIsService(false)}
+          className="bg-slate-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <MdClose size={22} />
+        </button>
+      </div>
+
+      {/* BODY - Tightened gaps (gap-5) and padding (p-7) to fit screen */}
+      <div className="p-7 flex flex-col gap-5">
+        
+        {/* Service Type */}
+        <div className="flex flex-col gap-1.5">
+          <label className="font-bold text-slate-800 text-[0.95rem]">
+            Service Type <span className="text-red-500">*</span>
+          </label>
+          <input
+            value={form.serviceType}
+            onChange={(e) => handleChange("serviceType", e.target.value)}
+            className="w-full py-3.5 px-5 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all placeholder:text-gray-400"
+            placeholder="Life Insurance"
+          />
+        </div>
+
+        {/* Company */}
+        <div className="flex flex-col gap-1.5">
+          <label className="font-bold text-slate-800 text-[0.95rem]">
+            Company <span className="text-red-500">*</span>
+          </label>
+          <input
+            value={form.company}
+            onChange={(e) => handleChange("company", e.target.value)}
+            className="w-full py-3.5 px-5 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all"
+            placeholder="LIC of India"
+          />
+        </div>
+
+        {/* Experience */}
+        <div className="flex flex-col gap-1.5">
+          <label className="font-bold text-slate-800 text-[0.95rem]">
+            Years of Experience <span className="text-red-500">*</span>
+          </label>
+          <input
+            value={form.experience}
+            onChange={(e) => handleChange("experience", e.target.value)}
+            className="w-full py-3.5 px-5 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all"
+            placeholder="e.g. 14"
+          />
+        </div>
+
+        {/* Dynamic Services Section */}
+        <div className="flex flex-col gap-2">
+          <label className="font-bold text-slate-800 text-[0.95rem]">
+            Key Services Offered <span className="text-red-500">*</span>
+          </label>
+
+          <div className="flex flex-col gap-3">
+            {form.services.map((item, index) => (
+              <div key={index} className="flex items-center gap-3">
                 <input
-                  value={form.serviceType}
-                  onChange={(e) => handleChange("serviceType", e.target.value)}
-                  className="py-3 px-4 rounded-lg border bg-[#FAFCFB]"
-                  placeholder="Life Insurance"
+                  value={item}
+                  onChange={(e) => handleServiceChange(index, e.target.value)}
+                  className="flex-1 py-3.5 px-5 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all"
+                  placeholder="e.g. Term Insurance Plans"
                 />
-              </div>
-
-              {/* Company */}
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold">
-                  Company <span className="text-red-600">*</span>
-                </label>
-                <input
-                  value={form.company}
-                  onChange={(e) => handleChange("company", e.target.value)}
-                  className="py-3 px-4 rounded-lg border bg-[#FAFCFB]"
-                  placeholder="LIC Of India"
-                />
-              </div>
-
-              {/* Experience */}
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold">
-                  Years of Experience <span className="text-red-600">*</span>
-                </label>
-                <input
-                  value={form.experience}
-                  onChange={(e) => handleChange("experience", e.target.value)}
-                  className="py-3 px-4 rounded-lg border bg-[#FAFCFB]"
-                  placeholder="e.g. 14"
-                />
-              </div>
-
-              {/* Dynamic Services */}
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold">
-                  Key Services Offered <span className="text-red-600">*</span>
-                </label>
-
-                {form.services.map((item, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <input
-                      value={item}
-                      onChange={(e) =>
-                        handleServiceChange(index, e.target.value)
-                      }
-                      className="flex-1 py-3 px-4 rounded-lg border bg-[#FAFCFB]"
-                      placeholder="e.g. Term Insurance Plans"
-                    />
-                    <MdClose
-                      className="cursor-pointer"
-                      onClick={() => removeServicePoint(index)}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Add Point */}
-              <button
-                onClick={addServicePoint}
-                className="flex items-center gap-2 text-[#0D6060] text-sm font-semibold"
-              >
-                <FaPlus />
-                Add Point
-              </button>
-
-              {/* Submit */}
-              <button className="mt-4 px-5 py-3 rounded-lg bg-[#0A4A4A] text-white">
-                Add Service
-              </button>
-            </div>
-          </div>
-        </ModalWrapper>
-      )}
-      {isEdit && (
-        <ModalWrapper onClose={() => setEdit(false)}>
-          <div className="px-5 md:px-[30px] pb-6">
-            {/* HEADER */}
-            <div className="h-[62px] flex justify-between items-center border-b">
-              <span className="flex items-center gap-2 font-semibold">
-                <FaPencil />
-                Edit sService
-              </span>
-              <MdClose onClick={() => setEdit(false)} />
-            </div>
-
-            {/* BODY */}
-            <div className="mt-5 flex flex-col gap-4">
-              {/* Service Type */}
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold">
-                  Service Type <span className="text-red-600">*</span>
-                </label>
-                <input
-                  value={form.serviceType}
-                  onChange={(e) => handleChange("serviceType", e.target.value)}
-                  className="py-3 px-4 rounded-lg border bg-[#FAFCFB]"
-                  placeholder="Life Insurance"
-                />
-              </div>
-
-              {/* Company */}
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold">
-                  Company <span className="text-red-600">*</span>
-                </label>
-                <input
-                  value={form.company}
-                  onChange={(e) => handleChange("company", e.target.value)}
-                  className="py-3 px-4 rounded-lg border bg-[#FAFCFB]"
-                  placeholder="LIC Of India"
-                />
-              </div>
-
-              {/* Experience */}
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold">
-                  Years of Experience <span className="text-red-600">*</span>
-                </label>
-                <input
-                  value={form.experience}
-                  onChange={(e) => handleChange("experience", e.target.value)}
-                  className="py-3 px-4 rounded-lg border bg-[#FAFCFB]"
-                  placeholder="e.g. 14"
-                />
-              </div>
-
-              {/* Dynamic Services */}
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold">
-                  Key Services Offered <span className="text-red-600">*</span>
-                </label>
-
-                {form.services.map((item, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <input
-                      value={item}
-                      onChange={(e) =>
-                        handleServiceChange(index, e.target.value)
-                      }
-                      className="flex-1 py-3 px-4 rounded-lg border bg-[#FAFCFB]"
-                      placeholder="e.g. Term Insurance Plans"
-                    />
-                    <MdClose
-                      className="cursor-pointer"
-                      onClick={() => removeServicePoint(index)}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Add Point */}
-              <button
-                onClick={addServicePoint}
-                className="flex items-center gap-2 text-[#0D6060] text-sm font-semibold"
-              >
-                <FaPlus />
-                Add Point
-              </button>
-
-              {/* Submit */}
-              <button className="mt-4 px-5 py-3 rounded-lg bg-[#0A4A4A] text-white">
-                Save Changes
-              </button>
-            </div>
-          </div>
-        </ModalWrapper>
-      )}
-      {isDelete && (
-        <ModalWrapper onClose={() => setIsDelete(false)}>
-          <div className="px-5 md:px-[30px] pb-6">
-            {/* HEADER */}
-            <div className="h-[62px] flex justify-between items-center border-b">
-              <span className="text-[#111827] font-poppins text-base font-bold">
-                Delete Service?
-              </span>
-
-              <MdClose
-                className="cursor-pointer text-xl"
-                onClick={() => setIsDelete(false)}
-              />
-            </div>
-
-            {/* BODY */}
-            <div className="mt-4 flex flex-col gap-4">
-              <p className="text-[#374151] font-nunito text-sm">
-                Remove <span className="font-semibold">Life Insurance</span>{" "}
-                from your profile?
-              </p>
-
-              {/* ACTION BUTTONS */}
-              <div className="flex flex-col sm:flex-row gap-3 sm:justify-end mt-2">
-                <button className="px-4 py-3 rounded-lg bg-[#FEF2F2] text-[#E85D5D] border border-[#FEB5B5] text-xs font-semibold">
-                  Yes Delete
-                </button>
-
                 <button
-                  onClick={() => setIsDelete(false)}
-                  className="px-4 py-3 rounded-lg bg-[#0A4A4A] text-white text-xs font-semibold"
+                  type="button"
+                  onClick={() => removeServicePoint(index)}
+                  className="p-2 rounded-lg border border-red-100 bg-red-50 text-red-400 hover:text-red-600 transition-all shrink-0"
                 >
-                  Cancel
+                  <MdClose size={18} />
                 </button>
               </div>
-            </div>
+            ))}
           </div>
-        </ModalWrapper>
-      )}
+          
+          <button
+            type="button"
+            onClick={addServicePoint}
+            className="flex items-center gap-2 text-[#0D6060] font-bold text-base mt-1 w-fit hover:opacity-80 transition-opacity"
+          >
+            <FaPlus size={14} />
+            Add Point
+          </button>
+        </div>
+
+        {/* Submit Button - Updated padding to match image height */}
+        <button 
+          className="w-full mt-2 bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4 rounded-2xl font-bold text-lg transition-transform active:scale-[0.98] shadow-lg shadow-emerald-900/10"
+          onClick={() => console.log("Final Form:", form)}
+        >
+          Add Service
+        </button>
+      </div>
+    </div>
+  </ModalWrapper>
+)}
+      
+{isEdit && (
+  <ModalWrapper onClose={() => setEdit(false)}>
+    {/* 1. h-auto and removed overflow-y-auto to prevent scrolling.
+        2. Rounded-[2rem] and shadow-xl to match your reference images.
+    */}
+    <div className="bg-white w-[calc(100vw-2rem)] sm:w-full max-w-lg overflow-hidden flex flex-col rounded-[2rem] shadow-xl border border-gray-100 h-auto">
+      
+      {/* HEADER - Updated with specific pencil icon and styling */}
+      <div className="px-8 py-5 flex justify-between items-center border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <span className="text-orange-500 text-lg">✏️</span>
+          <h2 className="text-xl font-bold text-slate-900">Edit Service</h2>
+        </div>
+        <button 
+          onClick={() => setEdit(false)}
+          className="bg-slate-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <MdClose size={22} />
+        </button>
+      </div>
+
+      {/* BODY - space-y-4 and p-7 to ensure everything fits on one screen */}
+      <div className="p-7 flex flex-col gap-4">
+        
+        {/* Service Type */}
+        <div className="flex flex-col gap-1.5">
+          <label className="font-bold text-slate-800 text-[0.95rem]">
+            Service Type <span className="text-red-500">*</span>
+          </label>
+          <input
+            value={form.serviceType}
+            onChange={(e) => handleChange("serviceType", e.target.value)}
+            className="w-full py-3 px-5 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all placeholder:text-gray-400"
+            placeholder="Life Insurance"
+          />
+        </div>
+
+        {/* Company */}
+        <div className="flex flex-col gap-1.5">
+          <label className="font-bold text-slate-800 text-[0.95rem]">
+            Company <span className="text-red-500">*</span>
+          </label>
+          <input
+            value={form.company}
+            onChange={(e) => handleChange("company", e.target.value)}
+            className="w-full py-3 px-5 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all"
+            placeholder="LIC of India"
+          />
+        </div>
+
+        {/* Experience */}
+        <div className="flex flex-col gap-1.5">
+          <label className="font-bold text-slate-800 text-[0.95rem]">
+            Years of Experience <span className="text-red-500">*</span>
+          </label>
+          <input
+            value={form.experience}
+            onChange={(e) => handleChange("experience", e.target.value)}
+            className="w-full py-3 px-5 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all"
+            placeholder="e.g. 14"
+          />
+        </div>
+
+        {/* Dynamic Services Section */}
+        <div className="flex flex-col gap-2">
+          <label className="font-bold text-slate-800 text-[0.95rem]">
+            Key Services Offered <span className="text-red-500">*</span>
+          </label>
+
+          <div className="flex flex-col gap-2.5">
+            {form.services.map((item, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <input
+                  value={item}
+                  onChange={(e) => handleServiceChange(index, e.target.value)}
+                  className="flex-1 py-3 px-5 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all"
+                  placeholder="e.g. Term Insurance Plans"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeServicePoint(index)}
+                  className="p-1.5 rounded-lg border border-red-100 bg-red-50 text-red-400 hover:text-red-600 transition-all shrink-0"
+                >
+                  <MdClose size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+          
+          <button
+            type="button"
+            onClick={addServicePoint}
+            className="flex items-center gap-2 text-[#0D6060] font-bold text-sm mt-1 w-fit hover:opacity-80 transition-opacity"
+          >
+            <FaPlus size={12} />
+            Add Point
+          </button>
+        </div>
+
+        {/* Submit Button */}
+        <button 
+          className="w-full mt-2 bg-[#0a4d4a] hover:bg-[#073a38] text-white py-3.5 rounded-2xl font-bold text-lg transition-transform active:scale-[0.98] shadow-lg shadow-emerald-900/10"
+        >
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </ModalWrapper>
+)}
+
+     {isDelete && (
+  <ModalWrapper onClose={() => setIsDelete(false)}>
+    {/* 1. Using rounded-[2rem] and shadow-xl to match other modals.
+      2. Set overflow-hidden to ensure a clean card look.
+    */}
+    <div className="bg-white w-[calc(100vw-2rem)] sm:w-full max-w-md overflow-hidden flex flex-col rounded-[2rem] shadow-xl border border-gray-100 h-auto">
+      
+      {/* HEADER - Consistent padding and border */}
+      <div className="px-8 py-5 flex justify-between items-center border-b border-gray-100">
+        <h2 className="text-xl font-bold text-slate-900">Delete Service?</h2>
+        <button 
+          onClick={() => setIsDelete(false)}
+          className="bg-slate-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <MdClose size={22} />
+        </button>
+      </div>
+
+      {/* BODY - Centered text and horizontally aligned buttons */}
+      <div className="p-8 flex flex-col gap-8">
+        <p className="text-slate-600 text-center text-lg">
+          Remove <span className="font-bold text-slate-900">Life Insurance</span> from your profile?
+        </p>
+
+        {/* ACTION BUTTONS - Side by side layout */}
+        <div className="flex items-center gap-4">
+          <button 
+            className="flex-1 py-4 rounded-2xl border border-red-200 bg-red-50 text-red-500 font-bold text-base transition-all active:scale-[0.98] hover:bg-red-100"
+            onClick={() => {
+              /* Handle Delete Logic */
+              setIsDelete(false);
+            }}
+          >
+            Yes, Delete
+          </button>
+
+          <button
+            onClick={() => setIsDelete(false)}
+            className="flex-1 py-4 rounded-2xl bg-[#0a4d4a] text-white font-bold text-base transition-all active:scale-[0.98] hover:bg-[#073a38]"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </ModalWrapper>
+)}
     </div>
   );
 }

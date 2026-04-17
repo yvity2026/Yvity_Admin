@@ -275,115 +275,94 @@ const page = () => {
         </ModalWrapper>
       )}
 
-      {/* Request Testimonial */}
       {isRequest && (
-        <ModalWrapper onClose={() => setIsRequest(false)}>
-          <div className="px-5 md:px-[30px] pb-6">
-            {/* HEADER */}
-            <div className="h-[62px] flex justify-between items-center border-b">
-              <span className="flex items-center gap-2 font-semibold">
-                <FaMessage />
-                Request Testimonials
-              </span>
-              <MdClose onClick={() => setIsRequest(false)} />
-            </div>
+  <ModalWrapper onClose={() => setIsRequest(false)}>
+    
+    <div className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-xl">
+      
+      {/* HEADER */}
+      <div className="h-[62px] flex justify-between items-center border-b px-5 md:px-6">
+        <span className="flex items-center gap-2 font-semibold">
+          <FaMessage />
+          Request Testimonials
+        </span>
 
-            {/* BODY */}
-            <div className="mt-5 flex flex-col gap-4">
-              <p className="rounded-lg border border-[#DBE1E0] bg-[#E0F4F3] pl-[30px] pt-[37px] pt-[16px] pb-[31px] text-[#0A4A4A] font-poppins text-xs font-normal leading-5">
-                Send a personalized request to your clients asking for a
-                testimonial. They verify via OTP.
-              </p>
-              {/* Service Type */}
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold">
-                  Client Name <span className="text-red-600">*</span>
-                </label>
-                <input
-                  // value={form.serviceType}
-                  // onChange={(e) => handleChange("serviceType", e.target.value)}
-                  className="py-3 px-4 rounded-lg border bg-[#FAFCFB]"
-                  placeholder="Client Full Name"
-                />
-              </div>
+        <MdClose
+          className="cursor-pointer"
+          onClick={() => setIsRequest(false)}
+        />
+      </div>
 
-              {/* Company */}
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold">
-                  Client Mobile <span className="text-red-600">*</span>
-                </label>
-                <input
-                  // value={form.company}
-                  // onChange={(e) => handleChange("company", e.target.value)}
-                  className="py-3 px-4 rounded-lg border bg-[#FAFCFB]"
-                  placeholder="10-digit mobile number"
-                />
-              </div>
+      {/* BODY */}
+      <div className="px-5 md:px-6 pb-6 mt-5 flex flex-col gap-4">
+        
+        <p className="rounded-lg border border-[#DBE1E0] bg-[#E0F4F3] px-4 py-4 text-[#0A4A4A] text-xs leading-5">
+          Send a personalized request to your clients asking for a testimonial. They verify via OTP.
+        </p>
 
-              {/* Experience */}
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold">
-                  Testimonial Type <span className="text-red-600">*</span>
-                </label>
+        {/* Client Name */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold">
+            Client Name <span className="text-red-600">*</span>
+          </label>
+          <input
+            className="py-3 px-4 rounded-lg border bg-[#FAFCFB]"
+            placeholder="Client Full Name"
+          />
+        </div>
 
-                <select
-                  className="py-3 px-4 rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] text-sm"
-                  // value={form.type}
-                  // onChange={(e) => handleChange("type", e.target.value)}
-                >
-                  <option value="" disabled selected>
-                    Select type
-                  </option>
-                  <option value="text">Text</option>
-                  <option value="audio">Audio</option>
-                  <option value="video">Video</option>
-                </select>
-              </div>
+        {/* Client Mobile */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold">
+            Client Mobile <span className="text-red-600">*</span>
+          </label>
+          <input
+            className="py-3 px-4 rounded-lg border bg-[#FAFCFB]"
+            placeholder="10-digit mobile number"
+          />
+        </div>
 
-              {/* Dynamic Services */}
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold">
-                  personal Message(Optional)
-                </label>
-                <textarea name="" id="" className="py-3 px-4 rounded-lg border bg-[#FAFCFB]" placeholder="e.g. Hi Ravi, I hope your team plan is serving your family well. Would you mind sharing a quick review?">
+        {/* Testimonial Type */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold">
+            Testimonial Type <span className="text-red-600">*</span>
+          </label>
 
-                </textarea>
+          <select className="py-3 px-4 rounded-lg border bg-[#FAFCFB] text-sm">
+            <option value="">Select type</option>
+            <option value="text">Text</option>
+            <option value="audio">Audio</option>
+            <option value="video">Video</option>
+          </select>
+        </div>
 
-                {/* {form.services.map((item, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <input
-                      // value={item}
-                      // onChange={(e) =>
-                      //   handleServiceChange(index, e.target.value)
-                      // }
-                      className="flex-1 py-3 px-4 rounded-lg border bg-[#FAFCFB]"
-                      placeholder="e.g. Term Insurance Plans"
-                    />
-                    <MdClose
-                      className="cursor-pointer"
-                      onClick={() => removeServicePoint(index)}
-                    />
-                  </div>
-                ))} */}
-              </div>
+        {/* Message */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold">
+            Personal Message (Optional)
+          </label>
 
-              {/* Add Point */}
-              <button
-                // onClick={addServicePoint}
-                className="flex items-center gap-2 text-[#0D6060] text-sm font-semibold"
-              >
-                <FaPlus />
-                Add Point
-              </button>
+          <textarea
+            className="py-3 px-4 rounded-lg border bg-[#FAFCFB]"
+            placeholder="e.g. Hi Ravi, I hope your plan is helping..."
+          />
+        </div>
 
-              {/* Submit */}
-              <button className="mt-4 px-5 py-3 rounded-lg bg-[#0A4A4A] text-white">
-                Request Testimonial
-              </button>
-            </div>
-          </div>
-        </ModalWrapper>
-      )}
+        {/* Add Point */}
+        <button className="flex items-center gap-2 text-[#0D6060] text-sm font-semibold">
+          <FaPlus />
+          Add Point
+        </button>
+
+        {/* Submit */}
+        <button className="mt-4 px-5 py-3 rounded-lg bg-[#0A4A4A] text-white">
+          Request Testimonial
+        </button>
+      </div>
+    </div>
+
+  </ModalWrapper>
+)}
     </div>
   );
 };

@@ -1,9 +1,11 @@
 "use client";
 import { ModalWrapper } from "@/app/components/layout/ModalWrapper";
 import React, { useState } from "react";
-import { FaArrowRight, FaCheck, FaCrown, FaMedal, FaPlus } from "react-icons/fa";
+import { FaArrowRight, FaCheck, FaCreditCard, FaCrown, FaMedal, FaPlus } from "react-icons/fa";
+import { FiArrowRight } from "react-icons/fi";
 import { HiOutlineDownload } from "react-icons/hi";
 import { HiMiniShieldCheck } from "react-icons/hi2";
+import { IoClose } from "react-icons/io5";
 import { MdAutorenew, MdClose, MdOutlineVerifiedUser } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
 
@@ -100,7 +102,8 @@ const page = () => {
         "absolute top-0  left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-(--primary-900,#0A4A4A) text-[var(--Pearl-Whitepage-background,#F8F6F1)] rounded-[16px] bg-gradient-to-r from-[#D97706] to-[#FF8900] xl:text-[13px]  text-xs px-1 xl:px-3 py-1 rounded-full",
     },
   ];
-  const [open, isopen] = useState(false);
+  const [isRenew, setIsRenew] = useState(false);
+  const [isAutoRenew, setIsAutoRenew] = useState(false);
 
   return (
     <div className="p-4 md:p-6 lg:p-10 xl:px-15 mx-auto pt-[24px] pb-[81px] flex flex-col gap-[26px]">
@@ -129,6 +132,7 @@ const page = () => {
       flex items-center justify-center
       px-4 gap-2 py-[10px] rounded-lg bg-[#F59E0B]
     "
+    onClick={() => setIsRenew(true)}
             >
               <MdAutorenew />
               Renew Now
@@ -141,6 +145,7 @@ const page = () => {
       flex items-center justify-center
       px-4 py-[10px] rounded-lg border bg-[#256B6B]
     "
+    onClick={() => setIsAutoRenew(true)}
             >
               Enable Auto Renewal
             </button>
@@ -286,8 +291,8 @@ const page = () => {
       </div>
 
       {/* Modals */}
-      {open && (
-        <ModalWrapper onClose={() => isopen(false)}>
+      {false && (
+        <ModalWrapper onClose={() => setIsRenew(false)}>
           <div className="px-5 md:px-[30px] pb-6">
             {/* HEADER */}
             <div className="h-[62px] flex justify-between items-center border-b">
@@ -295,7 +300,7 @@ const page = () => {
                 <FaCrown />
                 Renew Gold Plan
               </span>
-              <MdClose onClick={() => isopen(false)} />
+              <MdClose onClick={() => setIsRenew(false)} />
             </div>
 
             {/* BODY */}
@@ -375,6 +380,171 @@ const page = () => {
           </div>
         </ModalWrapper>
       )}
+
+     {
+  isRenew && (
+    <ModalWrapper onClose={() => setIsRenew(false)}>
+      <div className="flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl shadow-xl w-full  overflow-hidden border border-gray-100">
+
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="text-gray-800 text-xl">
+                <MdAutorenew />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900">
+                Renew Gold Plan
+              </h2>
+            </div>
+
+            <button
+              onClick={() => setIsRenew(false)}
+              className="text-gray-400 hover:text-gray-600 bg-gray-100 p-1 rounded-full transition-colors"
+            >
+              <IoClose size={20} />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="p-6 space-y-6">
+
+            {/* Plan Info */}
+            <div className="bg-orange-50 border border-orange-100 rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xl">
+                  <FaCrown />
+                </span>
+                <h3 className="font-bold text-lg text-slate-800">
+                  Gold Plan – ₹2,999/year
+                </h3>
+              </div>
+              <p className="text-slate-500 text-sm ml-8">
+                New expiry : December 31, 2026
+              </p>
+            </div>
+
+            {/* Payment Methods */}
+            <div className="space-y-4">
+              <h4 className="font-bold text-slate-800">
+                Select Payment Method
+              </h4>
+
+              <label className="flex items-center gap-4 p-4 border-2 border-gray-100 rounded-xl cursor-pointer hover:border-emerald-500 hover:bg-emerald-50 transition-all group">
+                <input
+                  type="radio"
+                  name="payment"
+                  className="w-5 h-5 accent-emerald-800"
+                  defaultChecked
+                />
+                <span className="font-medium text-slate-700 group-hover:text-emerald-900">
+                  UPI
+                </span>
+              </label>
+
+              <label className="flex items-center gap-4 p-4 border-2 border-gray-100 rounded-xl cursor-pointer hover:border-emerald-500 hover:bg-emerald-50 transition-all group">
+                <input
+                  type="radio"
+                  name="payment"
+                  className="w-5 h-5 accent-emerald-800"
+                />
+                <span className="font-medium text-slate-700 group-hover:text-emerald-900">
+                  Credit / Debit Card
+                </span>
+              </label>
+
+              <label className="flex items-center gap-4 p-4 border-2 border-gray-100 rounded-xl cursor-pointer hover:border-emerald-500 hover:bg-emerald-50 transition-all group">
+                <input
+                  type="radio"
+                  name="payment"
+                  className="w-5 h-5 accent-emerald-800"
+                />
+                <span className="font-medium text-slate-700 group-hover:text-emerald-900">
+                  Net Banking
+                </span>
+              </label>
+            </div>
+
+            {/* Pay Button */}
+            <button className="w-full bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-transform active:scale-[0.98]">
+              Pay 2,999
+              <FiArrowRight size={18} />
+            </button>
+
+          </div>
+        </div>
+      </div>
+    </ModalWrapper>
+  )
+}
+
+ {
+  isAutoRenew && (
+    <ModalWrapper onClose={() => setIsAutoRenew(false)}>
+      <div className="flex items-center justify-center p-4">
+        <div className="bg-white rounded-[2.5rem] shadow-xl w-full max-w-lg overflow-hidden border border-gray-100">
+
+          {/* Header */}
+          <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="text-gray-900 text-xl">
+                <MdAutorenew />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900">
+                Auto - Renewal
+              </h2>
+            </div>
+
+            <button
+              onClick={() => setIsAutoRenew(false)}
+              className="text-gray-400 hover:text-gray-600 bg-cyan-50/50 p-1.5 rounded-full transition-colors"
+            >
+              <IoClose size={20} />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="p-8 space-y-7">
+
+            <p className="text-slate-500 leading-relaxed text-[1.05rem]">
+              Enable auto - renewal so your Gold Plan renews automatically every year. You'll be notified 30 days before renewal.
+            </p>
+
+            <div className="bg-[#f0f9f9] border border-cyan-100 rounded-xl p-5 flex items-start gap-3">
+              <span className="text-xl">
+                <FaCreditCard/>
+              </span>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                Payment will be charged to your saved UPI / card on <br />
+                <span className="font-medium text-slate-600">
+                  Dec 31, 2025
+                </span>
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <label className="block font-bold text-slate-800 text-lg">
+                UPI ID / Card (for auto - debit)
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. krishna@upi or last 4 digits of card"
+                className="w-full px-5 py-4 bg-slate-50 border border-gray-200 rounded-xl text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-slate-400"
+              />
+            </div>
+
+            <button className="w-full bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4.5 rounded-xl font-bold text-lg transition-transform active:scale-[0.98] shadow-lg shadow-emerald-900/10">
+              Enable Auto - Renewal
+            </button>
+
+          </div>
+        </div>
+      </div>
+    </ModalWrapper>
+  )
+}
+
+      
     </div>
   );
 };
