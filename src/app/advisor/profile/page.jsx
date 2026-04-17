@@ -1,20 +1,32 @@
 "use client";
 import Toggle from "@/app/components/ui/ToggleButton";
 import React, { useState } from "react";
-import { FaCamera, FaFile, FaFolder, FaLightbulb, FaPen } from "react-icons/fa";
+import { CgGirl } from "react-icons/cg";
+import { CiGlobe } from "react-icons/ci";
+import { FaCamera, FaFile, FaFolder, FaLightbulb, FaLock, FaPen, FaTrophy, FaUser } from "react-icons/fa";
 import { FaTriangleExclamation } from "react-icons/fa6";
 import { FiEye } from "react-icons/fi";
-import { IoIosCamera } from "react-icons/io";
+import { IoIosCamera, IoMdChatboxes } from "react-icons/io";
 import { IoShieldHalfOutline } from "react-icons/io5";
 import { MdClose } from "react-icons/md";
+import { TfiGallery } from "react-icons/tfi";
 
 const page = () => {
   const [isUpload, setIsUpload] = useState(false);
+
+const [isJourney, setIsJourney] = useState(false);
+const [isService, setIsService] = useState(false);
+const [isAchievement, setIsAchievement] = useState(false);
+const [isGallery, setIsGallery] = useState(false);
+const [isTestimonial, setIsTestimonial] = useState(false);
+const [isProfile, setIsProfile] = useState(false);
+
+  
   return (
     <div className="p-4 md:p-8 flex flex-col gap-4 md:gap-6">
       {/* stage-1 */}
       <div className="md:h-[212px] border flex flex-col p-4 sm:p-6 md:py-[34px] xl:pl-[30px] md:pr-[87px] gap-4 rounded-2xl bg-white shadow-sm">
-        <span className="flex items-center  justify-center md:justify-start md:text-left gap-2 font-nunito text-[clamp(10px,1vw,14px)]">
+        <span className="flex items-center  justify-center md:justify-start md:text-left gap-2 font-nunito text-[clamp(12px,1.5vw,16px)]">
           <IoIosCamera />
           <p className="font-semibold font-poppins">Profile Photo</p> - Last
           updated 6 months ago
@@ -26,7 +38,7 @@ const page = () => {
             <div className="w-26 h-26 rounded-full bg-blue-200"></div>
 
             {/* edit icon */}
-            <div className="absolute bottom-0 right-0 w-8 h-8 bg-[#0A4A4A] rounded-full flex items-center justify-center text-white shadow-md">
+            <div className="absolute bottom-0 right-0 w-8 h-8 bg-[#0A4A4A] rounded-full flex items-center justify-center text-white shadow-md cursor-pointer">
               <FaPen size={14} />
             </div>
           </div>
@@ -39,7 +51,7 @@ const page = () => {
               </p>
             </span>
             <button
-              className="w-full sm:w-auto px-4 h-[40px] flex py-[14px] px-[14px] gap-2 rounded-lg bg-[#0A4A4A] items-center text-[#F8F6F1] text-[clamp(8px,1vw,12px)] font-semibold leading-normal font-poppins"
+              className="w-full sm:w-auto px-4 h-[40px] flex py-[14px] px-[14px] gap-2 rounded-lg bg-[#0A4A4A] items-center text-[#F8F6F1] text-[clamp(8px,1vw,12px)] font-semibold leading-normal font-poppins cursor-pointer"
               onClick={() => setIsUpload(true)}
             >
               <FaCamera />
@@ -52,7 +64,8 @@ const page = () => {
       {/* stage-2 */}
       {/* <div className="h-[449px] bg-white pl-10 pr-[35px] py-[22px] rounded-2xl bg-white shadow-sm"> */}
       <div className="bg-white px-4 md:pl-10 md:pr-[35px] py-4 md:py-[22px] rounded-2xl shadow-sm">
-        <span className=" text-[#111827] text-base font-bold leading-normal font-poppins">
+        <span className=" text-[#111827] text-base font-bold leading-normal font-poppins flex items-center gap-2">
+          <FaUser />
           Basic Information
         </span>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-[24px]">
@@ -88,23 +101,29 @@ hover:bg-gray-100 has-[:checked]:bg-blue-500 has-[:checked]:text-white"
                   type="radio"
                   name="gender"
                   value="male"
-                  className="hidden w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[16px] px-4 md:px-[24px] text-sm md:text-base font-nunito"
+                  className="hidden w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[16px] px-4 md:px-[24px] text-sm md:text-base font-nunito "
                 />
+                <span className="flex items-center gap-1">
+                <FaUser />
                 Male
+                </span>
               </label>
 
               {/* Female */}
               <label
-                className="flex items-center justify-center flex-1 h-10 px-3 sm:px-4 border rounded-md cursor-pointer text-sm
+                className="flex items-center justify-center flex-1 h-10 px-3 sm:px-4 bg-[#FAFCFB] border-[##DBE1E0] border  rounded-md cursor-pointer text-sm
 hover:bg-gray-100 has-[:checked]:bg-blue-500 has-[:checked]:text-white"
               >
                 <input
                   type="radio"
                   name="gender"
                   value="female"
-                  className="hidden w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[16px] px-4 md:px-[24px] text-sm md:text-base font-nunito"
+                  className="hidden w-full rounded-lg border border-[##DBE1E0] bg-[#FAFCFB] py-3 md:py-[16px] px-4 md:px-[24px] text-sm md:text-base font-bold leading-4 font-nunito"
                 />
+                <span className="flex items-center gap-1">
+<CgGirl />
                 Female
+                </span>
               </label>
 
               {/* Other */}
@@ -165,7 +184,8 @@ hover:bg-gray-100 has-[:checked]:bg-blue-500 has-[:checked]:text-white"
       {/* stage - 3 */}
       <div className="py-4 md:py-[35px] px-4 md:pl-[40px] md:pr-[35px] rounded-2xl bg-white shadow-sm">
         <span className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 mb-4 md:mb-[24px] text-gray-500 text-xs md:text-sm font-bold font-nunito">
-          <p className="text-sm md:text-[14px] font-bold font-poppins text-[#111827]">
+          <p className="text-sm md:text-[14px] font-bold font-poppins text-[#111827] flex items-center gap-2">
+            <FaLock />
             Section Visibility
           </p>
           - Control what clients see on your public profile
@@ -189,7 +209,7 @@ hover:bg-gray-100 has-[:checked]:bg-blue-500 has-[:checked]:text-white"
               <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
                 Public
               </p>
-              <Toggle onColor="bg-blue-500" offColor="bg-gray-400" />
+              <Toggle onColor="bg-[#0A4A4A]" offColor="bg-gray-400" isOn={isJourney} setIsOn={() =>setIsJourney(!isJourney)} />
             </span>
           </div>
           {/* 2ND */}
@@ -211,14 +231,14 @@ hover:bg-gray-100 has-[:checked]:bg-blue-500 has-[:checked]:text-white"
               <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
                 Public
               </p>
-              <Toggle onColor="bg-blue-500" offColor="bg-gray-400" />
+              <Toggle onColor="bg-[#0A4A4A]" offColor="bg-gray-400" isOn={isService} setIsOn={() =>setIsService(!isService)} />
             </span>
           </div>
           {/* 3rd */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
             <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
               {/* icon */}
-              <FaFolder className="text-sm md:text-base" />
+              <FaTrophy className="text-sm md:text-base" />
               <span className="flex flex-col gap-1 md:gap-2">
                 <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
                   Achievements
@@ -233,14 +253,14 @@ hover:bg-gray-100 has-[:checked]:bg-blue-500 has-[:checked]:text-white"
               <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
                 Public
               </p>
-              <Toggle onColor="bg-blue-500" offColor="bg-gray-400" />
+              <Toggle onColor="bg-[#0A4A4A]" offColor="bg-gray-400" isOn={isAchievement} setIsOn={() =>setIsAchievement(!isAchievement)}/>
             </span>
           </div>
           {/* 4th */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
             <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
               {/* icon */}
-              <FaFolder className="text-sm md:text-base" />
+              <TfiGallery  className="text-sm md:text-base" />
               <span className="flex flex-col gap-1 md:gap-2">
                 <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
                   Gallery
@@ -255,14 +275,14 @@ hover:bg-gray-100 has-[:checked]:bg-blue-500 has-[:checked]:text-white"
               <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
                 Public
               </p>
-              <Toggle onColor="bg-blue-500" offColor="bg-gray-400" />
+              <Toggle onColor="bg-[#0A4A4A]" offColor="bg-gray-400" isOn={isGallery} setIsOn={() =>setIsGallery(!isGallery)}/>
             </span>
           </div>
           {/* 5th */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
             <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
               {/* icon */}
-              <FaFolder className="text-sm md:text-base" />
+              <IoMdChatboxes className="text-sm md:text-base" />
               <span className="flex flex-col gap-1 md:gap-2">
                 <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
                   Testimonials
@@ -277,13 +297,13 @@ hover:bg-gray-100 has-[:checked]:bg-blue-500 has-[:checked]:text-white"
               <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
                 Public
               </p>
-              <Toggle onColor="bg-blue-500" offColor="bg-gray-400" />
+              <Toggle onColor="bg-[#0A4A4A]" offColor="bg-gray-400"  isOn={isTestimonial} setIsOn={() =>setIsTestimonial(!isTestimonial)} />
             </span>
           </div>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
             <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
               {/* icon */}
-              <FaFolder className="text-sm md:text-base" />
+              <CiGlobe className="text-sm md:text-base" />
               <span className="flex flex-col gap-1 md:gap-2">
                 <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
                   Public Profile
@@ -298,7 +318,7 @@ hover:bg-gray-100 has-[:checked]:bg-blue-500 has-[:checked]:text-white"
               <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
                 Public
               </p>
-              <Toggle onColor="bg-blue-500" offColor="bg-gray-400" />
+              <Toggle onColor="bg-[#0A4A4A]" offColor="bg-gray-400" isOn={isProfile} setIsOn={() =>setIsProfile(!isProfile)} />
             </span>
           </div>
         </div>
@@ -310,11 +330,11 @@ hover:bg-gray-100 has-[:checked]:bg-blue-500 has-[:checked]:text-white"
         </p>
         <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3 md:gap-4">
           <button className="w-full md:w-auto  px-4 py-[7px] lg:px-[22px] lg:py-[14px] flex items-center justify-center gap-2 text-[clamp(8px,1vw,12px)] font-semibold font-poppins rounded-lg flex items-center gap-[8px] text-teal-950 text-xs font-semibold leading-normal font-poppins rounded-lg border border-[#D8D8D8] cursor-pointer">
-            <FiEye />
+            <FiEye size={16} />
             preview Proile
           </button>
           <button className="w-full md:w-auto px-4 md:px-[22px] flex items-center justify-center gap-2 text-xs text-[clamp(8px,1vw,12px)]  font-semibold font-poppins rounded-lg flex items-center gap-[8px] rounded-lg bg-[#0A4A4A] text-[#F8F6F1] text-xs font-semibold leading-normal font-poppins cursor-pointer">
-            <FiEye />
+            <FiEye size={16}/>
             Save changes
           </button>
         </div>

@@ -205,13 +205,12 @@ export default function AppShell({ children }) {
       ${collapsed ? "w-20" : "w-65"}
       h-screen sticky top-0
       overflow-hidden
-      border-r
       bg-[#0A4A4A]
     `}
       >
         <div className="flex flex-col h-full">
           {/* Website Logo */}
-          <div className="h-[60px] bg-white flex justify-center items-center">
+          <div className="h-[60px] bg-white  flex justify-center items-center ">
             <Image
               src="/images/Adivisor/Navbar/navlogo.png"
               height={100}
@@ -219,7 +218,7 @@ export default function AppShell({ children }) {
               alt="Navbar logo"
             />
           </div>
-          <hr className="mt-5 h-px" />
+          <hr className="mt-5 border-t border-[#107171]" />
           {/* Profile Details and Logo */}
           <div
             className={`
@@ -231,7 +230,7 @@ export default function AppShell({ children }) {
             {/* Avatar */}
             <div
               className={`
-      rounded-full bg-white flex items-center justify-center
+      rounded-full ring-[2px] ring-[#FEC564] bg-[#F59E0B] flex items-center justify-center
       ${collapsed ? "w-10 h-10" : "w-14 h-14"}
     `}
             >
@@ -264,7 +263,7 @@ export default function AppShell({ children }) {
               )}
             </div>
           </div>
-          <hr className="bg-[#107171] h-px" />
+           <hr className="mt-5 border-t border-[#107171]" />
           {/* sidebar content */}
           <div className="flex-1 overflow-y-auto no-scrollbar scroll-smooth overflow-x-hidden">
             {menuItems.map((section, i) => (
@@ -324,7 +323,7 @@ export default function AppShell({ children }) {
             <motion.div
               whileHover={{ scale: 1.05, x: 5, color: "#ff4d4f" }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-4 font-semibold px-10 py-3 text-[#8BBEBE] cursor-pointer border-t"
+              className="flex items-center gap-4 font-semibold px-10 py-3 text-[#8BBEBE] cursor-pointer border-t border-[#107171]"
             >
               <Link
                 href="/login"
@@ -345,15 +344,15 @@ export default function AppShell({ children }) {
       {/* RIGHT SIDE (HEADER + MAIN) */}
       <div className="flex flex-col flex-1 ">
         {/* HEADER (TOP RIGHT) */}
-        <header className="h-[60px] sticky top-0 z-10 bg-white flex items-center justify-between border-b px-[90px]">
+        <header className=" py-[18px] max-h-[60px] sticky top-0 z-10  flex items-center justify-between px-[90px] py-[10px] bg-white shadow-[0_0_4px_0_rgba(0, 0, 0, 0.25)]">
           <h3 className="text-black font-poppins text-base font-bold leading-normal">
             {currentHeader.title}
           </h3>
 
           {currentHeader.actions.length > 0 && (
-            <div className="hidden h-10 md:flex gap-4 py-[10px] items-center">
+            <div className="hidden h-10 md:flex gap-4  items-center">
               {currentHeader.actions.includes("notifications") && (
-                <motion.button className="relative rounded-full h-10 w-10 bg-[#F8F6F1] flex items-center justify-center">
+                <motion.button className="relative rounded-full h-10 w-10 bg-[#F8F6F1] flex items-center justify-center cursor-pointer ring-[2px] ring-[#E4E2DB] ">
                   <FaBell
                     className="h-5 w-5"
                     style={{
@@ -367,7 +366,7 @@ export default function AppShell({ children }) {
               )}
 
               {currentHeader.actions.includes("profile") && (
-                <motion.button className="rounded-full h-10 w-10 bg-yellow-500">
+                <motion.button className="rounded-full h-10 w-10 bg-[#F59E0B] cursor-pointer ring-[2px] ring-[#FEC564] ">
                   <p className="font-bold text-sm">KM</p>
                 </motion.button>
               )}
@@ -388,7 +387,7 @@ export default function AppShell({ children }) {
                       openModal("REQUEST_TESTIMONIAL");
                     if (pathname === "/advisor/gallery") openModal("ADD_PHOTO");
                   }}
-                  className="px-4 py-[14px] bg-[#0A4A4A] text-white font-poppins text-[clamp(10px,1vw,14px)] rounded-md flex gap-2 items-center"
+                  className="px-4 py-[10px] bg-[#0A4A4A] text-white font-poppins text-[clamp(10px,1vw,14px)] rounded-md flex gap-2 items-center"
                 >
                   <FaPlus />
                   {currentHeader.actions[0]}
@@ -436,7 +435,7 @@ export default function AppShell({ children }) {
                 </div>
               </div>
 
-              <hr className="border-[#107171]" />
+              <hr className="mt-5 h-[1px] bg-[#107171] border-0" />
 
               {/* MENU */}
               <div className="flex-1 overflow-y-auto">

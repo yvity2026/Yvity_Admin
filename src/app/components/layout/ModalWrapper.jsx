@@ -27,7 +27,7 @@ export const ModalWrapper = ({ children, onClose }) => {
       />
 
       {/* MODAL CONTAINER */}
-      <div className="relative min-w-[450px] h-full flex items-center justify-center px-0 sm:px-0 md:px-0">
+      <div className="relative min-w-[450px] h-full flex items-center justify-center px-0 sm:px-0 md:px-0 scrollbar-hide">
         {children}
       </div>
     </div>
