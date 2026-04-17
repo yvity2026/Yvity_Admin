@@ -166,7 +166,7 @@ const page = () => {
 
       {/* Plan comparision */}
       <div className="h-auto w-full  bg-white px-3  xl:px-[40px] py-[27px] rounded-2xl">
-        <p className="text-[var(--headings-important-text)] text-base sm:text-lg md:text-[16px] font-bold leading-normal font-[Poppins] mb-4">
+        <p className="text-[var(--headings-important-text)] text-base sm:text-lg md:text-[16px] font-bold leading-normal font-poppins mb-4">
           Plan Comparision
         </p>
         <div className="xl:px-[40px] grid grid-cols-1 lg:grid-cols-3 gap-4 w-full md:justify-items-center">
@@ -191,7 +191,7 @@ const page = () => {
                 </span>
               </p>
               <div className="flex flex-col gap-4">
-                <ul className="flex flex-col justify-start items-start gap-2 md:gap-2 mt-2 md:pt-6 text-[var(--Body-content)] text-xs sm:text-sm md:text-[12px] font-normal leading-normal font-[Poppins]">
+                <ul className="flex flex-col justify-start items-start gap-2 md:gap-2 mt-2 md:pt-6 text-[var(--Body-content)] text-xs sm:text-sm md:text-[12px] font-normal leading-normal font-poppins">
                   {item.features.map((feature, idx) => (
                     <li key={idx} className="flex items-center gap-1">
                       <FaCheck className="text-green-400" />
@@ -227,12 +227,12 @@ const page = () => {
       {/* Payment History */}
       <div className="h-auto w-96 md:w-full bg-white rounded-2xl px-3 sm:px-4 md:pl-[40px] md:pr-[50px] py-[27px]">
         <div className="p-4">
-          <h2 className="text-xl mb-4 text-[var(--headings-important-text)] text-[16px] font-bold leading-normal font-[Poppins]">
+          <h2 className="text-xl mb-4 text-[var(--headings-important-text)] text-[16px] font-bold leading-normal font-poppins">
             Payment History
           </h2>
           <div className="overflow-x-auto w-full">
             <table className="w-full border-gray-200 text-sm">
-              <thead className="text-[var(--labels-secondary-info)] text-xs sm:text-sm md:text-[12px] font-semibold leading-normal font-[Poppins]">
+              <thead className="text-[var(--labels-secondary-info)] text-xs sm:text-sm md:text-[12px] font-semibold leading-normal font-poppins">
                 <tr className="">
                   <th className="text-left py-2 md:py-[10px] text-[10px] sm:text-xs">
                     Date
