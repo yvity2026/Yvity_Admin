@@ -379,6 +379,7 @@ export default function AppShell({ children }) {
                 <motion.button
                   onClick={() => {
                     if (pathname === "/advisor/services")
+                      // ADD_PROFESSIONAL_JOURNEY
                       openModal("ADD_SERVICE");
                     if (pathname === "/advisor/professional-journey")
                       openModal("ADD_ENTRY");
@@ -387,6 +388,11 @@ export default function AppShell({ children }) {
                     if (pathname === "/advisor/testimonials")
                       openModal("REQUEST_TESTIMONIAL");
                     if (pathname === "/advisor/gallery") openModal("ADD_PHOTO");
+                    if (pathname === "/advisor/professional-journey")
+                      openModal("ADD_PROFESSIONAL_JOURNEY");
+                    if (pathname === "/advisor/recommendations")
+                      openModal("ADD_RECOMMENDATION");
+                    
                   }}
                   className="px-4 py-[14px] bg-[#0A4A4A] text-white font-poppins text-[clamp(10px,1vw,14px)] rounded-md flex gap-2 items-center"
                 >

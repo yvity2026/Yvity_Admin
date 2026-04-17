@@ -1,10 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PageHeader from "@/components/features/advisor/achievements/page-header";
 import InfoBanner from "@/components/features/advisor/achievements/info-banner";
 import AchievementCard from "@/components/features/advisor/achievements/achievement-card";
 import AchievementFormModal from "@/components/features/advisor/achievements/achievement-form-modal";
 import AchievementDeleteModal from "@/components/features/advisor/achievements/achievement-delete-modal";
+import EntryFormModal from "@/components/features/advisor/professional-journey/entry-form-modal";
+import { useModal } from "@/context/ModalContext";
 
 // MOCK DATA: Structured for future backend API integration
 const achievementsData = [
@@ -64,6 +66,16 @@ export default function AchievementsPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingAchievement, setDeletingAchievement] = useState(null);
 
+
+   const { trigger, clearTrigger } = useModal();
+    const [isAchievement, setAchievement] = useState(false);
+    useEffect(() => {
+      if (trigger === "ADD_ACHIEVEMENT") {
+  setAchievement(true);
+        clearTrigger(); 
+      }
+    }, [trigger]);
+
   const handleAddClick = () => {
     setEditingAchievement(null);
     setIsModalOpen(true);
@@ -101,7 +113,9 @@ export default function AchievementsPage() {
 
   return (
     <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
-      <PageHeader onAddClick={handleAddClick} />
+     
+      {<EntryFormModal isOpen={isAchievement} onClose={() => setAchievement(false)} />}
+      
       
       <div className="p-4 md:p-6 lg:p-10 xl:px-15 space-y-6 mx-auto w-full pb-12">
         <InfoBanner />

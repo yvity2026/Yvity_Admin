@@ -1,11 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import InfoBanner from "@/components/features/advisor/professional-journey/info-banner";
 import JourneySection from "@/components/features/advisor/professional-journey/journey-section";
 import PageHeader from "@/components/features/advisor/professional-journey/page-header";
 import EntryFormModal from "@/components/features/advisor/professional-journey/entry-form-modal";
 import EntryDeleteModal from "@/components/features/advisor/professional-journey/entry-delete-modal";
 import { Shield, HeartPulse, GraduationCap } from "lucide-react";
+import { useModal } from "@/context/ModalContext";
 
 // MOCK DATA: Structured exactly how your backend API should return it
 const journeyData = [
@@ -103,6 +104,18 @@ export default function ProfessionalJourneyPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingEntry, setDeletingEntry] = useState(null);
 
+
+ const { trigger, clearTrigger } = useModal();
+  const [isProfessional, setProfessional] = useState(false);
+  useEffect(() => {
+    if (trigger === "ADD_PROFESSIONAL_JOURNEY") {
+setProfessional(true);
+      clearTrigger(); 
+    }
+  }, [trigger]);
+
+
+
   const handleAddClick = () => {
     setEditingEntry(null);
     setIsEntryModalOpen(true);
@@ -141,6 +154,8 @@ export default function ProfessionalJourneyPage() {
   return (
     <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
       {/* <PageHeader onAddClick={handleAddClick} /> */}
+              {<EntryFormModal isOpen={isProfessional} onClose={() => setProfessional(false)} />}
+      
 
       <div className="p-4 md:p-6 space-y-6 lg:p-10 xl:px-15 mx-auto w-full pb-12">
         <InfoBanner />
