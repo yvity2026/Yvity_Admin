@@ -140,7 +140,7 @@ export default function ProfessionalJourneyPage() {
 
   return (
     <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
-      <PageHeader onAddClick={handleAddClick} />
+      {/* <PageHeader onAddClick={handleAddClick} /> */}
 
       <div className="p-4 md:p-6 space-y-6 lg:p-10 xl:px-15 mx-auto w-full pb-12">
         <InfoBanner />
