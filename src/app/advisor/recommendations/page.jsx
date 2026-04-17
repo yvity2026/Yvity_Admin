@@ -1,6 +1,6 @@
-import PageHeader from "@/components/features/advisor/professional-journey/page-header";
 import BonusBanners from "@/components/features/advisor/recommendations/bonus-banners";
 import FilterTabs from "@/components/features/advisor/recommendations/filter-tabs";
+import PageHeader from "@/components/features/advisor/recommendations/page-header";
 import RecommendationCard from "@/components/features/advisor/recommendations/recommendation-card";
 import StatsRow from "@/components/features/advisor/recommendations/stats-row";
 
@@ -53,15 +53,15 @@ const recommendationsData = [
 export default function RecommendationsPage() {
   return (
     <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
-      {/* <PageHeader /> */}
-      
+      <PageHeader />
+
       <div className="p-4 md:p-6 lg:p-10 xl:px-15 space-y-6 mx-auto w-full pb-12">
         <StatsRow />
         <BonusBanners />
-        
+
         <div className="space-y-4">
           <FilterTabs />
-          
+
           <div className="space-y-4">
             {recommendationsData.map((rec) => (
               <RecommendationCard key={rec.id} data={rec} />

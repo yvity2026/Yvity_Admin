@@ -1,6 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import { BadgeCheck } from "lucide-react";
+import { RecommendationDetailsModal } from "./recommendation-modals";
 
 export default function RecommendationCard({ data }) {
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
   return (
     <div className=" rounded-2xl border border-gray-100 overflow-hidden relative flex flex-col sm:flex-row p-5 gap-5 hover:shadow-md transition-shadow  border-l-4 border-l-[var(--gradients-hover-state,#0D6060)] bg-white shadow-none">
       {/* Left Thick Border Accent */}
@@ -49,12 +55,21 @@ export default function RecommendationCard({ data }) {
           </span>
 
           <div className="rounded-[6px] flex justify-end border border-[#D5D5D5]">
-            <button className="bg-[#F3F4F6] hover:bg-gray-200 text-gray-700 px-4 py-1.5 rounded-md text-xs font-bold transition-colors cursor-pointer">
+            <button 
+              onClick={() => setIsDetailsOpen(true)}
+              className="bg-[#F3F4F6] hover:bg-gray-200 text-gray-700 px-4 py-1.5 rounded-md text-xs font-bold transition-colors cursor-pointer"
+            >
               View
             </button>
           </div>
         </div>
       </div>
+
+      <RecommendationDetailsModal 
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        data={data}
+      />
     </div>
   );
 }

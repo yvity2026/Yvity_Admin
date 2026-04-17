@@ -1,6 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import { AlertTriangle } from "lucide-react";
+import { DeactivateModal, DeleteModal } from "./settings-modals";
 
 export default function DangerZone() {
+  const [activeModal, setActiveModal] = useState(null);
+
   return (
     <div className="rounded-2xl p-6 border border-[#E2E1DC] bg-[#FEF2F2] shadow-none">
       
@@ -16,7 +22,10 @@ export default function DangerZone() {
             <h3 className="text-[clamp(10px,1vw,14px)] font-bold text-[#374151]">Deactivate Account</h3>
             <p className="text-[clamp(8px,1vw,12px)] text-[#6B7280] font-medium mt-0.5">Temporarily hide your profile from public view</p>
           </div>
-          <button className="px-4 py-1.5 bg-white border border-[#FECACA] rounded-md text-[clamp(8px,1vw,12px)] font-bold text-[#D32323] transition-colors cursor-pointer">
+          <button 
+            onClick={() => setActiveModal('deactivate')}
+            className="px-4 py-1.5 bg-white border border-[#FECACA] rounded-md text-[clamp(8px,1vw,12px)] font-bold text-[#D32323] transition-colors cursor-pointer"
+          >
             Deactivate
           </button>
         </div>
@@ -27,12 +36,23 @@ export default function DangerZone() {
             <h3 className="text-sm font-bold text-gray-900">Delete Account</h3>
             <p className="text-xs text-gray-500 font-medium mt-0.5">Permanently delete your profile and all data</p>
           </div>
-          <button className="text-[clamp(8px,1vw,12px)] px-4 py-1.5 bg-white border border-[#FECACA] rounded-md font-bold text-[#D32323] transition-colors cursor-pointer">
+          <button 
+            onClick={() => setActiveModal('delete')}
+            className="text-[clamp(8px,1vw,12px)] px-4 py-1.5 bg-white border border-[#FECACA] rounded-md font-bold text-[#D32323] transition-colors cursor-pointer"
+          >
             Delete
           </button>
         </div>
       </div>
 
+      <DeactivateModal 
+        isOpen={activeModal === 'deactivate'} 
+        onClose={() => setActiveModal(null)} 
+      />
+      <DeleteModal 
+        isOpen={activeModal === 'delete'} 
+        onClose={() => setActiveModal(null)} 
+      />
     </div>
   );
 }

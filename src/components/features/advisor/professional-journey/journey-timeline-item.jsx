@@ -2,7 +2,7 @@ export default function JourneyTimelineItem({ entry, themeColor, textColor, isLa
   return (
     <div className="relative pl-6 sm:pl-8">
       {/* Timeline Dot */}
-      <div className={`absolute -left-[9px] top-4 w-4 h-4 rounded-full ${themeColor} border-4 border-white shadow-sm`} />
+      <div className={`absolute -left-[9px] top-4 w-4 h-4 rounded-full ${themeColor} border-4 border-[#A6CECE] shadow-sm`} />
 
       {/* Content Card */}
       <div className="bg-[#F8FBFA] border border-gray-100 rounded-xl p-5 hover:shadow-sm transition-shadow">

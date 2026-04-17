@@ -14,7 +14,7 @@ export function SettingsCard({ title, children, className = "" }) {
   );
 }
 
-export function ActionRow({ icon, iconBg, title, subtitle, actionText }) {
+export function ActionRow({ icon, iconBg, title, subtitle, actionText, onClick }) {
   return (
     <div className="flex items-center justify-between py-4 border-b border-gray-50 last:border-0 last:pb-0 first:pt-0">
       <div className="flex items-center gap-4">
@@ -26,7 +26,7 @@ export function ActionRow({ icon, iconBg, title, subtitle, actionText }) {
           <p className="text-[clamp(8px,1vw,12px)] text-[#6B7280] font-medium mt-0.5">{subtitle}</p>
         </div>
       </div>
-      <button className="flex items-center gap-1 text-[clamp(10px,1vw,14px)] font-bold text-[#0A4A4A] hover:text-[#0a2e2c] transition-colors cursor-pointer">
+      <button onClick={onClick} className="flex items-center gap-1 text-[clamp(10px,1vw,14px)] font-bold text-[#0A4A4A] hover:text-[#0a2e2c] transition-colors cursor-pointer">
         {actionText} <ChevronRight className="w-4 h-4" />
       </button>
     </div>

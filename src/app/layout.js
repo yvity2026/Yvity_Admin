@@ -9,7 +9,7 @@ import "./globals.css";
 import AppShell from "./components/layout/Sidebar";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { ModalProvider } from "@/context/ModalContext";
-
+import { Toaster } from "react-hot-toast";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -52,7 +52,13 @@ export default function RootLayout({ children }) {
       <body className="min-h-full max-w-384 mx-auto flex flex-col">
         <ModalProvider>
           <SidebarProvider>
-            <AppShell>{children}</AppShell>
+            <AppShell>
+               <main className="flex-1 flex flex-col">
+                  <Toaster position="top-right" />
+                  {children}
+                </main>
+              
+              </AppShell>
           </SidebarProvider>
         </ModalProvider>
       </body>
