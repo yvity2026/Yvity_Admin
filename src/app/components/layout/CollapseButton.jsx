@@ -29,6 +29,7 @@ export default function CollapseButton({ sidebarWidth }) {
         hover:scale-110
         active:scale-95
         transition
+        cursor-pointer
       "
     >
       <motion.span

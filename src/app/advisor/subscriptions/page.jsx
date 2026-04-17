@@ -104,22 +104,23 @@ const page = () => {
   ];
   const [isRenew, setIsRenew] = useState(false);
   const [isAutoRenew, setIsAutoRenew] = useState(false);
+  const [isUpgrade, setIsUpgrade] = useState(false);
 
   return (
-    <div className="p-4 md:p-6 lg:p-10 xl:px-15 mx-auto pt-[24px] pb-[81px] flex flex-col gap-[26px]">
-      <div className="w-full  h-auto  bg-white px-4 md:pl-[40px] md:pr-[44px] py-6 md:py-[33px] flex flex-col md:grid md:grid-cols-2 gap-6 md:gap-0 rounded-2xl">
+    <div className="p-4 md:p-6 lg:p-10 xl:px-15 pt-[24px] pb-[81px] flex flex-col gap-[26px]">
+      <div className="w-full  h-auto  bg-white px-4 md:pl-[40px] md:pr-[44px] py-6 md:py-[33px] flex flex-col md:grid md:grid-cols-2 gap-6 md:gap-0 rounded-2xl bg-gradient-to-r from-[#094C4B] to-[#0A6A69] shadow-[0_0_2px_0_rgba(0,0,0,0.2)]">
         <div className="flex flex-col gap-4">
           <span>
-            <h3 className="text-xl sm:text-2xl md:text-[32px] font-bold">
+            <h3 className="text-xl sm:text-2xl md:text-[32px] font-bold text-[#F8F6F1]">
               Gold Plan
             </h3>
 
             {/* Mobile only */}
-            <p className="md:hidden text-sm text-gray-300">
+            <p className="md:hidden text-sm  text-[#F8F6F1]">
               288 days remaining
             </p>
 
-            <p className="text-sm md:text-[14px]">
+            <p className="text-[clamp(10px,1vw,14px)] text-[#F8F6F1]">
               Expires: December 31, 2025 · Auto-renewal OFF
             </p>
           </span>
@@ -130,7 +131,7 @@ const page = () => {
               text-[clamp(10px,1vw,14px)]
        w-full sm:w-auto
       flex items-center justify-center
-      px-4 gap-2 py-[10px] rounded-lg bg-[#F59E0B]
+      px-4 gap-2 py-[10px] rounded-lg bg-[#F59E0B] text-[#F8F6F1]
     "
     onClick={() => setIsRenew(true)}
             >
@@ -143,7 +144,7 @@ const page = () => {
               text-[clamp(10px,1vw,14px)]
       w-full sm:w-auto   // ✅ FIXED (space added)
       flex items-center justify-center
-      px-4 py-[10px] rounded-lg border bg-[#256B6B]
+      px-4 py-[10px] rounded-lg bg-[#256B6B] text-[#F8F6F1] border border-[#539292]
     "
     onClick={() => setIsAutoRenew(true)}
             >
@@ -151,22 +152,22 @@ const page = () => {
             </button>
           </span>
 
-          <span className="flex items-center gap-2 text-xs">
+          <span className="flex items-center gap-2 text-xs text-[#F59E0B] rounded-2xl bg-[rgba(245,158,11,0.2)] py-[6px] px-4 w-fit">
             <FaCrown />
             current plan
           </span>
         </div>
         <div className="hidden md:flex justify-end ">
           <span>
-            <h3 className="text-[36px] font-bold text-right">285</h3>
-            <p className="text-[14px] text-right">Days Remaining</p>
+            <h3 className="text-[36px] font-bold text-right text-[#F8F6F1]">285</h3>
+            <p className="text-[14px] text-right text-[#F8F6F1] ">Days Remaining</p>
           </span>
         </div>
       </div>
 
       {/* Plan comparision */}
       <div className="h-auto w-full  bg-white px-3  xl:px-[40px] py-[27px] rounded-2xl">
-        <p className="text-[var(--headings-important-text)] text-base sm:text-lg md:text-[16px] font-bold leading-normal font-poppins mb-4">
+        <p className="text-[var(--headings-important-text)] text-base sm:text-lg md:text-[16px] font-bold leading-normal font-[Poppins] mb-4">
           Plan Comparision
         </p>
         <div className="xl:px-[40px] grid grid-cols-1 lg:grid-cols-3 gap-4 w-full md:justify-items-center">
@@ -191,7 +192,7 @@ const page = () => {
                 </span>
               </p>
               <div className="flex flex-col gap-4">
-                <ul className="flex flex-col justify-start items-start gap-2 md:gap-2 mt-2 md:pt-6 text-[var(--Body-content)] text-xs sm:text-sm md:text-[12px] font-normal leading-normal font-poppins">
+                <ul className="flex flex-col justify-start items-start gap-2 md:gap-2 mt-2 md:pt-6 text-[var(--Body-content)] text-xs sm:text-sm md:text-[12px] font-normal leading-normal font-[Poppins]">
                   {item.features.map((feature, idx) => (
                     <li key={idx} className="flex items-center gap-1">
                       <FaCheck className="text-green-400" />
@@ -207,7 +208,8 @@ const page = () => {
                   ))}
                 </ul>
                 <button
-                  className={`w-full mt-4 md:mt-0 flex items-center justify-center gap-2 rounded-full transition-all duration-500 ease-in-out ${item.buttonStyle}`}
+                  className={`w-full mt-4 md:mt-0 flex items-center justify-center gap-2 rounded-full transition-all duration-500 ease-in-out text-[clamp(12px,1.5vw,16px)] ${item.buttonStyle}`}
+                  onClick={() => setIsUpgrade(true)}
                 >
                   {item.buttonText}
                 </button>
@@ -227,12 +229,12 @@ const page = () => {
       {/* Payment History */}
       <div className="h-auto w-96 md:w-full bg-white rounded-2xl px-3 sm:px-4 md:pl-[40px] md:pr-[50px] py-[27px]">
         <div className="p-4">
-          <h2 className="text-xl mb-4 text-[var(--headings-important-text)] text-[16px] font-bold leading-normal font-poppins">
+          <h2 className="text-xl mb-4 text-[var(--headings-important-text)] text-[16px] font-bold leading-normal font-[Poppins]">
             Payment History
           </h2>
           <div className="overflow-x-auto w-full">
             <table className="w-full border-gray-200 text-sm">
-              <thead className="text-[var(--labels-secondary-info)] text-xs sm:text-sm md:text-[12px] font-semibold leading-normal font-poppins">
+              <thead className="text-[var(--labels-secondary-info)] text-xs sm:text-sm md:text-[12px] font-semibold leading-normal font-[Poppins]">
                 <tr className="">
                   <th className="text-left py-2 md:py-[10px] text-[10px] sm:text-xs">
                     Date
@@ -257,27 +259,27 @@ const page = () => {
 
               <tbody>
                 {paymentHistory.map((item, index) => (
-                  <tr key={index} className="border-t">
-                    <td className="py-2 md:py-[10px] text-[var(--Body-content)] text-xs sm:text-sm md:text-[12px] sm:font-normal leading-normal font-nunito">
+                  <tr key={index} className="border-t text-[clamp(8px,1vw,12px)] font-nunito">
+                    <td className="py-2 md:py-[10px]  sm:font-normal leading-normal font-nunito">
                       {item.date}
                     </td>
-                    <td className="py-2 md:py-[10px] text-xs sm:text-sm md:text-[12px] font-normal">
+                    <td className="py-2 md:py-[10px]  font-normal">
                       {item.plan}
                     </td>
-                    <td className="py-2 md:py-[10px] text-[var(--headings-important-text)] text-xs sm:text-sm md:text-[12px] font-semibold leading-normal font-poppins">
+                    <td className="py-2 md:py-[10px] t text-xs sm:text-sm md:text-[12px] font-semibold leading-normal font-poppins">
                       {item.amount}
                     </td>
-                    <td className="py-2 md:py-[10px] text-[var(--Body-content)] text-xs sm:text-sm md:text-[12px] font-normal leading-normal font-nunito">
+                    <td className="py-2 md:py-[10px]  text-xs sm:text-sm md:text-[12px] font-normal leading-normal font-nunito">
                       {item.method}
                     </td>
                     <td className="py-2 md:p-[10px]">
-                      <span className="text-green-600 p-[10px] font-medium flex items-center gap-1 whitespace-nowrap rounded-2xl bg-[#E8F4F4] w-fit">
+                      <span className="text-[#0A4A4A] font-poppins font-semibold leading-normal p-[10px] font-medium flex items-center gap-1 whitespace-nowrap rounded-2xl bg-[#E8F4F4] w-fit">
                         <MdOutlineVerifiedUser />
                         {item.status}
                       </span>
                     </td>
                     <td className="p-[10px]">
-                      <button className="text-blue-600 p-[10px] hover:underline flex items-center gap-2 whitespace-nowrap rounded-2xl bg-[#E8F4F4]">
+                      <button className="text-[#0A4A4A] font-poppins text-xs font-semibold leading-normal p-[10px] hover:underline flex items-center gap-2 whitespace-nowrap rounded-2xl bg-[#E8F4F4]">
                         <HiOutlineDownload />
                         {item.invoice}
                       </button>
@@ -541,6 +543,48 @@ const page = () => {
         </div>
       </div>
     </ModalWrapper>
+  )
+}
+
+{
+  isUpgrade && (
+    <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+      
+      {/* CARD */}
+      <div className="w-[92vw] sm:w-[85vw] md:w-[420px] bg-[#f3f4f6] rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+        
+        {/* HEADER */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">
+            Upgrade Plan
+          </h2>
+
+          <button
+            onClick={() => setIsUpgrade(false)}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition"
+          >
+            <MdClose className="text-gray-600" size={18} />
+          </button>
+        </div>
+
+        {/* BODY */}
+        <div className="px-6 py-5">
+          <p className="text-sm text-gray-600 leading-relaxed">
+            You are already on the{" "}
+            <span className="font-semibold text-gray-900">Gold Plan</span> – from our best plan! You have access to all features.
+          </p>
+
+          {/* BUTTON */}
+          <button
+            onClick={() => setIsUpgrade(false)}
+            className="mt-5 w-full bg-[#0f4f4f] hover:bg-[#0c3f3f] text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition active:scale-[0.98]"
+          >
+            Got it!
+            <span className="text-sm">✓</span>
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 

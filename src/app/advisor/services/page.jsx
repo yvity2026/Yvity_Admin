@@ -72,13 +72,13 @@ export default function Page() {
   return (
     <div className="px-4 sm:px-6 md:px-[90px] pt-4 sm:pt-6 md:pt-[30px] min-h-full">
       {/* Info */}
-      <div className="mb-[20px] rounded-[8px] border border-[#DBE1E0] bg-[#E0F4F3] px-3 sm:px-4 md:pl-[30px] py-3 md:py-[14px] flex gap-[15px] items-center">
+      <div className="mb-[20px] text-[clamp(10px,1vw,14px)] rounded-lg border border-[#DBE1E0] bg-[#E0F4F3] px-3 sm:px-4 md:pl-[30px] py-3 md:py-[14px] flex gap-[15px] items-center">
         <LuClockAlert />
         <p>Services you add here appear as cards on your public profile.</p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full">
-        <div className="w-full rounded-2xl border border-[#E2E1DC] bg-white pb-[38px] shadow-none max-w-[480px]">
+        <div className="w-full rounded-2xl border border-[#E2E1DC] bg-white pb-[38px] shadow-none min-w-[480px] lx:w-full">
           <div className="h-[60px] px-3 sm:px-4 md:px-[30px] py-3 md:py-[18px] rounded-t-2xl bg-[#2A9D8F] shadow-[0_0_2px_0_rgba(0,0,0,0.25)] flex justify-between items-center">
             <span className="flex items-center gap-2 text-[#F8F6F1] font-[Poppins] text-[16px] font-bold leading-normal">
               <FaShield />
@@ -86,7 +86,7 @@ export default function Page() {
             </span>
             <span className="flex flex-wrap gap-2 sm:gap-[11px]">
               <button
-                className="p-[10px] rounded-[6px] h-[26px] flex items-center border border-[#D5D5D5] bg-white text-[#0A4A4A] font-poppins text-xs font-bold leading-normal"
+                className="p-[10px] rounded-[6px] h-[26px] flex items-center border border-[#D5D5D5] bg-white text-[#0A4A4A] font-poppins text-xs font-medium leading-normal"
                 onClick={() => setEdit(true)}
               >
                 Edit
@@ -117,10 +117,10 @@ export default function Page() {
         </div>
 
         {/* Add Card Button */}
-        <div className="w-full flex items-center justify-center cursor-pointer hover:opacity-90 rounded-2xl border border-[#E2E1DC] bg-white shadow-none max-w-[480px] min-h-[240px] py-[80px]">
+        <div className="w-full flex items-center justify-center cursor-pointer hover:opacity-90 rounded-2xl border border-[#E2E1DC] bg-white shadow-none min-w-[480px] lg:w-full  min-h-[240px] py-[80px]">
           <span className="flex flex-col justify-center items-center text-2xl">
-            <HiPlus />
-            <p>Add New Services</p>
+            <FaPlus className="text-[#785DC8] w-10 h-10" />
+            <p className="text-gray-500 text-center font-[Poppins] text-[clamp(12px,1.5vw,16px)] font-medium leading-normal">Add New Services</p>
           </span>
         </div>
       </div>
@@ -133,7 +133,7 @@ export default function Page() {
         2. Set bg-white and overflow-hidden for the clean card look.
         3. Match the specific max-w-lg from your designs.
     */}
-    <div className="bg-white w-[92vw] sm:w-[85vw] md:w-[70vw] lg:w-[50vw] max-w-lg overflow-hidden flex flex-col rounded-[2rem] shadow-xl border border-gray-100 h-auto">
+    <div className="bg-white w-[92vw] sm:w-[85vw] md:w-[70vw] lg:w-[50vw] max-w-lg overflow-y-scroll max-h-[543px] flex flex-col rounded-[2rem] shadow-xl border border-gray-100 h-auto no-scrollbar">
       
       {/* HEADER - Updated to match image icon/style */}
       <div className="px-8 py-5 flex justify-between items-center border-b border-gray-100">

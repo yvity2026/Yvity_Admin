@@ -13,13 +13,14 @@ import {
   MdOutlineMail,
   MdSms,
 } from "react-icons/md";
-import { TbDownload, TbMail } from "react-icons/tb";
+import { TbAlertSquareFilled, TbDownload, TbMail } from "react-icons/tb";
 import { useRouter } from "next/navigation";
 import { ModalWrapper } from "@/app/components/layout/ModalWrapper";
 import { IoClose, IoQrCode } from "react-icons/io5";
-import { FiArrowRight, FiUpload } from "react-icons/fi";
+import { FiArrowRight, FiCheckCircle, FiUpload } from "react-icons/fi";
 import { QRCodeCanvas } from "qrcode.react";
 import { AiOutlineLike } from "react-icons/ai";
+import { FaRegCirclePlay } from "react-icons/fa6";
 
 const page = () => {
   const qrRef = React.useRef(null);
@@ -159,7 +160,7 @@ const actions = [
           <div className="relative rounded-2xl bg-white shadow-sm flex-1">
             <div className="h-[78px] bg-gradient-to-r from-[#032B2B] to-[#095A5B] mb-[65px] w-full rounded-t-2xl"></div>
             {/* profile circle */}
-            <span className="absolute h-16 w-16 sm:h-20 sm:w-20 md:h-22 md:w-22 rounded-full bg-yellow-300 top-[39px] left-4 md:left-[30px]"></span>
+            <span className="absolute h-16 w-16 sm:h-20 sm:w-20 md:h-22 md:w-22 rounded-full top-[39px] left-4 md:left-[30px] ring-[3px] ring-white text-2xl flex items-center justify-center bg-[#0A4A4A] text-white">KM</span>
             {/* Advisor Dtails */}
             <div className="px-4 md:px-6">
               <span className="flex flex-col gap-1">
@@ -167,7 +168,7 @@ const actions = [
                   Krishna Mohan
                 </p>
                 <span className="flex gap-2 items-center">
-                  <IoMdCheckmarkCircle />
+                  <FiCheckCircle className="text-[#0A4A4A]"/>
                   <p className="">Identity Verified</p>
                 </span>
                 <p className="text-gray-700 text-[10px] sm:text-xs md:text-xs font-normal leading-4 font-poppins">
@@ -182,9 +183,9 @@ const actions = [
             <div className="pr-[30px] pl-[29px]">
               <div className="bg-amber-200 w-full  pl-[20px] pr-[23px] py-[9px] mt-[24px] bg-gradient-to-r from-[#022927] to-[#053F40] rounded-lg">
                 <span className="flex gap-5 h-full cursor-pointer" onClick={() => setActiveModal(MODALS.VIDEO)}>
-                  <FaPlayCircle
+                  <FaRegCirclePlay
                     size={40}
-                    className="flex justify-center items-center"
+                    className="flex justify-center text-white items-center"
                   />
                   <span className="flex flex-col justify-between w-full">
                     <span className="flex gap-1 text-[#F8F6F1] text-[10px] text-xs sm:text-sm font-medium leading-4 font-poppins">
@@ -230,7 +231,7 @@ const actions = [
                   <div
                     key={index}
                     className="w-full px-4 sm:px-6 py-3 
-      flex flex-col justify-center border rounded-md bg-[#F0F8F8] cursor-pointer"
+      flex flex-col justify-center border rounded-md bg-[#F0F8F8] cursor-pointer rounded-lg border border-[#E2E2E2] bg-[#F0F8F8]"
                   >
                     {/* count */}
                     <span className="text-heading text-center font-poppins text-base font-bold leading-[16px]">
@@ -248,10 +249,10 @@ const actions = [
                 {actions.map((item, index) => (
                   <button
                     key={index}
-                    className="px-3 py-2 border rounded-md 
+                    className="px-3 py-2 rounded-md 
       flex items-center justify-center 
       text-xs sm:text-sm font-medium 
-      hover:bg-teal-950 hover:text-white transition flex items-center gap-2 cursor-pointer"
+      hover:bg-teal-950 hover:text-white transition flex items-center gap-2 cursor-pointer rounded-lg border border-[#E2E2E2] bg-[#F0F8F8]"
       onClick={() => item.modal && setActiveModal(item.modal)}
                   >
                     <span>{item.icon}</span>
@@ -281,25 +282,25 @@ const actions = [
               {/* Heading */}
               <span className="text-[16px] font-bold text-[#111827] font-poppins flex items-center gap-2">
                 <span>
-                  <MdCall />
+                  <MdCall  className="text-[#DC2020]"/>
                 </span>
                 Contact Advisor
               </span>
 
               {/* Buttons container */}
               <div className="flex flex-col gap-2 flex-1">
-                <button className="w-full text-[10px] px-[23px] py-[14px] font-medium rounded-lg bg-[#0A4A4A] flex gap-2 items-center justify-center text-white cursor-pointer">
-                  <IoIosCall />
+                <button className="w-full text-[clamp(8px,1vw,12px)] px-[23px] py-[14px] font-medium rounded-lg bg-[#0A4A4A] flex gap-2 items-center justify-center text-white cursor-pointer">
+                  <IoIosCall size={18} />
                   Call Now
                 </button>
 
-                <button className="w-full text-[10px] px-[23px] py-[14px] font-medium rounded-lg bg-[#26D367] flex gap-2 items-center justify-center text-white cursor-pointer">
-                  <BsChatDots />
+                <button className="w-full text-[clamp(8px,1vw,12px)] px-[23px] py-[14px] font-medium rounded-lg bg-[#26D367] flex gap-2 items-center justify-center text-white cursor-pointer">
+                  <BsChatDots size={18} />
                   Whatsapp
                 </button>
 
-                <button className="w-full text-[10px] px-[23px] py-[14px] bg-white flex gap-2 items-center justify-center rounded-lg border border-[#E8F4F4] text-primary-900 font-poppins text-xs font-semibold cursor-pointer">
-                  <TbMail />
+                <button className="w-full text-[clamp(8px,1vw,12px)] px-[23px] py-[14px] bg-white flex gap-2 items-center justify-center rounded-lg border border-[#E8F4F4] text-primary-900 font-poppins text-xs font-semibold cursor-pointer">
+                  <TbMail size={18} />
                   Send Mail
                 </button>
               </div>
@@ -337,7 +338,7 @@ const actions = [
               {/* Heading */}
               <span className="text-[var(--headings-important-text)] text-[16px] font-bold font-poppins leading-normal flex items-center gap-2">
                 <span>
-                  <BsFillInfoSquareFill />
+                  <TbAlertSquareFilled className="text-[#57A5F4]"/>
                 </span>
                 Profile Info
               </span>
@@ -359,7 +360,7 @@ const actions = [
         </div>
         {/* second layer */}
         <div className="rounded-2xl bg-white shadow-soft">
-          <div className="border-b border-highlights rounded-t-2xl flex overflow-x-auto no-scrollbar">
+          <div className="border-b border-[#E8F4F4] border-highlights rounded-t-2xl flex overflow-x-auto no-scrollbar md:pl-10">
             {footerheadings.map((heading, index) => (
               <button
                 key={index}
@@ -371,8 +372,8 @@ const actions = [
           </div>
 
           {/* Dynamic content */}
-          <div className="pt-[20px] px-4 md:pl-[40px] md:pr-[240px] pb-[36px] flex flex-col gap-2 ">
-            <p className="text-[#6B7280] font-nunito text-sm font-normal leading-6">
+          <div className="pt-[20px] px-4 xl:pl-[40px] xl:pr-[240px] pb-[36px] flex flex-col gap-2 ">
+            <p className="text-[#6B7280] font-nunito text-sm font-normal leading-6 text-[clamp(10px,1vw,14px)]">
               I am Krishna Mohan, a Senior LIC Advisor based in Nellore, AP with
               over 14 years of experience. I am an MDRT qualifier and YVITY
               Verified Professional. My mission is to provide trusted,
@@ -387,7 +388,7 @@ const actions = [
                 {companies.map((comp, index) => (
                   <span
                     key={index}
-                    className="p-[10px] flex gap-2 items-center text-[var(--primary-900)] text-[12px] font-semibold font-poppins leading-normal rounded-2xl bg-[#E8F4F4]"
+                    className="p-[10px] flex gap-2 items-center text-[clamp(8px,1vw,12px)] font-semibold font-poppins leading-normal rounded-2xl bg-[#E8F4F4]"
                   >
                     <span className="">{comp.icon}</span>
                     {comp.data}
@@ -407,8 +408,8 @@ const actions = [
                     className="px-3 py-1 
         w-full sm:w-auto 
         flex items-center justify-center sm:justify-start
-        text-[10px] sm:text-[12px] font-semibold 
-        rounded-2xl bg-[#E0F4F3] text-[var(--primary-900)]"
+        sm:text-[12px] font-semibold 
+        rounded-2xl bg-[#E0F4F3] text-[clamp(8px,1vw,12px)]"
                   >
                     {comp.data}
                   </span>
