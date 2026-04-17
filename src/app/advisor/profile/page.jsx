@@ -5,6 +5,7 @@ import { FaCamera, FaFile, FaFolder, FaLightbulb } from "react-icons/fa";
 import { FaTriangleExclamation } from "react-icons/fa6";
 import { FiEye } from "react-icons/fi";
 import { IoIosCamera } from "react-icons/io";
+import { IoShieldHalfOutline } from "react-icons/io5";
 import { MdClose } from "react-icons/md";
 
 const page = () => {
@@ -56,24 +57,26 @@ const page = () => {
         </span>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-[24px]">
           {/* Full name */}
-          <div className="flex flex-col">
-            <label className="font-poppins">Full name</label>
+          <div className="flex flex-col gap-2">
+            <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">Full name <p className="text-[#D11717]">*</p></label>
             <input
               type="text"
+              placeholder="Krishna Mohan"
               className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 md:pl-[30px] text-sm md:text-base font-nunito"
             />
           </div>
           {/* DOB */}
-          <div className="flex flex-col">
-            <label className="font-poppins">Date of Birth</label>
+          <div className="flex flex-col gap-2">
+            <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">Date of Birth<p className="text-[#D11717]">*</p></label>
             <input
               type="date"
+              placeholder="15-06-1985"
               className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 md:pl-[30px] text-sm md:text-base font-nunito"
             />
           </div>
           {/* Gender */}
-          <div className="flex flex-col">
-            <label className="font-poppins">Gender</label>
+          <div className="flex flex-col gap-2">
+            <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">Gender<p className="text-[#D11717]">*</p></label>
 
             <div className="flex gap-2 xl:gap-3 mt-2">
               {/* Male */}
@@ -101,7 +104,7 @@ const page = () => {
                   value="female"
                   className="hidden w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[16px] px-4 md:px-[24px] text-sm md:text-base font-nunito"
                 />
-                Female
+                Female <p>*</p>
               </label>
 
               {/* Other */}
@@ -120,37 +123,38 @@ const page = () => {
             </div>
           </div>
           {/* City/Location */}
-          <div className="flex flex-col">
-            <label className="font-poppins">City / Location</label>
+          <div className="flex flex-col gap-2">
+            <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">City / Location<p className="text-[#D11717]">*</p></label>
             <input
               type="text"
+              placeholder="Nellore, AP"
               className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 md:pl-[30px] text-sm md:text-base font-nunito"
             />
           </div>
           {/* email */}
-          <div className="flex flex-col">
-            <label className="font-poppins">Email</label>
+          <div className="flex flex-col gap-2">
+            <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">Email<p className="text-[#D11717]">*</p></label>
             <input
               type="email"
+              placeholder="Krishna@email.com"
               className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 md:pl-[30px] text-sm md:text-base font-nunito"
             />
           </div>
           {/* mobile */}
           <div className="flex flex-col">
-            <label className="font-poppins">Phone Number</label>
+            <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">Phone Number<p className="text-[#D11717]">*</p></label>
             <input
               type="tel"
+              placeholder="+91  9876543210"
               className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 md:pl-[30px] text-sm md:text-base font-nunito"
             />
           </div>
-          <div className="flex flex-col lg:col-span-2">
-            <label className="flex font-poppins">
-              IRDAI License Number <p className="text-red-600">*</p>
-              <p>What is this?</p>
-            </label>
+          <div className="flex flex-col gap-2 lg:col-span-2">
+            <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">IRDAI License Number <p className="text-[#D11717]">*</p><p className="text-primary-900 font-nunito text-xs font-semiboldame hover:underline cursor-pointer">What is this?</p></label>
             <input
               type="text"
               name="irdaiLicenseNumber"
+              placeholder="CM123456789"
               className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 md:pl-[30px] text-sm md:text-base font-nunito"
               required
             />
@@ -171,7 +175,7 @@ const page = () => {
             <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
               {/* icon */}
               <FaFolder className="text-sm md:text-base" />
-              <span className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
+              <span className="flex flex-col gap-1 md:gap-2">
                 <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
                   professional Journey
                 </p>
@@ -188,13 +192,84 @@ const page = () => {
               <Toggle onColor="bg-blue-500" offColor="bg-gray-400" />
             </span>
           </div>
+          {/* 2ND */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
+            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+              {/* icon */}
+              <IoShieldHalfOutline className="text-md md:text-base" />
+              <span className="flex flex-col gap-1 md:gap-2">
+                <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+                  Services
+                </p>
+                <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+                  Life & Health insurance offerings
+                </p>
+              </span>
+            </span>
+            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+              {/* public */}
+              <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
+                Public
+              </p>
+              <Toggle onColor="bg-blue-500" offColor="bg-gray-400" />
+            </span>
+          </div>
+          {/* 3rd */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
             <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
               {/* icon */}
               <FaFolder className="text-sm md:text-base" />
-              <span className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
-                <p>professional Journey</p>
-                <p>Work history and career timeline</p>
+              <span className="flex flex-col gap-1 md:gap-2">
+                <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+                  Achievements
+                </p>
+                <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+                  MDRT, awards & milestones
+                </p>
+              </span>
+            </span>
+            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+              {/* public */}
+              <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
+                Public
+              </p>
+              <Toggle onColor="bg-blue-500" offColor="bg-gray-400" />
+            </span>
+          </div>
+          {/* 4th */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
+            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+              {/* icon */}
+              <FaFolder className="text-sm md:text-base" />
+              <span className="flex flex-col gap-1 md:gap-2">
+                <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+                  Gallery
+                </p>
+                <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+                 Photos & event images
+                </p>
+              </span>
+            </span>
+            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+              {/* public */}
+              <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
+                Public
+              </p>
+              <Toggle onColor="bg-blue-500" offColor="bg-gray-400" />
+            </span>
+          </div>
+          {/* 5th */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
+            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
+              {/* icon */}
+              <FaFolder className="text-sm md:text-base" />
+              <span className="flex flex-col gap-1 md:gap-2">
+                <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+                  Testimonials
+                </p>
+                <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+                  Client reviews & ratings
+                </p>
               </span>
             </span>
             <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
@@ -209,60 +284,13 @@ const page = () => {
             <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
               {/* icon */}
               <FaFolder className="text-sm md:text-base" />
-              <span className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
-                <p>professional Journey</p>
-                <p>Work history and career timeline</p>
-              </span>
-            </span>
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* public */}
-              <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
-                Public
-              </p>
-              <Toggle onColor="bg-blue-500" offColor="bg-gray-400" />
-            </span>
-          </div>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* icon */}
-              <FaFolder className="text-sm md:text-base" />
-              <span className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
-                <p>professional Journey</p>
-                <p>Work history and career timeline</p>
-              </span>
-            </span>
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* public */}
-              <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
-                Public
-              </p>
-              <Toggle onColor="bg-blue-500" offColor="bg-gray-400" />
-            </span>
-          </div>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* icon */}
-              <FaFolder className="text-sm md:text-base" />
-              <span className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
-                <p>professional Journey</p>
-                <p>Work history and career timeline</p>
-              </span>
-            </span>
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* public */}
-              <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
-                Public
-              </p>
-              <Toggle onColor="bg-blue-500" offColor="bg-gray-400" />
-            </span>
-          </div>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-            <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* icon */}
-              <FaFolder className="text-sm md:text-base" />
-              <span className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
-                <p>professional Journey</p>
-                <p>Work history and career timeline</p>
+              <span className="flex flex-col gap-1 md:gap-2">
+                <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+                  Public Profile
+                </p>
+                <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+                  Anyone with the link can view your profile
+                </p>
               </span>
             </span>
             <span className="flex items-center justify-between md:justify-end gap-3 md:gap-[23px] w-full md:w-auto">

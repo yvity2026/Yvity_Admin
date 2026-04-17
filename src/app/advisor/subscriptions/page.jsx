@@ -1,8 +1,9 @@
 "use client";
 import { ModalWrapper } from "@/app/components/layout/ModalWrapper";
 import React, { useState } from "react";
-import { FaArrowRight, FaCheck, FaCrown, FaPlus } from "react-icons/fa";
+import { FaArrowRight, FaCheck, FaCrown, FaMedal, FaPlus } from "react-icons/fa";
 import { HiOutlineDownload } from "react-icons/hi";
+import { HiMiniShieldCheck } from "react-icons/hi2";
 import { MdAutorenew, MdClose, MdOutlineVerifiedUser } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
 
@@ -94,7 +95,7 @@ const page = () => {
       buttonText: "Active Plan",
       buttonStyle:
         "flex items-center justify-center gap-2  md:min-w-0 xl:min-h-[44px] rounded-full text-xs sm:text-sm md:text-base px-4 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-3 bg-gradient-to-r from-[rgba(217,119,6,0.9)] to-[rgba(255,169,70,0.9)] hover:shadow-[0_4px_12px_rgba(217,119,6,0.25)] transition-all duration-500 active:scale-[0.98] cursor-pointer text-[var(--Pearl-Whitepage-background,#F8F6F1)]",
-      cover: "most popular",
+      cover: "Your Plan",
       coverStyle:
         "absolute top-0  left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-(--primary-900,#0A4A4A) text-[var(--Pearl-Whitepage-background,#F8F6F1)] rounded-[16px] bg-gradient-to-r from-[#D97706] to-[#FF8900] xl:text-[13px]  text-xs px-1 xl:px-3 py-1 rounded-full",
     },
@@ -159,7 +160,7 @@ const page = () => {
       </div>
 
       {/* Plan comparision */}
-      <div className="h-auto w-full  bg-white px-3 sm:px-4 md:px-[40px] py-[27px] rounded-2xl">
+      <div className="h-auto w-full  bg-white px-3  xl:px-[40px] py-[27px] rounded-2xl">
         <p className="text-[var(--headings-important-text)] text-base sm:text-lg md:text-[16px] font-bold leading-normal font-[Poppins] mb-4">
           Plan Comparision
         </p>
@@ -168,33 +169,23 @@ const page = () => {
             <div
               key={index}
               // variants={itemstyle}
-              className={`${item.cardStyle} relative w-full   mx-auto min-h-[420px] md:h-[480px] p-4 md:py-[36px] md:px-[16px] rounded-2xl`}
+              className={`${item.cardStyle} relative w-full flex flex-col gap-4 mx-auto p-4 md:py-[36px] md:px-[16px] rounded-2xl border border-[#E5E5E5] bg-white shadow-[0_0_4px_0_rgba(0,0,0,0.25)]`}
             >
+              <span className="flex justify-start">
+                <FaMedal/>
+              </span>
               <p className="text-xl md:text-2xl font-semibold tracking-[1.4px] text-(--ct-as-badges-accents,#F59E0B) uppercase font-poppins leading-none">
                 {item.title}
               </p>
               <p
-                className={`text-xl sm:text-2xl lg:text-3xl font-bold font-poppins text-[#111827] ${
-                  Number(item.price?.split("/")[0] || 0) === 0
-                    ? "invisible"
-                    : ""
-                }`}
+                className={`text-xl sm:text-2xl lg:text-3xl font-bold font-poppins text-[#111827]`}
               >
                 ₹{Number(item.price?.split("/")[0] || 0)}
                 <span className="text-gray-400 text-base font-bold">
                   {item.period}
                 </span>
               </p>
-              {/* {item.message ? (
-                <p className=" text-[15px] md:text-[11px] lg:text-[13px] xl:text-[16px] font-normal leading-[26px] text-[var(--Body-content,#374151)] font-nunito">
-                  {item.message}
-                </p>
-              ) : (
-                <p className="invisible">placeholder</p>
-              )} */}
-              {/* <p className="text-[16px] font-normal leading-[26px] text-[var(--Body-content,#374151)] font-nunito">{item.message}</p> */}
-              <div className="h-0.5 w-full bg-gray-300"></div>
-              <div className="flex flex-col justify-between min-h-86 md:gap-8  w-full">
+              <div className="flex flex-col gap-4">
                 <ul className="flex flex-col justify-start items-start gap-2 md:gap-2 mt-2 md:pt-6 text-[var(--Body-content)] text-xs sm:text-sm md:text-[12px] font-normal leading-normal font-[Poppins]">
                   {item.features.map((feature, idx) => (
                     <li key={idx} className="flex items-center gap-1">
@@ -220,7 +211,7 @@ const page = () => {
                 <span
                   className={`${item.coverStyle} flex items-center gap-1 font-poppins font-semibold md:gap-2 md:w-36`}
                 >
-                  <FaCheck size={16} />
+                  <HiMiniShieldCheck size={16} />
                   {item.cover}
                 </span>
               )}
@@ -262,26 +253,26 @@ const page = () => {
               <tbody>
                 {paymentHistory.map((item, index) => (
                   <tr key={index} className="border-t">
-                    <td className="py-2 md:py-[10px] text-[var(--Body-content)] text-xs sm:text-sm md:text-[12px] sm:font-normal leading-normal font-[Nunito]">
+                    <td className="py-2 md:py-[10px] text-[var(--Body-content)] text-xs sm:text-sm md:text-[12px] sm:font-normal leading-normal font-nunito">
                       {item.date}
                     </td>
                     <td className="py-2 md:py-[10px] text-xs sm:text-sm md:text-[12px] font-normal">
                       {item.plan}
                     </td>
-                    <td className="py-2 md:py-[10px] text-[var(--headings-important-text)] text-xs sm:text-sm md:text-[12px] font-semibold leading-normal font-[Poppins]">
+                    <td className="py-2 md:py-[10px] text-[var(--headings-important-text)] text-xs sm:text-sm md:text-[12px] font-semibold leading-normal font-poppins">
                       {item.amount}
                     </td>
-                    <td className="py-2 md:py-[10px] text-[var(--Body-content)] text-xs sm:text-sm md:text-[12px] font-normal leading-normal font-[Nunito]">
+                    <td className="py-2 md:py-[10px] text-[var(--Body-content)] text-xs sm:text-sm md:text-[12px] font-normal leading-normal font-nunito">
                       {item.method}
                     </td>
                     <td className="py-2 md:p-[10px]">
-                      <span className="text-green-600 font-medium flex items-center gap-1 whitespace-nowrap">
+                      <span className="text-green-600 p-[10px] font-medium flex items-center gap-1 whitespace-nowrap rounded-2xl bg-[#E8F4F4] w-fit">
                         <MdOutlineVerifiedUser />
                         {item.status}
                       </span>
                     </td>
                     <td className="p-[10px]">
-                      <button className="text-blue-600 hover:underline flex items-center gap-2 whitespace-nowrap">
+                      <button className="text-blue-600 p-[10px] hover:underline flex items-center gap-2 whitespace-nowrap rounded-2xl bg-[#E8F4F4]">
                         <HiOutlineDownload />
                         {item.invoice}
                       </button>

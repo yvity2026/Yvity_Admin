@@ -1,29 +1,42 @@
 import { useSidebar } from "@/context/SidebarContext";
 import { motion } from "framer-motion";
+import { FiChevronLeft } from "react-icons/fi";
 
 export default function CollapseButton({ sidebarWidth }) {
   const { collapsed, toggleCollapse } = useSidebar();
+
   const SIDEBAR_TRANSITION = {
-  duration: 0.35,
-  ease: [0.4, 0, 0.2, 1], // smoother than easeInOut
-};
+    duration: 0.35,
+    ease: [0.4, 0, 0.2, 1],
+  };
 
   return (
     <motion.button
       onClick={toggleCollapse}
-      animate={{ x: sidebarWidth - 16 }}
+      animate={{ left: sidebarWidth - 20 }}
       transition={SIDEBAR_TRANSITION}
       className="
         hidden md:flex
         items-center justify-center
-        w-8 h-16
-        bg-[#0A4A4A] text-white
-        absolute top-1/2 -translate-y-1/2
+        w-10 h-10
+        rounded-full
+        bg-white
+        text-[#0A4A4A]
+        fixed top-1/2 -translate-y-1/2
         z-[1000]
-        rounded-r-lg shadow-lg
+        shadow-lg
+        border border-gray-200
+        hover:scale-110
+        active:scale-95
+        transition
       "
     >
-      {collapsed ? ">" : "<"}
+      <motion.span
+        animate={{ rotate: collapsed ? 180 : 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <FiChevronLeft className="text-lg" />
+      </motion.span>
     </motion.button>
   );
 }
