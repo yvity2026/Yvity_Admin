@@ -1,6 +1,6 @@
 export default function AchievementCard({ data, onEditClick, onDeleteClick }) {
   return (
-    <div className="bg-white border-t-[5px] border-[#00796B] rounded-[24px] p-3 sm:p-5 lg:p-7 flex items-start gap-2 lg:gap-3 shadow-sm">
+    <div className="bg-white border-t-[5px] border-[#00796B] rounded-[16px] p-3 sm:p-5 lg:p-7 flex items-start gap-2 lg:gap-3 shadow-sm">
       
       <div className="p-2 flex-shrink-0 rounded-[12px] flex items-center justify-center bg-[#FBF3E6]">
         {data.icon}
@@ -22,13 +22,13 @@ export default function AchievementCard({ data, onEditClick, onDeleteClick }) {
         <div className="flex items-center gap-3 mt-3">
           <button 
             onClick={onEditClick}
-            className="px-5 py-1.5 rounded-lg text-[clamp(8px,1vw,12px)] font-bold text-[#0A4A4A] hover:bg-[#D8E6E3] transition-all border border-[#D5D5D5] bg-[var(--background-highlights,#E8F4F4)] cursor-pointer"
+            className="px-5 py-1.5 rounded-lg text-[clamp(8px,1vw,12px)] font-bold text-[#0A4A4A] transition-all border border-[#D5D5D5] bg-[#E8F4F4] cursor-pointer"
           >
             Edit
           </button>
           <button 
             onClick={onDeleteClick}
-            className="px-5 py-1.5 rounded-lg text-[clamp(8px,1vw,12px)] font-bold text-[#D32323] hover:bg-[#FEE2E2] transition-all border border-[#F7C6C6] bg-[#FFF2F2] cursor-pointer"
+            className="px-5 py-1.5 rounded-lg text-[clamp(8px,1vw,12px)] font-bold text-[#D32323] bg-[#FFF2F2] transition-all border border-[#F7C6C6] cursor-pointer"
           >
             Delete
           </button>

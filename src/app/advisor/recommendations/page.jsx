@@ -1,5 +1,4 @@
-
-'use client'
+"use client";
 import { useState, useEffect } from "react";
 import BonusBanners from "@/components/features/advisor/recommendations/bonus-banners";
 import FilterTabs from "@/components/features/advisor/recommendations/filter-tabs";
@@ -7,8 +6,10 @@ import PageHeader from "@/components/features/advisor/recommendations/page-heade
 import RecommendationCard from "@/components/features/advisor/recommendations/recommendation-card";
 import StatsRow from "@/components/features/advisor/recommendations/stats-row";
 import { useModal } from "@/context/ModalContext";
-import { RecommendationModalBase, ShareModal } from "@/components/features/advisor/recommendations/recommendation-modals";
-
+import {
+  RecommendationModalBase,
+  ShareModal,
+} from "@/components/features/advisor/recommendations/recommendation-modals";
 
 // MOCK DATA: Structured for future backend API integration
 const recommendationsData = [
@@ -56,21 +57,24 @@ const recommendationsData = [
 ];
 
 export default function RecommendationsPage() {
+  const { trigger, clearTrigger } = useModal();
+  const [isRecommendation, setRecommendation] = useState(false);
+  useEffect(() => {
+    if (trigger === "ADD_RECOMMENDATION") {
+      setRecommendation(true);
+      clearTrigger();
+    }
+  }, [trigger]);
 
-  
-   const { trigger, clearTrigger } = useModal();
-    const [isRecommendation, setRecommendation] = useState(false);
-    useEffect(() => {
-      if (trigger === "ADD_RECOMMENDATION") {
-  setRecommendation(true);
-        clearTrigger(); 
-      }
-    }, [trigger]);
-  
   return (
-    <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
+    <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col ">
       {/* <PageHeader /> */}
-       {<ShareModal isOpen={isRecommendation} onClose={() => setRecommendation(false)} />}
+      {
+        <ShareModal
+          isOpen={isRecommendation}
+          onClose={() => setRecommendation(false)}
+        />
+      }
 
       <div className="p-4 md:p-6 lg:p-10 xl:px-15 space-y-6 mx-auto w-full pb-12">
         <StatsRow />

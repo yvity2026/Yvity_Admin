@@ -5,7 +5,7 @@ import { ChevronRight } from "lucide-react";
 
 export function SettingsCard({ title, children, className = "" }) {
   return (
-    <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 p-6 ${className}`}>
+    <div className={`bg-white rounded-2xl border border-gray-200 p-6 ${className}`}>
       <h2 className="text-[clamp(12px,1.5vw,16px)] font-bold text-[#111827] mb-4">{title}</h2>
       <div className="flex flex-col">
         {children}
@@ -16,7 +16,7 @@ export function SettingsCard({ title, children, className = "" }) {
 
 export function ActionRow({ icon, iconBg, title, subtitle, actionText, onClick }) {
   return (
-    <div className="flex items-center justify-between py-4 border-b border-gray-50 last:border-0 last:pb-0 first:pt-0">
+    <div className="flex items-center justify-between py-4 border-b-[2px] border-[#E8F4F4] last:border-0 last:pb-0 first:pt-0">
       <div className="flex items-center gap-4">
         <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0 ${iconBg}`}>
           {icon}
@@ -43,7 +43,7 @@ export function ToggleRow({ icon, iconBg, title, subtitle, isActive, onToggle })
   };
 
   return (
-    <div className="flex items-center justify-between py-4 border-b border-gray-50 last:border-0 last:pb-0 first:pt-0">
+    <div className="flex items-center justify-between py-4 border-b border-b-[2px] border-[#E8F4F4] last:border-0 last:pb-0 first:pt-0">
       <div className="flex items-center gap-4 pr-4">
         <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0 ${iconBg}`}>
           {icon}

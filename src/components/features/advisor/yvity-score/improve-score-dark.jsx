@@ -44,7 +44,7 @@ export default function ImproveScoreDark() {
         {improvements.map((item, i) => (
           <div
             key={i}
-            className="flex flex-col sm:flex-row sm:items-center justify-between bg-[#18303B] p-4 rounded-xl border border-[#1A3344] gap-4"
+            className="flex flex-col sm:flex-row sm:items-center justify-between bg-[#18303B] p-4 rounded-2xl border border-[#1A3344] gap-4 self-stretch"
           >
             <div className="flex items-center gap-3">
               <span className="text-xl">{item.icon}</span>

@@ -32,8 +32,8 @@ export default function ScoreHero() {
             />
           </svg>
           <div className="absolute flex flex-col items-center justify-center text-white">
-            <span className="text-3xl font-bold">87</span>
-            <span className="text-[10px] font-medium border-t border-white/30 pt-0.5 mt-0.5 w-8 text-center opacity-80">
+            <span className="text-2xl font-bold">87</span>
+            <span className="text-[clamp(12px,1.5vw,16px)] font-medium border-t border-white/30 pt-0.5 mt-0.5 w-8 text-center opacity-80 text-[#61A4A4]">
               /100
             </span>
           </div>
@@ -61,7 +61,7 @@ export default function ScoreHero() {
 // Strictly JSX - No Types
 function HeroStatCard({ icon: Icon, score, max, label }) {
   return (
-    <div className="bg-white/10 rounded-xl p-3 sm:px-4 sm:py-3 flex items-center gap-3 backdrop-blur-sm border border-white/10">
+    <div className="bg-white/10 rounded-xl p-3 sm:px-4 sm:py-3 lg:px-6 flex items-center gap-3 backdrop-blur-sm border border-white/10">
       <Icon className=" text-[#EAB308]" />
       <div className="text-[#F8F6F1]">
         <div className="text-[#F8F6F1] font-bold leading-tight text-[clamp(14px,2vw,18px)]">

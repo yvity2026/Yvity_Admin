@@ -1,14 +1,17 @@
 "use client";
 
+
 import { useState } from "react";
 import { BadgeCheck } from "lucide-react";
+import { MdVerifiedUser } from "react-icons/md";
+
 import { RecommendationDetailsModal } from "./recommendation-modals";
 
 export default function RecommendationCard({ data }) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   return (
-    <div className=" rounded-2xl border border-gray-100 overflow-hidden relative flex flex-col sm:flex-row p-5 gap-5 hover:shadow-md transition-shadow  border-l-4 border-l-[var(--gradients-hover-state,#0D6060)] bg-white shadow-none">
+    <div className=" rounded-2xl border border-[#D5D5D5] overflow-hidden relative flex flex-col sm:flex-row p-5 gap-5 hover:shadow-md transition-shadow  border-l-4 border-l-[var(--gradients-hover-state,#0D6060)] bg-white shadow-none">
       {/* Left Thick Border Accent */}
       <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#124B48]" />
 
@@ -27,8 +30,8 @@ export default function RecommendationCard({ data }) {
             </p>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-[#E8F5E9] text-[#1E7145] px-3 py-1 rounded-full text-xs font-bold w-fit">
-            <BadgeCheck className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1.5 bg-[#E8F4F4] text-[#0A4A4A] px-3 py-1 rounded-full text-[clamp(8px,1vw,12px)] font-bold w-fit">
+            <MdVerifiedUser className="w-3.5 h-3.5" />
             {data.status}
           </div>
         </div>
@@ -37,9 +40,9 @@ export default function RecommendationCard({ data }) {
           {data.tags.map((tag, i) => (
             <div
               key={i}
-              className="flex items-center gap-1.5 bg-[#F0F7F6] text-[#0A4A4A] px-3 py-1.5 rounded-full text-[clamp(8px,1vw,12px)] font-bold tracking-wide"
+              className="flex items-center gap-1.5 bg-[#E8F4F4] text-[#0A4A4A] px-3 py-1.5 rounded-full text-[clamp(8px,1vw,12px)] font-bold tracking-wide"
             >
-              <span>{tag.icon}</span>
+              <span className="">{tag.icon}</span>
               {tag.label}
             </div>
           ))}
@@ -57,7 +60,7 @@ export default function RecommendationCard({ data }) {
           <div className="rounded-[6px] flex justify-end border border-[#D5D5D5]">
             <button 
               onClick={() => setIsDetailsOpen(true)}
-              className="bg-[#F3F4F6] hover:bg-gray-200 text-gray-700 px-4 py-1.5 rounded-md text-xs font-bold transition-colors cursor-pointer"
+              className="bg-[#E8F4F4] text-[#0A4A4A] px-4 py-1.5 rounded-md text-xs font-bold transition-colors cursor-pointer"
             >
               View
             </button>
