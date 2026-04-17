@@ -27,17 +27,17 @@ export default function VisibilitySection() {
       <InfoBox className="ml-8 mt-3 mb-7">
         <div className="flex justify-between w-full items-start">
           <div>
-            <ul className="text-[13px] text-[#4B5563] space-y-1.5 font-medium">
+            <ul className="text-[clamp(10px,1vw,14px)] text-[#374151] space-y-1.5 font-medium">
               <li className="flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-[#0A4A4A]"></div>
                 <span>Every 5 shares → 1 point</span>
               </li>
               <li className="flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-[#0A4A4A]"></div>
                 <span>25 total shares → 5 points</span>
               </li>
             </ul>
-            <div className="text-[11px] text-gray-400 mt-1.5 ml-3 font-normal">
+            <div className="text-[clamp(8px,1vw,12px)] text-[#6B7280] mt-1.5 ml-3 font-normal">
               Share your profile 10 more times to earn full 5 points
             </div>
           </div>
@@ -60,17 +60,17 @@ export default function VisibilitySection() {
       <InfoBox className="ml-8 mt-3 mb-7">
         <div className="flex justify-between items-start w-full">
           <div>
-            <ul className="text-[13px] text-[#4B5563] space-y-1.5 font-medium">
+            <ul className="text-[clamp(10px,1vw,14px)] text-[#374151] space-y-1.5 font-medium">
               <li className="flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-[#0A4A4A]"></div>
                 <span>Every user share → 1 point</span>
               </li>
               <li className="flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-[#0A4A4A]"></div>
                 <span>Current : 2 users shared your profile</span>
               </li>
             </ul>
-            <div className="text-[11px] text-gray-400 mt-1.5 ml-3 font-normal">
+            <div className="text-[clamp(8px,1vw,12px)] text-[#6B7280] mt-1.5 ml-3 font-normal">
               Encourage clients to share your profile link to earn more points
             </div>
           </div>
@@ -91,7 +91,7 @@ export default function VisibilitySection() {
         textClass="text-[#0A4A4A]"
       />
       <InfoBox className="ml-8 mt-3 mb-7">
-        <ul className="text-[13px] text-[#4B5563] space-y-2.5 font-medium w-full">
+        <ul className="text-[clamp(10px,1vw,14px)] text-[#374151] space-y-2.5 font-medium w-full">
           {[
             "Professional Journey added",
             "Services added",
@@ -101,7 +101,7 @@ export default function VisibilitySection() {
           ].map((item, i) => (
             <li key={i} className="flex justify-between items-center pr-1">
               <div className="flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-[#0A4A4A]"></div>
                 <span>{item}</span>
               </div>
               <span className="flex items-center gap-1.5 text-[#0A4A4A] font-bold">
@@ -123,13 +123,13 @@ export default function VisibilitySection() {
       />
       <InfoBox className="ml-8 mt-3 mb-2">
         <div className="flex justify-between items-start pr-1 w-full">
-          <ul className="text-[13px] text-[#4B5563] space-y-1.5 font-medium">
+          <ul className="text-[clamp(10px,1vw,14px)] text-[#374151] space-y-1.5 font-medium">
             <li className="flex items-center gap-2">
-              <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-[#0A4A4A]"></div>
               <span>Each active day → 1 point</span>
             </li>
             <li className="flex items-center gap-2">
-              <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-[#0A4A4A]"></div>
               <span>Active last 6 of 7 days</span>
             </li>
           </ul>

@@ -379,7 +379,6 @@ export default function AppShell({ children }) {
                 <motion.button
                   onClick={() => {
                     if (pathname === "/advisor/services")
-                      // ADD_PROFESSIONAL_JOURNEY
                       openModal("ADD_SERVICE");
                     if (pathname === "/advisor/professional-journey")
                       openModal("ADD_ENTRY");

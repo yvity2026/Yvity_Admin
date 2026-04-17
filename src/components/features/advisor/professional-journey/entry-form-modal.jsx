@@ -87,7 +87,7 @@ export default function EntryFormModal({ isOpen, onClose, initialData, onSubmit 
         </div>
 
         {/* Form Body */}
-        <div className="p-6 overflow-y-auto max-h-[80vh]">
+        <div className="p-6 overflow-y-auto max-h-[80vh] no-scrollbar">
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Entry Type */}
             <div>

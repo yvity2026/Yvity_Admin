@@ -1,5 +1,6 @@
 import { Trophy, CheckCircle2 } from "lucide-react";
 import { SectionWrapper, ProgressRow, InfoBox } from "./score-components";
+import { MdVerifiedUser } from "react-icons/md";
 
 export default function TrustSection() {
   return (
@@ -56,25 +57,25 @@ export default function TrustSection() {
       {/* Bonuses */}
       <div className="pl-8 pr-2 space-y-3 mb-6">
         <div className="bg-[#F2F7F4] border border-[#D1E5D8] rounded-xl p-4">
-          <h4 className="text-sm font-bold text-[#1E7145] flex items-center gap-2 mb-1">
+          <h4 className="text-[clamp(10px,1vw,14px)] font-bold text-[#065F46] flex items-center gap-2 mb-1">
             🌟 Continuity Bonus
           </h4>
-          <p className="text-xs text-gray-600 font-medium mb-2">
+          <p className="text-[clamp(10px,1vw,14px)] text-[#374151] font-medium mb-2">
             Receive at least 1 recommendation every month (or within last 6
             months continuity) →{" "}
             <span className="font-bold">1 bonus point</span>
           </p>
-          <p className="text-xs font-bold text-[#1E7145] flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5" /> Currently active - bonus
+          <p className="text-[clamp(10px,1vw,14px)] font-bold text-[#065F46] flex items-center gap-1">
+            <MdVerifiedUser className="w-3.5 h-3.5" /> Currently active - bonus
             applied!
           </p>
         </div>
 
-        <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-xl p-4">
-          <h4 className="text-sm font-bold text-[#DC2626] flex items-center gap-2 mb-1">
+        <div className="bg-[#FEF2F2] border border-[#DADEDE] rounded-[16px] p-4">
+          <h4 className="text-[clamp(10px,1vw,14px)] font-bold text-[#C42F2F] flex items-center gap-2 mb-1">
             ⚠️ Negative Rule
           </h4>
-          <p className="text-xs text-gray-600 font-medium leading-relaxed">
+          <p className="text-[clamp(10px,1vw,14px)] text-[#374151] font-medium leading-relaxed">
             If no recommendation received in a month →{" "}
             <span className="font-bold">-1 point</span> per month, continues
             until activity resumes.
@@ -88,11 +89,11 @@ export default function TrustSection() {
       <ProgressRow label="Achievements" icon="🎖️" score={10} max={10} />
       <div className="pl-8 pr-2 mt-2">
         <InfoBox>
-          <div className="flex justify-between text-sm font-medium text-gray-600">
-            <span>• Latest year achievement considered</span>
-            <span className="font-bold text-[#124B48]">
+          <div className="flex justify-between items-center w-full font-medium text-[#374151]">
+            <p className="text-[clamp(10px,1vw,14px)]">• Latest year achievement considered</p>
+            <p className="font-bold text-[#124B48]">
               Current : MDRT 2024
-            </span>
+            </p>
           </div>
         </InfoBox>
         <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -123,29 +124,29 @@ export default function TrustSection() {
 // Sub-components specific to Trust
 function TestimonialBox({ icon, title, score, max, status, isFull, sub }) {
   return (
-    <div className="bg-[#F8FBFA] border border-gray-100 rounded-xl p-4 text-center flex flex-col items-center justify-center">
-      <span className="text-sm font-bold text-gray-700 flex items-center gap-1.5 mb-2">
+    <div className="bg-[#F0F8F8] border border-[#DADEDE] rounded-[16px] p-4 text-center flex flex-col items-center justify-center">
+      <span className="text-[clamp(10px,1vw,14px)] font-bold text-[#111827] flex items-center gap-1.5 mb-2">
         {icon} {title}
       </span>
-      <span className="text-xl font-bold text-gray-900">{score}</span>
-      <span className="text-xs text-gray-400 font-medium mb-1">{max}</span>
+      <span className="text-[clamp(14px,2vw,18px)] font-bold text-[#0A4A4A]">{score}</span>
+      <span className="text-[clamp(10px,1vw,14px)] text-[#6B7280] font-medium mb-1">{max}</span>
       <span
-        className={`text-xs font-bold flex items-center gap-1 ${isFull ? "text-[#1E7145]" : "text-[#F59E0B]"}`}
+        className={`text-[clamp(10px,1vw,14px)] font-bold flex items-center gap-1 ${isFull ? "text-[#065F46]" : "text-[#F59E0B]"}`}
       >
-        {isFull && <CheckCircle2 className="w-3.5 h-3.5" />} {status}
+        {isFull && <MdVerifiedUser className="w-3.5 h-3.5" />} {status}
       </span>
-      <span className="text-[10px] text-gray-400 mt-1">{sub}</span>
+      <span className="text-[clamp(10px,1vw,14px)] text-[#374151] mt-1">{sub}</span>
     </div>
   );
 }
 
 function AchievementBox({ icon, title, points, sub }) {
   return (
-    <div className="bg-[#F8FBFA] border border-gray-100 rounded-xl p-4 text-center flex flex-col items-center justify-center">
-      <span className="text-2xl mb-1">{icon}</span>
-      <span className="text-sm font-bold text-gray-900">{title}</span>
-      <span className="text-sm font-bold text-[#F59E0B]">{points}</span>
-      <span className="text-[10px] text-gray-400 mt-1 leading-tight">
+    <div className="bg-[#F0F8F8] border border-[#DADEDE] rounded-xl p-4 text-center flex flex-col items-center justify-center">
+      <span className=" mb-1">{icon}</span>
+      <span className="text-[clamp(14px,2vw,18px)] font-bold text-[#374151]]">{title}</span>
+      <span className="text-[clamp(16px,2.5vw,20px)] font-bold text-[#F59E0B]">{points}</span>
+      <span className="text-[clamp(10px,1vw,14px)] text-[#6B7280] mt-1 leading-tight">
         {sub}
       </span>
     </div>

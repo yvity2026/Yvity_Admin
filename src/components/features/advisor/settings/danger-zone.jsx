@@ -8,7 +8,7 @@ export default function DangerZone() {
   const [activeModal, setActiveModal] = useState(null);
 
   return (
-    <div className="rounded-2xl p-6 border border-[#E2E1DC] bg-[#FEF2F2] shadow-none">
+    <div className="rounded-2xl p-6 border-[2px] border-[#E2E1DC] bg-[#FEF2F2] shadow-none">
       
       <div className="flex items-center gap-2 mb-6">
         <AlertTriangle className="w-5 h-5 text-[#BF1313]" />

@@ -8,7 +8,9 @@ export function SectionWrapper({ title, icon: Icon, score, max, children }) {
           <div className="p-2 rounded-full bg-[#F0F7F6] text-[#124B48] flex items-center justify-center">
             <Icon className="" />
           </div>
-          <h2 className="text-[clamp(16px,2.5vw,20px)] font-bold text-[#111827]">{title}</h2>
+          <h2 className="text-[clamp(16px,2.5vw,20px)] font-bold text-[#111827]">
+            {title}
+          </h2>
         </div>
 
         {/* Main Section Progress Bar */}
@@ -33,7 +35,7 @@ export function SectionWrapper({ title, icon: Icon, score, max, children }) {
 export function ProgressRow({ label, icon, score, max }) {
   const isFull = score === max;
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="flex items-center justify-between gap-4 p-2 px-4">
       <div className="flex items-center gap-3 font-bold text-[clamp(10px,1vw,14px)]  text-[#374151]">
         <span className="text-lg w-6 text-center">{icon}</span>
         {label}
@@ -55,23 +57,29 @@ export function ProgressRow({ label, icon, score, max }) {
 
 export function InfoBox({ title, subtitle, badge, children }) {
   return (
-    <div className="bg-[#F8FBFA] border border-[#E2F1F0] rounded-xl p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+    <div className="bg-[#F0F8F8] border border-[#DADEDE] rounded-[16px] p-6 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
       {children ? (
         children
       ) : (
         <>
           <div>
             {title && (
-              <h4 className="text-sm font-bold text-gray-700">{title}</h4>
+              <div className="flex text-center items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#0A4A4A]"></div>
+
+                <h4 className="text-[clamp(10px,1vw,14px)] font-semibold text-[#374151]">
+                  {title}
+                </h4>
+              </div>
             )}
             {subtitle && (
-              <p className="text-xs text-gray-500 font-medium mt-0.5">
+              <p className="text-[clamp(8px,1vw,12px)] text-gray-500 font-medium mt-0.5">
                 {subtitle}
               </p>
             )}
           </div>
           {badge && (
-            <span className="text-xs font-bold text-[#1E7145] whitespace-nowrap">
+            <span className="text-[clamp(10px,1vw,14px)] font-bold text-[#1E7145] whitespace-nowrap">
               {badge}
             </span>
           )}
