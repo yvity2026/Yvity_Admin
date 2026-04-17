@@ -77,8 +77,8 @@ export default function Page() {
         <p>Services you add here appear as cards on your public profile.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-        <div className="w-full rounded-2xl border border-[#E2E1DC] bg-white pb-[38px] shadow-none">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full">
+        <div className="w-full rounded-2xl border border-[#E2E1DC] bg-white pb-[38px] shadow-none max-w-[480px]">
           <div className="h-[60px] px-3 sm:px-4 md:px-[30px] py-3 md:py-[18px] rounded-t-2xl bg-[#2A9D8F] shadow-[0_0_2px_0_rgba(0,0,0,0.25)] flex justify-between items-center">
             <span className="flex items-center gap-2 text-[#F8F6F1] font-[Poppins] text-[16px] font-bold leading-normal">
               <FaShield />
@@ -117,7 +117,7 @@ export default function Page() {
         </div>
 
         {/* Add Card Button */}
-        <div className="w-full flex items-center justify-center cursor-pointer hover:opacity-90 rounded-2xl border border-[#E2E1DC] bg-white shadow-none">
+        <div className="w-full flex items-center justify-center cursor-pointer hover:opacity-90 rounded-2xl border border-[#E2E1DC] bg-white shadow-none max-w-[480px] min-h-[240px] py-[80px]">
           <span className="flex flex-col justify-center items-center text-2xl">
             <HiPlus />
             <p>Add New Services</p>
@@ -133,7 +133,7 @@ export default function Page() {
         2. Set bg-white and overflow-hidden for the clean card look.
         3. Match the specific max-w-lg from your designs.
     */}
-    <div className="bg-white w-[calc(100vw-2rem)] sm:w-full max-w-lg overflow-hidden flex flex-col rounded-[2rem] shadow-xl border border-gray-100 h-auto">
+    <div className="bg-white w-[92vw] sm:w-[85vw] md:w-[70vw] lg:w-[50vw] max-w-lg overflow-hidden flex flex-col rounded-[2rem] shadow-xl border border-gray-100 h-auto">
       
       {/* HEADER - Updated to match image icon/style */}
       <div className="px-8 py-5 flex justify-between items-center border-b border-gray-100">
@@ -150,7 +150,7 @@ export default function Page() {
       </div>
 
       {/* BODY - Tightened gaps (gap-5) and padding (p-7) to fit screen */}
-      <div className="p-7 flex flex-col gap-5">
+      <div className="p-4 sm:p-5 md:p-6 lg:p-7 flex flex-col gap-3 sm:gap-4 md:gap-5">
         
         {/* Service Type */}
         <div className="flex flex-col gap-1.5">
@@ -261,7 +261,7 @@ export default function Page() {
       </div>
 
       {/* BODY - space-y-4 and p-7 to ensure everything fits on one screen */}
-      <div className="p-7 flex flex-col gap-4">
+      <div className="p-4 sm:p-5 md:p-6 lg:p-7 flex flex-col gap-4">
         
         {/* Service Type */}
         <div className="flex flex-col gap-1.5">

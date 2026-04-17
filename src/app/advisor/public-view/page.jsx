@@ -181,7 +181,7 @@ const actions = [
             {/* intro video */}
             <div className="pr-[30px] pl-[29px]">
               <div className="bg-amber-200 w-full  pl-[20px] pr-[23px] py-[9px] mt-[24px] bg-gradient-to-r from-[#022927] to-[#053F40] rounded-lg">
-                <span className="flex gap-5 h-full" onClick={() => setActiveModal(MODALS.VIDEO)}>
+                <span className="flex gap-5 h-full cursor-pointer" onClick={() => setActiveModal(MODALS.VIDEO)}>
                   <FaPlayCircle
                     size={40}
                     className="flex justify-center items-center"
@@ -230,7 +230,7 @@ const actions = [
                   <div
                     key={index}
                     className="w-full px-4 sm:px-6 py-3 
-      flex flex-col justify-center border rounded-md bg-[#F0F8F8]"
+      flex flex-col justify-center border rounded-md bg-[#F0F8F8] cursor-pointer"
                   >
                     {/* count */}
                     <span className="text-heading text-center font-poppins text-base font-bold leading-[16px]">
@@ -251,7 +251,7 @@ const actions = [
                     className="px-3 py-2 border rounded-md 
       flex items-center justify-center 
       text-xs sm:text-sm font-medium 
-      hover:bg-teal-950 hover:text-white transition flex items-center gap-2"
+      hover:bg-teal-950 hover:text-white transition flex items-center gap-2 cursor-pointer"
       onClick={() => item.modal && setActiveModal(item.modal)}
                   >
                     <span>{item.icon}</span>
@@ -266,7 +266,7 @@ const actions = [
     bg-black text-white rounded-md 
     flex items-center gap-2 justify-center 
     text-xs sm:text-sm font-semibold 
-    hover:bg-gray-800 transition mb-[19px] xl:mb-[39px]"
+    hover:bg-gray-800 transition mb-[19px] xl:mb-[39px] cursor-pointer"
                 >
                   <TbDownload />
                   Download PDF Profile
@@ -275,11 +275,11 @@ const actions = [
             </div>
           </div>
           {/* Right potion */}
-          <div className="flex flex-col gap-4 w-full lg:w-[320px]">
+          <div className="flex flex-col gap-4 lg:justify-between w-full lg:w-[320px]">
             {/* R1 */}
             <div className="w-full py-6 px-[17px] flex flex-col gap-3 rounded-2xl bg-white shadow-soft">
               {/* Heading */}
-              <span className="text-[16px] font-bold text-[#111827] font-[Poppins] flex items-center gap-2">
+              <span className="text-[16px] font-bold text-[#111827] font-poppins flex items-center gap-2">
                 <span>
                   <MdCall />
                 </span>
@@ -288,19 +288,19 @@ const actions = [
 
               {/* Buttons container */}
               <div className="flex flex-col gap-2 flex-1">
-                <button className="w-full text-[10px] px-[23px] py-[14px] font-medium rounded-lg bg-[#0A4A4A] flex gap-2 items-center justify-center text-white">
+                <button className="w-full text-[10px] px-[23px] py-[14px] font-medium rounded-lg bg-[#0A4A4A] flex gap-2 items-center justify-center text-white cursor-pointer">
                   <IoIosCall />
                   Call Now
                 </button>
 
-                <button className="w-full text-[10px] px-[23px] py-[14px] font-medium rounded-lg bg-[#26D367] flex gap-2 items-center justify-center text-white">
+                <button className="w-full text-[10px] px-[23px] py-[14px] font-medium rounded-lg bg-[#26D367] flex gap-2 items-center justify-center text-white cursor-pointer">
                   <BsChatDots />
                   Whatsapp
                 </button>
 
-                <button className="w-full text-[10px] px-[23px] py-[14px] bg-white flex gap-2 items-center justify-center rounded-lg border border-[#E8F4F4] text-primary-900 font-poppins text-xs font-semibold">
+                <button className="w-full text-[10px] px-[23px] py-[14px] bg-white flex gap-2 items-center justify-center rounded-lg border border-[#E8F4F4] text-primary-900 font-poppins text-xs font-semibold cursor-pointer">
                   <TbMail />
-                  Call Now
+                  Send Mail
                 </button>
               </div>
             </div>
@@ -308,7 +308,7 @@ const actions = [
             {/* R2 */}
             <div className="w-full px-[17px] py-[23px] flex flex-col gap-[15px] rounded-2xl bg-white shadow-soft">
               {/* Heading */}
-              <span className="text-[var(--headings-important-text)] text-[16px] font-bold font-[Poppins] leading-normal flex items-center gap-[15px]">
+              <span className="text-[var(--headings-important-text)] text-[16px] font-bold font-poppins leading-normal flex items-center gap-[15px]">
                 <span>
                   <MdBarChart />
                 </span>
@@ -319,12 +319,12 @@ const actions = [
                 {statsData.map((item, index) => (
                   <div
                     key={index}
-                    className="py-[8px] pl-5 pr-[10px] flex justify-between items-center rounded-lg bg-[#F0F8F8]"
+                    className="py-[8px] pl-5 pr-[10px] flex justify-between items-center rounded-lg bg-[#F0F8F8] cursor-pointer"
                   >
-                    <span className="text-[12px] font-normal text-[#6B7280] font-[Nunito] leading-[16px]">
+                    <span className="text-[12px] font-normal text-[#6B7280] font-Nunito leading-[16px]">
                       {item.label}
                     </span>
-                    <span className="text-[var(--headings-important-text)] text-[14px] font-bold font-[Poppins] text-right leading-normal">
+                    <span className="text-[var(--headings-important-text)] text-[14px] font-bold font-poppins text-right leading-normal">
                       {item.value}
                     </span>
                   </div>
@@ -335,7 +335,7 @@ const actions = [
             {/* R3 */}
             <div className="w-full py-[23px] pl-[20px] pr-[53px] flex flex-col gap-3 rounded-2xl bg-white shadow-soft">
               {/* Heading */}
-              <span className="text-[var(--headings-important-text)] text-[16px] font-bold font-[Poppins] leading-normal flex items-center gap-2">
+              <span className="text-[var(--headings-important-text)] text-[16px] font-bold font-poppins leading-normal flex items-center gap-2">
                 <span>
                   <BsFillInfoSquareFill />
                 </span>
@@ -347,7 +347,7 @@ const actions = [
                 {stats.map((item, index) => (
                   <span
                     key={index}
-                    className="flex flex-wrap gap-2 items-center text-[12px] font-normal text-[#6B7280] font-[Nunito] leading-[16px]"
+                    className="flex flex-wrap gap-2 items-center text-[12px] font-normal text-[#6B7280] font-nunito leading-[16px]"
                   >
                     <span>{item.icon}</span>
                     {item.data}
@@ -363,7 +363,7 @@ const actions = [
             {footerheadings.map((heading, index) => (
               <button
                 key={index}
-                className="font-poppins p-[10px] text-center text-[10px] cursor-pointer text-primary-900  text-sm font-bold"
+                className="font-poppins p-[10px] text-center text-[clamp(10px,1vw,14px)] cursor-pointer text-primary-900  text-sm font-bold"
               >
                 {heading}
               </button>
@@ -380,14 +380,14 @@ const actions = [
               future.
             </p>
             <div className="flex flex-col gap-2">
-              <p className="text-[var(--headings-important-text)] text-[14px] font-bold font-[Poppins] leading-normal self-stretch">
+              <p className="text-[var(--headings-important-text)] text-[14px] font-bold font-poppins leading-normal self-stretch">
                 Companies Associated
               </p>
               <div className="flex flex-wrap items-center gap-2">
                 {companies.map((comp, index) => (
                   <span
                     key={index}
-                    className="p-[10px] flex gap-2 items-center text-[var(--primary-900)] text-[12px] font-semibold font-[Poppins] leading-normal rounded-2xl bg-[#E8F4F4]"
+                    className="p-[10px] flex gap-2 items-center text-[var(--primary-900)] text-[12px] font-semibold font-poppins leading-normal rounded-2xl bg-[#E8F4F4]"
                   >
                     <span className="">{comp.icon}</span>
                     {comp.data}
@@ -424,10 +424,7 @@ const actions = [
 
 {activeModal === MODALS.TESTIMONIAL && (
   <ModalWrapper onClose={() => setActiveModal(null)}>
-    {/* 1. Removed max-h and overflow-y-auto.
-      2. Set w-full and max-w-lg for consistent sizing.
-      3. Added bg-white and h-auto to ensure it fits content perfectly.
-    */}
+    
     <div className="bg-white rounded-[2rem] shadow-xl w-[calc(100vw-2rem)] sm:w-full max-w-lg overflow-hidden border border-gray-100 h-auto">
 
       {/* Header - Tightened padding for vertical fit */}

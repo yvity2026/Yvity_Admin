@@ -48,7 +48,7 @@ const page = () => {
               className="min-h-[70px] md:h-[86px] w-full  py-4 md:py-[12.5px] px-4 md:px-[55px] rounded-2xl border border-[#E2E1DC] bg-white"
             >
               <span className="flex items-center flex-col gap-1">
-                <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#111827] text-center font-[Poppins] text-[28px] leading-normal">
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#111827] text-center font-poppins text-[28px] leading-normal">
                   {item.count}
                 </p>
                 <p className="text-gray-500 text-[10px] sm:text-xs font-medium">
@@ -67,7 +67,7 @@ const page = () => {
               className="px-3 py-1 flex items-center gap-2 rounded-2xl border border-[#DADADA] bg-white text-[10px] sm:text-xs"
             >
               {item.icon}
-              <p className="text-[#111827] font-[Poppins] text-xs font-semibold leading-normal">
+              <p className="text-[#111827] font-poppins text-xs font-semibold leading-normal">
                 {item.label}
               </p>
             </span>
@@ -238,20 +238,20 @@ const page = () => {
                 <div className="w-10 h-10 rounded-full bg-green-950 flex items-center justify-center text-white">
                   MA
                 </div>
-                <span className="text-[#6B7280] font-[Nunito] text-xs font-normal leading-4 flex flex-col justify-between">
+                <span className="text-[#6B7280] font-nunito text-xs font-normal leading-4 flex flex-col justify-between">
                   <p className="text-[#111827] font-poppins text-base font-bold leading-normal">
                     Priya Devi
                   </p>
                   Teacher • Nellore • 2 days ago
                 </span>
               </span>
-              <p className="rounded-lg bg-[#F0F8F8] px-[13px] py-[11px]  text-[#6B7280] font-[Nunito] text-xs italic font-semibold leading-5">
+              <p className="rounded-lg bg-[#F0F8F8] px-[13px] py-[11px]  text-[#6B7280] font-nunito text-xs italic font-semibold leading-5">
                 “Krishna helped me choose the right term plan. He explained
                 every detail clearly. Highly trustworthy advisor!”
               </p>
               <span className="flex justify-between items-center">
                 ⭐⭐⭐⭐
-                <span className="flex items-center gap-2 text-[#065F46] text-right font-[Poppins] text-xs font-semibold leading-normal">
+                <span className="flex items-center gap-2 text-[#065F46] text-right font-poppins text-xs font-semibold leading-normal">
                   <FaShield />
                   OTP Verified
                 </span>
