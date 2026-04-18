@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { FaCross, FaMehBlank, FaPlus } from "react-icons/fa";
 import { FaPencil, FaShield } from "react-icons/fa6";
 import { HiPlus } from "react-icons/hi";
+import { HiOutlineBuildingLibrary } from "react-icons/hi2";
 import { LuClockAlert } from "react-icons/lu";
 import { MdClose } from "react-icons/md";
 
@@ -101,7 +102,7 @@ export default function Page() {
           </div>
           <div className="pl-3 sm:pl-4 md:pl-3 sm:pl-4 md:pl-[40px] mt-[16px] flex flex-col gap-2">
             <span className="flex gap-2 justify-start items-center rounded-lg bg-[#E0F4F3] w-auto md:w-[116px] min-h-[30px] px-3 py-1 text-green-800 font-poppins text-[11px] sm:text-xs font-semibold ">
-              <FaMehBlank />
+              <HiOutlineBuildingLibrary />
               LIC of India
             </span>
             <p className="text-[#6B7280] font-nunito text-[11px] sm:text-xs font-normal leading-4">
