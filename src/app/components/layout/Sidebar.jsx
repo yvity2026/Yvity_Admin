@@ -21,6 +21,7 @@ import { useSidebar } from "@/context/SidebarContext";
 import { FaPlus } from "react-icons/fa6";
 
 import { useModal } from "@/context/ModalContext";
+import clsx from "clsx";
 
 const menuItems = [
   {
@@ -201,16 +202,14 @@ export default function AppShell({ children }) {
       <motion.aside
         animate={{ width: collapsed ? 80 : 260 }}
         transition={SIDEBAR_TRANSITION}
-        className={`hidden md:flex flex-col relative
-      ${collapsed ? "w-20" : "w-65"}
-      h-screen sticky top-0
-      overflow-hidden
-      bg-[#0A4A4A]
-    `}
+        className={clsx(
+  "hidden md:flex flex-col relative h-screen sticky top-0 overflow-hidden bg-[#0A4A4A]",
+  collapsed ? "w-20" : "w-[260px]"
+)}
       >
         <div className="flex flex-col h-full">
           {/* Website Logo */}
-          <div className="h-[60px] bg-white  flex justify-center items-center ">
+          <div className="h-[60px] bg-[#FAFAFA]  flex justify-center items-center ">
             <Image
               src="/images/Adivisor/Navbar/navlogo.png"
               height={100}
@@ -253,7 +252,7 @@ export default function AppShell({ children }) {
               className={`
       flex items-center justify-center
       rounded-2xl bg-[rgba(245,158,11,0.2)]
-      ${collapsed ? "p-2" : "px-4 py-[6px] gap-2 text-[#F59E0B]"}
+      ${collapsed ? "p-2 text-[#F59E0B]" : "px-4 py-[6px] gap-2 text-[#F59E0B]"}
     `}
             >
               <FaCrown className={collapsed ? "text-base" : "text-sm"} />
@@ -344,7 +343,7 @@ export default function AppShell({ children }) {
       {/* RIGHT SIDE (HEADER + MAIN) */}
       <div className="flex flex-col flex-1 ">
         {/* HEADER (TOP RIGHT) */}
-        <header className=" py-[18px] max-h-[60px] sticky top-0 z-10  flex items-center justify-between px-[90px] py-[10px] bg-white shadow-[0_0_4px_0_rgba(0, 0, 0, 0.25)]">
+        <header className=" py-[18px] max-h-[60px] sticky top-0 z-10  flex items-center justify-between px-[90px] py-[10px] bg-white shadow-[0_0_4px_0_rgba(0,0,0,0.25)]">
           <h3 className="text-black font-poppins text-base font-bold leading-normal">
             {currentHeader.title}
           </h3>
@@ -420,7 +419,7 @@ export default function AppShell({ children }) {
               transition={{ duration: 0.3, ease: easeInOut }}
               className="fixed top-0 right-0 h-full  bg-[#0A4A4A] z-[9999] md:hidden flex flex-col"
             >
-              {/* ✅ HEADER WITH LOGO (REPLACES DASHBOARD TEXT) */}
+              {/*  HEADER WITH LOGO (REPLACES DASHBOARD TEXT) */}
               <div className="relative flex items-center justify-end">
                 <button
                   className="absolute text-black text-xl top-6 right-8 flex justify-end"
@@ -492,13 +491,6 @@ export default function AppShell({ children }) {
             />
           </>
         )}
-
-        {/* {mobileOpen && (
-          <div
-            className="fixed inset-0 bg-black/40 z-[9998] md:hidden"
-            onClick={() => setMobileOpen(false)}
-          />
-        )} */}
 
         {/* MAIN CONTENT */}
         <main className="flex-1 bg-[#F8F6F1]">{children}</main>
