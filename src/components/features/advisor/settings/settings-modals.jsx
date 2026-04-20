@@ -347,7 +347,7 @@ export function DeleteModal({ isOpen, onClose }) {
       <form onSubmit={handleDelete}>
         <div className="mb-6">
           <label className="block text-[clamp(13px,1.3vw,15px)] font-bold text-gray-900 mb-2">
-            Type DELETE to confirm
+            Type "DELETE" to confirm
           </label>
           <input 
             type="text"

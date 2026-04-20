@@ -391,7 +391,7 @@ export default function AppShell({ children }) {
                       openModal("ADD_RECOMMENDATION");
                     
                   }}
-                  className="px-4 py-[10px] bg-[#0A4A4A] text-white font-poppins text-[clamp(10px,1vw,14px)] rounded-md flex gap-2 items-center"
+                  className="px-4 py-[10px] bg-[#0A4A4A] text-white font-poppins text-[clamp(10px,1vw,14px)] rounded-md flex gap-2 items-center cursor-pointer"
                 >
                   <FaPlus />
                   {currentHeader.actions[0]}

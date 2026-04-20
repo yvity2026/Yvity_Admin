@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function AchievementDeleteModal({ isOpen, onClose, achievement, onDelete }) {
   if (!isOpen || !achievement) return null;
@@ -6,6 +7,7 @@ export default function AchievementDeleteModal({ isOpen, onClose, achievement, o
   const handleDelete = () => {
     if (onDelete) {
       onDelete(achievement);
+      toast.success("Deleted Successfully")
     }
     onClose();
   };

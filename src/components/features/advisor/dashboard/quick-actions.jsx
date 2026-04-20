@@ -1,11 +1,14 @@
 import { Eye, Share2, MessageSquare, Film, SmartphoneNfc } from "lucide-react";
+import { IoQrCode } from "react-icons/io5";
+import { FaEye } from "react-icons/fa";
+
 
 const actions = [
-  { label: "View Profile", icon: Eye },
+  { label: "View Profile", icon: FaEye },
   { label: "Share Profile", icon: Share2 },
   { label: "Testimonials", icon: MessageSquare },
   { label: "Add Intro Video", icon: Film },
-  { label: "Download QR", icon: SmartphoneNfc },
+  { label: "Download QR", icon: IoQrCode },
 ];
 
 export default function QuickActions() {
