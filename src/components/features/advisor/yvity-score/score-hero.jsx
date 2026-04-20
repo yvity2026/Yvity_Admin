@@ -3,7 +3,7 @@ import { BadgeCheck, Eye, Trophy } from "lucide-react";
 
 export default function ScoreHero() {
   return (
-    <div className="w-full rounded-[16px] bg-gradient-to-r from-[#094C4B] to-[#0A6A69] shadow-[0_0_2px_0_rgba(0,0,0,0.20)] p-6 flex flex-col md:flex-row md:items-start justify-between gap-6">
+    <div className="w-full rounded-[16px] bg-gradient-to-r from-[#094C4B] to-[#0A6A69] shadow-[0_0_2px_0_rgba(0,0,0,0.20)] p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
       
       {/* Circular Score & Text */}
       {/* Changed to flex-col on mobile/tablet, switching to row only on large screens (lg) */}

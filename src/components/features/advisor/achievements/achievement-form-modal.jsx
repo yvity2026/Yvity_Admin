@@ -81,7 +81,7 @@ export default function AchievementFormModal({ isOpen, onClose, initialData, onS
         </div>
 
         {/* Form Body */}
-        <div className="p-6 overflow-y-auto max-h-[80vh]">
+        <div className="p-6 overflow-y-auto max-h-[80vh] no-scrollbar">
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Achievement Title */}
             <div>

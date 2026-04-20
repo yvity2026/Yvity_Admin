@@ -11,7 +11,7 @@ export default function SettingsPage() {
       {/* <PageHeader /> */}
       
       <div className="p-4 md:p-6 lg:p-10 xl:px-15 space-y-6 mx-auto w-full pb-12">
-        <AccountSettings />
+        {/* <AccountSettings /> */}
         <NotificationPreferences />
         <PrivacyPreferences />
         <DangerZone />

@@ -1,32 +1,34 @@
 import { Eye, MessageSquare, ThumbsUp, Share } from "lucide-react";
+import { FaThumbsUp,FaShareSquare, FaRegEye  } from "react-icons/fa";
+import { AiFillMessage } from "react-icons/ai";
 
 const stats = [
   {
     label: "Profile Views",
     value: "1,247",
     growth: "12%",
-    icon: Eye,
+    icon: FaRegEye ,
     type: "percent",
   },
   {
     label: "Testimonials",
     value: "50",
     growth: "3",
-    icon: MessageSquare,
+    icon: AiFillMessage,
     type: "number",
   },
   {
     label: "Recommendations",
     value: "32",
     growth: "2",
-    icon: ThumbsUp,
+    icon: FaThumbsUp,
     type: "number",
   },
   {
     label: "Profile Shares",
     value: "156",
     growth: "8%",
-    icon: Share,
+    icon: FaShareSquare,
     type: "percent",
   },
 ];
@@ -42,7 +44,7 @@ export default function StatsCards() {
             className=" p-6 flex flex-col justify-between h-full rounded-2xl border border-[#E2E1DC] bg-white shadow-[0_0_0_0_rgba(0,0,0,0.20)]"
           >
             <div className="mb-1">
-              <Icon className="w-5 h-5 text-gray-600" strokeWidth={1.5} />
+              <Icon className="w-5 h-5 text-[#E48C15] " strokeWidth={1.5} />
             </div>
 
             <div className="flex items-end gap-3 mb-1">
