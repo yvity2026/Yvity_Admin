@@ -9,14 +9,11 @@ import SavedProfiles from "@/components/features/user/landing/SavedProfiles";
 import AdvisorSearchFilter from "@/components/features/user/landing/HeroSection";
 
 export default function Home() {
-  return (
-    <>
-    <Header />
-    <LandingPopup />
-    <AdvisorSearchFilter />
-    <SavedProfiles/>
-    </>
-  );
-  // redirect("/advisor/dashboard");
+  // return (
+  //   <>
+    
+  //   </>
+  // );
+  redirect("/dashboard");
 
 }
