@@ -9,7 +9,7 @@ import { Shield, HeartPulse, GraduationCap } from "lucide-react";
 import { useModal } from "@/context/ModalContext";
 
 // MOCK DATA: Structured exactly how your backend API should return it
-const journeyData = [
+export const journeyData = [
   {
     id: "life-insurance",
     category: "Life Insurance",

@@ -9,6 +9,7 @@ import {
 } from "react-icons/bs";
 import { CiBank } from "react-icons/ci";
 import {
+  FaBuilding,
   FaFacebookF,
   FaLink,
   FaPlay,
@@ -35,6 +36,9 @@ import { FaRegCirclePlay } from "react-icons/fa6";
 import { BiSolidCapsule } from "react-icons/bi";
 import { PiHospitalBold } from "react-icons/pi";
 import toast from "react-hot-toast";
+import { ChevronDown, ShieldCheck } from "lucide-react";
+import JourneySection from "@/components/features/advisor/professional-journey/journey-section";
+import { journeyData } from "../professional-journey/page";
 
 const page = () => {
   const qrRef = React.useRef(null);
@@ -57,6 +61,16 @@ const page = () => {
     return () => window.removeEventListener("keydown", handleEsc);
   }, []);
 
+   const handleEditClick = (entry) => {
+    setEditingEntry(entry);
+    setIsEntryModalOpen(true);
+  };
+
+  const handleDeleteClick = (entry) => {
+    setDeletingEntry(entry);
+    setIsDeleteModalOpen(true);
+  };
+
   const downloadQR = () => {
     const canvas = qrRef.current?.querySelector("canvas");
     if (!canvas) return;
@@ -68,6 +82,7 @@ const page = () => {
     link.download = "krishna-qr.png";
     link.click();
   };
+  
 
   const stats = [
     {
@@ -120,6 +135,7 @@ const page = () => {
     { label: "Member Since", value: "2023" },
   ];
 
+  const [isOpen, setIsOpen] = useState(true);
   const footerheadings = [
     "Home",
     "Journey",
@@ -129,6 +145,29 @@ const page = () => {
     "Testimonials",
   ];
 
+  const [activeTab, setActiveTab] = useState("Home");
+
+   const item = {
+    title: "Life Insurance",
+    subtitle: "LIC of India • 14+ years",
+    icon: <ShieldCheck className="w-5 h-5 text-blue-500" />,
+    timeline: [
+      {
+        year: "2024 - PRESENT",
+        role: "Senior Development Officer",
+        company: "LIC of India • Nellore Branch",
+      },
+      {
+        year: "2019 - 2024",
+        role: "LIC Advisor – MDRT Qualifier",
+        company: "LIC of India",
+      },
+      {
+        year: "2015 - 2019",
+        role: "Insurance Advisor",
+      },
+    ],
+  };
   const companies = [
     {
       icon: <CiBank />,
@@ -303,7 +342,7 @@ const page = () => {
               KM
             </span>
             {/* Advisor Dtails */}
-            <div className="px-4 md:px-6">
+            <div className="px-4 md:px-6 md:flex justify-between">
               <span className="flex flex-col gap-1">
                 <p className="text-[#111827] text-[18px] sm:text-[20px] md:text-[24px] font-bold leading-normal font-cormorant">
                   Krishna Mohan
@@ -315,10 +354,18 @@ const page = () => {
                 <p className="text-gray-700 text-[10px] sm:text-xs md:text-xs font-normal leading-4 font-poppins">
                   Senior LIC Advisor • Nellore, AP
                 </p>
-                <p className="text-teal-950 text-[10px] sm:text-xs md:text-xs sm:text-xs sm:text-sm md:text-sm md:text-xs sm:text-sm md:text-sm font-medium leading-4 font-poppins">
+                
+                <p className="text-teal-950 text-[clamp(8px,1vw,12px)] font-medium leading-4 font-poppins">
                   Life Insurance · Health Insurance
                 </p>
               </span>
+              <span className="text-teal-950 text-[clamp(8px,1vw,12px)] font-medium leading-4 font-poppins pr-6 flex flex-col gap-3">
+                {
+                  [" Life Insurance", "Health Insurance"].map((item, index) => (
+                    <p key={index} className="flex p-[10px] gap-1 bg-[#E0F4F3] rounded-full gap-2"><FaBuilding /> {item}</p>
+                  ))
+                }
+                </span>
             </div>
             {/* intro video */}
             <div className="pr-[30px] pl-[29px]">
@@ -531,19 +578,26 @@ const page = () => {
         </div>
         {/* second layer */}
         <div className="rounded-2xl bg-white shadow-soft">
-          <div className="border-b border-[#E8F4F4] border-highlights rounded-t-2xl flex overflow-x-auto no-scrollbar md:pl-10">
-            {footerheadings.map((heading, index) => (
-              <button
-                key={index}
-                className="font-poppins p-[10px] text-center text-[clamp(10px,1vw,14px)] cursor-pointer text-primary-900  text-sm font-bold"
-              >
-                {heading}
-              </button>
-            ))}
-          </div>
+      <div className="border-b border-[#E8F4F4] border-highlights rounded-t-2xl flex overflow-x-auto no-scrollbar md:pl-10">
+        {footerheadings.map((heading, index) => (
+          <button
+            key={index}
+            onClick={() => setActiveTab(heading)}
+            className={`font-poppins p-[10px] text-center text-[clamp(10px,1vw,14px)] cursor-pointer text-sm font-bold ${
+              activeTab === heading
+                ? "text-primary-900 border-b-2 border-primary-900"
+                : "text-gray-400"
+            }`}
+          >
+            {heading}
+          </button>
+        ))}
+      </div>
 
-          {/* Dynamic content */}
-          <div className="pt-[20px] px-4 xl:pl-[40px] xl:pr-[240px] pb-[36px] flex flex-col gap-2 ">
+      {/* Dynamic content */}
+      <div className="pt-[20px] px-4 xl:pl-[40px] xl:pr-[240px] pb-[36px] flex flex-col gap-2">
+        {activeTab === "Home" ? (
+          <>
             <p className="text-[#6B7280] font-nunito text-sm font-normal leading-6 text-[clamp(10px,1vw,14px)]">
               I am Krishna Mohan, a Senior LIC Advisor based in Nellore, AP with
               over 14 years of experience. I am an MDRT qualifier and YVITY
@@ -551,6 +605,7 @@ const page = () => {
               transparent advice that genuinely protects my clients' financial
               future.
             </p>
+
             <div className="flex flex-col gap-2">
               <p className="text-[var(--headings-important-text)] text-[14px] font-bold font-poppins leading-normal self-stretch">
                 Companies Associated
@@ -561,12 +616,13 @@ const page = () => {
                     key={index}
                     className="p-[10px] flex gap-2 items-center text-[clamp(8px,1vw,12px)] font-semibold font-poppins leading-normal rounded-2xl bg-[#E8F4F4]"
                   >
-                    <span className="">{comp.icon}</span>
+                    <span>{comp.icon}</span>
                     {comp.data}
                   </span>
                 ))}
               </div>
             </div>
+
             <div className="flex flex-col gap-2">
               <p className="text-[12px] sm:text-[14px] font-bold leading-normal">
                 Specialization
@@ -576,19 +632,319 @@ const page = () => {
                 {companies.map((comp, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1 
-        w-full sm:w-auto 
-        flex items-center justify-center sm:justify-start
-        sm:text-[12px] font-semibold 
-        rounded-2xl bg-[#E0F4F3] text-[clamp(8px,1vw,12px)]"
+                    className="px-3 py-1 w-full sm:w-auto flex items-center justify-center sm:justify-start sm:text-[12px] font-semibold rounded-2xl bg-[#E0F4F3] text-[clamp(8px,1vw,12px)]"
                   >
                     {comp.data}
                   </span>
                 ))}
               </div>
             </div>
+          </>
+        )
+        : activeTab === "Service" ? (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    
+    {/* Life Insurance Card */}
+    <div className="rounded-2xl bg-[#EEF3F3] p-5 sm:p-6 flex flex-col gap-3">
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-full">
+          🛡️
+        </div>
+        <div>
+          <p className="font-bold text-[16px] sm:text-[18px]">
+            Life Insurance
+          </p>
+          <p className="text-green-600 text-sm font-semibold">
+            LIC of India
+          </p>
+        </div>
+      </div>
+
+      <p className="text-gray-500 text-sm">14+ years experience</p>
+
+      <ul className="text-gray-700 text-sm flex flex-col gap-1 list-disc pl-5">
+        <li>Term Insurance Plans</li>
+        <li>Endowment & Money Back</li>
+        <li>Child Education Plans</li>
+        <li>Pension & Retirement Plans</li>
+      </ul>
+    </div>
+
+    {/* Health Insurance Card */}
+    <div className="rounded-2xl bg-[#F4EFE6] p-5 sm:p-6 flex flex-col gap-3">
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-full">
+          💊
+        </div>
+        <div>
+          <p className="font-bold text-[16px] sm:text-[18px]">
+            Health Insurance
+          </p>
+          <div className="flex flex-wrap gap-2 mt-1">
+            <span className="px-2 py-1 text-xs bg-white rounded-xl border">
+              Star Health
+            </span>
+            <span className="px-2 py-1 text-xs bg-white rounded-xl border">
+              Niva Bupa
+            </span>
           </div>
         </div>
+      </div>
+
+      <p className="text-gray-500 text-sm">6+ years experience</p>
+
+      <ul className="text-gray-700 text-sm flex flex-col gap-1 list-disc pl-5">
+        <li>Individual Health Plans</li>
+        <li>Family Floater Plans</li>
+        <li>Critical Illness Cover</li>
+        <li>Senior Citizen Plans</li>
+      </ul>
+    </div>
+
+  </div>
+) : activeTab === "Aceivements" ? (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    {/* MDRT Qualifier */}
+    <div className="flex items-start gap-4 p-4 sm:p-5 rounded-2xl bg-[#EEF3F3]">
+      <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[#DDEBEC] text-xl">
+        🏆
+      </div>
+      <div className="flex flex-col">
+        <p className="font-bold text-[14px] sm:text-[16px]">
+          MDRT Qualifier
+        </p>
+        <p className="text-gray-500 text-sm">
+          Million Dollar Round Table — Global recognition
+        </p>
+        <p className="text-green-700 text-sm font-semibold mt-1">
+          2022, 2023, 2024
+        </p>
+      </div>
+    </div>
+
+    {/* Branch Champion */}
+    <div className="flex items-start gap-4 p-4 sm:p-5 rounded-2xl bg-[#EEF3F3]">
+      <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[#DDEBEC] text-xl">
+        🛡️
+      </div>
+      <div className="flex flex-col">
+        <p className="font-bold text-[14px] sm:text-[16px]">
+          Branch Champion
+        </p>
+        <p className="text-gray-500 text-sm">
+          Highest premium collection in Nellore LIC branch
+        </p>
+        <p className="text-green-700 text-sm font-semibold mt-1">
+          2023
+        </p>
+      </div>
+    </div>
+
+    {/* 500+ Clients */}
+    <div className="flex items-start gap-4 p-4 sm:p-5 rounded-2xl bg-[#EEF3F3]">
+      <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[#DDEBEC] text-xl">
+        ⭐
+      </div>
+      <div className="flex flex-col">
+        <p className="font-bold text-[14px] sm:text-[16px]">
+          500+ Clients Served
+        </p>
+        <p className="text-gray-500 text-sm">
+          Successfully secured coverage for 500+ families
+        </p>
+        <p className="text-green-700 text-sm font-semibold mt-1">
+          2024 milestone
+        </p>
+      </div>
+    </div>
+
+    {/* IRDAI Certified */}
+    <div className="flex items-start gap-4 p-4 sm:p-5 rounded-2xl bg-[#EEF3F3]">
+      <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[#DDEBEC] text-xl">
+        📜
+      </div>
+      <div className="flex flex-col">
+        <p className="font-bold text-[14px] sm:text-[16px]">
+          IRDAI Certified
+        </p>
+        <p className="text-gray-500 text-sm">
+          Valid IRDAI license verified by YVITY platform
+        </p>
+        <p className="text-green-700 text-sm font-semibold mt-1">
+          Active
+        </p>
+      </div>
+    </div>
+
+  </div>) : activeTab === "Gallery" ? (
+  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+
+    {/* Item 1 */}
+    <div className="aspect-square rounded-2xl bg-[#0F5C56] flex items-center justify-center text-4xl">
+      🏆
+    </div>
+
+    {/* Item 2 */}
+    <div className="aspect-square rounded-2xl bg-[#1F7A4C] flex items-center justify-center text-4xl">
+      🎖️
+    </div>
+
+    {/* Item 3 */}
+    <div className="aspect-square rounded-2xl bg-[#B07A07] flex items-center justify-center text-4xl">
+      📜
+    </div>
+
+  </div>)
+  // : activeTab === "Testimonials" ? (
+  // <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 bg-gray-50 rounded-2xl">
+
+  //   {/* Header */}
+  //   <h2 className="text-lg sm:text-xl font-bold mb-4">
+  //     50 Verified Testimonials
+  //   </h2>
+
+  //   {/* Filter Tabs */}
+  //   <div className="flex flex-wrap gap-2 sm:gap-3 mb-5">
+  //     <button className="px-4 py-2 bg-[#004d40] text-white rounded-full text-sm font-semibold">
+  //       All (50)
+  //     </button>
+
+  //     <button className="px-4 py-2 border rounded-full flex items-center gap-2 text-sm">
+  //       📝 <span>Text</span>
+  //     </button>
+
+  //     <button className="px-4 py-2 border rounded-full flex items-center gap-2 text-sm">
+  //       🎧 <span>Audio</span>
+  //     </button>
+
+  //     <button className="px-4 py-2 border rounded-full flex items-center gap-2 text-sm">
+  //       🎥 <span>Video</span>
+  //     </button>
+  //   </div>
+
+  //   {/* Testimonial Card */}
+  //   <div className="bg-[#f0f9f8] border-l-4 border-[#004d40] rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col gap-4">
+
+  //     {/* Top Section */}
+  //     <div className="flex justify-between items-start gap-3 flex-wrap sm:flex-nowrap">
+
+  //       {/* User Info */}
+  //       <div className="flex gap-3 sm:gap-4">
+  //         <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#004d40] text-white rounded-full flex items-center justify-center font-bold text-sm sm:text-base">
+  //           PD
+  //         </div>
+
+  //         <div>
+  //           <h3 className="font-bold text-base sm:text-lg">
+  //             Priya Devi
+  //           </h3>
+  //           <p className="text-gray-500 text-xs sm:text-sm">
+  //             Teacher • Hyderabad • 5 days ago
+  //           </p>
+  //         </div>
+  //       </div>
+
+  //       {/* Type Badge */}
+  //       <span className="text-xs bg-white px-2 py-1 rounded-full flex items-center gap-1 border">
+  //         📝 Text
+  //       </span>
+  //     </div>
+
+  //     {/* Message */}
+  //     <p className="italic text-gray-700 text-sm sm:text-base leading-relaxed">
+  //       "Excellent guidance on health insurance. Highly recommend!"
+  //     </p>
+
+  //     {/* Bottom Section */}
+  //     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+
+  //       {/* Rating */}
+  //       <div className="flex text-yellow-400 text-sm sm:text-base">
+  //         ★★★★★
+  //       </div>
+
+  //       {/* Verified Badge */}
+  //       <div className="flex items-center gap-2 text-[#00695c] font-semibold text-xs sm:text-sm">
+  //         <span className="bg-[#00695c] text-white rounded-full px-1.5 py-[2px] text-[10px]">
+  //           ✓
+  //         </span>
+  //         Approved • OTP Verified
+  //       </div>
+
+  //     </div>
+  //   </div>
+  // </div>
+  // )
+  // : activeTab === "Journey" ? (
+  //   <div className="max-w-2xl mx-auto p-4 font-sans">
+  //     {/* Dropdown Header */}
+  //     <button
+  //       onClick={() => setIsOpen(!isOpen)}
+  //       className="w-full flex items-center justify-between p-4 bg-cyan-50/50 rounded-lg border border-cyan-100 transition-colors hover:bg-cyan-50"
+  //     >
+  //       <div className="flex items-center gap-3">
+  //         <div className="p-2 bg-blue-100 rounded-full">
+  //           <ShieldCheck className="w-5 h-5 text-blue-500" />
+  //         </div>
+  //         <div className="text-left">
+  //           <h3 className="font-bold text-gray-900 text-lg">Life Insurance</h3>
+  //           <p className="text-gray-500 text-sm">LIC of India • 14+ years</p>
+  //         </div>
+  //       </div>
+  //       <ChevronDown 
+  //         className={`w-6 h-6 text-emerald-900 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
+  //       />
+  //     </button>
+
+  //     {/* Dropdown Content (Timeline) */}
+  //     <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+  //       <div className="relative mt-6 ml-2 pl-8 border-l-2 border-gray-100 space-y-8">
+          
+  //         {/* Timeline Item 1 */}
+  //         <div className="relative">
+  //           <div className="absolute -left-[37px] top-1 w-3 h-3 bg-emerald-800 rounded-full border-4 border-white shadow-sm" />
+  //           <span className="text-emerald-700 font-bold text-sm tracking-wide">2024 - PRESENT</span>
+  //           <h4 className="text-xl font-extrabold text-gray-800 mt-1">Senior Development Officer</h4>
+  //           <p className="text-gray-500">LIC of India • Nellore Branch</p>
+  //         </div>
+
+  //         {/* Timeline Item 2 */}
+  //         <div className="relative">
+  //           <div className="absolute -left-[37px] top-1 w-3 h-3 bg-emerald-800 rounded-full border-4 border-white shadow-sm" />
+  //           <span className="text-emerald-700 font-bold text-sm tracking-wide">2019 - 2024</span>
+  //           <h4 className="text-xl font-extrabold text-gray-800 mt-1">LIC Advisor – MDRT Qualifier</h4>
+  //           <p className="text-gray-500">LIC of India</p>
+  //         </div>
+
+  //         {/* Timeline Item 3 */}
+  //         <div className="relative">
+  //           <div className="absolute -left-[37px] top-1 w-3 h-3 bg-emerald-800 rounded-full border-4 border-white shadow-sm" />
+  //           <span className="text-emerald-700 font-bold text-sm tracking-wide">2015 - 2019</span>
+  //           <h4 className="text-xl font-extrabold text-gray-800 mt-1">Insurance Advisor</h4>
+  //         </div>
+          
+  //       </div>
+  //     </div>
+  //   </div>
+  // ) 
+  : activeTab === "Journey" ? (
+    journeyData.map((section) => (
+                <JourneySection
+                  key={section.id}
+                  data={section}
+                  onEditClick={handleEditClick}
+                  onDeleteClick={handleDeleteClick}
+                />
+              ))
+  )
+  : (
+          <p className="text-gray-400 text-sm font-medium">
+            No data available
+          </p>
+        )}
+      </div>
+    </div>
       </div>
       ;
       {activeModal === MODALS.TESTIMONIAL && (
