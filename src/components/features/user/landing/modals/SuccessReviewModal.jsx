@@ -4,11 +4,16 @@ import { IoClose } from "react-icons/io5";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const SuccessReviewModal = ({ isOpen, onClose, score = 12 }) => {
   const router = useRouter()
   if (!isOpen) return null;
 
+  const handleSubmit = () => {
+    toast.success("Your IRDAI details have been submitted. Our team will verify them and activate your profile with in 48 Hours")
+    router.push("/")
+  }
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
@@ -79,8 +84,8 @@ const SuccessReviewModal = ({ isOpen, onClose, score = 12 }) => {
 
           {/* Action Button */}
           <button
-            onClick={() => router.push("/")}
-            className="w-full bg-[#0D4D4D] hover:bg-[#0A3D3D] text-white font-bold py-4 rounded-xl transition-all active:scale-[0.98]"
+            onClick={() => {router.push("/")}}
+            className="w-full bg-[#0D4D4D] hover:bg-[#0A3D3D] text-white font-bold py-4 rounded-xl transition-all active:scale-[0.98] cursor-pointer"
           >
             Go to Dashboard
           </button>

@@ -5,6 +5,7 @@ import Testimonials_filters from "@/components/features/advisor/Testimonials/Tes
 import { useModal } from "@/context/ModalContext";
 // import ProgressBar from "@/app/components/ui/progressionbar";
 import React, { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { AiFillEdit } from "react-icons/ai";
 import { FaPlayCircle, FaPlus, FaVideo } from "react-icons/fa";
 import { FaMessage, FaShield } from "react-icons/fa6";
@@ -14,10 +15,16 @@ import { MdClose, MdOutlineVerifiedUser } from "react-icons/md";
 import { RiVideoAiFill } from "react-icons/ri";
 
 export const testimonialsData = [
-  { count: 50, label: "total", icon : "", style : "text-[#111827]" },
-  { count: 3, label: "Pending", icon : "", style : "text-[#F59E0B]" },
-  { count: 47, label: "Approval", icon : "", style : "text-[#0A4A4A]" },
-  { count: 4.9, label: "Avg Rating", icon : <IoIosStar />, style : "text-[#111827]",iconStyle  : "text-[#FDD835]" },
+  { count: 50, label: "total", icon: "", style: "text-[#111827]" },
+  { count: 3, label: "Pending", icon: "", style: "text-[#F59E0B]" },
+  { count: 47, label: "Approval", icon: "", style: "text-[#0A4A4A]" },
+  {
+    count: 4.9,
+    label: "Avg Rating",
+    icon: <IoIosStar />,
+    style: "text-[#111827]",
+    iconStyle: "text-[#FDD835]",
+  },
 ];
 
 const page = () => {
@@ -117,6 +124,62 @@ const page = () => {
       .toString()
       .padStart(2, "0");
     return `${minutes}:${seconds}`;
+  };
+
+  const [requestForm, setRequestForm] = useState({
+    name: "",
+    mobile: "",
+    type: "",
+    message: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  const handleRequestSubmit = async () => {
+    if (!validateRequestForm()) return;
+
+    try {
+      setLoading(true);
+
+      // simulate API
+      await new Promise((res) => setTimeout(res, 1000));
+
+      toast.success("Request sent successfully");
+
+      setIsRequest(false);
+
+      // reset form
+      setRequestForm({
+        name: "",
+        mobile: "",
+        type: "",
+        message: "",
+      });
+    } catch (err) {
+      toast.error("Failed to send request");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const validateRequestForm = () => {
+    const { name, mobile, type } = requestForm;
+
+    if (!name.trim()) {
+      toast.error("Client name is required");
+      return false;
+    }
+
+    if (!/^[6-9]\d{9}$/.test(mobile)) {
+      toast.error("Enter valid 10-digit mobile number");
+      return false;
+    }
+
+    if (!type) {
+      toast.error("Please select testimonial type");
+      return false;
+    }
+
+    return true;
   };
 
   return (
@@ -235,6 +298,8 @@ const page = () => {
                 <input
                   className="py-3 px-4 rounded-lg border bg-[#FAFCFB]"
                   placeholder="Client Full Name"
+                  value={requestForm.name}
+                  onChange={(e) => handleRequestChange("name", e.target.value)}
                 />
               </div>
 
@@ -246,6 +311,10 @@ const page = () => {
                 <input
                   className="py-3 px-4 rounded-lg border bg-[#FAFCFB]"
                   placeholder="10-digit mobile number"
+                  value={requestForm.mobile}
+                  onChange={(e) =>
+                    handleRequestChange("mobile", e.target.value)
+                  }
                 />
               </div>
 
@@ -255,7 +324,11 @@ const page = () => {
                   Testimonial Type <span className="text-red-600">*</span>
                 </label>
 
-                <select className="py-3 px-4 rounded-lg border bg-[#FAFCFB] text-sm">
+                <select
+                  className="py-3 px-4 rounded-lg border bg-[#FAFCFB] text-sm"
+                  value={requestForm.type}
+                  onChange={(e) => handleRequestChange("type", e.target.value)}
+                >
                   <option value="">Select type</option>
                   <option value="text">Text</option>
                   <option value="audio">Audio</option>
@@ -272,6 +345,10 @@ const page = () => {
                 <textarea
                   className="py-3 px-4 rounded-lg border bg-[#FAFCFB]"
                   placeholder="e.g. Hi Ravi, I hope your plan is helping..."
+                  value={requestForm.message}
+                  onChange={(e) =>
+                    handleRequestChange("message", e.target.value)
+                  }
                 />
               </div>
 
@@ -282,8 +359,12 @@ const page = () => {
               </button>
 
               {/* Submit */}
-              <button className="mt-4 px-5 py-3 rounded-lg bg-[#0A4A4A] text-white">
-                Request Testimonial
+              <button
+                onClick={handleRequestSubmit}
+                disabled={loading}
+                className="mt-4 px-5 py-3 rounded-lg bg-[#0A4A4A] text-white"
+              >
+                {loading ? "Sending..." : "Request Testimonial"}
               </button>
             </div>
           </div>

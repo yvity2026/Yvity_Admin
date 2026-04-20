@@ -18,7 +18,7 @@
 
 export const ModalWrapper = ({ children, onClose }) => {
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+    <div className="fixed inset-0 z-200 flex items-center justify-center">
       
       {/* BACKDROP */}
       <div

@@ -144,9 +144,9 @@ const AdvisorSearchFilter = ({ onSearchChange }) => {
     return "Good night";
   };
   return (
-    <div className="w-full  mx-auto bg-[#0D4D4D] text-white p-4 md:p-6 lg:p-10 xl:px-[15px] xl:pt-[66px] overflow-hidden font-poppins">
+    <div className="w-full  mx-auto bg-[#0D4D4D] text-white  xl:pt-[66px] overflow-hidden font-poppins">
       {/* 1. HERO SECTION */}
-      <div className=" mx-auto pt-[66px] pb-[39px] xl:px-[120px]">
+      <div className=" mx-auto pt-[66px] pb-[39px] px-4 md:px-6 lg:px-10 lg:px-[15px] xl:px-[120px]">
         <div className="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700 flex flex-col gap-4">
           <p className="flex items-center gap-2 mb- text-[16px] font-normal text-[#B4B1AA]">
             {getGreeting()}, krishna{" "}
@@ -196,7 +196,7 @@ const AdvisorSearchFilter = ({ onSearchChange }) => {
           {/* Search Button */}
           <button
             type="submit"
-            className="w-full mt-6 bg-[#0A3D3D] hover:bg-[#1A5D5D] text-white font-bold py-3 pl-[47px] pr-[53px] rounded-2xl flex items-center justify-between transition-all group active:scale-[0.98]"
+            className="w-full mt-6 bg-[#0A3D3D] hover:bg-[#1A5D5D] text-white font-bold py-3 pl-[47px] pr-[53px] rounded-2xl flex items-center justify-between transition-all group active:scale-[0.98] cursor-pointer"
           >
             <span className="text-lg">Search</span>
             <HiOutlineArrowRight className="text-xl group-hover:translate-x-2 transition-transform duration-300" />
@@ -204,12 +204,12 @@ const AdvisorSearchFilter = ({ onSearchChange }) => {
         </form>
 
         {/* 3. FILTER TAGS */}
-        <div className="flex flex-wrap gap-4 mt-[24px]">
+        <div className="flex flex-wrap gap-4 mt-[24px] ">
           {filterTags.map((tag) => (
             <button
               key={tag}
               onClick={() => setActiveFilter(tag)}
-              className={`px-[16px] py-[6px] rounded-full border text-sm transition-all duration-300 ${
+              className={`px-[16px] py-[6px] rounded-full border text-sm transition-all duration-300 cursor-pointer ${
                 activeFilter === tag
                   ? "bg-orange-400 border-orange-400 text-[#0D4D4D] font-bold shadow-lg shadow-orange-400/20"
                   : "border-gray-500 bg-white/5 hover:bg-white/10 text-gray-200"
@@ -250,7 +250,7 @@ const AdvisorSearchFilter = ({ onSearchChange }) => {
       </div>
 
       {/* Data Displyed here */}
-      <div className="px-[120px] pt-[62px] pb-[54px] flex flex-col gap-10 bg-[#FFFFFF]">
+      <div className="p-4 md:p-6 lg:p-10 xl:px-[120px] pt-[62px] pb-[54px] flex flex-col gap-10 bg-[#FFFFFF] w-full">
         <span className="flex items-center justify-between">
           <span className="text-[48px] leading-[50px]  font-bold  font-cormorant text-[#111827] flex itemcen gap-3">
             Featured

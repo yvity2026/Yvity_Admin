@@ -8,7 +8,7 @@ const LandingPopup = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="w-full bg-[#F2F0E4] border-y border-[#D1D5DB] px-4 py-3 sm:py-2">
+    <div className="w-full bg-[#F2F0E4] border-y border-[#D1D5DB] px-4 py-3 sm:py-2 xl:px-[120px]">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         
         {/* Content Area */}
@@ -30,7 +30,7 @@ const LandingPopup = () => {
         {/* Action Area */}
         <div className="flex items-center gap-4 w-full sm:w-auto justify-center">
           <button 
-            className="bg-[#104D4D] hover:bg-[#0D3D3D]  py-2 px-6 rounded-full transition-all text-sm md:text-base whitespace-nowrap text-[14px] font-bold text-[var(--ct-as-badges-accents,#F59E0B)] font-poppins"
+            className="bg-[#104D4D] hover:bg-[#0D3D3D]  py-2 px-6 rounded-full transition-all text-sm md:text-base whitespace-nowrap text-[14px] font-bold text-[var(--ct-as-badges-accents,#F59E0B)] font-poppins cursor-pointer"
             onClick={() => console.log("Navigating to setup...")}
           >
             Setup Now
@@ -38,7 +38,7 @@ const LandingPopup = () => {
           
           <button 
             onClick={() => setIsVisible(false)}
-            className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+            className="text-gray-400 hover:text-gray-600 transition-colors p-1 cursor-pointer"
             aria-label="Close banner"
           >
             <X size={20} />

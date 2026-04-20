@@ -448,7 +448,7 @@ export default function AppShell({ children }) {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ duration: 0.3, ease: easeInOut }}
-              className="fixed top-0 right-0 h-full  bg-[#0A4A4A] z-[9998] md:hidden flex flex-col"
+              className="fixed top-0 right-0 h-full  bg-[#0A4A4A] z-100 md:hidden flex flex-col"
             >
               {/*  HEADER WITH LOGO (REPLACES DASHBOARD TEXT) */}
               <div className="relative flex items-center justify-end">
@@ -517,7 +517,7 @@ export default function AppShell({ children }) {
 
             {/* OVERLAY */}
             <div
-              className="fixed inset-0 bg-black/40 z-[9998] md:hidden"
+              className="fixed inset-0 bg-black/40 z-100 md:hidden"
               onClick={() => setMobileOpen(false)}
             />
           </>

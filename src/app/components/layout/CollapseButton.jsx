@@ -23,7 +23,7 @@ export default function CollapseButton({ sidebarWidth }) {
         bg-white
         text-[#0A4A4A]
         fixed top-1/2 -translate-y-1/2
-        z-[1000]
+        z-200
         shadow-lg
         border border-gray-200
         hover:scale-110
