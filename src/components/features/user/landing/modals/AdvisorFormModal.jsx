@@ -24,23 +24,23 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
     return false;
   }
 
-  if (!formData.service) {
+  if (!formData.service && addedServices.length === 0) {
     toast.error("Service is required");
     return false;
   }
 
-  if (!formData.company) {
+  if (!formData.company && addedServices.length === 0) {
     toast.error("Insurance company is required");
     return false;
   }
 
-  // 2️⃣ Certificate / License SECOND
-  if (!formData.license) {
+  
+  if (!formData.license && addedServices.length === 0) {
     toast.error("IRDAI certificate number is required");
     return false;
   }
 
-  if (formData.experience && isNaN(formData.experience)) {
+  if (formData.experience && isNaN(formData.experience) && addedServices.length === 0) {
     toast.error("Experience must be a valid number");
     return false;
   }
@@ -104,6 +104,15 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
       toast.error("Select a company");
       return;
     }
+    if (!formData.license) {
+      toast.error("IRDAI license cannot be Empty");
+      return;
+    }
+
+    if (!formData.experience) {
+      toast.error("Enter a valid Experience");
+      return;
+    }
 
     setAddedServices([...addedServices, { ...formData, id: Date.now() }]);
 
@@ -130,10 +139,10 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm  ">
       <div className="relative w-full max-w-[600px] bg-white rounded-[2rem] overflow-hidden shadow-2xl flex flex-col max-h-[95vh] no-scrollbar">
         {/* Header */}
-        <div className="bg-[#0D4D4D] p-6 text-white shrink-0">
+        <div className="bg-[#0D4D4D] p-6 text-white shrink-0 cursor-pointer">
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 p-2 bg-white/10 rounded-full hover:bg-white/20"
+            className="absolute top-6 right-6 p-2 bg-white/10 rounded-full hover:bg-white/20 cursor-pointer"
           >
             <IoClose size={20} />
           </button>
@@ -154,9 +163,9 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
         </div>
 
         {/* Scrollable Content */}
-        <div className="p-6 overflow-y-auto flex-1 bg-[#F9F8F6]">
+        <div className="p-6 overflow-y-auto flex-1 bg-[#F9F8F6] no-scrollbar">
           <button
-            className="flex items-center gap-2 text-gray-500 text-sm mb-4 cursor-pointer"
+            className="flex items-center gap-2 text-gray-500 text-sm mb-4"
             onClick={() => onBack()}
           >
             <HiOutlineArrowLeft /> Change role
@@ -204,7 +213,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
                 </label>
                 <button
                   onClick={handleAddService}
-                  className="flex items-center gap-1 text-[#0D4D4D] text-xs font-bold border border-[#0D4D4D] px-3 py-1 rounded-md hover:bg-[#0D4D4D] hover:text-white transition-all"
+                  className="flex items-center gap-1 text-[#0D4D4D] text-xs font-bold border border-[#0D4D4D] px-3 py-1 rounded-md hover:bg-[#0D4D4D] hover:text-white transition-all cursor-pointer"
                 >
                   <LuPlus /> Add
                 </button>
