@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import JourneyTimelineItem from "./journey-timeline-item";
 
-export default function JourneySection({ data, onEditClick, onDeleteClick }) {
+export default function JourneySection({ data, onEditClick, onDeleteClick, showActions = true }) {
   const Icon = data.icon;
 
   return (
@@ -31,6 +31,7 @@ export default function JourneySection({ data, onEditClick, onDeleteClick }) {
               isLast={index === data.entries.length - 1}
               onEditClick={() => onEditClick(entry)}
               onDeleteClick={() => onDeleteClick(entry)}
+              showActions = {showActions}
             />
           ))}
         </div>

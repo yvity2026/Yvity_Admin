@@ -144,7 +144,7 @@ const AdvisorSearchFilter = ({ onSearchChange }) => {
     return "Good night";
   };
   return (
-    <div className="w-full  mx-auto bg-[#0D4D4D] text-white xl:pt-[66px] overflow-hidden font-poppins">
+    <div className="w-full  mx-auto bg-[#0D4D4D] text-white p-4 md:p-6 lg:p-10 xl:px-[15px] xl:pt-[66px] overflow-hidden font-poppins">
       {/* 1. HERO SECTION */}
       <div className=" mx-auto pt-[66px] pb-[39px] xl:px-[120px]">
         <div className="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700 flex flex-col gap-4">
@@ -204,7 +204,7 @@ const AdvisorSearchFilter = ({ onSearchChange }) => {
         </form>
 
         {/* 3. FILTER TAGS */}
-        <div className="flex flex-wrap gap-4 xl:mt-[24px]">
+        <div className="flex flex-wrap gap-4 mt-[24px]">
           {filterTags.map((tag) => (
             <button
               key={tag}

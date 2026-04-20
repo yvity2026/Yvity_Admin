@@ -1,12 +1,14 @@
-import React, { useRef, useState } from "react";
+import { ModalWrapper } from "@/app/components/layout/ModalWrapper";
+import React, { useEffect, useRef, useState } from "react";
 import { AiFillEdit } from "react-icons/ai";
 import { FaPlayCircle, FaVideo } from "react-icons/fa";
+import { FaMessage, FaShield } from "react-icons/fa6";
 import { IoIosMusicalNotes } from "react-icons/io";
 import { IoDocumentText } from "react-icons/io5";
-import { MdOutlineVerifiedUser } from "react-icons/md";
+import { MdClose, MdOutlineVerifiedUser } from "react-icons/md";
 import { RiVideoAiFill } from "react-icons/ri";
 
-const Testimonials_filters = () => {
+const Testimonials_filters = ({ showActions = true }) => {
   const [isTextOpen, setIsTextOpen] = useState(false);
 
   const testimonialsData1 = [
@@ -95,254 +97,321 @@ const Testimonials_filters = () => {
       .padStart(2, "0");
     return `${minutes}:${seconds}`;
   };
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+      setLoading(true)
+        const fetchData = async () => {
+          // await your API
+          await new Promise((res) => setTimeout(res, 1500)); // simulate delay
+          setLoading(false);
+        };
+    
+        fetchData();
+      }, []);
   return (
     <>
-      <div className="flex flex-col gap-4">
-        {/* FILTERS */}
-        <div className="flex flex-wrap gap-2 sm:gap-4 items-center">
-          {testimonialsData1.map((item, index) => (
-            <button
-              key={index}
-              onClick={() => setActiveFilter(item.label)}
-              className={`px-3 py-1 flex items-center gap-2 rounded-2xl border text-[10px] sm:text-xs transition-all cursor-pointer
+      {loading ? (
+        <div className="flex flex-col gap-4">
+          {/* FILTERS SKELETON */}
+          <div className="flex flex-wrap gap-2 sm:gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-8 w-20 rounded-2xl bg-gray-200 animate-pulse"
+              />
+            ))}
+          </div>
+
+          {/* CARDS SKELETON */}
+          {[1, 2, 3].map((card) => (
+            <div
+              key={card}
+              className="w-full px-4 sm:px-6 md:px-[50px] py-4 rounded-2xl bg-white border-l-4 border-gray-200 flex flex-col gap-4"
+            >
+              {/* HEADER */}
+              <div className="flex justify-between items-center">
+                <div className="flex gap-3 items-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-300 animate-pulse" />
+                  <div className="flex flex-col gap-2">
+                    <div className="h-3 w-24 bg-gray-300 rounded animate-pulse" />
+                    <div className="h-2 w-32 bg-gray-200 rounded animate-pulse" />
+                  </div>
+                </div>
+
+                <div className="h-6 w-16 bg-gray-200 rounded-full animate-pulse" />
+              </div>
+
+              {/* CONTENT */}
+              <div className="flex flex-col gap-2">
+                <div className="h-3 w-full bg-gray-200 rounded animate-pulse" />
+                <div className="h-3 w-5/6 bg-gray-200 rounded animate-pulse" />
+              </div>
+
+              {/* MEDIA PLACEHOLDER (audio/video variation feel) */}
+              <div className="h-10 w-full bg-gray-100 rounded-lg animate-pulse" />
+
+              {/* FOOTER */}
+              <div className="flex justify-between items-center">
+                <div className="h-3 w-16 bg-gray-200 rounded animate-pulse" />
+                <div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {/* FILTERS */}
+          <div className="flex flex-wrap gap-2 sm:gap-4 items-center">
+            {testimonialsData1.map((item, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveFilter(item.label)}
+                className={`px-3 py-1 flex items-center gap-2 rounded-2xl border text-[10px] sm:text-xs transition-all cursor-pointer
             ${
               activeFilter === item.label
                 ? "bg-[#0A4A4A] text-white border-[#0A4A4A]"
                 : "bg-white border-[#DADADA] text-[#111827]"
             }`}
-            >
-              {item.icon}
-
-              <span className="font-poppins text-xs font-semibold">
-                {item.label} ({getCount(item.label)}) {/* ✅ COUNT ADDED */}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* CARDS */}
-        <div className="flex flex-col gap-4">
-          {/* TEXT CARD */}
-          {(activeFilter === "All" || activeFilter === "Text") && (
-            <div className="w-full px-4 sm:px-6 md:px-[50px] py-4 md:py-[19px] flex flex-col gap-[18px] md:gap-[18px] rounded-2xl border-l-4 border-l-[#E2E1DC] hover:border-l-[#0D6060] bg-white transition-all duration-300">
-              <div className="flex flex-col sm:flex-row justify-between gap-3 sm:items-center">
-                <div className="flex gap-[16px] items-center">
-                  <div className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] rounded-full bg-green-950"></div>
-                  <div className="flex flex-col gap-1">
-                    <p className="text-sm sm:text-base font-bold text-[#111827]">
-                      Priya Devi
-                    </p>
-                    <p className="text-[10px] sm:text-xs text-[#6B7280]">
-                      Teacher • Hyderabad • 5 days ago
-                    </p>
-                  </div>
-                </div>
-
-                <span className="flex items-center gap-1 text-[#0A4A4A] text-xs rounded-2xl bg-[#E8F4F4] font-semibold p-[10px]">
-                  <AiFillEdit /> Text
-                </span>
-              </div>
-
-              <p className="text-[#374151] text-xs sm:text-sm italic">
-                "Excellent guidance on health insurance. Highly recommend!"
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
-                <p>⭐⭐⭐⭐</p>
-
-                <span className="flex gap-2 items-center text-xs text-[#065F46] font-semibold">
-                  <MdOutlineVerifiedUser />
-                  Approved • OTP Verified
-                </span>
-
-                <span className="flex gap-2">
-                  <button className="px-2 py-1 bg-[#E8F4F4] rounded-md text-xs">
-                    View
-                  </button>
-                  <button className="px-2 py-1 border rounded-md text-xs">
-                    Reply
-                  </button>
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* AUDIO CARD */}
-          {(activeFilter === "All" || activeFilter === "Audio") && (
-            <div className="w-full px-4 sm:px-6 md:px-[50px] py-4 md:py-[19px] flex flex-col gap-[18px] rounded-2xl border-l-4 border-l-[#E2E1DC] hover:border-l-[#0D6060] bg-white">
-              <div className="flex flex-col sm:flex-row justify-between gap-3 sm:items-center">
-                <div className="flex gap-[16px] items-center">
-                  <div className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] rounded-full bg-[#A5780A]"></div>
-                  <div className="flex flex-col gap-1">
-                    <p className="text-sm sm:text-base font-bold text-[#111827]">
-                      Suresh Reddy
-                    </p>
-                    <p className="text-[10px] sm:text-xs text-[#6B7280]">
-                      Business Owner · Vijayawada · 1 week ago
-                    </p>
-                  </div>
-                </div>
-
-                <span className="flex items-center gap-1 text-[#0A4A4A] text-xs rounded-2xl bg-[#E8F4F4] font-semibold p-[10px]">
-                  <IoIosMusicalNotes /> Audio
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2 rounded-lg bg-[#F0F8F8] px-4 py-2">
-                <audio
-                  ref={audioRef}
-                  src="/your-audio.mp3"
-                  onTimeUpdate={handleTimeUpdate}
-                  onLoadedMetadata={handleLoadedMetadata}
-                  onEnded={() => setIsPlaying(false)}
-                />
-
-                <FaPlayCircle
-                  onClick={togglePlay}
-                  className="w-[28px] h-[28px] text-[#0A4A4A] cursor-pointer"
-                />
-
-                <div className="flex-1 h-[6px] bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-[#0A4A4A]"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-
-                <span className="text-gray-500 font-nunito text-xs font-bold leading-4">
-                  {formatTime(currentTime)} / {formatTime(duration)}
-                </span>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
-                <p>⭐⭐⭐⭐</p>
-
-                <span className="flex gap-2 items-center text-xs text-[#065F46] font-semibold">
-                  <MdOutlineVerifiedUser />
-                  Approved • OTP Verified
-                </span>
-
-                <span className="flex gap-2">
-                  <button className="px-2 py-1 bg-[#E8F4F4] rounded-md text-xs">
-                    View
-                  </button>
-                  <button className="px-2 py-1 border rounded-md text-xs">
-                    Reply
-                  </button>
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* VIDEO CARD */}
-          {(activeFilter === "All" || activeFilter === "Video") && (
-            <div className="w-full px-4 sm:px-6 md:px-[50px] py-4 md:py-[19px] flex flex-col gap-[18px] rounded-2xl border-l-4 border-l-[#E2E1DC] hover:border-l-[#0D6060] bg-white">
-              <div className="flex flex-col sm:flex-row justify-between gap-[16px] sm:items-center">
-                <div className="flex gap-3 items-center">
-                  <div className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] rounded-full bg-green-950"></div>
-                  <div className="flex flex-col gap-1">
-                    <p className="text-sm sm:text-base font-bold text-[#111827]">
-                      Mahesh Kumar
-                    </p>
-                    <p className="text-[10px] sm:text-xs text-[#6B7280]">
-                      Govt Employee · Nellore · 2 weeks ago
-                    </p>
-                  </div>
-                </div>
-
-                <span className="flex items-center gap-1 text-[#0A4A4A] text-xs rounded-2xl bg-[#FDF8E5] font-semibold p-[10px]">
-                  <RiVideoAiFill /> Video
-                </span>
-              </div>
-
-              <video
-                className="w-full h-[120px] rounded-md object-cover"
-                controls
               >
-                <source src="/your-video.mp4" type="video/mp4" />
-              </video>
+                {item.icon}
 
-              <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
-                <p>⭐⭐⭐⭐</p>
-
-                <span className="flex gap-2 items-center text-xs text-[#065F46] font-semibold">
-                  <MdOutlineVerifiedUser />
-                  Approved • OTP Verified
+                <span className="font-poppins text-xs font-semibold">
+                  {item.label} ({getCount(item.label)}) {/* ✅ COUNT ADDED */}
                 </span>
+              </button>
+            ))}
+          </div>
 
-                <span className="flex gap-2">
-                  <button className="px-2 py-1 bg-[#E8F4F4] rounded-md text-xs">
-                    View
-                  </button>
-                  <button className="px-2 py-1 border rounded-md text-xs">
-                    Reply
-                  </button>
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {isTextOpen && (
-              <ModalWrapper onClose={() => setIsTextOpen(false)}>
-                <div className="px-5 md:px-[30px] pb-6 rounded-[30px] bg-white shadow-[0_0_4px_0_rgba(0,0,0,0.25)]">
-                  {/* HEADER */}
-                  <div className="h-[62px] flex justify-between items-center border-b">
-                    <span className="text-[#111827] font-poppins text-base font-bold flex items-center gap-[11px]">
-                      <FaMessage />
-                      Testimonials Details
-                    </span>
-      
-                    <MdClose
-                      className="cursor-pointer text-xl"
-                      onClick={() => setIsTextOpen(false)}
-                    />
-                  </div>
-      
-                  {/* BODY */}
-                  <div className="mt-4 flex flex-col gap-4">
-                    <span className="flex gap-4">
-                      <div className="w-10 h-10 rounded-full bg-green-950 flex items-center justify-center text-white">
-                        MA
-                      </div>
-                      <span className="text-[#6B7280] font-nunito text-xs font-normal leading-4 flex flex-col justify-between">
-                        <p className="text-[#111827] font-poppins text-base font-bold leading-normal">
-                          Priya Devi
-                        </p>
-                        Teacher • Nellore • 2 days ago
-                      </span>
-                    </span>
-                    <p className="rounded-lg bg-[#F0F8F8] px-[13px] py-[11px]  text-[#6B7280] font-nunito text-xs italic font-semibold leading-5">
-                      “Krishna helped me choose the right term plan. He explained
-                      every detail clearly. Highly trustworthy advisor!”
-                    </p>
-                    <span className="flex justify-between items-center">
-                      ⭐⭐⭐⭐
-                      <span className="flex items-center gap-2 text-[#065F46] text-right font-poppins text-xs font-semibold leading-normal">
-                        <FaShield />
-                        OTP Verified
-                      </span>
-                    </span>
-      
-                    {/* ACTION BUTTONS */}
-                    <div className="flex flex-col sm:flex-row gap-3 sm:justify-end mt-2">
-                      <button className="px-4 py-3 rounded-lg bg-[#FEF2F2] text-[#E85D5D] border border-[#FEB5B5] text-xs font-semibold">
-                        Approve
-                      </button>
-      
-                      <button
-                        onClick={() => setIsDelete(false)}
-                        className="px-4 py-3 rounded-lg bg-[#0A4A4A] text-white text-xs font-semibold"
-                      >
-                        Reject
-                      </button>
+          {/* CARDS */}
+          <div className="flex flex-col gap-4">
+            {/* TEXT CARD */}
+            {(activeFilter === "All" || activeFilter === "Text") && (
+              <div className="w-full px-4 sm:px-6 md:px-[50px] py-4 md:py-[19px] flex flex-col gap-[18px] md:gap-[18px] rounded-2xl border-l-4 border-l-[#E2E1DC] hover:border-l-[#0D6060] bg-white transition-all duration-300">
+                <div className="flex flex-col sm:flex-row justify-between gap-3 sm:items-center">
+                  <div className="flex gap-[16px] items-center">
+                    <div className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] rounded-full bg-green-950"></div>
+                    <div className="flex flex-col gap-1">
+                      <p className="text-sm sm:text-base font-bold text-[#111827]">
+                        Priya Devi
+                      </p>
+                      <p className="text-[10px] sm:text-xs text-[#6B7280]">
+                        Teacher • Hyderabad • 5 days ago
+                      </p>
                     </div>
                   </div>
+
+                  <span className="flex items-center gap-1 text-[#0A4A4A] text-xs rounded-2xl bg-[#E8F4F4] font-semibold p-[10px]">
+                    <AiFillEdit /> Text
+                  </span>
                 </div>
-              </ModalWrapper>
+
+                <p className="text-[#374151] text-xs sm:text-sm italic">
+                  "Excellent guidance on health insurance. Highly recommend!"
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
+                  <p>⭐⭐⭐⭐</p>
+
+                  <span className="flex gap-2 items-center text-xs text-[#065F46] font-semibold">
+                    <MdOutlineVerifiedUser />
+                    Approved • OTP Verified
+                  </span>
+                  {showActions && (
+                    <span className="flex gap-2">
+                      <button
+                        className="px-2 py-1 bg-[#E8F4F4] rounded-md text-xs"
+                        onClick={() => setIsTextOpen(true)}
+                      >
+                        View
+                      </button>
+                      <button className="px-2 py-1 border border-[#C1C1C1] rounded-md text-xs">
+                        Reply
+                      </button>
+                    </span>
+                  )}
+                </div>
+              </div>
             )}
+
+            {/* AUDIO CARD */}
+            {(activeFilter === "All" || activeFilter === "Audio") && (
+              <div className="w-full px-4 sm:px-6 md:px-[50px] py-4 md:py-[19px] flex flex-col gap-[18px] rounded-2xl border-l-4 border-l-[#E2E1DC] hover:border-l-[#0D6060] bg-white">
+                <div className="flex flex-col sm:flex-row justify-between gap-3 sm:items-center">
+                  <div className="flex gap-[16px] items-center">
+                    <div className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] rounded-full bg-[#A5780A]"></div>
+                    <div className="flex flex-col gap-1">
+                      <p className="text-sm sm:text-base font-bold text-[#111827]">
+                        Suresh Reddy
+                      </p>
+                      <p className="text-[10px] sm:text-xs text-[#6B7280]">
+                        Business Owner · Vijayawada · 1 week ago
+                      </p>
+                    </div>
+                  </div>
+
+                  <span className="flex items-center gap-1 text-[#0A4A4A] text-xs rounded-2xl bg-[#E8F4F4] font-semibold p-[10px]">
+                    <IoIosMusicalNotes /> Audio
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 rounded-lg bg-[#F0F8F8] px-4 py-2">
+                  <audio
+                    ref={audioRef}
+                    src="/your-audio.mp3"
+                    onTimeUpdate={handleTimeUpdate}
+                    onLoadedMetadata={handleLoadedMetadata}
+                    onEnded={() => setIsPlaying(false)}
+                  />
+
+                  <FaPlayCircle
+                    onClick={togglePlay}
+                    className="w-[28px] h-[28px] text-[#0A4A4A] cursor-pointer"
+                  />
+
+                  <div className="flex-1 h-[6px] bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-[#0A4A4A]"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+
+                  <span className="text-gray-500 font-nunito text-xs font-bold leading-4">
+                    {formatTime(currentTime)} / {formatTime(duration)}
+                  </span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
+                  <p>⭐⭐⭐⭐</p>
+
+                  <span className="flex gap-2 items-center text-xs text-[#065F46] font-semibold">
+                    <MdOutlineVerifiedUser />
+                    Approved • OTP Verified
+                  </span>
+
+                  <span className="flex gap-2">
+                    <button className="px-2 py-1 bg-[#E8F4F4] rounded-md text-xs">
+                      View
+                    </button>
+                    <button className="px-2 py-1 border border-[#C1C1C1] rounded-md text-xs">
+                      Reply
+                    </button>
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* VIDEO CARD */}
+            {(activeFilter === "All" || activeFilter === "Video") && (
+              <div className="w-full px-4 sm:px-6 md:px-[50px] py-4 md:py-[19px] flex flex-col gap-[18px] rounded-2xl border-l-4 border-l-[#E2E1DC] hover:border-l-[#0D6060] bg-white">
+                <div className="flex flex-col sm:flex-row justify-between gap-[16px] sm:items-center">
+                  <div className="flex gap-3 items-center">
+                    <div className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] rounded-full bg-green-950"></div>
+                    <div className="flex flex-col gap-1">
+                      <p className="text-sm sm:text-base font-bold text-[#111827]">
+                        Mahesh Kumar
+                      </p>
+                      <p className="text-[10px] sm:text-xs text-[#6B7280]">
+                        Govt Employee · Nellore · 2 weeks ago
+                      </p>
+                    </div>
+                  </div>
+
+                  <span className="flex items-center gap-1 text-[#0A4A4A] text-xs rounded-2xl bg-[#FDF8E5] font-semibold p-[10px]">
+                    <RiVideoAiFill /> Video
+                  </span>
+                </div>
+
+                <video
+                  className="w-full h-[120px] rounded-md object-cover"
+                  controls
+                >
+                  <source src="/your-video.mp4" type="video/mp4" />
+                </video>
+
+                <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
+                  <p>⭐⭐⭐⭐</p>
+
+                  <span className="flex gap-2 items-center text-xs text-[#065F46] font-semibold">
+                    <MdOutlineVerifiedUser />
+                    Approved • OTP Verified
+                  </span>
+
+                  {showActions && (
+                    <span className="flex gap-2">
+                      <button className="px-2 py-1 bg-[#E8F4F4] rounded-md text-xs">
+                        View
+                      </button>
+                      <button className="px-2 py-1 border border-[#C1C1C1] rounded-md text-xs">
+                        Reply
+                      </button>
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {isTextOpen && (
+        <ModalWrapper onClose={() => setIsTextOpen(false)}>
+          <div className="px-5 md:px-[30px] pb-6 rounded-[30px] bg-white shadow-[0_0_4px_0_rgba(0,0,0,0.25)]">
+            {/* HEADER */}
+            <div className="h-[62px] flex justify-between items-center border-b">
+              <span className="text-[#111827] font-poppins text-base font-bold flex items-center gap-[11px]">
+                <FaMessage />
+                Testimonials Details
+              </span>
+
+              <MdClose
+                className="cursor-pointer text-xl"
+                onClick={() => setIsTextOpen(false)}
+              />
+            </div>
+
+            {/* BODY */}
+            <div className="mt-4 flex flex-col gap-4">
+              <span className="flex gap-4">
+                <div className="w-10 h-10 rounded-full bg-green-950 flex items-center justify-center text-white">
+                  MA
+                </div>
+                <span className="text-[#6B7280] font-nunito text-xs font-normal leading-4 flex flex-col justify-between">
+                  <p className="text-[#111827] font-poppins text-base font-bold leading-normal">
+                    Priya Devi
+                  </p>
+                  Teacher • Nellore • 2 days ago
+                </span>
+              </span>
+              <p className="rounded-lg bg-[#F0F8F8] px-[13px] py-[11px]  text-[#6B7280] font-nunito text-xs italic font-semibold leading-5">
+                “Krishna helped me choose the right term plan. He explained
+                every detail clearly. Highly trustworthy advisor!”
+              </p>
+              <span className="flex justify-between items-center">
+                ⭐⭐⭐⭐
+                <span className="flex items-center gap-2 text-[#065F46] text-right font-poppins text-xs font-semibold leading-normal">
+                  <FaShield />
+                  OTP Verified
+                </span>
+              </span>
+
+              {/* ACTION BUTTONS */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-end mt-2">
+                <button className="px-4 py-3 rounded-lg bg-[#FEF2F2] text-[#E85D5D] border border-[#FEB5B5] text-xs font-semibold">
+                  Approve
+                </button>
+
+                <button
+                  onClick={() => setIsDelete(false)}
+                  className="px-4 py-3 rounded-lg bg-[#0A4A4A] text-white text-xs font-semibold"
+                >
+                  Reject
+                </button>
+              </div>
+            </div>
+          </div>
+        </ModalWrapper>
+      )}
     </>
   );
 };

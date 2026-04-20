@@ -9,7 +9,7 @@ import EntryFormModal from "@/components/features/advisor/professional-journey/e
 import { useModal } from "@/context/ModalContext";
 
 // MOCK DATA: Structured for future backend API integration
-const achievementsData = [
+ export const achievementsData = [
   {
     id: "ach-1",
     icon: "🏆",
