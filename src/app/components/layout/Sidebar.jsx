@@ -19,6 +19,7 @@ import { RxPeople } from "react-icons/rx";
 import CollapseButton from "./CollapseButton";
 import { useSidebar } from "@/context/SidebarContext";
 import { FaPlus } from "react-icons/fa6";
+import { createPortal } from "react-dom";
 
 import { useModal } from "@/context/ModalContext";
 import clsx from "clsx";
@@ -175,9 +176,10 @@ export default function AppShell({ children }) {
   };
 
   // const hideSidebarRoutes = ["/advisor/public-view"];
-  // if (hideSidebarRoutes.includes(pathname)) {
-  //   return <>{children}</>;
-  // }
+  if (!pathname.includes("/advisor")) {
+    return <>{children}</>;
+  }
+
   const { collapsed } = useSidebar();
 
   const sidebarWidth = collapsed ? 80 : 260;
@@ -192,6 +194,14 @@ export default function AppShell({ children }) {
     ease: [0.4, 0, 0.2, 1], // smoother than easeInOut
   };
 
+  const [hoveredItem, setHoveredItem] = useState(null);
+  const [tooltip, setTooltip] = useState({
+  visible: false,
+  text: "",
+  x: 0,
+  y: 0,
+});
+
   const isDefaultActions =
     currentHeader.actions.includes("notifications") ||
     currentHeader.actions.includes("profile");
@@ -203,9 +213,9 @@ export default function AppShell({ children }) {
         animate={{ width: collapsed ? 80 : 260 }}
         transition={SIDEBAR_TRANSITION}
         className={clsx(
-  "hidden md:flex flex-col relative h-screen sticky top-0 overflow-hidden bg-[#0A4A4A]",
-  collapsed ? "w-20" : "w-[260px]"
-)}
+          "hidden md:flex flex-col relative h-screen sticky top-0 overflow-visible bg-[#0A4A4A]",
+          collapsed ? "w-20" : "w-[260px]",
+        )}
       >
         <div className="flex flex-col h-full">
           {/* Website Logo */}
@@ -262,9 +272,9 @@ export default function AppShell({ children }) {
               )}
             </div>
           </div>
-           <hr className="mt-5 border-t border-[#107171]" />
+          <hr className="mt-5 border-t border-[#107171]" />
           {/* sidebar content */}
-          <div className="flex-1 overflow-y-auto no-scrollbar scroll-smooth overflow-x-hidden">
+          <div className="flex-1 overflow-y-auto no-scrollbar scroll-smooth overflow-x-visible">
             {menuItems.map((section, i) => (
               <div key={i} className="mb-4">
                 {!collapsed && (
@@ -279,9 +289,26 @@ export default function AppShell({ children }) {
                   return (
                     <motion.div
                       key={j}
+                      onMouseEnter={() =>
+    setTooltip((prev) => ({
+      ...prev,
+      visible: true,
+      text: item.label,
+    }))
+  }
+  onMouseLeave={() =>
+    setTooltip((prev) => ({ ...prev, visible: false }))
+  }
+  onMouseMove={(e) =>
+    setTooltip((prev) => ({
+      ...prev,
+      x: e.clientX + 12, // offset from cursor
+      y: e.clientY + 12,
+    }))
+  }
                       whileHover={{ scale: 1.01 }}
                       transition={{ duration: 0.2, ease: "easeOut" }}
-                      className={`group flex w-full items-center cursor-pointer rounded-lg
+                      className={` relative group flex w-full items-center cursor-pointer rounded-lg
     ${collapsed ? "justify-center py-3" : "gap-4 px-10 py-2"}
     font-semibold
     transition-colors duration-300
@@ -313,6 +340,11 @@ export default function AppShell({ children }) {
                           </span>
                         )}
                       </Link>
+                      {/* {collapsed && hoveredItem === item.label && (
+                        <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-[9999] bg-black text-white text-xs px-3 py-1 rounded-md shadow-lg whitespace-nowrap">
+                          {item.label}
+                        </div>
+                      )} */}
                     </motion.div>
                   );
                 })}
@@ -389,7 +421,6 @@ export default function AppShell({ children }) {
                       openModal("ADD_PROFESSIONAL_JOURNEY");
                     if (pathname === "/advisor/recommendations")
                       openModal("ADD_RECOMMENDATION");
-                    
                   }}
                   className="px-4 py-[10px] bg-[#0A4A4A] text-white font-poppins text-[clamp(10px,1vw,14px)] rounded-md flex gap-2 items-center"
                 >
@@ -417,7 +448,7 @@ export default function AppShell({ children }) {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ duration: 0.3, ease: easeInOut }}
-              className="fixed top-0 right-0 h-full  bg-[#0A4A4A] z-[9999] md:hidden flex flex-col"
+              className="fixed top-0 right-0 h-full  bg-[#0A4A4A] z-[9998] md:hidden flex flex-col"
             >
               {/*  HEADER WITH LOGO (REPLACES DASHBOARD TEXT) */}
               <div className="relative flex items-center justify-end">
@@ -495,6 +526,19 @@ export default function AppShell({ children }) {
         {/* MAIN CONTENT */}
         <main className="flex-1 bg-[#F8F6F1]">{children}</main>
       </div>
+      {tooltip.visible && collapsed && (
+  <div
+    style={{
+      position: "fixed",
+      top: tooltip.y,
+      left: tooltip.x,
+      zIndex: 99999,
+    }}
+    className="pointer-events-none bg-[#0f6f6f] text-white text-xs px-3 py-1.5 font-poppins rounded-md shadow-lg whitespace-nowrap"
+  >
+    {tooltip.text}
+  </div>
+)}
     </div>
   );
 }

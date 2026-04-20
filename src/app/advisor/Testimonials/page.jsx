@@ -1,5 +1,7 @@
 "use client";
 import { ModalWrapper } from "@/app/components/layout/ModalWrapper";
+import Testimonial_Stats from "@/components/features/advisor/Testimonials/Testimonial_Stats";
+import Testimonials_filters from "@/components/features/advisor/Testimonials/Testimonials_filters";
 import { useModal } from "@/context/ModalContext";
 // import ProgressBar from "@/app/components/ui/progressionbar";
 import React, { useEffect, useRef, useState } from "react";
@@ -11,20 +13,36 @@ import { IoDocumentText } from "react-icons/io5";
 import { MdClose, MdOutlineVerifiedUser } from "react-icons/md";
 import { RiVideoAiFill } from "react-icons/ri";
 
-const page = () => {
-  const testimonialsData = [
-    { count: 50, label: "total" },
-    { count: 50, label: "Pending" },
-    { count: 50, label: "Approval" },
-    { count: 50, label: "Avg Rating" },
-  ];
+export const testimonialsData = [
+  { count: 50, label: "total" },
+  { count: 50, label: "Pending" },
+  { count: 50, label: "Approval" },
+  { count: 50, label: "Avg Rating" },
+];
 
+const page = () => {
   const testimonialsData1 = [
-    { label: "All(50)" },
+    { label: "All" },
     { icon: <IoDocumentText />, label: "Text" },
     { icon: <IoIosMusicalNotes />, label: "Audio" },
-    { icon: <FaVideo />, label: "video" },
+    { icon: <FaVideo />, label: "Video" },
   ];
+
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+
+  // const testimonialsData1 = [
+  //   { label: "All", icon: "📋" },
+  //   { label: "Text", icon: "📝" },
+  //   { label: "Audio", icon: "🎧" },
+  //   { label: "Video", icon: "🎥" },
+  // ];
+
+  const getCount = (label) => {
+    if (label === "All") return testimonials.length;
+
+    return testimonials.filter((t) => t.type === label).length;
+  };
 
   const { trigger, clearTrigger } = useModal();
   const [isRequest, setIsRequest] = useState(false);
@@ -53,18 +71,59 @@ const page = () => {
   };
 
   const handleTimeUpdate = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
+    const current = audioRef.current.currentTime;
+    const duration = audioRef.current.duration || 1;
 
-    const percent = (audio.currentTime / audio.duration) * 100;
-    setProgress(percent);
+    setCurrentTime(current);
+    setProgress((current / duration) * 100);
+  };
+
+  const handleLoadedMetadata = () => {
+    setDuration(audioRef.current.duration || 0);
+  };
+
+  const testimonials = [
+    {
+      type: "Text",
+      name: "Priya Devi",
+      role: "Teacher • Hyderabad • 5 days ago",
+      message: "Excellent guidance on health insurance. Highly recommend!",
+      color: "bg-green-950",
+    },
+    {
+      type: "Audio",
+      name: "Suresh Reddy",
+      role: "Business Owner · Vijayawada · 1 week ago",
+      color: "bg-[#A5780A]",
+    },
+    {
+      type: "Video",
+      name: "Mahesh Kumar",
+      role: "Govt Employee · Nellore · 2 weeks ago",
+      color: "bg-green-950",
+    },
+  ];
+
+  const [activeFilter, setActiveFilter] = useState("All");
+  const filteredTestimonials =
+    activeFilter === "All"
+      ? testimonials
+      : testimonials.filter((t) => t.type === activeFilter);
+
+  const formatTime = (time) => {
+    if (!time) return "0:00";
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60)
+      .toString()
+      .padStart(2, "0");
+    return `${minutes}:${seconds}`;
   };
 
   return (
     <div>
       <div className="px-4 md:p-6 lg:p-10 xl:px-16 xl:pt-6 mx-auto w-full flex flex-col gap-6">
         {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full">
+        {/* <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full">
           {testimonialsData.map((item, index) => (
             <div
               key={index}
@@ -80,193 +139,10 @@ const page = () => {
               </span>
             </div>
           ))}
-        </div>
+        </div> */}
+        <Testimonial_Stats />
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-2 sm:gap-4 items-center">
-          {testimonialsData1.map((item, index) => (
-            <span
-              key={index}
-              className="px-3 py-1 flex items-center gap-2 rounded-2xl border border-[#DADADA] bg-white text-[10px] sm:text-xs"
-            >
-              {item.icon}
-              <p className="text-[#111827] font-poppins text-xs font-semibold leading-normal">
-                {item.label}
-              </p>
-            </span>
-          ))}
-        </div>
-
-        {/* Cards */}
-        <div className="flex flex-col gap-4">
-          {/* TEXT CARD */}
-          <div className="w-full px-4 sm:px-6 md:px-[50px] py-4 md:py-[19px] flex flex-col gap-4 md:gap-[18px] rounded-2xl border-l-4 border-l-[#E2E1DC] hover:border-l-[#0D6060] bg-white transition-all duration-300">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between gap-3 sm:items-center">
-              <div className="flex gap-3 items-center">
-                <div className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] rounded-full bg-green-950"></div>
-                <div>
-                  <p className="text-sm sm:text-base text-[#111827] font-poppins text-base font-bold leading-normal">
-                    Priya Devi
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-[#6B7280] font-nunito text-xs font-normal leading-4">
-                    Teacher • Hyderabad • 5 days ago
-                  </p>
-                </div>
-              </div>
-
-              <span className="flex items-center gap-1 text-[#0A4A4A]  text-[clamp(8px,1vw,12px)] rounded-2xl bg-[#E8F4F4] font-semibold leading-normal p-[10px]">
-                <AiFillEdit />
-                Text
-              </span>
-            </div>
-
-            <p className="text-[#374151] text-xs sm:text-sm italic font-[14px]">
-              "Excellent guidance on health insurance. Highly recommend!"
-            </p>
-
-            {/* Footer */}
-            <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
-              <p>⭐⭐⭐⭐</p>
-
-              <span className="flex gap-2 items-center text-[10px] sm:text-xs text-[#065F46] font-poppins font-semibold leading-normal">
-                <MdOutlineVerifiedUser />
-                Approved • OTP Verified
-              </span>
-
-              <span className="flex gap-2">
-                <button
-                  className="px-2 py-1 text-[#0A4A4A] font-medium leading-normal sm:text-xs rounded-md border border-[#D5D5D5] bg-[#E8F4F4] text-[clamp(8px,1vw,12px)]"
-                  onClick={() => setIsTextOpen(true)}
-                >
-                  View
-                </button>
-                <button className="px-2 py-1 text-[#0A4A4A] font-medium leading-normal sm:text-xs rounded-md border border-[#D5D5D5] text-[clamp(8px,1vw,12px)]">
-                  Reply
-                </button>
-              </span>
-            </div>
-          </div>
-
-          {/* AUDIO CARD */}
-          <div className="w-full  px-4 sm:px-6 md:px-[50px] py-4 md:py-[19px] flex flex-col gap-4 rounded-2xl border-l-4 hover:border-l-[#0D6060] border-l-[#E2E1DC] bg-white">
-            <div className="flex flex-col sm:flex-row justify-between gap-3 sm:items-center">
-              <div className="flex gap-3 items-center">
-                <div className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] rounded-full bg-[#A5780A]"></div>
-                <div>
-                  <p className="text-sm sm:text-base text-[#111827] font-poppins text-base font-bold leading-normal">
-                    Suresh Reddy
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-[#6B7280] font-nunito text-xs font-normal leading-4">
-                    Business Owner · Vijayawada · 1 week ago
-                  </p>
-                </div>
-              </div>
-
-              <span className="flex items-center gap-1 text-[#0A4A4A]  text-[clamp(8px,1vw,12px)] rounded-2xl bg-[#E8F4F4] font-semibold leading-normal p-[10px]">
-                <IoIosMusicalNotes />
-                Audio
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 md:gap-[11px] md:h-[48px] rounded-lg bg-[#F0F8F8] md:px-[89px] py-[8px]">
-      
-      {/* Audio element */}
-      <audio
-        ref={audioRef}
-        src="/your-audio.mp3"
-        onTimeUpdate={handleTimeUpdate}
-        onEnded={() => setIsPlaying(false)}
-      />
-
-      {/* Play button */}
-      <FaPlayCircle
-        onClick={togglePlay}
-        className="md:h-[32px] w-[32px] text-[#0A4A4A] cursor-pointer"
-      />
-
-      {/* Progress bar */}
-      <div className="flex-1 h-[6px] md:h-[8px] bg-gray-200 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-[#0A4A4A] rounded-full transition-all"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-
-      {/* Time (simple placeholder) */}
-      <span className="text-gray-500 font-nunito text-xs font-bold leading-4">
-        {Math.floor(progress / 100 * 100)}%
-      </span>
-    </div>
-
-            <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
-              <p>⭐⭐⭐⭐</p>
-              <span className="flex gap-2 items-center text-[10px] sm:text-xs text-[#065F46] font-poppins  font-semibold leading-normal">
-                <MdOutlineVerifiedUser />
-                Approved • OTP Verified
-              </span>
-              <span className="flex gap-2">
-                <button
-                  className="px-2 py-1 text-[#0A4A4A] font-medium leading-normal sm:text-xs rounded-md border border-[#D5D5D5] bg-[#E8F4F4] text-[clamp(8px,1vw,12px)]"
-                  onClick={() => setIsTextOpen(true)}
-                >
-                  View
-                </button>
-                <button className="px-2 py-1 text-[#0A4A4A] font-medium leading-normal sm:text-xs rounded-md border border-[#D5D5D5] text-[clamp(8px,1vw,12px)]">
-                  Reply
-                </button>
-              </span>
-            </div>
-          </div>
-
-          {/* VIDEO CARD */}
-          <div className="w-full px-4 sm:px-6 md:px-[50px] py-4 md:py-[19px] flex flex-col gap-4 rounded-2xl border-l-4 border-l-[#E2E1DC] hover:border-l-[#0D6060] bg-white">
-            <div className="flex flex-col sm:flex-row justify-between gap-3 sm:items-center">
-              <div className="flex gap-3 items-center">
-                <div className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] rounded-full bg-green-950"></div>
-                <div>
-                  <p className="text-sm sm:text-base text-[#111827] font-poppins text-base font-bold leading-normal">
-                    Mahesh Kumar
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-[#6B7280] font-nunito text-xs font-normal leading-4">
-                    Govt Employee · Nellore · 2 weeks ago
-                  </p>
-                </div>
-              </div>
-
-             <span className="flex items-center gap-1 text-[#0A4A4A] font-poppins text-[clamp(8px,1vw,12px)] rounded-2xl bg-[#FDF8E5] font-semibold leading-normal p-[10px]">
-                <RiVideoAiFill />
-                Video
-              </span>
-            </div>
-
-            <video
-              className="w-full h-[120px] md:h-[102px] rounded-md cursor-pointer object-cover"
-              controls
-            >
-              <source src="/your-video.mp4" type="video/mp4" />
-            </video>
-
-            <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
-              <p>⭐⭐⭐⭐</p>
-              <span className="flex gap-2 items-center text-[10px] sm:text-xs text-[#065F46] font-poppins font-semibold leading-normal">
-                <MdOutlineVerifiedUser />
-                Approved • OTP Verified
-              </span>
-              <span className="flex gap-2">
-                <button
-                  className="px-2 py-1 text-[#0A4A4A] font-medium leading-normal sm:text-xs rounded-md border border-[#D5D5D5] bg-[#E8F4F4] text-[clamp(8px,1vw,12px)]"
-                  onClick={() => setIsTextOpen(true)}
-                >
-                  View
-                </button>
-                <button className="px-2 py-1 text-[#0A4A4A] font-medium leading-normal sm:text-xs rounded-md border border-[#D5D5D5] text-[clamp(8px,1vw,12px)]">
-                  Reply
-                </button>
-              </span>
-            </div>
-          </div>
-        </div>
+        <Testimonials_filters />
       </div>
 
       {isTextOpen && (
