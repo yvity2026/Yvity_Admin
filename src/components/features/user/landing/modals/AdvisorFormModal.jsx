@@ -4,7 +4,7 @@ import { HiOutlineArrowLeft, HiOutlineArrowRight } from "react-icons/hi";
 import { LuPlus } from "react-icons/lu";
 import Image from "next/image";
 
-const AdvisorFormModal = ({ isOpen, onClose, onContinue }) => {
+const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
   // Available services list
   const initialServices = [
     "Life Insurance",
@@ -75,7 +75,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue }) => {
 
         {/* Scrollable Content */}
         <div className="p-6 overflow-y-auto flex-1 bg-[#F9F8F6]">
-          <button className="flex items-center gap-2 text-gray-500 text-sm mb-4">
+          <button className="flex items-center gap-2 text-gray-500 text-sm mb-4" onClick={() => onBack()}>
             <HiOutlineArrowLeft /> Change role
           </button>
 

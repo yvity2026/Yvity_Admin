@@ -8,16 +8,16 @@ import React, { useEffect, useRef, useState } from "react";
 import { AiFillEdit } from "react-icons/ai";
 import { FaPlayCircle, FaPlus, FaVideo } from "react-icons/fa";
 import { FaMessage, FaShield } from "react-icons/fa6";
-import { IoIosMusicalNotes } from "react-icons/io";
+import { IoIosMusicalNotes, IoIosStar } from "react-icons/io";
 import { IoDocumentText } from "react-icons/io5";
 import { MdClose, MdOutlineVerifiedUser } from "react-icons/md";
 import { RiVideoAiFill } from "react-icons/ri";
 
 export const testimonialsData = [
-  { count: 50, label: "total" },
-  { count: 50, label: "Pending" },
-  { count: 50, label: "Approval" },
-  { count: 50, label: "Avg Rating" },
+  { count: 50, label: "total", icon : "", style : "text-[#111827]" },
+  { count: 3, label: "Pending", icon : "", style : "text-[#F59E0B]" },
+  { count: 47, label: "Approval", icon : "", style : "text-[#0A4A4A]" },
+  { count: 4.9, label: "Avg Rating", icon : <IoIosStar />, style : "text-[#111827]",iconStyle  : "text-[#FDD835]" },
 ];
 
 const page = () => {

@@ -262,7 +262,7 @@ export default function AppShell({ children }) {
               className={`
       flex items-center justify-center
       rounded-2xl bg-[rgba(245,158,11,0.2)]
-      ${collapsed ? "p-2 text-[#F59E0B]" : "px-4 py-[6px] gap-2 text-[#F59E0B]"}
+      ${collapsed ? "p-2 mt-2 text-[#F59E0B]" : "px-4 py-[6px] gap-2 text-[#F59E0B]"}
     `}
             >
               <FaCrown className={collapsed ? "text-base" : "text-sm"} />

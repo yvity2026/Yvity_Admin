@@ -10,7 +10,7 @@ import { useModal } from "@/context/ModalContext";
 
 // MOCK DATA: Structured for future backend API integration
 // When backend is ready, replace 'bgColor' and 'icon' with an 'imageUrl' property.
-const galleryData = [
+ export const galleryData = [
   {
     id: "gal-1",
     bgColor: "bg-[#0B4646]", // Dark teal

@@ -1,4 +1,5 @@
 "use client";
+import Skeleton from "@/app/components/skeleton/Skeleton";
 import Toggle from "@/app/components/ui/ToggleButton";
 import React, { useEffect, useRef, useState } from "react";
 import { CgGirl } from "react-icons/cg";
@@ -22,12 +23,12 @@ import { TfiGallery } from "react-icons/tfi";
 
 const page = () => {
   const [file, setFile] = useState(null);
-const [preview, setPreview] = useState(null);
-const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [preview, setPreview] = useState(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
 
-const videoRef = useRef(null);
-const canvasRef = useRef(null);
-const [isUpload, setIsUpload] = useState(false);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const [isUpload, setIsUpload] = useState(false);
 
   //start camera
   const startCamera = async () => {
@@ -95,184 +96,316 @@ const [isUpload, setIsUpload] = useState(false);
   const [isGallery, setIsGallery] = useState(false);
   const [isTestimonial, setIsTestimonial] = useState(false);
   const [isProfile, setIsProfile] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // await your API
+      await new Promise((res) => setTimeout(res, 1500)); // simulate delay
+      setLoading(false);
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div className="p-4 md:p-8 flex flex-col gap-4 md:gap-6">
       {/* stage-1 */}
       <div className="md:h-[212px] border flex flex-col p-4 sm:p-6 md:py-[34px] xl:pl-[30px] md:pr-[87px] gap-4 rounded-2xl bg-white shadow-sm">
-        <span className="flex items-center  justify-center md:justify-start md:text-left gap-2 font-nunito text-[clamp(12px,1.5vw,16px)]">
-          <IoIosCamera />
-          <p className="font-semibold font-poppins">Profile Photo</p> - Last
-          updated 6 months ago
-        </span>
+        {loading ? (
+          <div className="flex items-center justify-center md:justify-start gap-2">
+            {/* icon */}
+            <Skeleton className="h-4 w-4 rounded-full" />
+
+            {/* "Profile Photo" */}
+            <Skeleton className="h-4 w-28" />
+
+            {/* "- Last updated 6 months ago" */}
+            <Skeleton className="h-4 w-40 hidden sm:block" />
+          </div>
+        ) : (
+          <span className="flex items-center justify-center md:justify-start md:text-left gap-2 font-nunito text-[clamp(12px,1.5vw,16px)]">
+            <IoIosCamera />
+            <p className="font-semibold font-poppins">Profile Photo</p> - Last
+            updated 6 months ago
+          </span>
+        )}
         {/* <div className="w-[883px] flex flex-col md:flex-row items-center gap-[17px]"> */}
         <div className="w-full flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-[17px]">
           {/* profile image */}
           <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-26 md:h-26">
-            <div className="w-26 h-26 rounded-full bg-blue-200"></div>
+            {loading ? (
+              <Skeleton className="w-26 h-26 rounded-full" />
+            ) : (
+              <div className="w-26 h-26 rounded-full bg-blue-200"></div>
+            )}
 
             {/* edit icon */}
             <div className="absolute bottom-0 right-0 w-8 h-8 bg-[#0A4A4A] rounded-full flex items-center justify-center text-white shadow-md cursor-pointer">
               <FaPen size={14} />
             </div>
           </div>
-          <div className="flex flex-col h-full justify-between items-center md:items-start gap-6 xl:gap-0">
-            <span className="flex items-start sm:items-center text-left gap-4 py-[12px] px-[10px] xl:pl-[21px] text-amber-600 text-[clamp(10px,1vw,14px)] font-semibold leading-4 font-nunito rounded-lg border border-[#ECE4C8] bg-[#FDF9ED] shadow-none">
-              <FaTriangleExclamation />
-              <p className="">
-                You can update your profile photo only once a year. Next update
-                will be available on your birthday.
-              </p>
-            </span>
-            <button
-              className="w-full sm:w-auto px-4 h-[40px] flex py-[14px] px-[14px] gap-2 rounded-lg bg-[#0A4A4A] hover:bg-[#076868] hover:shadow-sm items-center text-[#F8F6F1] text-[clamp(8px,1vw,12px)] font-semibold leading-normal font-poppins cursor-pointer"
-              onClick={() => setIsUpload(true)}
-            >
-              <FaCamera />
-              Update Selfie
-            </button>
-          </div>
+          {loading ? (
+            <div className="flex flex-col h-full justify-between items-center md:items-start gap-6 xl:gap-0 w-full">
+              {/* Warning skeleton */}
+              <div className="flex items-start gap-4 py-[12px] px-[10px] xl:pl-[21px] w-full rounded-lg border border-gray-200 bg-gray-100">
+                {/* icon */}
+                <Skeleton className="h-4 w-4 rounded-full mt-1" />
+
+                {/* text lines */}
+                <div className="flex flex-col gap-2 w-full">
+                  <Skeleton className="h-3 w-[90%]" />
+                  <Skeleton className="h-3 w-[80%]" />
+                </div>
+              </div>
+
+              {/* Button skeleton */}
+              <Skeleton className="h-[40px] w-full sm:w-[160px] rounded-lg" />
+            </div>
+          ) : (
+            <div className="flex flex-col h-full justify-between items-center md:items-start gap-6 xl:gap-0">
+              <span className="flex items-start sm:items-center text-left gap-4 py-[12px] px-[10px] xl:pl-[21px] text-amber-600 text-[clamp(10px,1vw,14px)] font-semibold leading-4 font-nunito rounded-lg border border-[#ECE4C8] bg-[#FDF9ED] shadow-none">
+                <FaTriangleExclamation />
+                <p>
+                  You can update your profile photo only once a year. Next
+                  update will be available on your birthday.
+                </p>
+              </span>
+
+              <button
+                className="w-full sm:w-auto px-4 h-[40px] flex py-[14px] gap-2 rounded-lg bg-[#0A4A4A] hover:bg-[#076868] hover:shadow-sm items-center text-[#F8F6F1] text-[clamp(8px,1vw,12px)] font-semibold font-poppins cursor-pointer"
+                onClick={() => setIsUpload(true)}
+              >
+                <FaCamera />
+                Update Selfie
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* stage-2 */}
       {/* <div className="h-[449px] bg-white pl-10 pr-[35px] py-[22px] rounded-2xl bg-white shadow-sm"> */}
-      <div className="bg-white px-4 md:pl-10 md:pr-[35px] py-4 md:py-[22px] rounded-2xl shadow-sm">
-        <span className=" text-[#111827] text-base font-bold leading-normal font-poppins flex items-center gap-2">
-          <FaUser />
-          Basic Information
-        </span>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-[24px]">
-          {/* Full name */}
-          <div className="flex flex-col gap-2">
-            <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">
-              Full name <p className="text-[#D11717]">*</p>
-            </label>
-            <input
-              type="text"
-              placeholder="Krishna Mohan"
-              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
-            />
-          </div>
-          {/* DOB */}
-          <div className="flex flex-col gap-2">
-            <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">
-              Date of Birth<p className="text-[#D11717]">*</p>
-            </label>
-            <input
-              type="date"
-              placeholder="15-06-1985"
-              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
-            />
-          </div>
-          {/* Gender */}
-          <div className="flex flex-col gap-2">
-            <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">
-              Gender<p className="text-[#D11717]">*</p>
-            </label>
+      {
+        loading ? (
+           <div className="bg-white px-4 md:pl-10 md:pr-[35px] py-4 md:py-[22px] rounded-2xl shadow-sm">
 
-            <div className="flex gap-2 xl:gap-3 mt-2">
-              {/* Male */}
-              <label
-                className="flex items-center justify-center flex-1 h-10 px-3 sm:px-4 border border-[#DBE1E0] bg-[#FAFCFB] rounded-md cursor-pointer text-sm
-hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
-              >
-                <input
-                  type="radio"
-                  name="gender"
-                  value="male"
-                  className="hidden w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[16px] px-4 md:px-[24px] text-sm md:text-base font-nunito "
-                />
-                <span className="flex items-center gap-1">
-                  <FaUser />
-                  Male
-                </span>
-              </label>
-
-              {/* Female */}
-              <label
-                className="flex items-center justify-center flex-1 h-10 px-3 sm:px-4 border-[#DBE1E0] bg-[#FAFCFB]   border  rounded-md cursor-pointer text-sm
-hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
-              >
-                <input
-                  type="radio"
-                  name="gender"
-                  value="female"
-                  className="hidden w-full rounded-lg border border-[##DBE1E0] bg-[#FAFCFB] py-3 md:py-[16px] px-4 md:px-[24px] text-sm md:text-base font-bold leading-4 font-nunito"
-                />
-                <span className="flex items-center gap-1">
-                  <CgGirl />
-                  Female
-                </span>
-              </label>
-
-              {/* Other */}
-              <label
-                className="flex items-center justify-center flex-1 h-10 px-3 sm:px-4 border border-[#DBE1E0] bg-[#FAFCFB] rounded-md cursor-pointer text-sm
-hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
-              >
-                <input
-                  type="radio"
-                  name="gender"
-                  value="other"
-                  className="hidden w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[16px] px-4 md:px-[24px] text-sm md:text-base font-nunito"
-                />
-                Other
-              </label>
-            </div>
-          </div>
-          {/* City/Location */}
-          <div className="flex flex-col gap-2">
-            <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">
-              City / Location<p className="text-[#D11717]">*</p>
-            </label>
-            <input
-              type="text"
-              placeholder="Nellore, AP"
-              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
-            />
-          </div>
-          {/* email */}
-          <div className="flex flex-col gap-2">
-            <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">
-              Email<p className="text-[#D11717]">*</p>
-            </label>
-            <input
-              type="email"
-              placeholder="Krishna@email.com"
-              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
-            />
-          </div>
-          {/* mobile */}
-          <div className="flex flex-col gap-2">
-            <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">
-              Phone Number<p className="text-[#D11717]">*</p>
-            </label>
-            <input
-              type="tel"
-              placeholder="+91  9876543210"
-              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
-            />
-          </div>
-          <div className="flex flex-col gap-2 lg:col-span-2">
-            <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">
-              IRDAI License Number <p className="text-[#D11717]">*</p>
-              <p className="text-primary-900 font-nunito text-xs font-semiboldame hover:underline cursor-pointer">
-                What is this?
-              </p>
-            </label>
-            <input
-              type="text"
-              name="irdaiLicenseNumber"
-              placeholder="CM123456789"
-              className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
-              required
-            />
-          </div>
-        </div>
+      {/* Title */}
+      <div className="flex items-center gap-2 mb-6">
+        <Skeleton className="h-5 w-5 rounded-full" />
+        <Skeleton className="h-5 w-40" />
       </div>
 
+      {/* Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        {/* Input field skeleton */}
+        {[1,2,3,4,5,6].map((_, i) => (
+          <div key={i} className="flex flex-col gap-2">
+            <Skeleton className="h-4 w-32" /> {/* label */}
+            <Skeleton className="h-11 w-full rounded-lg" /> {/* input */}
+          </div>
+        ))}
+
+        {/* Gender special case */}
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-4 w-24" />
+          <div className="flex gap-2 mt-2">
+            <Skeleton className="h-10 flex-1 rounded-md" />
+            <Skeleton className="h-10 flex-1 rounded-md" />
+            <Skeleton className="h-10 flex-1 rounded-md" />
+          </div>
+        </div>
+
+        {/* Full width field (IRDAI) */}
+        <div className="flex flex-col gap-2 lg:col-span-2">
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-11 w-full rounded-lg" />
+        </div>
+
+      </div>
+    </div>
+        ) : (
+        <div className="bg-white px-4 md:pl-10 md:pr-[35px] py-4 md:py-[22px] rounded-2xl shadow-sm">
+          <span className=" text-[#111827] text-base font-bold leading-normal font-poppins flex items-center gap-2">
+            <FaUser />
+            Basic Information
+          </span>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-[24px]">
+            {/* Full name */}
+            <div className="flex flex-col gap-2">
+              <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">
+                Full name <p className="text-[#D11717]">*</p>
+              </label>
+              <input
+                type="text"
+                placeholder="Krishna Mohan"
+                className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
+              />
+            </div>
+            {/* DOB */}
+            <div className="flex flex-col gap-2">
+              <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">
+                Date of Birth<p className="text-[#D11717]">*</p>
+              </label>
+              <input
+                type="date"
+                placeholder="15-06-1985"
+                className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
+              />
+            </div>
+            {/* Gender */}
+            <div className="flex flex-col gap-2">
+              <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">
+                Gender<p className="text-[#D11717]">*</p>
+              </label>
+
+              <div className="flex gap-2 xl:gap-3 mt-2">
+                {/* Male */}
+                <label
+                  className="flex items-center justify-center flex-1 h-10 px-3 sm:px-4 border border-[#DBE1E0] bg-[#FAFCFB] rounded-md cursor-pointer text-sm
+hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
+                >
+                  <input
+                    type="radio"
+                    name="gender"
+                    value="male"
+                    className="hidden w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[16px] px-4 md:px-[24px] text-sm md:text-base font-nunito "
+                  />
+                  <span className="flex items-center gap-1">
+                    <FaUser />
+                    Male
+                  </span>
+                </label>
+
+                {/* Female */}
+                <label
+                  className="flex items-center justify-center flex-1 h-10 px-3 sm:px-4 border-[#DBE1E0] bg-[#FAFCFB]   border  rounded-md cursor-pointer text-sm
+hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
+                >
+                  <input
+                    type="radio"
+                    name="gender"
+                    value="female"
+                    className="hidden w-full rounded-lg border border-[##DBE1E0] bg-[#FAFCFB] py-3 md:py-[16px] px-4 md:px-[24px] text-sm md:text-base font-bold leading-4 font-nunito"
+                  />
+                  <span className="flex items-center gap-1">
+                    <CgGirl />
+                    Female
+                  </span>
+                </label>
+
+                {/* Other */}
+                <label
+                  className="flex items-center justify-center flex-1 h-10 px-3 sm:px-4 border border-[#DBE1E0] bg-[#FAFCFB] rounded-md cursor-pointer text-sm
+hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
+                >
+                  <input
+                    type="radio"
+                    name="gender"
+                    value="other"
+                    className="hidden w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[16px] px-4 md:px-[24px] text-sm md:text-base font-nunito"
+                  />
+                  Other
+                </label>
+              </div>
+            </div>
+            {/* City/Location */}
+            <div className="flex flex-col gap-2">
+              <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">
+                City / Location<p className="text-[#D11717]">*</p>
+              </label>
+              <input
+                type="text"
+                placeholder="Nellore, AP"
+                className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
+              />
+            </div>
+            {/* email */}
+            <div className="flex flex-col gap-2">
+              <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">
+                Email<p className="text-[#D11717]">*</p>
+              </label>
+              <input
+                type="email"
+                placeholder="Krishna@email.com"
+                className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
+              />
+            </div>
+            {/* mobile */}
+            <div className="flex flex-col gap-2">
+              <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">
+                Phone Number<p className="text-[#D11717]">*</p>
+              </label>
+              <input
+                type="tel"
+                placeholder="+91  9876543210"
+                className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
+              />
+            </div>
+            <div className="flex flex-col gap-2 lg:col-span-2">
+              <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">
+                IRDAI License Number <p className="text-[#D11717]">*</p>
+                <p className="text-primary-900 font-nunito text-xs font-semiboldame hover:underline cursor-pointer">
+                  What is this?
+                </p>
+              </label>
+              <input
+                type="text"
+                name="irdaiLicenseNumber"
+                placeholder="CM123456789"
+                className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
+                required
+              />
+            </div>
+          </div>
+        </div>  
+        )
+      }
+
+
       {/* stage - 3 */}
+      {
+        loading ? (
+          <div className="py-4 md:py-[35px] px-4 md:pl-[40px] md:pr-[35px] rounded-2xl bg-white shadow-sm">
+
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center gap-2 mb-6">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-5 w-5 rounded-full" />
+          <Skeleton className="h-5 w-40" />
+        </div>
+        <Skeleton className="h-4 w-72 md:ml-2" />
+      </div>
+
+      {/* Rows */}
+      <div className="flex flex-col gap-4">
+        {[1,2,3,4,5,6].map((_, i) => (
+          <div
+            key={i}
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-gray-200 bg-gray-100"
+          >
+            {/* Left side */}
+            <div className="flex items-center gap-4 w-full">
+              <Skeleton className="h-5 w-5 rounded-full" />
+
+              <div className="flex flex-col gap-2 w-full">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-3 w-56" />
+              </div>
+            </div>
+
+            {/* Right side */}
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+              <Skeleton className="h-4 w-14" /> {/* "Public" */}
+              <Skeleton className="h-6 w-10 rounded-full" /> {/* toggle */}
+            </div>
+          </div>
+        ))}
+      </div>
+
+    </div>
+        ) : (
       <div className="py-4 md:py-[35px] px-4 md:pl-[40px] md:pr-[35px] rounded-2xl bg-white shadow-sm">
         <span className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 mb-4 md:mb-[24px] text-gray-500 text-xs md:text-sm font-bold font-nunito">
           <p className="text-sm md:text-[14px] font-bold font-poppins text-[#111827] flex items-center gap-2">
@@ -444,7 +577,24 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
           </div>
         </div>
       </div>
+        )
+      }
       {/* stage-4 */}
+      {
+        loading ? (
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 px-4 md:px-6 py-4 md:py-[26px] bg-white">
+      
+      {/* Text */}
+      <Skeleton className="h-4 w-48" />
+
+      {/* Buttons */}
+      <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3 md:gap-4">
+        <Skeleton className="h-[40px] w-full md:w-[150px] rounded-lg" />
+        <Skeleton className="h-[40px] w-full md:w-[150px] rounded-lg" />
+      </div>
+
+    </div>
+        ) : (
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 px-4 md:px-6 py-4 md:py-[26px] bg-white">
         <p className="text-gray-500 ttext-[clamp(10px,1vw,14px)] font-normal leading-normal font-nunito">
           Make Changes Above To Save
@@ -460,6 +610,8 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
           </button>
         </div>
       </div>
+        )
+      }
 
       {isUpload && (
         <div className="fixed inset-0 z-[9999] flex items-start md:items-center justify-center">
@@ -498,9 +650,7 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
                 >
                   <FaCamera />
                   <div>
-                    <p className="text-[#111827] font-medium">
-                      Take a Selfie
-                    </p>
+                    <p className="text-[#111827] font-medium">Take a Selfie</p>
                     <p className="text-[#6B7280] text-sm">
                       Use camera for a live photo
                     </p>
@@ -539,9 +689,7 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
                     <p className="text-[#111827] font-medium">
                       Upload from Gallery
                     </p>
-                    <p className="text-[#6B7280] text-sm">
-                      JPG, PNG • Max 5MB
-                    </p>
+                    <p className="text-[#6B7280] text-sm">JPG, PNG • Max 5MB</p>
                   </div>
                 </button>
               </div>

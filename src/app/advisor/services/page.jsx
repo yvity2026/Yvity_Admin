@@ -1,5 +1,6 @@
 "use client";
 import { ModalWrapper } from "@/app/components/layout/ModalWrapper";
+import ServiceSection from "@/components/features/advisor/services/ServiceSection";
 import { useModal } from "@/context/ModalContext";
 import React, { useEffect, useState } from "react";
 import { FaCross, FaMehBlank, FaPlus } from "react-icons/fa";
@@ -79,6 +80,7 @@ export default function Page() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full">
+        <ServiceSection setEdit={setEdit} setIsDelete={setIsDelete} />
         <div className="w-full rounded-2xl border border-[#E2E1DC] bg-white pb-[38px] shadow-none min-w-[480px] lx:w-full">
           <div className="h-[60px] px-3 sm:px-4 md:px-[30px] py-3 md:py-[18px] rounded-t-2xl bg-[#2A9D8F] shadow-[0_0_2px_0_rgba(0,0,0,0.25)] flex justify-between items-center">
             <span className="flex items-center gap-2 text-[#F8F6F1] font-[Poppins] text-[16px] font-bold leading-normal">
@@ -118,7 +120,7 @@ export default function Page() {
         </div>
 
         {/* Add Card Button */}
-        <div className="w-full flex items-center justify-center cursor-pointer hover:opacity-90 rounded-2xl border border-[#E2E1DC] bg-white shadow-none min-w-[480px] lg:w-full  min-h-[240px] py-[80px]">
+        <div className="w-full flex items-center justify-center cursor-pointer hover:opacity-90 rounded-2xl border-2 border-[#E2E1DC] border-dashed hover:border-[#785DC8] bg-white shadow-none min-w-[480px] lg:w-full  min-h-[240px] py-[80px]">
           <span className="flex flex-col justify-center items-center text-2xl">
             <FaPlus className="text-[#785DC8] w-10 h-10" />
             <p className="text-gray-500 text-center font-[Poppins] text-[clamp(12px,1.5vw,16px)] font-medium leading-normal">Add New Services</p>
