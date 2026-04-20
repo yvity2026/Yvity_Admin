@@ -5,6 +5,9 @@ const page = () => {
   return (
     <>
     <Header />
+    <LandingPopup />
+    <AdvisorSearchFilter />
+    <SavedProfiles/>
     </>
   )
 }
