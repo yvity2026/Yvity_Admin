@@ -86,7 +86,7 @@ export default function EntryFormModal({ isOpen, onClose, initialData, onSubmit 
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-200 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="bg-white rounded-[24px] w-full max-w-[500px] shadow-2xl overflow-hidden flex flex-col">
         {/* Header */}
         <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">

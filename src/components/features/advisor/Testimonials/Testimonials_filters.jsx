@@ -1,5 +1,6 @@
 import { ModalWrapper } from "@/app/components/layout/ModalWrapper";
 import React, { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { AiFillEdit } from "react-icons/ai";
 import { FaPlayCircle, FaVideo } from "react-icons/fa";
 import { FaMessage, FaShield } from "react-icons/fa6";
@@ -99,6 +100,41 @@ const Testimonials_filters = ({ showActions = true }) => {
   };
   const [loading, setLoading] = useState(true);
 
+  const validateTestimonialAction = (action) => {
+  // Example conditions — adjust based on real logic
+  if (!action) {
+    toast.error("Invalid action");
+    return false;
+  }
+
+  return true;
+};
+
+const handleApprove = async () => {
+  if (!validateTestimonialAction("approve")) return;
+
+  try {
+    setLoading(true);
+    // await API call
+    await new Promise((res) => setTimeout(res, 1000));
+
+    toast.success("Approved successfully");
+    setIsTextOpen(false);
+  } catch (err) {
+    toast.error("Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const handleReject = () => {
+  if (!validateTestimonialAction("reject")) return;
+
+  // API call here
+  toast.success("Testimonial rejected");
+  setIsTextOpen(false);
+};
+
   useEffect(() => {
       setLoading(true)
         const fetchData = async () => {
@@ -189,7 +225,7 @@ const Testimonials_filters = ({ showActions = true }) => {
             {(activeFilter === "All" || activeFilter === "Text") && (
               <div className="w-full px-4 sm:px-6 md:px-[50px] py-4 md:py-[19px] flex flex-col gap-[18px] md:gap-[18px] rounded-2xl border-l-4 border-l-[#E2E1DC] hover:border-l-[#0D6060] bg-white transition-all duration-300">
                 <div className="flex flex-col sm:flex-row justify-between gap-3 sm:items-center">
-                  <div className="flex gap-[16px] items-center">
+                  <div className="flex gap-[16px] md:gap-[16px] items-center">
                     <div className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] rounded-full bg-green-950"></div>
                     <div className="flex flex-col gap-1">
                       <p className="text-sm sm:text-base font-bold text-[#111827]">
@@ -200,7 +236,6 @@ const Testimonials_filters = ({ showActions = true }) => {
                       </p>
                     </div>
                   </div>
-
                   <span className="flex items-center gap-1 text-[#0A4A4A] text-xs rounded-2xl bg-[#E8F4F4] font-semibold p-[10px]">
                     <AiFillEdit /> Text
                   </span>
@@ -220,12 +255,12 @@ const Testimonials_filters = ({ showActions = true }) => {
                   {showActions && (
                     <span className="flex gap-2">
                       <button
-                        className="px-2 py-1 bg-[#E8F4F4] rounded-md text-xs"
+                        className="px-2 py-1 bg-[#E8F4F4] rounded-md text-xs cursor-pointer"
                         onClick={() => setIsTextOpen(true)}
                       >
                         View
                       </button>
-                      <button className="px-2 py-1 border border-[#C1C1C1] rounded-md text-xs">
+                      <button className="px-2 py-1 border border-[#C1C1C1] rounded-md text-xs cursor-pointer">
                         Reply
                       </button>
                     </span>
@@ -236,9 +271,9 @@ const Testimonials_filters = ({ showActions = true }) => {
 
             {/* AUDIO CARD */}
             {(activeFilter === "All" || activeFilter === "Audio") && (
-              <div className="w-full px-4 sm:px-6 md:px-[50px] py-4 md:py-[19px] flex flex-col gap-[18px] rounded-2xl border-l-4 border-l-[#E2E1DC] hover:border-l-[#0D6060] bg-white">
+              <div className="w-full px-4 sm:px-6 md:px-[50px] py-4 md:py-[19px] flex flex-col gap-[18px] md:gap-[18px] rounded-2xl border-l-4 border-l-[#E2E1DC] hover:border-l-[#0D6060] bg-white">
                 <div className="flex flex-col sm:flex-row justify-between gap-3 sm:items-center">
-                  <div className="flex gap-[16px] items-center">
+                  <div className="flex gap-[16px] md:gap-[16px] items-center">
                     <div className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] rounded-full bg-[#A5780A]"></div>
                     <div className="flex flex-col gap-1">
                       <p className="text-sm sm:text-base font-bold text-[#111827]">
@@ -290,10 +325,10 @@ const Testimonials_filters = ({ showActions = true }) => {
                   </span>
 
                   <span className="flex gap-2">
-                    <button className="px-2 py-1 bg-[#E8F4F4] rounded-md text-xs">
+                    <button className="px-2 py-1 bg-[#E8F4F4] rounded-md text-xs cursor-pointer">
                       View
                     </button>
-                    <button className="px-2 py-1 border border-[#C1C1C1] rounded-md text-xs">
+                    <button className="px-2 py-1 border border-[#C1C1C1] rounded-md text-xs cursor-pointer">
                       Reply
                     </button>
                   </span>
@@ -323,7 +358,7 @@ const Testimonials_filters = ({ showActions = true }) => {
                 </div>
 
                 <video
-                  className="w-full h-[120px] rounded-md object-cover"
+                  className="w-full h-[120px] rounded-md object-cover cursor-pointer"
                   controls
                 >
                   <source src="/your-video.mp4" type="video/mp4" />
@@ -339,10 +374,10 @@ const Testimonials_filters = ({ showActions = true }) => {
 
                   {showActions && (
                     <span className="flex gap-2">
-                      <button className="px-2 py-1 bg-[#E8F4F4] rounded-md text-xs">
+                      <button className="px-2 py-1 bg-[#E8F4F4] rounded-md text-xs cursor-pointer">
                         View
                       </button>
-                      <button className="px-2 py-1 border border-[#C1C1C1] rounded-md text-xs">
+                      <button className="px-2 py-1 border border-[#C1C1C1] rounded-md text-xs cursor-pointer">
                         Reply
                       </button>
                     </span>
@@ -397,12 +432,13 @@ const Testimonials_filters = ({ showActions = true }) => {
 
               {/* ACTION BUTTONS */}
               <div className="flex flex-col sm:flex-row gap-3 sm:justify-end mt-2">
-                <button className="px-4 py-3 rounded-lg bg-[#FEF2F2] text-[#E85D5D] border border-[#FEB5B5] text-xs font-semibold">
+                <button className="px-4 py-3 rounded-lg bg-[#FEF2F2] text-[#E85D5D] border border-[#FEB5B5] text-xs font-semibold"
+                onClick={() => handleApprove()}>
                   Approve
                 </button>
 
                 <button
-                  onClick={() => setIsDelete(false)}
+                  onClick={() => handleReject()}
                   className="px-4 py-3 rounded-lg bg-[#0A4A4A] text-white text-xs font-semibold"
                 >
                   Reject

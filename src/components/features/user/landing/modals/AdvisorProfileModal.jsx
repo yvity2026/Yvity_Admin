@@ -40,6 +40,22 @@ const AdvisorProfileModal = ({ isOpen, onClose, onContinue }) => {
   const [isAdvisorForm, setIsAdvisorForm] = useState(false);
   if (!isOpen) return null;
 
+  const validateRoleSelection = () => {
+    if (!selectedRole) {
+      toast.error("Please select a role to continue");
+      return false;
+    }
+
+    const selected = roles.find((r) => r.id === selectedRole);
+
+    if (!selected?.isAvailable) {
+      toast.error("This role is not available yet");
+      return false;
+    }
+
+    return true;
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 no-scrollbar">
       {/* Background Blur Overlay */}
@@ -48,14 +64,14 @@ const AdvisorProfileModal = ({ isOpen, onClose, onContinue }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm "
       />
 
       {/* Modal Container */}
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        className="relative w-full max-w-lg bg-white rounded-[2rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-lg bg-white rounded-[2rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh] no-scrollbar"
       >
         {/* FIXED Header Section */}
         <div className="bg-[#0D4D4D] p-8 pb-5 text-white relative shrink-0 sticky">
@@ -117,12 +133,14 @@ const AdvisorProfileModal = ({ isOpen, onClose, onContinue }) => {
         {/* FIXED Footer Action */}
         <div className="p-6 pt-4 pb-8 bg-white border-t border-gray-100 shrink-0">
           <button
-            className="w-full bg-[#0D4D4D] hover:bg-[#0A3D3D] text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all"
+            className="w-full bg-[#0D4D4D] hover:bg-[#0A3D3D] text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all cursor-pointer"
             onClick={() => {
+              if (!validateRoleSelection()) return;
+
               onContinue(selectedRole);
             }}
           >
-            Continue as Selected Role
+            {!selectedRole ? "Select a Role to Continue" : "Continue as Selected Role"}
             <HiOutlineArrowRight size={20} />
           </button>
         </div>

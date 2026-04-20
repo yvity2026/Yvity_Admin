@@ -1,6 +1,7 @@
 "use client";
 import { ModalWrapper } from "@/app/components/layout/ModalWrapper";
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 import {
   FaArrowRight,
   FaCheck,
@@ -15,6 +16,7 @@ import { HiMiniShieldCheck } from "react-icons/hi2";
 import { IoClose } from "react-icons/io5";
 import { MdAutorenew, MdClose, MdOutlineVerifiedUser } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
+import { SiInfinityfree } from "react-icons/si";
 
 const page = () => {
   const paymentHistory = [
@@ -51,6 +53,7 @@ const page = () => {
       period: "",
       message: "Free forever, no credit card required",
       features: ["Basic Profile", "3 Achievements", "5 Text Testimonials"],
+      medal : <SiInfinityfree />,
       nonFeatures: [
         "Identify Verified Badge",
         "Audio/video Reviews",
@@ -59,7 +62,7 @@ const page = () => {
       ],
       cardStyle:
         "hover:rounded-[16px] hover:border border-transparent hover:border-[#0D6060] bg-white hover:shadow-[0_0_4px_2px_rgba(13,96,96,0.25)]",
-      buttonText: "Current : Free",
+      buttonText: "Free",
       buttonStyle:
         "flex items-center justify-center gap-2  md:min-w-0 lg:min-h-[44px] rounded-full text-sm md:text-base px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 border-2 border-transparent bg-[#F8F6F1] hover:border-[#0D6060] hover:bg-[#F8F6F1] transition-all duration-500 active:scale-[0.98] cursor-pointer text-[var(--labels-secondary-info,#6B7280)]",
     },
@@ -74,10 +77,11 @@ const page = () => {
         "Identify Verified Badge",
         "Audio Reviews",
       ],
+      medal : <FaMedal />,
       nonFeatures: ["Vedio Testimonials", "QR Code Download"],
       cardStyle:
         "hover:rounded-[16px] hover:border border-transparent  hover:border-[#0D6060] bg-white hover:shadow-[0_0_4px_2px_rgba(13,96,96,0.25)]",
-      buttonText: "Upgrade to silver",
+      buttonText: "Silver",
       buttonStyle:
         "flex items-center justify-center gap-2  md:min-w-0 xl:min-h-[44px] rounded-full text-sm  md:text-base px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 bg-(--primary-900,#0A4A4A) text-(--ct-as-badges-accents,#F59E0B) hover:bg-(--Primary-800,#076868) hover:text-(--ct-as-badges-accents,#F59E0B) hover:shadow-[0_4px_12px_rgba(13,96,96,0.25)] transition-all duration-500 active:scale-[0.98] cursor-pointer text-[ var(--ct-as-badges-accents,#F59E0B)]",
     },
@@ -94,6 +98,7 @@ const page = () => {
         "Intro Video Upload",
         "Finding Advisors Badge",
       ],
+      medal : <FaCrown />,
       // nonFeatures?: [
       //   "No access to premium features",
       //   "Limited profile customization",
@@ -112,7 +117,79 @@ const page = () => {
   const [isRenew, setIsRenew] = useState(false);
   const [isAutoRenew, setIsAutoRenew] = useState(false);
   const [isUpgrade, setIsUpgrade] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("UPI");
+  const [loading, setLoading] = useState(false);
 
+  const validatePayment = () => {
+    if (!paymentMethod) {
+      toast.error("Please select a payment method");
+      return false;
+    }
+    return true;
+  };
+
+  const handlePayment = async () => {
+    if (!validatePayment()) return;
+
+    try {
+      setLoading(true);
+
+      // simulate API/payment gateway
+      await new Promise((res) => setTimeout(res, 1200));
+
+      toast.success(`Payment initiated via ${paymentMethod}`);
+
+      setIsRenew(false);
+    } catch (err) {
+      toast.error("Payment failed. Try again");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const [autoRenewInput, setAutoRenewInput] = useState("");
+
+  const validateAutoRenew = () => {
+    const value = autoRenewInput.trim();
+
+    // UPI pattern (basic)
+    const upiRegex = /^[\w.-]+@[\w.-]+$/;
+
+    // last 4 digits of card
+    const cardRegex = /^\d{4}$/;
+
+    if (!value) {
+      toast.error("Payment detail is required");
+      return false;
+    }
+
+    if (!upiRegex.test(value) && !cardRegex.test(value)) {
+      toast.error("Enter valid UPI ID or last 4 digits of card");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleAutoRenew = async () => {
+    if (!validateAutoRenew()) return;
+
+    try {
+      setLoading(true);
+
+      // simulate API
+      await new Promise((res) => setTimeout(res, 1200));
+
+      toast.success("Auto-renewal enabled successfully");
+
+      setIsAutoRenew(false);
+      setAutoRenewInput("");
+    } catch (err) {
+      toast.error("Failed to enable auto-renewal");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="p-4 md:p-6 lg:p-10 xl:px-15 pt-[24px] pb-[81px] flex flex-col gap-[26px]">
       <div className="w-full  h-auto  bg-white px-4 md:pl-[40px] md:pr-[44px] py-6 md:py-[33px] flex flex-col md:grid md:grid-cols-2 gap-6 md:gap-0 rounded-2xl bg-gradient-to-r from-[#094C4B] to-[#0A6A69] shadow-[0_0_2px_0_rgba(0,0,0,0.2)]">
@@ -138,7 +215,7 @@ const page = () => {
               text-[clamp(10px,1vw,14px)]
        w-full sm:w-auto
       flex items-center justify-center
-      px-4 gap-2 py-[10px] rounded-lg bg-[#F59E0B] text-[#F8F6F1]
+      px-4 gap-2 py-[10px] rounded-lg bg-[#F59E0B] text-[#F8F6F1] cursor-pointer
     "
               onClick={() => setIsRenew(true)}
             >
@@ -151,7 +228,7 @@ const page = () => {
               text-[clamp(10px,1vw,14px)]
       w-full sm:w-auto   // ✅ FIXED (space added)
       flex items-center justify-center
-      px-4 py-[10px] rounded-lg bg-[#256B6B] text-[#F8F6F1] border border-[#539292]
+      px-4 py-[10px] rounded-lg bg-[#256B6B] text-[#F8F6F1] border border-[#539292] cursor-pointer
     "
               onClick={() => setIsAutoRenew(true)}
             >
@@ -189,7 +266,7 @@ const page = () => {
               className={`${item.cardStyle} relative w-full flex flex-col gap-4 mx-auto p-4 md:py-[36px] md:px-[16px] rounded-2xl border border-[#E5E5E5] bg-white shadow-[0_0_4px_0_rgba(0,0,0,0.25)]`}
             >
               <span className="flex justify-start">
-                <FaMedal />
+                {item.medal}
               </span>
               <p className="text-xl md:text-2xl font-semibold tracking-[1.4px] text-(--ct-as-badges-accents,#F59E0B) uppercase font-poppins leading-none">
                 {item.title}
@@ -451,6 +528,8 @@ const page = () => {
                       name="payment"
                       className="w-5 h-5 accent-emerald-800"
                       defaultChecked
+                      checked={paymentMethod === "UPI"}
+                      onChange={() => setPaymentMethod("UPI")}
                     />
                     <span className="font-medium text-slate-700 group-hover:text-emerald-900">
                       UPI
@@ -462,6 +541,8 @@ const page = () => {
                       type="radio"
                       name="payment"
                       className="w-5 h-5 accent-emerald-800"
+                      checked={paymentMethod === "CARD"}
+                      onChange={() => setPaymentMethod("CARD")}
                     />
                     <span className="font-medium text-slate-700 group-hover:text-emerald-900">
                       Credit / Debit Card
@@ -473,6 +554,8 @@ const page = () => {
                       type="radio"
                       name="payment"
                       className="w-5 h-5 accent-emerald-800"
+                      checked={paymentMethod === "NET_BANKING"}
+                      onChange={() => setPaymentMethod("NET_BANKING")}
                     />
                     <span className="font-medium text-slate-700 group-hover:text-emerald-900">
                       Net Banking
@@ -481,8 +564,12 @@ const page = () => {
                 </div>
 
                 {/* Pay Button */}
-                <button className="w-full bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-transform active:scale-[0.98]">
-                  Pay 2,999
+                <button
+                  onClick={handlePayment}
+                  disabled={loading}
+                  className="w-full bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-3 transition-transform active:scale-[0.98] cursor-pointer"
+                >
+                  {loading ? "Processing..." : "Pay 2,999"}
                   <FiArrowRight size={18} />
                 </button>
               </div>
@@ -539,13 +626,19 @@ const page = () => {
                   </label>
                   <input
                     type="text"
+                    value={autoRenewInput}
+                    onChange={(e) => setAutoRenewInput(e.target.value)}
                     placeholder="e.g. krishna@upi or last 4 digits of card"
                     className="w-full px-5 py-4 bg-slate-50 border border-gray-200 rounded-xl text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-slate-400"
                   />
                 </div>
 
-                <button className="w-full bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4.5 rounded-xl font-bold text-lg transition-transform active:scale-[0.98] shadow-lg shadow-emerald-900/10">
-                  Enable Auto - Renewal
+                <button
+                  onClick={handleAutoRenew}
+                  disabled={loading}
+                  className="w-full bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4.5 rounded-xl font-bold text-lg transition-transform active:scale-[0.98] shadow-lg shadow-emerald-900/10 cursor-pointer"
+                >
+                  {loading ? "Enabling..." : "Enable Auto - Renewal"}
                 </button>
               </div>
             </div>
@@ -554,7 +647,7 @@ const page = () => {
       )}
 
       {isUpgrade && (
-        <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+        <div className="fixed inset-0 z-200 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           {/* CARD */}
           <div className="w-[92vw] sm:w-[85vw] md:w-[420px] bg-[#f3f4f6] rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
             {/* HEADER */}

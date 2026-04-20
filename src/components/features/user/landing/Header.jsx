@@ -18,8 +18,8 @@ const Header = () => {
     SUCCESS: "success",
   };
   return (
-    <nav className="bg-white border-b border-gray-200 px-4 md:px-6 lg:px-10 xl:px-[15px] shadow-sm">
-      <div className="max-w-7xl mx-auto flex items-center justify-between ">
+    <nav className="bg-white border-b border-gray-200 px-4 md:px-6 lg:px-10 xl:px-[120px] shadow-sm">
+      <div className=" mx-auto flex items-center justify-between ">
         {/* Left Side: Logo */}
         <div className="flex items-center space-x-2">
           <Image
@@ -56,7 +56,7 @@ const Header = () => {
               KM
             </div>
 
-            <button className="flex items-center gap-2 text-[14px] leading-[16px] font-medium text-[#EF5555] font-poppins">
+            <button className="flex items-center gap-2 text-[14px] leading-[16px] font-medium text-[#EF5555] font-poppins cursor-pointer">
               <FiLogOut size={20} />
               Logout
             </button>

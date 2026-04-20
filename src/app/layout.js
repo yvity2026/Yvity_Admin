@@ -53,12 +53,18 @@ export default function RootLayout({ children }) {
         <ModalProvider>
           <SidebarProvider>
             <AppShell>
-               <main className="flex-1 flex flex-col">
-                  <Toaster position="top-right" />
-                  {children}
-                </main>
-              
-              </AppShell>
+              <main className="flex-1 flex flex-col">
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    style: {
+                      zIndex: 99999,
+                    },
+                  }}
+                />
+                {children}
+              </main>
+            </AppShell>
           </SidebarProvider>
         </ModalProvider>
       </body>

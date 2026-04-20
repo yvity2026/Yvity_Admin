@@ -614,7 +614,7 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
       }
 
       {isUpload && (
-        <div className="fixed inset-0 z-[9999] flex items-start md:items-center justify-center">
+        <div className="fixed inset-0 z-200 flex items-start md:items-center justify-center">
           {/* BACKDROP */}
           <div
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
