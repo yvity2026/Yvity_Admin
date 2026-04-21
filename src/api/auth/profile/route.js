@@ -1,4 +1,4 @@
-import { apiResponse } from "@/lib/ApiResponse";
+import { apiResponse } from "@/lib/apiResponse";
 import { getUser } from "@/lib/auth/Getuser";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
