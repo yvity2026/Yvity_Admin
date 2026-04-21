@@ -1,31 +1,42 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { cookies, cookies } from "next/headers"
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    return decodeURIComponent(parts.pop().split(";").shift());
+  }
+  return null;
+}
 
 export default function InitPage() {
-  const router = useRouter()
-const cookiestore = cookies();
-  useEffect(async() => {
-    // const userId = sessionStorage.getItem("userId") || 
-    const userId = (await cookiestore).get()
+  const router = useRouter();
 
-    if (!userId) {
-      router.push("/login")
-      return
-    }
+  useEffect(() => {
+    const run = async () => {
+      const userId = getCookie("yvity_user_id");
 
-    fetch("/api/auth/sync", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId }),
-    }).then(() => {
-      router.push("/dashboard")
-    })
-  }, [])
+      if (!userId) {
+        router.push("/");
+        return;
+      }
 
-  return <p>Setting up session...</p>
+      await fetch("/api/auth/sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      router.push("/dashboard");
+    };
+
+    run();
+  }, []);
+
+  return <p>Setting up session...</p>;
 }

@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { createAdminClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -14,7 +15,8 @@ export async function POST(req) {
         error: "Missing Userid from the session Storage",
       });
     }
-    const { data, error } = await supabaseAdmin.auth.admin.getUserById(UserId);
+    
+    const { data, error } = await createAdminClient.;
     if (error || !data.user) {
       return NextResponse.json({
         message: "User not Found",
