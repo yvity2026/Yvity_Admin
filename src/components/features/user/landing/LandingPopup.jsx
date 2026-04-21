@@ -18,10 +18,10 @@ const LandingPopup = () => {
           </div>
           
           <div className="flex flex-col md:flex-row md:items-center md:gap-2">
-            <span className="text-[16px] font-semibold font-poppins text-[#1A3C40] whitespace-nowrap">
+            <span className="text-[clamp(12px,1.5vw,16px)] font-semibold font-poppins text-[#1A3C40] whitespace-nowrap">
               Offer your services on YVITY?
             </span>
-            <span className="text-[14px] leading-[16px] font-normal text-[#6B7280] font-poppins">
+            <span className="text-[clamp(10px,1vw,14px)] leading-[16px] font-normal text-[#6B7280] font-poppins">
               Complete your profile setup — takes 3 minutes.
             </span>
           </div>
@@ -29,8 +29,8 @@ const LandingPopup = () => {
 
         {/* Action Area */}
         <div className="flex items-center gap-4 w-full sm:w-auto justify-center">
-          <button 
-            className="bg-[#104D4D] hover:bg-[#0D3D3D]  py-2 px-6 rounded-full transition-all text-sm md:text-base whitespace-nowrap text-[14px] font-bold text-[var(--ct-as-badges-accents,#F59E0B)] font-poppins cursor-pointer"
+          <button
+            className="bg-[#104D4D] hover:bg-[#0D3D3D]  py-2 px-6 rounded-full transition-all text-sm md:text-base whitespace-nowrap text-[clamp(10px,1vw,14px)] font-bold text-[var(--ct-as-badges-accents,#F59E0B)] font-poppins cursor-pointer"
             onClick={() => console.log("Navigating to setup...")}
           >
             Setup Now

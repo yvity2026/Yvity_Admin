@@ -137,7 +137,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm  ">
-      <div className="relative w-full max-w-[600px] bg-white rounded-[2rem] overflow-hidden shadow-2xl flex flex-col max-h-[95vh] no-scrollbar">
+      <div className="relative w-full max-w-[600px] bg-white shadow-[0_0_8px_2px_rgba(245,158,11,0.25)] rounded-3xl overflow-hidden flex flex-col max-h-[95vh] no-scrollbar">
         {/* Header */}
         <div className="bg-[#0D4D4D] p-6 text-white shrink-0 cursor-pointer">
           <button
