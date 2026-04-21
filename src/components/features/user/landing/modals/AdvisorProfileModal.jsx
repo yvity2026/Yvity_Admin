@@ -71,7 +71,7 @@ const AdvisorProfileModal = ({ isOpen, onClose, onContinue }) => {
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        className="relative w-full max-w-lg bg-white rounded-[2rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-lg bg-white rounded-3xl  shadow-[0_0_8px_2px_rgba(245,158,11,0.25)] overflow-hidden flex flex-col max-h-[90vh]"
       >
         {/* FIXED Header Section */}
         <div className="bg-[#0D4D4D] p-8 pb-5 text-white relative shrink-0 sticky">

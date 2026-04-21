@@ -1,77 +1,94 @@
+"use client";
+
 import { paymentHistory } from "@/app/advisor/subscriptions/page";
 import React from "react";
 import { HiOutlineDownload } from "react-icons/hi";
 import { MdOutlineVerifiedUser } from "react-icons/md";
 
 const Pricing_History = () => {
-  return (
-    <div className="h-auto w-96 md:w-full bg-white rounded-2xl px-3 sm:px-4 md:pl-[40px] md:pr-[50px] py-[27px]">
-      <div className="p-4">
-        <h2 className="text-xl mb-4 text-[var(--headings-important-text)] text-[16px] font-bold leading-normal font-[Poppins]">
-          Payment History
-        </h2>
-        <div className="overflow-x-auto w-full">
-          <table className="w-full border-gray-200 text-sm">
-            <thead className="text-[var(--labels-secondary-info)] text-xs sm:text-sm md:text-[12px] font-semibold leading-normal font-[Poppins]">
-              <tr className="">
-                <th className="text-left py-2 md:py-[10px] text-[10px] sm:text-xs">
-                  Date
-                </th>
-                <th className="text-left py-2 md:py-[10px] text-[10px] sm:text-xs">
-                  Plan
-                </th>
-                <th className="text-left py-2 md:py-[10px] text-[10px] sm:text-xs">
-                  Amount
-                </th>
-                <th className="text-left py-2 md:py-[10px] text-[10px] sm:text-xs">
-                  Method
-                </th>
-                <th className="text-left py-2 md:py-[10px] text-[10px] sm:text-xs">
-                  Status
-                </th>
-                <th className="text-left py-2 md:py-[10px] text-[10px] sm:text-xs">
-                  Invoice
-                </th>
-              </tr>
-            </thead>
+  const handleDownload = (fileUrl, fileName) => {
+    if (!fileUrl) return;
 
-            <tbody>
-              {paymentHistory.map((item, index) => (
-                <tr
-                  key={index}
-                  className="border-t text-[clamp(8px,1vw,12px)] font-nunito"
-                >
-                  <td className="py-2 md:py-[10px]  sm:font-normal leading-normal font-nunito">
-                    {item.date}
-                  </td>
-                  <td className="py-2 md:py-[10px] font-normal">
-                    {item.plan === "Gold Plan" && "👑 "}
-                    {item.plan === "Silver Plan" && "🥈 "}
-                    {item.plan}
-                  </td>
-                  <td className="py-2 md:py-[10px] t text-xs sm:text-sm md:text-[12px] font-semibold leading-normal font-poppins">
-                    {item.amount}
-                  </td>
-                  <td className="py-2 md:py-[10px]  text-xs sm:text-sm md:text-[12px] font-normal leading-normal font-nunito">
-                    {item.method}
-                  </td>
-                  <td className="py-2 md:p-[10px]">
-                    <span className="text-[#0A4A4A] font-poppins font-semibold leading-normal px-[10px] py-2 font-medium flex items-center gap-1 whitespace-nowrap rounded-2xl bg-[#E8F4F4] w-fit">
-                      <MdOutlineVerifiedUser />
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="p-[10px]">
-                    <button className="text-[#0A4A4A] font-poppins text-xs font-semibold leading-normal p-[10px] hover:underline flex items-center gap-2 whitespace-nowrap rounded-2xl bg-[#E8F4F4]">
-                      <HiOutlineDownload />
-                      {item.invoice}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+    const link = document.createElement("a");
+    link.href = fileUrl;
+
+    // force download (works if server allows it)
+    link.setAttribute("download", fileName || "invoice.pdf");
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <div className="w-full bg-white rounded-2xl px-4 md:px-10 py-7 border border-gray-100">
+      <h2 className="text-[16px] font-bold text-[var(--headings-important-text)] font-poppins mb-5">
+        Payment History
+      </h2>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm border-separate border-spacing-y-2">
+          <thead>
+            <tr className="text-[12px] text-[var(--labels-secondary-info)] font-semibold font-poppins">
+              {["Date", "Plan", "Amount", "Method", "Status", "Invoice"].map(
+                (head) => (
+                  <th key={head} className="text-left px-3 py-2">
+                    {head}
+                  </th>
+                )
+              )}
+            </tr>
+          </thead>
+
+          <tbody>
+            {paymentHistory.map((item, index) => (
+              <tr
+                key={index}
+                className="bg-white border border-gray-100"
+              >
+                <td className="px-3 py-3 text-[12px] font-nunito text-gray-700">
+                  {item.date}
+                </td>
+
+                <td className="px-3 py-3 font-medium text-gray-800">
+                  {item.plan === "Gold Plan" && "👑 "}
+                  {item.plan === "Silver Plan" && "🥈 "}
+                  {item.plan}
+                </td>
+
+                <td className="px-3 py-3 text-[12px] font-semibold text-gray-900">
+                  {item.amount}
+                </td>
+
+                <td className="px-3 py-3 text-[12px] text-gray-600">
+                  {item.method}
+                </td>
+
+                <td className="px-3 py-3">
+                  <span className="flex items-center gap-1 px-3 py-1 text-[#0A4A4A] bg-[#E8F4F4] rounded-full text-[12px] font-semibold w-fit">
+                    <MdOutlineVerifiedUser />
+                    {item.status}
+                  </span>
+                </td>
+
+                <td className="px-3 py-3">
+                  <button
+                    onClick={() =>
+                      handleDownload(
+                        item.invoiceUrl || item.invoice,
+                        `invoice-${index + 1}.pdf`
+                      )
+                    }
+                    className="flex items-center gap-2 px-3 py-1 text-[#0A4A4A] bg-[#E8F4F4] rounded-full text-[12px] font-semibold cursor-pointer hover:underline"
+                  >
+                    <HiOutlineDownload />
+                    Download
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

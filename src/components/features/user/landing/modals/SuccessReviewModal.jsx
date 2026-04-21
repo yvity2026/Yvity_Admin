@@ -29,7 +29,7 @@ const SuccessReviewModal = ({ isOpen, onClose, score = 12 }) => {
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        className="relative w-full max-w-[600px] bg-white rounded-[2rem] overflow-hidden shadow-2xl"
+        className="relative w-full max-w-[600px] bg-white rounded-3xl overflow-hidden shadow-[0_0_8px_2px_rgba(245,158,11,0.25)]"
       >
         {/* Teal Header */}
         <div className="bg-[#0D4D4D] p-6 text-white relative text-left">

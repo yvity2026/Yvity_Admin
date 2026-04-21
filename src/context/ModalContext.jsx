@@ -5,7 +5,6 @@ const ModalContext = createContext();
 
 export const ModalProvider = ({ children }) => {
   const [trigger, setTrigger] = useState(null);
-  // example: "ADD_SERVICE", "ADD_ENTRY", etc.
 
   const openModal = (type) => {
     setTrigger(type);

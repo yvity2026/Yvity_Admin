@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import {
   HiOutlineLocationMarker,
@@ -138,25 +138,29 @@ const AdvisorSearchFilter = ({ onSearchChange }) => {
 
     const hour = indiaTime.getHours();
 
-    if (hour < 12) return "Good morning";
-    if (hour < 17) return "Good afternoon";
-    if (hour < 21) return "Good evening";
-    return "Good night";
+    if (hour < 12) return ["Good morning", "☀️"];
+    if (hour < 17) return ["Good afternoon", "🌤️"];
+    if (hour < 21) return ["Good evening", "🌇"];
+    return ["Good night", "🌙"];
   };
+
+  const Wave = getGreeting()
   return (
     <div className="w-full  mx-auto bg-[#0D4D4D] text-white  xl:pt-[66px] overflow-hidden font-poppins">
       {/* 1. HERO SECTION */}
       <div className=" mx-auto pt-[66px] pb-[39px] px-4 md:px-6 lg:px-10 lg:px-[15px] xl:px-[120px]">
-        <div className="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700 flex flex-col gap-4">
-          <p className="flex items-center gap-2 mb- text-[16px] font-normal text-[#B4B1AA]">
-            {getGreeting()}, krishna{" "}
+        <div className="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700 flex flex-col gap-3">
+          <p className="flex items-center gap-2 text-[clamp(12px,1.5vw,16px)] font-normal text-[#B4B1AA]">
+            {Wave[0]}, krishna{" "}
             <span role="img" aria-label="wave">
-              👋
+              {Wave[1]}
             </span>
           </p>
           <h1 className="text-[#F8F6F1] text-[38px] font-bold font-cormorant">
             Find Your{" "}
-            <span className="text-[#F59E0B] italic leading-normal">Trusted</span>{" "}
+            <span className="text-[#F59E0B] italic leading-normal">
+              Trusted
+            </span>{" "}
             <br />
             Insurance Advisor
           </h1>
@@ -165,9 +169,9 @@ const AdvisorSearchFilter = ({ onSearchChange }) => {
         {/* 2. SEARCH BAR CONTAINER */}
         <form
           onSubmit={handleSearch}
-          className="bg-white rounded-[2rem] p-3 xl:px-[47px] xl:py-[22px] shadow-2xl transition-all duration-300 hover:shadow-orange-400/10 border border-white/10 flex flex-col gap-4"
+          className="bg-white rounded-3xl p-3 xl:px-[47px] xl:py-[22px] shadow-2xl transition-all duration-300 hover:shadow-orange-400/10 border border-white/10 flex flex-col gap-4"
         >
-          <div className="flex flex-col md:flex-row items-center gap-4">
+          <div className="flex flex-col md:flex-row items-center gap">
             {/* Location Input */}
             <div className="flex items-center gap-3 flex-1 w-full border-b md:border-b-0 md:border-r border-gray-100 px-4 md:pb-0 py-2 group">
               <HiOutlineLocationMarker className="text-gray-400 text-xl shrink-0 group-focus-within:text-orange-400 transition-colors" />
@@ -176,7 +180,7 @@ const AdvisorSearchFilter = ({ onSearchChange }) => {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="City (e.g. Nellore, Hyderabad)"
-                className="w-full outline-none placeholder:text-[#6B7280] font-poppins bg-transparent py-2 text-[#6B7280] font-normal text-[16px] leading-[16px] "
+                className="w-full outline-none placeholder:text-[#6B7280] font-poppins bg-transparent py-2 text-[#6B7280] font-normal text-[clamp(12px,1.5vw,16px)] leading-[16px] "
               />
             </div>
 
@@ -188,7 +192,7 @@ const AdvisorSearchFilter = ({ onSearchChange }) => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Name or service..."
-                className="w-full outline-none placeholder:text-gray-400 bg-transparent py-2 text-[#6B7280] font-normal text-[16px] leading-[16px]  font-poppins"
+                className="w-full outline-none placeholder:text-gray-400 bg-transparent py-2 text-[#6B7280] font-normal text-[clamp(12px,1.5vw,16px)] leading-[16px]  font-poppins"
               />
             </div>
           </div>
@@ -196,7 +200,7 @@ const AdvisorSearchFilter = ({ onSearchChange }) => {
           {/* Search Button */}
           <button
             type="submit"
-            className="w-full mt-6 bg-[#0A3D3D] hover:bg-[#1A5D5D] text-white font-bold py-3 pl-[47px] pr-[53px] rounded-2xl flex items-center justify-between transition-all group active:scale-[0.98] cursor-pointer"
+            className="w-full bg-[#0A3D3D] hover:bg-[#1A5D5D] text-white font-bold py-3 pl-[47px] pr-[53px] rounded-2xl flex items-center justify-between transition-all group active:scale-[0.98] cursor-pointer"
           >
             <span className="text-lg">Search</span>
             <HiOutlineArrowRight className="text-xl group-hover:translate-x-2 transition-transform duration-300" />
@@ -226,22 +230,28 @@ const AdvisorSearchFilter = ({ onSearchChange }) => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-y-8 md:gap-y-0 text-center md:text-left xl:px-[150px]">
             <div className="flex flex-col md:flex-row items-center md:items-center gap-2 md:border-r border-white/10 px-4">
-              <span className="text-center font-poppins text-2xl font-bold text-[#F59E0B]">250+</span>
-              <span className="text-[14px] font-normal text-[#F8F6F1] font-poppins">
-                Verified  Advisors
+              <span className="text-center font-poppins text-2xl font-bold text-[#F59E0B]">
+                250+
+              </span>
+              <span className="text-[clamp(10px,1vw,14px)] font-normal text-[#F8F6F1] font-poppins">
+                Verified Advisors
               </span>
             </div>
 
             <div className="flex flex-col md:flex-row items-center md:items-center gap-2 md:justify-center md:border-r border-white/10 px-4">
-              <span className="text-center font-poppins text-2xl font-bold text-[#F59E0B]">30+</span>
-              <span className="text-[14px] font-normal text-[#F8F6F1] font-poppins">
+              <span className="text-center font-poppins text-2xl font-bold text-[#F59E0B]">
+                30+
+              </span>
+              <span className="text-[clamp(10px,1vw,14px)] font-normal text-[#F8F6F1] font-poppins">
                 Cities Covered
               </span>
             </div>
 
             <div className="flex flex-col md:flex-row items-center md:items-center gap-2 md:justify-end pl-4">
-              <span className="text-center font-poppins text-2xl font-bold text-[#F59E0B]">5,991+</span>
-              <span className="text-[14px] font-normal text-[#F8F6F1] font-poppins">
+              <span className="text-center font-poppins text-2xl font-bold text-[#F59E0B]">
+                5,991+
+              </span>
+              <span className="text-[clamp(10px,1vw,14px)] font-normal text-[#F8F6F1] font-poppins">
                 Verified Reviews
               </span>
             </div>
@@ -258,7 +268,7 @@ const AdvisorSearchFilter = ({ onSearchChange }) => {
               Advisors{" "}
             </p>
           </span>
-          <button className="flex gap-[10px] text-[14px] font-normal text-[var(--primary-900,#0A4A4A)] ">
+          <button className="flex gap-[10px] text-[clamp(10px,1vw,14px)] font-normal text-[var(--primary-900,#0A4A4A)] ">
             View all
             <IoIosArrowRoundForward />
           </button>
