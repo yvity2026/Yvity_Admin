@@ -35,7 +35,7 @@ const SuccessReviewModal = ({ isOpen, onClose, score = 12 }) => {
         <div className="bg-[#0D4D4D] p-6 text-white relative text-left">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+            className="absolute top-4 right-4 p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors cursor-pointer"
           >
             <IoClose size={20} />
           </button>

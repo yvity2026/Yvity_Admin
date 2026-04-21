@@ -71,13 +71,13 @@ const AdvisorProfileModal = ({ isOpen, onClose, onContinue }) => {
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        className="relative w-full max-w-lg bg-white rounded-[2rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh] no-scrollbar"
+        className="relative w-full max-w-lg bg-white rounded-[2rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
       >
         {/* FIXED Header Section */}
         <div className="bg-[#0D4D4D] p-8 pb-5 text-white relative shrink-0 sticky">
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+            className="absolute top-6 right-6 p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors cursor-pointer"
           >
             <IoClose size={20} />
           </button>
@@ -100,7 +100,7 @@ const AdvisorProfileModal = ({ isOpen, onClose, onContinue }) => {
         </div>
 
         {/* SCROLLABLE Roles List */}
-        <div className="p-6 space-y-4 mt-3 overflow-y-auto custom-scrollbar flex-1 bg-white rounded-t-[2rem]">
+        <div className="p-6 space-y-4 mt-3 overflow-y-auto custom-scrollbar flex-1 bg-white rounded-t-[2rem] no-scrollbar">
           {roles.map((role) => (
             <div
               key={role.id}

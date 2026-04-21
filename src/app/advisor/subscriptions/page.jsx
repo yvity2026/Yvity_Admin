@@ -1,5 +1,7 @@
 "use client";
 import { ModalWrapper } from "@/app/components/layout/ModalWrapper";
+import Plans from "@/components/features/advisor/subscriptions/Plans";
+import Pricing_History from "@/components/features/advisor/subscriptions/Pricing_History";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import {
@@ -17,9 +19,9 @@ import { IoClose } from "react-icons/io5";
 import { MdAutorenew, MdClose, MdOutlineVerifiedUser } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
 import { SiInfinityfree } from "react-icons/si";
+import { motion } from "framer-motion"
 
-const page = () => {
-  const paymentHistory = [
+  export const paymentHistory = [
     {
       date: "Jan 5, 2025",
       plan: "Gold Plan",
@@ -46,7 +48,7 @@ const page = () => {
     },
   ];
 
-  const pricingData = [
+    export const pricingData = [
     {
       title: "Free",
       price: "0",
@@ -114,6 +116,8 @@ const page = () => {
         "absolute top-0  left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-(--primary-900,#0A4A4A) text-[var(--Pearl-Whitepage-background,#F8F6F1)] rounded-[16px] bg-gradient-to-r from-[#D97706] to-[#FF8900] xl:text-[13px]  text-xs px-1 xl:px-3 py-1 rounded-full",
     },
   ];
+
+const page = () => {
   const [isRenew, setIsRenew] = useState(false);
   const [isAutoRenew, setIsAutoRenew] = useState(false);
   const [isUpgrade, setIsUpgrade] = useState(false);
@@ -190,6 +194,7 @@ const page = () => {
       setLoading(false);
     }
   };
+  const [isOn, setIsOn] = useState(false)
   return (
     <div className="p-4 md:p-6 lg:p-10 xl:px-15 pt-[24px] pb-[81px] flex flex-col gap-[26px]">
       <div className="w-full  h-auto  bg-white px-4 md:pl-[40px] md:pr-[44px] py-6 md:py-[33px] flex flex-col md:grid md:grid-cols-2 gap-6 md:gap-0 rounded-2xl bg-gradient-to-r from-[#094C4B] to-[#0A6A69] shadow-[0_0_2px_0_rgba(0,0,0,0.2)]">
@@ -253,137 +258,42 @@ const page = () => {
         </div>
       </div>
 
-      {/* Plan comparision */}
-      <div className="h-auto w-full  bg-white px-3  xl:px-[40px] py-[27px] rounded-2xl">
-        <p className="text-[var(--headings-important-text)] text-base sm:text-lg md:text-[16px] font-bold leading-normal font-[Poppins] mb-4">
-          Plan Comparision
-        </p>
-        <div className="xl:px-[40px] grid grid-cols-1 lg:grid-cols-3 gap-4 w-full md:justify-items-center">
-          {pricingData.map((item, index) => (
-            <div
-              key={index}
-              // variants={itemstyle}
-              className={`${item.cardStyle} relative w-full flex flex-col gap-4 mx-auto p-4 md:py-[36px] md:px-[16px] rounded-2xl border border-[#E5E5E5] bg-white shadow-[0_0_4px_0_rgba(0,0,0,0.25)]`}
-            >
-              <span className="flex justify-start">
-                {item.medal}
-              </span>
-              <p className="text-xl md:text-2xl font-semibold tracking-[1.4px] text-(--ct-as-badges-accents,#F59E0B) uppercase font-poppins leading-none">
-                {item.title}
-              </p>
-              <p
-                className={`text-xl sm:text-2xl lg:text-3xl font-bold font-poppins text-[#111827]`}
-              >
-                ₹{Number(item.price?.split("/")[0] || 0)}
-                <span className="text-gray-400 text-base font-bold">
-                  {item.period}
-                </span>
-              </p>
-              <div className="flex flex-col gap-4">
-                <ul className="flex flex-col justify-start items-start gap-2 md:gap-2 mt-2 md:pt-6 text-[var(--Body-content)] text-xs sm:text-sm md:text-[12px] font-normal leading-normal font-[Poppins]">
-                  {item.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center gap-1">
-                      <FaCheck className="text-green-400" />
-                      {feature}
-                    </li>
-                  ))}
+      <div
+      onClick={() => setIsOn(!isOn)}
+      className="w-48 h-12 bg-gray-200 rounded-full p-1 flex items-center cursor-pointer relative"
+    >
+      {/* Sliding background */}
+      <motion.div
+        className="absolute top-1 bottom-1 w-1/2 bg-[#0A6A69] rounded-full"
+        animate={{
+          x: isOn ? 0 : "100%",
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 500,
+          damping: 30,
+        }}
+      />
 
-                  {item.nonFeatures?.map((nonFeature, idx) => (
-                    <li key={idx} className="flex items-center gap-1">
-                      <RxCross2 />
-                      {nonFeature}
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  className={`w-full mt-4 md:mt-0 flex items-center justify-center gap-2 rounded-full transition-all duration-500 ease-in-out text-[clamp(12px,1.5vw,16px)] ${item.buttonStyle}`}
-                  onClick={() => setIsUpgrade(true)}
-                >
-                  {item.buttonText}
-                </button>
-              </div>
-              {item.cover && (
-                <span
-                  className={`${item.coverStyle} flex items-center gap-1 font-poppins font-semibold md:gap-2 md:w-36`}
-                >
-                  <HiMiniShieldCheck size={16} />
-                  {item.cover}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
+      {/* Labels */}
+      <div className="w-1/2 text-center z-10 text-sm font-medium">
+        <span className={isOn ? "text-white" : "text-[#0A6A69"}>
+          Pricing
+        </span>
       </div>
-      {/* Payment History */}
-      <div className="h-auto w-96 md:w-full bg-white rounded-2xl px-3 sm:px-4 md:pl-[40px] md:pr-[50px] py-[27px]">
-        <div className="p-4">
-          <h2 className="text-xl mb-4 text-[var(--headings-important-text)] text-[16px] font-bold leading-normal font-[Poppins]">
-            Payment History
-          </h2>
-          <div className="overflow-x-auto w-full">
-            <table className="w-full border-gray-200 text-sm">
-              <thead className="text-[var(--labels-secondary-info)] text-xs sm:text-sm md:text-[12px] font-semibold leading-normal font-[Poppins]">
-                <tr className="">
-                  <th className="text-left py-2 md:py-[10px] text-[10px] sm:text-xs">
-                    Date
-                  </th>
-                  <th className="text-left py-2 md:py-[10px] text-[10px] sm:text-xs">
-                    Plan
-                  </th>
-                  <th className="text-left py-2 md:py-[10px] text-[10px] sm:text-xs">
-                    Amount
-                  </th>
-                  <th className="text-left py-2 md:py-[10px] text-[10px] sm:text-xs">
-                    Method
-                  </th>
-                  <th className="text-left py-2 md:py-[10px] text-[10px] sm:text-xs">
-                    Status
-                  </th>
-                  <th className="text-left py-2 md:py-[10px] text-[10px] sm:text-xs">
-                    Invoice
-                  </th>
-                </tr>
-              </thead>
 
-              <tbody>
-                {paymentHistory.map((item, index) => (
-                  <tr
-                    key={index}
-                    className="border-t text-[clamp(8px,1vw,12px)] font-nunito"
-                  >
-                    <td className="py-2 md:py-[10px]  sm:font-normal leading-normal font-nunito">
-                      {item.date}
-                    </td>
-                    <td className="py-2 md:py-[10px] font-normal">
-                      {item.plan === "Gold Plan" && "👑 "}
-                      {item.plan === "Silver Plan" && "🥈 "}
-                      {item.plan}
-                    </td>
-                    <td className="py-2 md:py-[10px] t text-xs sm:text-sm md:text-[12px] font-semibold leading-normal font-poppins">
-                      {item.amount}
-                    </td>
-                    <td className="py-2 md:py-[10px]  text-xs sm:text-sm md:text-[12px] font-normal leading-normal font-nunito">
-                      {item.method}
-                    </td>
-                    <td className="py-2 md:p-[10px]">
-                      <span className="text-[#0A4A4A] font-poppins font-semibold leading-normal px-[10px] py-2 font-medium flex items-center gap-1 whitespace-nowrap rounded-2xl bg-[#E8F4F4] w-fit">
-                        <MdOutlineVerifiedUser />
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="p-[10px]">
-                      <button className="text-[#0A4A4A] font-poppins text-xs font-semibold leading-normal p-[10px] hover:underline flex items-center gap-2 whitespace-nowrap rounded-2xl bg-[#E8F4F4]">
-                        <HiOutlineDownload />
-                        {item.invoice}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+      <div className="w-1/2 text-center z-10 text-sm font-medium">
+        <span className={!isOn ? "text-white" : "text-[#0A6A69]"}>
+          History
+        </span>
       </div>
+    </div>
+
+{
+  isOn ? ( <Plans />) : (<Pricing_History />)
+}
+    
+     
 
       {/* Modals */}
       {false && (
