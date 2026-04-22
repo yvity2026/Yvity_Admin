@@ -9,12 +9,11 @@ import SavedProfiles from "@/components/features/user/landing/SavedProfiles";
 import AdvisorSearchFilter from "@/components/features/user/landing/HeroSection";
 import { useRouter } from "next/navigation";
 export default function Home() {
-  const router = useRouter();
-  // return (
-  //   <>
-    
-  //   </>
-  // );
-  router.push("/auth/init");
-
+  return (
+    <>
+      <Header />
+      <HeroSection />
+      <SavedProfiles />
+    </>
+  );
 }
