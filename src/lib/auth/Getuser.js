@@ -1,10 +1,10 @@
 import { cookies } from "next/headers"
 
-export function getUser() {
-  const cookieStore = cookies()
+export async function getUser() {
+  const cookieStore = await cookies()
   const token = cookieStore.get("security_token")?.value
 
-  if (!session) return null
+  if (!token) return null;
 
-  return JSON.parse(session)
+  return JSON.parse(token);
 }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   IoShieldCheckmark,
   IoStatsChart,
@@ -9,27 +9,32 @@ import { HiOutlineArrowRight } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
 import AdvisorFormModal from "./AdvisorFormModal";
 import Image from "next/image";
+import toast from "react-hot-toast";
 
-const AdvisorProfileModal = ({ isOpen, onClose, onContinue }) => {
-  const [selectedRole, setSelectedRole] = useState("insurance");
+const AdvisorProfileModal = ({ isOpen, onClose, onContinue, form }) => {
+  const [selectedRoleId, setSelectedRoleId] = useState("");
+
+ useEffect(() => {
+  setSelectedRoleId(form?.advisor_role_id || "");
+}, [form]);
 
   const roles = [
     {
-      id: "insurance",
+      id: "1",
       title: "Insurance Advisor",
       desc: "Build a verified credibility profile, collect OTP reviews, showcase IRDAI license & achievements",
       icon: <IoShieldCheckmark className="text-blue-400" size={32} />,
       isAvailable: true,
     },
     {
-      id: "mfd",
+      id: "2",
       title: "MFD / Financial Advisor",
       desc: "Mutual fund distributors and financial planners",
       icon: <IoStatsChart className="text-blue-300" size={32} />,
       isAvailable: false,
     },
     {
-      id: "realestate",
+      id: "3",
       title: "Real Estate Advisor",
       desc: "Property agents and real estate professionals",
       icon: <IoBusiness className="text-blue-300" size={32} />,
@@ -37,16 +42,15 @@ const AdvisorProfileModal = ({ isOpen, onClose, onContinue }) => {
     },
   ];
 
-  const [isAdvisorForm, setIsAdvisorForm] = useState(false);
   if (!isOpen) return null;
 
   const validateRoleSelection = () => {
-    if (!selectedRole) {
+    if (!selectedRoleId) {
       toast.error("Please select a role to continue");
       return false;
     }
 
-    const selected = roles.find((r) => r.id === selectedRole);
+    const selected = roles.find((r) => r.id === selectedRoleId);
 
     if (!selected?.isAvailable) {
       toast.error("This role is not available yet");
@@ -104,11 +108,11 @@ const AdvisorProfileModal = ({ isOpen, onClose, onContinue }) => {
           {roles.map((role) => (
             <div
               key={role.id}
-              onClick={() => role.isAvailable && setSelectedRole(role.id)}
+              onClick={() => role.isAvailable && setSelectedRoleId(role.id)}
               className={`
                 relative flex items-start gap-4 p-5 rounded-2xl border-2 transition-all cursor-pointer
                 ${!role.isAvailable ? "bg-gray-50 opacity-80" : "bg-[#FAF9F4]"}
-                ${selectedRole === role.id && role.isAvailable ? "border-orange-400 ring-1 ring-orange-400" : "border-transparent"}
+                ${selectedRoleId === role.id && role.isAvailable ? "border-orange-400 ring-1 ring-orange-400" : "border-transparent"}
               `}
             >
               <div className="shrink-0 mt-1">{role.icon}</div>
@@ -135,12 +139,12 @@ const AdvisorProfileModal = ({ isOpen, onClose, onContinue }) => {
           <button
             className="w-full bg-[#0D4D4D] hover:bg-[#0A3D3D] text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all cursor-pointer"
             onClick={() => {
-              if (!validateRoleSelection()) return;
+            if (!validateRoleSelection()) return;
 
-              onContinue(selectedRole);
+            onContinue(selectedRoleId);
             }}
           >
-            {!selectedRole ? "Select a Role to Continue" : "Continue as Selected Role"}
+            {!selectedRoleId ? "Select a Role to Continue" : "Continue as Selected Role"}
             <HiOutlineArrowRight size={20} />
           </button>
         </div>

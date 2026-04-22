@@ -8,6 +8,7 @@ import AdvisorFormModal from "./modals/AdvisorFormModal";
 import SuccessReviewModal from "./modals/SuccessReviewModal";
 import Image from "next/image";
 import Skeleton from "@/app/components/skeleton/Skeleton";
+import { useAuth } from "@/context/AuthContext";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,7 +19,42 @@ const Header = () => {
     FORM: "form",
     SUCCESS: "success",
   };
-  const [loading, setLoading] = useState(false)
+  const { user, loading } = useAuth();
+  const [profileFormData, setProfileFormData] = useState({});
+
+  console.log("sdfghjkhgfdsfghjmk,jhgfds", profileFormData);
+
+  const updateStep = (data) => {
+    setProfileFormData((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const handleSubmit = async (payload) => {
+    try {
+      const res = await fetch("/api/advisor/setprofile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error(data);
+        return false;
+      }
+
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  };
+
   return (
     <>
       {loading ? (
@@ -100,8 +136,18 @@ const Header = () => {
                   <span className="absolute top-2 right-2.5 w-2 h-2 bg-orange-400 rounded-full border border-white"></span>
                 </div>
 
-                <div className="w-10 h-10 bg-[#004D4D] text-white flex items-center justify-center rounded-full font-semibold cursor-pointer ring-[2px] ring-[#197272]">
-                  KM
+                <div className="w-10 h-10 bg-[#004D4D] text-white flex items-center justify-center rounded-full font-semibold cursor-pointer ring-[2px] ring-[#197272] overflow-hidden">
+                  {user?.selfie_url ? (
+                    <Image
+                      src={user.selfie_url}
+                      width={60}
+                      height={60}
+                      alt="profile"
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <span>KM</span>
+                  )}
                 </div>
 
                 <button className="flex items-center gap-2 text-[14px] leading-[16px] font-medium text-[#EF5555] font-poppins cursor-pointer px-2 py-1">
@@ -155,8 +201,9 @@ const Header = () => {
             <AdvisorProfileModal
               isOpen={true}
               onClose={() => setActiveModal(null)}
-              onContinue={(selectedRole) => {
-                console.log("Selected role:", selectedRole);
+              form={profileFormData}
+              onContinue={(selectedRoleId) => {
+                updateStep({ roleId: selectedRoleId });
                 setActiveModal(MODALS.FORM);
               }}
             />
@@ -166,9 +213,24 @@ const Header = () => {
             <AdvisorFormModal
               isOpen={true}
               onClose={() => setActiveModal(null)}
-              onContinue={(selectedRole) => {
-                console.log("Selected role:", selectedRole);
-                setActiveModal(MODALS.SUCCESS);
+              form={profileFormData}
+              onContinue={async (formdata) => {
+                // 1. update parent state FIRST
+                setProfileFormData((prev) => {
+                  const updated = {
+                    ...prev,
+                    ...formdata,
+                  };
+
+                  // 2. call API with fresh data (not stale closure)
+                  handleSubmit(updated).then((success) => {
+                    if (success) {
+                      setActiveModal(MODALS.SUCCESS);
+                    }
+                  });
+
+                  return updated;
+                });
               }}
               onBack={() => setActiveModal(MODALS.PROFILE)}
             />
