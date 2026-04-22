@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoClose, IoChevronDown, IoCloudUploadOutline } from "react-icons/io5";
 import { HiOutlineArrowLeft, HiOutlineArrowRight } from "react-icons/hi";
 import { LuPlus } from "react-icons/lu";
 import Image from "next/image";
 import toast from "react-hot-toast";
 
-const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
+const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
   // Available services list
   const initialServices = [
     "Life Insurance",
@@ -14,118 +14,121 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
     "Mutual Funds",
   ];
 
-  const [errors, setErrors] = useState({});
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const validateForm = () => {
-  // 1️⃣ Service validation FIRST
-  if (addedServices.length === 0) {
-    toast.error("Please add at least one service");
-    return false;
-  }
-
-  if (!formData.service && addedServices.length === 0) {
-    toast.error("Service is required");
-    return false;
-  }
-
-  if (!formData.company && addedServices.length === 0) {
-    toast.error("Insurance company is required");
-    return false;
-  }
-
-  
-  if (!formData.license && addedServices.length === 0) {
-    toast.error("IRDAI certificate number is required");
-    return false;
-  }
-
-  if (formData.experience && isNaN(formData.experience) && addedServices.length === 0) {
-    toast.error("Experience must be a valid number");
-    return false;
-  }
-
-  // 3️⃣ File upload LAST
-  if (!file) {
-    toast.error("Please upload IRDAI certificate image");
-    return false;
-  }
-
-  const validTypes = ["image/jpeg", "image/png"];
-  if (!validTypes.includes(file.type)) {
-    toast.error("Only JPG/PNG images are allowed");
-    return false;
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
-    toast.error("Image size must be under 5MB");
-    return false;
-  }
-
-  return true;
-};
-  // State for the current form inputs
-  const [formData, setFormData] = useState({
-    service: "",
-    company: "",
-    designation: "",
-    license: "",
-    experience: "",
-    bio: "",
-  });
-
-  const handleSubmit = () => {
-  if (!validateForm()) return;
-
-  toast.success("Profile submitted successfully");
-
-  onContinue({
-    ...formData,
-    file,
-    addedServices,
-  });
-};
-
-  // State for saved services
-  const [addedServices, setAddedServices] = useState([]);
-
-  // Filter dropdown to hide already added services
-  const availableServices = initialServices.filter(
-    (s) => !addedServices.some((as) => as.service === s),
-  );
-
-  const handleAddService = () => {
-    if (!formData.service) {
-      toast.error("Select a service");
-      return;
-    }
-
-    if (!formData.company) {
-      toast.error("Select a company");
-      return;
-    }
-    if (!formData.license) {
-      toast.error("IRDAI license cannot be Empty");
-      return;
-    }
-
-    if (!formData.experience) {
-      toast.error("Enter a valid Experience");
-      return;
-    }
-
-    setAddedServices([...addedServices, { ...formData, id: Date.now() }]);
-
+  useEffect(() => {
+  if (!isOpen) {
     setFormData({
-      service: "",
-      company: "",
-      designation: "",
-      license: "",
-      experience: "",
+      services: [],
+      certificate_url: "",
       bio: "",
     });
 
+    setServiceData({
+      service: "",
+      company: "",
+      license: "",
+      experience: "",
+    });
+
+    setFile(null);
+    setPreview(null);
+  }
+}, [isOpen]);
+
+  useEffect(() => {
+    if (form) {
+      setFormData({
+        services: form?.services || [],
+        certificate_url: form?.certificate_url || "",
+        bio: form?.bio || "",
+      });
+
+      setFile(form?.license_file || null);
+    }
+  }, [form]);
+
+  const [errors, setErrors] = useState({});
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+
+  const validateForm = () => {
+    if (formData.services.length === 0) {
+      toast.error("Add at least one service");
+      return false;
+    }
+
+    if (!file) {
+      toast.error("Upload certificate image");
+      return false;
+    }
+
+    return true;
+  };
+
+  const [formData, setFormData] = useState({
+    services: [],
+    certificate_url: "",
+    bio: "",
+  });
+
+  const [serviceData, setServiceData] = useState({
+    service: "",
+    company: "",
+    license: "",
+    experience: "",
+  });
+
+  const handleSubmit = () => {
+    if (!validateForm()) return;
+
+    console.log("MODAL DATA:", {
+      ...formData,
+      file,
+    });
+
+    onContinue({
+      ...formData,
+      file,
+    });
+    toast.success("Profile submitted");
+  };
+
+  // Filter dropdown to hide already added services
+  const availableServices = initialServices.filter(
+    (s) => !formData.services.some((as) => as.service === s),
+  );
+
+  const handleAddService = () => {
+    if (!serviceData.service) return toast.error("Select a service");
+    if (!serviceData.company) return toast.error("Select a company");
+    if (!serviceData.license) return toast.error("License required");
+    if (!serviceData.experience) return toast.error("Experience required");
+
+    const newService = {
+      ...serviceData,
+      experience: Number(serviceData.experience),
+      id: Date.now(),
+    };
+
+    setFormData((prev) => ({
+      ...prev,
+      services: [...prev.services, newService],
+    }));
+
+    setServiceData({
+      service: "",
+      company: "",
+      license: "",
+      experience: "",
+    });
+
     toast.success("Service added");
+  };
+
+  const handleRemoveService = (id) => {
+    setFormData((prev) => ({
+      ...prev,
+      services: prev.services.filter((s) => s.id !== id),
+    }));
   };
 
   {
@@ -165,7 +168,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
         {/* Scrollable Content */}
         <div className="p-6 overflow-y-auto flex-1 bg-[#F9F8F6] no-scrollbar">
           <button
-            className="flex items-center gap-2 text-gray-500 text-sm mb-4"
+            className="flex items-center gap-2 text-gray-500 text-sm mb-4 cursor-pointer"
             onClick={() => onBack()}
           >
             <HiOutlineArrowLeft /> Change role
@@ -179,7 +182,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
           </div>
 
           {/* Render Added Services (Summary View) */}
-          {addedServices.map((item) => (
+          {formData.services.map((item) => (
             <div
               key={item.id}
               className="bg-white border border-gray-200 rounded-xl p-4 mb-4 shadow-sm relative"
@@ -189,14 +192,10 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
               </span>
               <h3 className="font-bold text-gray-800">{item.service}</h3>
               <p className="text-sm text-gray-600">
-                {item.company} • {item.designation}
+                {item.company} • {item.experience} yrs
               </p>
               <button
-                onClick={() =>
-                  setAddedServices(
-                    addedServices.filter((s) => s.id !== item.id),
-                  )
-                }
+                onClick={() => handleRemoveService(item.id)}
                 className="absolute top-4 right-4 text-red-400 text-xs hover:underline"
               >
                 Remove
@@ -205,7 +204,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
           ))}
 
           {/* The Active Form */}
-          <div className="bg-white]  p-6 space-y-4">
+          <div className="bg-white  p-6 space-y-4">
             <div className="bg-[#E8F4F4] px-[16px] py-[24px] rounded-2xl space-y-4">
               <div className="flex justify-between items-center">
                 <label className="text-sm font-bold text-gray-700">
@@ -220,9 +219,9 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
               </div>
 
               <select
-                value={formData.service}
+                value={serviceData.service}
                 onChange={(e) =>
-                  setFormData({ ...formData, service: e.target.value })
+                  setServiceData({ ...serviceData, service: e.target.value })
                 }
                 className="w-full p-3 rounded-xl border border-gray-200 bg-white appearance-none outline-none focus:ring-2 ring-[#0D4D4D]/20"
               >
@@ -239,9 +238,9 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
                   Insurance Company <span className="text-red-500">*</span>
                 </label>
                 <select
-                  value={formData.company}
+                  value={serviceData.company}
                   onChange={(e) =>
-                    setFormData({ ...formData, company: e.target.value })
+                    setServiceData({ ...serviceData, company: e.target.value })
                   }
                   className="w-full p-3 rounded-xl border border-gray-200 bg-[#F8F6F1]"
                 >
@@ -262,9 +261,12 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
                     IRDAI License No.
                   </label>
                   <input
-                    value={formData.license}
+                    value={serviceData.license}
                     onChange={(e) =>
-                      setFormData({ ...formData, license: e.target.value })
+                      setServiceData({
+                        ...serviceData,
+                        license: e.target.value,
+                      })
                     }
                     type="text"
                     placeholder="e.g. 1234567"
@@ -276,9 +278,12 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
                     Years of Experience
                   </label>
                   <input
-                    value={formData.experience}
+                    value={serviceData.experience}
                     onChange={(e) =>
-                      setFormData({ ...formData, experience: e.target.value })
+                      setServiceData({
+                        ...serviceData,
+                        experience: e.target.value,
+                      })
                     }
                     type="text"
                     className="w-full p-3 rounded-xl border border-gray-200 bg-white"
@@ -331,7 +336,14 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack }) => {
                     setErrors((prev) => ({ ...prev, file: null }));
 
                     const reader = new FileReader();
-                    reader.onloadend = () => setPreview(reader.result);
+                    reader.onloadend = () => {
+                      setPreview(reader.result);
+
+                      setFormData((prev) => ({
+                        ...prev,
+                        certificate_url: reader.result, // ✅ store base64 or later replace with Supabase URL
+                      }));
+                    };
                     reader.readAsDataURL(selectedFile);
 
                     toast.success("File uploaded successfully");

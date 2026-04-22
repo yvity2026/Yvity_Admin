@@ -18,19 +18,24 @@ export default function InitPage() {
   useEffect(() => {
     const run = async () => {
       const userId = getCookie("yvity_user_id");
-
       if (!userId) {
-        router.push("/");
+        router.push("http://localhost:3000");
         return;
       }
 
-      await fetch("/api/auth/sync", {
+      console.log(userId);
+      const response = await fetch("/api/auth/sync", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId }),
       });
+
+      const result = await response.json();
+      if (!result || !result.success) {
+        console.error(result.error);
+        router.push("http://localhost:3000");
+        return;
+      }
 
       router.push("/dashboard");
     };
