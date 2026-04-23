@@ -52,7 +52,7 @@ import { useAuth } from "@/context/AuthContext";
 import GiveTestimonialModal from "@/components/features/user/landing/modals/public-profile/GiveTestimonialModal";
 const page = () => {
   const qrRef = React.useRef(null);
-
+    const { user, advisor, setUser } = useAuth();
   const [activeModal, setActiveModal] = useState(null);
 
   const MODALS = {
@@ -146,12 +146,30 @@ const page = () => {
 
   const [isOpen, setIsOpen] = useState(true);
   const footerheadings = [
-    "Home",
-    "Journey",
-    "Service",
-    "Aceivements",
-    "Gallery",
-    "Testimonials",
+    {
+      name : "Home",
+      isvisible : true
+    },
+    {
+      name : "Journey",
+      isvisible : advisor?.ispublic_professional
+    },
+    {
+      name : "Service",
+      isvisible : advisor?.ispublic_services
+    },
+    {
+      name : "Achievements",
+      isvisible : advisor?.ispublic_achievements
+    },
+    {
+      name : "Gallery",
+      isvisible : advisor?.ispublic_gallery
+    },
+    {
+      name : "Testimonials",
+      isvisible : advisor?.ispublic_testimonials
+    },
   ];
 
   const [activeTab, setActiveTab] = useState("Home");
@@ -177,10 +195,12 @@ const page = () => {
       },
     ],
   };
+
   const companies = [
     {
       icon: <CiBank />,
       data: "Quick Response",
+      
     },
     {
       icon: <BiSolidCapsule />,
@@ -208,7 +228,7 @@ const page = () => {
     { label: "QR Code", icon: <IoQrCode />, modal: MODALS.QR },
   ];
 
-  const { user, setUser } = useAuth();
+
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [testimonial, setTestimonial] = useState("");
@@ -705,6 +725,7 @@ const page = () => {
                   </div>
                 ))
               : footerheadings.map((heading, index) => (
+                heading.isvisible && (
                   <button
                     key={index}
                     onClick={() => setActiveTab(heading)}
@@ -712,12 +733,12 @@ const page = () => {
                   >
                     <span
                       className={`${
-                        activeTab === heading
+                        activeTab?.name === heading.name
                           ? "text-primary-900"
                           : "text-gray-400"
                       }`}
                     >
-                      {heading}
+                      {heading.name}
                     </span>
 
                     {/* Animated underline */}
@@ -733,6 +754,7 @@ const page = () => {
                       />
                     )}
                   </button>
+                )
                 ))}
           </div>
 
@@ -817,12 +839,12 @@ const page = () => {
                         </div>
                       </div>
                     </>
-                  ) : activeTab === "Service" ? (
+                  ) : activeTab === "Service" && advisor?.ispublic_services ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Life Insurance Card */}
                       <ServiceSection ShowActions={false} />
                     </div>
-                  ) : activeTab === "Aceivements" ? (
+                  ) : activeTab === "Achievements" && advisor?.ispublic_achievements ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {achievementsData.map((achievement) => (
                         <AchievementCard
@@ -832,15 +854,15 @@ const page = () => {
                         />
                       ))}
                     </div>
-                  ) : activeTab === "Gallery" ? (
+                  ) : activeTab === "Gallery" && advisor?.ispublic_gallery ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
                       {galleryData.map((item) => (
                         <GalleryItem key={item.id} data={item} />
                       ))}
                     </div>
-                  ) : activeTab === "Testimonials" ? (
+                  ) : activeTab === "Testimonials" && advisor?.ispublic_testimonials ? (
                     <Testimonials_filters showActions={false} />
-                  ) : activeTab === "Journey" ? (
+                  ) : activeTab === "Journey" && advisor?.ispublic_professional ? (
                     journeyData.map((section) => (
                       <JourneySection
                         key={section.id}

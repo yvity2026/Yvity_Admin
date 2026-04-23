@@ -10,71 +10,108 @@ export async function PATCH(req) {
     if (!user?.token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
     const supabase = createAdminClient();
 
-    const { count, userError } = await supabase
+    // Get user by device token - optimized query
+    const { data: loggedUser, error: userError } = await supabase
       .from("users")
-      .select("id", { count: "exact", head: true })
-      .filter("device_tokens", "cs", JSON.stringify([{ token: user.token }]));
+      .select("id")
+      .filter("device_tokens", "cs", JSON.stringify([{ token: user.token }]))
+      .maybeSingle();
 
-      if(count === 0){
-        return apiResponse()
-      }
-      if(count > 1){
-        return apiResponse()
-      }
+    if (userError || !loggedUser) {
+      console.error("User fetch error:", userError);
+      return apiResponse("Failed to fetch user", false, 1, "", userError?.message || "User not found");
+    }
+
     const body = await req.json();
 
-    const updates = {};
+    // Define allowed fields - moved outside for better performance
+    const USER_PROFILE_FIELDS = new Set([
+      "name", "dob", "gender", "city", "email", "mobile"
+    ]);
+    
+    const ADVISOR_PROFILE_FIELDS = new Set([
+      "ispublic_professional", "ispublic_services", "ispublic_achievements",
+      "ispublic_gallery", "ispublic_testimonials", "ispublic_profile"
+    ]);
 
-    const allowedFields = [
-      "name",
-      "dob",
-      "gender",
-      "city",
-      "email",
-      "mobile",
-      "ispublic_professional",
-      "ispublic_services",
-      "ispublic_achievements",
-      "ispublic_gallery",
-      "ispublic_testimonials",
-      "ispublic_profile"
-      //   "irdai_"
-    ];
+    // Extract updates using object destructuring and filtering
+    const userProfileUpdates = Object.fromEntries(
+      Object.entries(body)
+        .filter(([key]) => USER_PROFILE_FIELDS.has(key))
+    );
 
-    if (Object.keys(updates).length === 0) {
-      return apiResponse();
+    const advisorProfileUpdates = Object.fromEntries(
+      Object.entries(body)
+        .filter(([key]) => ADVISOR_PROFILE_FIELDS.has(key))
+    );
+
+    if (Object.keys(userProfileUpdates).length === 0 && 
+        Object.keys(advisorProfileUpdates).length === 0) {
+      return apiResponse("No valid fields to update", false, 4);
     }
 
-    updates.updated_at = new Date().toISOString();
+    const now = new Date().toISOString();
+    
+    // Run updates in parallel for better performance
+    const [advisorResult, userResult] = await Promise.allSettled([
+      // Update advisor profile if there are fields to update
+      Object.keys(advisorProfileUpdates).length > 0 
+        ? supabase
+            .from("advisor_profiles")
+            .update({ ...advisorProfileUpdates, updated_at: now })
+            .eq("advisor_id", loggedUser.id)
+            .select()
+            .single()
+        : Promise.resolve({ data: null, error: null }),
+      
+      // Update user profile if there are fields to update
+      Object.keys(userProfileUpdates).length > 0
+        ? supabase
+            .from("users")
+            .update({ ...userProfileUpdates, updated_at: now })
+            .filter("device_tokens", "cs", JSON.stringify([{ token: user.token }]))
+            .select("*")
+            .single()
+        : Promise.resolve({ data: null, error: null })
+    ]);
 
-    const { data, error } = await supabase
-      .from("users") // change if needed
-      .update(updates)
-      .eq("id", user.id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error("SUPABASE_ERROR:", error);
-
-      return NextResponse.json(
-        { error: "Failed to update profile" },
-        { status: 500 },
-      );
+    // Handle errors
+    const errors = [];
+    
+    if (advisorResult.status === 'rejected') {
+      errors.push({ type: 'advisor', error: advisorResult.reason });
+    } else if (advisorResult.value.error) {
+      errors.push({ type: 'advisor', error: advisorResult.value.error });
     }
 
-    return NextResponse.json({
-      success: true,
-      data,
-    });
+    if (userResult.status === 'rejected') {
+      errors.push({ type: 'user', error: userResult.reason });
+    } else if (userResult.value.error) {
+      errors.push({ type: 'user', error: userResult.value.error });
+    }
+
+    if (errors.length > 0) {
+      console.error("Update errors:", errors);
+      return apiResponse("Failed to update profile", false, 5, "", errors[0].error.message);
+    }
+
+    // Extract data from successful updates
+    const advisor = advisorResult.status === 'fulfilled' ? advisorResult.value.data : null;
+    const update = userResult.status === 'fulfilled' ? userResult.value.data : null;
+
+    // Return appropriate response based on what was updated
+    const updatedFields = {
+      ...(Object.keys(userProfileUpdates).length > 0 && { user: update }),
+      ...(Object.keys(advisorProfileUpdates).length > 0 && { advisor })
+    };
+
+    return apiResponse("Profile updated successfully", true, 0, updatedFields);
+
   } catch (error) {
     console.error("PATCH_ERROR:", error);
-
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 },
-    );
+    return apiResponse("Internal Server Error", false, 6, "", error.message || error);
   }
 }
