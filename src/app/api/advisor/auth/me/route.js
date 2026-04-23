@@ -8,41 +8,62 @@ export async function GET() {
 
     if (!user?.token) {
       return apiResponse(
-        "something went wrong please try again",
+        "Something went wrong, please try again",
         false,
         1,
         "",
-        "Unable to get the token from the sessions",
+        "Unable to get the token from the session"
       );
     }
+
     const supabase = createAdminClient();
-    const { data, error } = await supabase
-      .from("advisor_profiles")
-      .select("*")
+
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("id, roles")
       .filter("device_tokens", "cs", JSON.stringify([{ token: user.token }]))
-      .maybeSingle()
-      
-    if (!data && error) {
+      .maybeSingle();
+
+    if (userError || !userData) {
       return apiResponse(
         "User Not Found",
         false,
         2,
         "",
-        "user not found based on the userId",
+        userError?.message || "User not found based on the token"
       );
     }
-    if(!Array.isArray(data.roles) || !data.roles.include("advisor")){
-        return apiResponse("UN AUTHORIZED", false, 3, "", "unauthorized access");
+
+    // Safe roles check
+    if (!Array.isArray(userData.roles) || !userData.roles.includes("advisor")) {
+      return apiResponse("UNAUTHORIZED", false, 3, "", "Unauthorized access");
     }
-    return apiResponse("user Retrieved successfully", true, 3, data, "");
+
+    const { data: advisor, error: advisorError } = await supabase
+      .from("advisor_profiles")
+      .select("*")
+      .eq("advisor_id", userData.id)
+      .maybeSingle();
+
+    if (advisorError || !advisor) {
+      return apiResponse(
+        "Advisor profile not found",
+        false,
+        4,
+        "",
+        advisorError?.message || "No advisor profile exists for this user"
+      );
+    }
+
+    return apiResponse("User retrieved successfully", true, 0, advisor, "");
   } catch (error) {
-    console.log(error);
+    console.error("GET /api/advisor/auth/me error:", error);
     return apiResponse(
       "Internal Server Error",
       false,
-      4,
+      5,
       "",
-      error.message || error,
+      error.message || error
     );
   }
 }

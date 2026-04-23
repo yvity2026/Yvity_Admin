@@ -65,8 +65,6 @@ const page = () => {
     fetchUser();
   }, []);
 
-  
-
   // start video
   const capturePhoto = () => {
     const video = videoRef.current;
@@ -123,42 +121,41 @@ const page = () => {
   const [loading, setLoading] = useState(true);
 
   const handleSave = async () => {
-  try {
-    const res = await fetch("/api/advisorauth/profile/update", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...formdata,
-        ispublic_professional: isJourney,
-        ispublic_services: isService,
-        ispublic_achievements: isAchievement,
-        ispublic_gallery: isGallery,
-        ispublic_testimonials: isTestimonial,
-        ispublic_profile: isProfile,
-      }),
-    });
+    try {
+      const res = await fetch("/api/advisor/profile/update", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formdata,
+          ispublic_professional: isJourney,
+          ispublic_services: isService,
+          ispublic_achievements: isAchievement,
+          ispublic_gallery: isGallery,
+          ispublic_testimonials: isTestimonial,
+          ispublic_profile: isProfile,
+        }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      alert(data.error || "Update failed");
-      return;
+      if (!res.ok) {
+        alert(data.error || "Update failed");
+        return;
+      }
+
+      setUser(data.data); // sync UI
+      alert("Profile updated successfully");
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong");
     }
+  };
 
-    setUser(data.data); // sync UI
-    alert("Profile updated successfully");
-
-  } catch (err) {
-    console.error(err);
-    alert("Something went wrong");
-  }
-};
-
-useEffect(() => {
+  useEffect(() => {
     if (!user) return;
-console.log(user)
+    console.log(user);
     setFormData({
       name: user.name || "",
       email: user.email || "",
@@ -170,10 +167,10 @@ console.log(user)
     });
   }, [user]);
 
-useEffect(() => {
+  useEffect(() => {
     if (!advisor) return;
-console.log(advisor)
-        setIsJourney(advisor.ispublic_professional);
+    console.log(advisor);
+    setIsJourney(advisor.ispublic_professional);
     setIsService(advisor.ispublic_services);
     setIsAchievement(advisor.ispublic_achievements);
     setIsGallery(advisor.ispublic_gallery);
@@ -211,11 +208,22 @@ console.log(advisor)
               <Skeleton className="w-26 h-26 rounded-full" />
             ) : (
               <>
-                <div className="w-26 h-26 rounded-full bg-blue-200 relative overflow-hidden">
-                  <Image src={user?.selfie_url} fill className="object-cover" />
+                <div className=" w-20 h-20 md:w-26 md:h-26 rounded-full bg-blue-200 relative overflow-hidden">
+                  {user?.selfie_url ? (
+                    <Image
+                      src={user.selfie_url}
+                      fill
+                      className="object-cover"
+                      alt="User Selfie"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                      <span className="text-gray-600 text-sm"> {user?.name ? user.name.charAt(0).toUpperCase() : "U"}</span>
+                    </div>
+                  )}
                 </div>
-                <div className="absolute bottom-0 right-0 w-8 h-8 bg-[#0A4A4A] rounded-full flex items-center justify-center text-white shadow-md cursor-pointer">
-                  <FaPen size={14} />
+                <div className="absolute bottom-0 right-0 w-4 h-4 md:w-8 md:h-8 bg-[#0A4A4A] rounded-full flex items-center justify-center text-white shadow-md cursor-pointer">
+                  <FaPen size={14} className="text-[8px] md:text-[14px]" />
                 </div>
               </>
             )}
@@ -250,7 +258,7 @@ console.log(advisor)
               </span>
 
               <button
-                className="w-full sm:w-auto px-4 h-[40px] flex py-[14px] gap-2 rounded-lg bg-[#0A4A4A] hover:bg-[#076868] hover:shadow-sm items-center text-[#F8F6F1] text-[clamp(8px,1vw,12px)] font-semibold font-poppins cursor-pointer"
+                className="w-full sm:w-auto px-4 h-[40px] flex text-center py-[14px] gap-2 rounded-lg bg-[#0A4A4A] hover:bg-[#076868] hover:shadow-sm items-center text-[#F8F6F1] text-[clamp(8px,1vw,12px)] font-semibold font-poppins cursor-pointer"
                 onClick={() => setIsUpload(true)}
               >
                 <FaCamera />
@@ -685,7 +693,7 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
                 {/* icon */}
                 <CiGlobe className="text-sm md:text-base" />
                 <span className="flex flex-col gap-1 md:gap-2">
-                  <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
+                  <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
                     Public Profile
                   </p>
                   <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
@@ -727,11 +735,14 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
             Make Changes Above To Save
           </p>
           <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3 md:gap-4">
-            <button className="w-full md:w-auto  px-4 py-[7px] lg:px-[22px] lg:py-[14px] flex items-center justify-center gap-2 text-[clamp(8px,1vw,12px)] font-semibold font-poppins rounded-lg flex items-center gap-[8px] text-teal-950 text-xs font-semibold leading-normal font-poppins rounded-lg border border-[#D8D8D8] cursor-pointer">
+            <button className="w-full md:w-auto  px-4 py-[7px] lg:px-[22px] lg:py-[14px] flex items-center justify-center gap-2 text-[clamp(8px,1vw,12px)]  rounded-lg flex items-center gap-[8px] text-teal-950 text-xs font-semibold leading-normal font-poppins rounded-lg border border-[#D8D8D8] cursor-pointer">
               <FiEye size={16} />
               preview Proile
             </button>
-            <button className="w-full md:w-auto px-4 md:px-[22px] flex items-center justify-center gap-2 text-xs text-[clamp(8px,1vw,12px)]  font-semibold font-poppins rounded-lg flex items-center gap-[8px] rounded-lg bg-[#0A4A4A] text-[#F8F6F1] text-xs font-semibold leading-normal font-poppins cursor-pointer" onClick={() => handleSave()}>
+            <button
+              className="w-full md:w-auto  px-4 py-[7px] lg:px-[22px] lg:py-[14px] flex items-center justify-center gap-2 text-xs text-[clamp(8px,1vw,12px)]  font-semibold font-poppins rounded-lg flex items-center gap-[8px] rounded-lg bg-[#0A4A4A] text-[#F8F6F1] text-xs font-semibold leading-normal font-poppins cursor-pointer"
+              onClick={() => handleSave()}
+            >
               <FiEye size={16} />
               Save changes
             </button>
