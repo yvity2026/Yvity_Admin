@@ -24,7 +24,7 @@ import { MdClose } from "react-icons/md";
 import { TfiGallery } from "react-icons/tfi";
 
 const page = () => {
-  const { user, setUser } = useAuth();
+  const { user, setUser, advisor } = useAuth();
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -65,19 +65,7 @@ const page = () => {
     fetchUser();
   }, []);
 
-  useEffect(() => {
-    if (!user) return;
-
-    setFormData({
-      name: user.name || "",
-      email: user.email || "",
-      dob: user.dob || "",
-      gender: user.gender || "",
-      city: user.city || "",
-      mobile: user.mobile || "",
-      irdai_number: user.irdai || "",
-    });
-  }, [user]);
+  
 
   // start video
   const capturePhoto = () => {
@@ -134,15 +122,64 @@ const page = () => {
   const [isProfile, setIsProfile] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      // await your API
-      await new Promise((res) => setTimeout(res, 1500)); // simulate delay
-      setLoading(false);
-    };
+  const handleSave = async () => {
+  try {
+    const res = await fetch("/api/advisorauth/profile/update", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...formdata,
+        ispublic_professional: isJourney,
+        ispublic_services: isService,
+        ispublic_achievements: isAchievement,
+        ispublic_gallery: isGallery,
+        ispublic_testimonials: isTestimonial,
+        ispublic_profile: isProfile,
+      }),
+    });
 
-    fetchData();
-  }, []);
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "Update failed");
+      return;
+    }
+
+    setUser(data.data); // sync UI
+    alert("Profile updated successfully");
+
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong");
+  }
+};
+
+useEffect(() => {
+    if (!user) return;
+console.log(user)
+    setFormData({
+      name: user.name || "",
+      email: user.email || "",
+      dob: user.dob || "",
+      gender: user.gender || "",
+      city: user.city || "",
+      mobile: user.mobile || "",
+      irdai_number: user.irdai || "",
+    });
+  }, [user]);
+
+useEffect(() => {
+    if (!advisor) return;
+console.log(advisor)
+        setIsJourney(advisor.ispublic_professional);
+    setIsService(advisor.ispublic_services);
+    setIsAchievement(advisor.ispublic_achievements);
+    setIsGallery(advisor.ispublic_gallery);
+    setIsTestimonial(advisor.ispublic_testimonials);
+    setIsProfile(advisor.ispublic_profile);
+  }, [advisor]);
 
   return (
     <div className="p-4 md:p-8 flex flex-col gap-4 md:gap-6">
@@ -648,7 +685,7 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
                 {/* icon */}
                 <CiGlobe className="text-sm md:text-base" />
                 <span className="flex flex-col gap-1 md:gap-2">
-                  <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+                  <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
                     Public Profile
                   </p>
                   <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
@@ -694,7 +731,7 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
               <FiEye size={16} />
               preview Proile
             </button>
-            <button className="w-full md:w-auto px-4 md:px-[22px] flex items-center justify-center gap-2 text-xs text-[clamp(8px,1vw,12px)]  font-semibold font-poppins rounded-lg flex items-center gap-[8px] rounded-lg bg-[#0A4A4A] text-[#F8F6F1] text-xs font-semibold leading-normal font-poppins cursor-pointer">
+            <button className="w-full md:w-auto px-4 md:px-[22px] flex items-center justify-center gap-2 text-xs text-[clamp(8px,1vw,12px)]  font-semibold font-poppins rounded-lg flex items-center gap-[8px] rounded-lg bg-[#0A4A4A] text-[#F8F6F1] text-xs font-semibold leading-normal font-poppins cursor-pointer" onClick={() => handleSave()}>
               <FiEye size={16} />
               Save changes
             </button>

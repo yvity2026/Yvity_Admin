@@ -34,14 +34,14 @@ export async function PATCH(req) {
       "city",
       "email",
       "mobile",
+      "ispublic_professional",
+      "ispublic_services",
+      "ispublic_achievements",
+      "ispublic_gallery",
+      "ispublic_testimonials",
+      "ispublic_profile"
       //   "irdai_"
     ];
-
-    allowedFields.forEach((key) => {
-      if (body[key] !== undefined) {
-        updates[key] = body[key];
-      }
-    });
 
     if (Object.keys(updates).length === 0) {
       return apiResponse();
