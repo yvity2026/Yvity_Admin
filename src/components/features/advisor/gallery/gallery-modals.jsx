@@ -215,9 +215,7 @@ export function ImageDetailsModal({ isOpen, onClose, data, onSuccess }) {
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this photo?")) return;
-
+  const executeDelete = async () => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/advisor/gallery?id=${data.id}`, {
@@ -236,6 +234,33 @@ export function ImageDetailsModal({ isOpen, onClose, data, onSuccess }) {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDelete = () => {
+    toast((t) => (
+      <div className="flex flex-col gap-3 p-1">
+        <p className="text-[clamp(13px,1.2vw,15px)] font-bold text-gray-900">Are you sure you want to delete this photo?</p>
+        <div className="flex justify-end gap-3 mt-1">
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-200 transition-colors cursor-pointer"
+          >
+            No, Cancel
+          </button>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+              executeDelete();
+            }}
+            className="px-4 py-2 bg-[#EF4444] text-white rounded-lg text-xs font-bold hover:bg-red-600 transition-colors cursor-pointer"
+          >
+            Yes, Delete
+          </button>
+        </div>
+      </div>
+    ), { 
+      duration: Infinity,
+    });
   };
 
   const title = isEditing ? "Edit Caption" : (data.caption || "Gallery Photo");

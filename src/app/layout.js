@@ -59,6 +59,7 @@ export default function RootLayout({ children }) {
                   <Toaster
                     position="top-right"
                     toastOptions={{
+                      duration: 2000,
                       style: {
                         zIndex: 99999,
                       },
