@@ -1,5 +1,9 @@
+import { useAuth } from "@/context/AuthContext";
+import { User } from "lucide-react";
+
 export default function WelcomeCard() {
   // Function to get greeting based on Indian time
+  const { user, setUser, loading } = useAuth();
   const getGreeting = () => {
     const now = new Date();
     // Convert to Indian time (IST = UTC+5:30)
@@ -29,7 +33,7 @@ export default function WelcomeCard() {
         </p>
       </div>
       <h2 className="text-[clamp(16px,4vw,27px)] font-cormorant mb-1 text-[#FFF]  text-base font-bold leading-normal">
-        Krishna Mohan!
+        {user?.name}
       </h2>
       <p className="text-[clamp(10px,1.2vw,14px)] text-[#89B5B7]">
         Your credibility profile is active and growing{" "}

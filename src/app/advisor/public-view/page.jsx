@@ -47,6 +47,9 @@ import GalleryItem from "@/components/features/advisor/gallery/gallery-item";
 import ServiceSection from "@/components/features/advisor/services/ServiceSection";
 import { motion, AnimatePresence } from "framer-motion";
 import Skeleton from "@/app/components/skeleton/Skeleton";
+import Image from "next/image";
+import { useAuth } from "@/context/AuthContext";
+import GiveTestimonialModal from "@/components/features/user/landing/modals/public-profile/GiveTestimonialModal";
 const page = () => {
   const qrRef = React.useRef(null);
 
@@ -205,6 +208,7 @@ const page = () => {
     { label: "QR Code", icon: <IoQrCode />, modal: MODALS.QR },
   ];
 
+  const { user, setUser } = useAuth();
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [testimonial, setTestimonial] = useState("");
@@ -212,58 +216,6 @@ const page = () => {
   const [loading, setLoading] = useState(false);
 
   // ✅ Validation + Submit
-  const handleSubmit = async () => {
-    if (!name.trim()) {
-      toast.error("Name is required");
-      return;
-    }
-
-    if (!/^[6-9]\d{9}$/.test(mobile)) {
-      toast.error("Enter valid 10 digit mobile number");
-      return;
-    }
-
-    if (!testimonial.trim()) {
-      toast.error("Testimonial cannot be empty");
-      return;
-    }
-
-    if (rating === 0) {
-      toast.error("Please select a rating");
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      // 🔥 Replace with your API
-      await fetch("/api/testimonial", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          mobile,
-          testimonial,
-          rating,
-        }),
-      });
-
-      toast.success("OTP sent successfully");
-
-      // optional reset
-      setName("");
-      setMobile("");
-      setTestimonial("");
-      setRating(0);
-    } catch (err) {
-      toast.error("Something went wrong");
-    } finally {
-      await new Promise((res) => setTimeout(res, 1500)); // simulate delay
-      setLoading(false);
-    }
-  };
 
   const [selectedReasons, setSelectedReasons] = useState([]);
   // const [mobile, setMobile] = useState("");
@@ -336,6 +288,17 @@ const page = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      const res = await fetch("/api/auth/me");
+      const data = await res.json();
+      setUser(data);
+      setLoading(false);
+    };
+
+    fetchUser();
+  }, []);
+
   return (
     <div className="bg-[#F8F6F1]">
       {/* Header */}
@@ -360,8 +323,20 @@ const page = () => {
                 <Skeleton className="h-16 w-16 sm:h-20 sm:w-20 md:h-22 md:w-22 rounded-full" />
               </span>
             ) : (
-              <span className="absolute h-16 w-16 sm:h-20 sm:w-20 md:h-22 md:w-22 rounded-full top-[39px] left-4 md:left-[30px] ring-[3px] ring-white text-2xl flex items-center justify-center bg-[#0A4A4A] text-white">
-                KM
+              <span className="absolute h-16 w-16 sm:h-20 sm:w-20 md:h-22 md:w-22 rounded-full top-[39px] left-4 md:left-[30px] ring-[3px] ring-white bg-[#0A4A4A] text-white overflow-hidden">
+                {user?.selfie_url ? (
+                  <Image
+                    src={user.selfie_url}
+                    alt="User profile"
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <span className="flex items-center justify-center w-full h-full text-2xl">
+                    {/* fallback (initial or icon) */}
+                    {user?.name?.charAt(0) || "U"}
+                  </span>
+                )}
               </span>
             )}
             {/* Advisor Details */}
@@ -422,14 +397,14 @@ const page = () => {
                 <div className="px-4 md:px-6 md:flex justify-between">
                   <span className="flex flex-col gap-1">
                     <p className="text-[#111827] text-[18px] sm:text-[20px] md:text-[24px] font-bold leading-normal font-cormorant">
-                      Krishna Mohan
+                      {user?.name}
                     </p>
                     <span className="flex gap-2 items-center">
                       <FiCheckCircle className="text-[#0A4A4A]" />
                       <p className="">Identity Verified</p>
                     </span>
                     <p className="text-gray-700 text-[10px] sm:text-xs md:text-xs font-normal leading-4 font-poppins">
-                      Senior LIC Advisor • Nellore, AP
+                      {`${user?.profession} • ${user?.city}`}
                     </p>
 
                     {/* <p className="text-teal-950 text-[clamp(8px,1vw,12px)] font-medium leading-4 font-poppins">
@@ -886,117 +861,11 @@ const page = () => {
       </div>
 
       {activeModal === MODALS.TESTIMONIAL && (
-        <ModalWrapper onClose={() => setActiveModal(null)}>
-          <div className="bg-white rounded-[2rem] shadow-xl w-[calc(100vw-2rem)] sm:w-full max-w-lg overflow-hidden border border-gray-100 h-auto">
-            {/* Header - Tightened padding for vertical fit */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">📷</span>
-                <h2 className="text-xl font-bold text-slate-900">
-                  Give Testimonial
-                </h2>
-              </div>
-
-              <button
-                onClick={() => setActiveModal(null)}
-                className="text-gray-400 hover:text-gray-600 bg-gray-100 p-1.5 rounded-full transition-colors"
-              >
-                <IoClose size={20} />
-              </button>
-            </div>
-
-            {/* Body - Adjusted spacing from 5 to 4 to save vertical pixels */}
-            <div className="p-6 space-y-4">
-              {/* Tabs */}
-              <div className="flex p-1 bg-slate-100 rounded-xl">
-                <button className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white shadow-sm rounded-lg text-sm font-bold text-slate-800">
-                  <span>📄</span> Text
-                </button>
-                <button className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700">
-                  <span>🎵</span> Audio
-                </button>
-                <button className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700">
-                  <span>🎬</span> Video
-                </button>
-              </div>
-
-              {/* Form - Compact layout */}
-              <div className="space-y-3">
-                <div>
-                  <label className="block font-bold text-slate-800 mb-1.5 text-sm">
-                    Your Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Full name"
-                    className="w-full px-4 py-3 bg-slate-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-800 mb-1.5 text-sm">
-                    Mobile (OTP) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    value={mobile}
-                    onChange={(e) => setMobile(e.target.value)}
-                    placeholder="10 digit mobile number"
-                    className="w-full px-4 py-3 bg-slate-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-800 mb-1.5 text-sm">
-                    Testimonial <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    rows="3"
-                    value={testimonial}
-                    onChange={(e) => setTestimonial(e.target.value)}
-                    placeholder="Share your experience..."
-                    className="w-full px-4 py-3 bg-slate-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all resize-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-800 mb-1.5 text-sm">
-                    Rating
-                  </label>
-                  <div className="flex gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setRating(i + 1)}
-                        className={`text-3xl transition-transform hover:scale-110 ${
-                          i < rating ? "text-yellow-400" : "text-gray-300"
-                        }`}
-                      >
-                        ★
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Submit */}
-              <button
-                className="w-full bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-                onClick={handleSubmit}
-                disabled={loading}
-              >
-                {loading ? "Processing..." : "Submit & Verify OTP"}
-                {loading ? (
-                  <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                ) : (
-                  <FiArrowRight size={18} />
-                )}
-              </button>
-            </div>
-          </div>
-        </ModalWrapper>
+        <GiveTestimonialModal
+          open={activeModal}
+          onClose={() => setActiveModal(null)}
+          loading={loading}
+        />
       )}
       {activeModal === MODALS.QR && (
         <ModalWrapper onClose={() => setActiveModal(null)}>

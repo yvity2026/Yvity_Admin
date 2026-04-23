@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+
 function getCookie(name) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
@@ -43,5 +44,10 @@ export default function InitPage() {
     run();
   }, []);
 
-  return <p>Setting up session...</p>;
+  return (
+    <>
+    <p>....</p>
+    {/* <DashboardLoader /> */}
+    </>
+  );
 }

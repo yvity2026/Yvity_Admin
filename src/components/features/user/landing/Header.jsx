@@ -9,6 +9,8 @@ import SuccessReviewModal from "./modals/SuccessReviewModal";
 import Image from "next/image";
 import Skeleton from "@/app/components/skeleton/Skeleton";
 import { useAuth } from "@/context/AuthContext";
+import { RxDashboard } from "react-icons/rx";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,6 +56,8 @@ const Header = () => {
       return false;
     }
   };
+
+  const router = useRouter();
 
   return (
     <>
@@ -121,6 +125,18 @@ const Header = () => {
                 <span className="font-medium">Home</span>
               </button>
 
+              {
+                user?.roles?.[0] === "advisor" ? (
+                  <button
+                className="flex items-center gap-2  text-[14px] bg-[#0A4A4A] hover:bg-[#023e3e] leading-[16px] px-4 py-2 rounded-lg font-medium text-white cursor-pointer"
+                onClick={() => router.push("/advisor/dashboard")}
+              >
+                <RxDashboard size={20} />
+                <span className="font-medium">Dashboard</span>
+              </button>
+                )
+                : 
+                (
               <button
                 className="flex items-center gap-2  text-[14px] leading-[16px] px-2 py-1 font-medium text-[var(--headings-important-text,#111827)] cursor-pointer"
                 onClick={() => setActiveModal(MODALS.PROFILE)}
@@ -128,6 +144,9 @@ const Header = () => {
                 <FiUser size={20} />
                 <span className="font-medium">Setup My Profile</span>
               </button>
+                )
+              }
+
 
               {/* Icons & Logout */}
               <div className="flex items-center space-x-4 pl-4 border-l border-gray-200">

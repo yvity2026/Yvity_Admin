@@ -26,7 +26,7 @@ export async function POST(req) {
     }
 
     // 3. Get user
-    const user = await getUser();
+    const user = await await getUser();
     if (!user?.token) {
       return apiResponse(
         "Unauthorized",
