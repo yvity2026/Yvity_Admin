@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 
 // READ ONE
 export async function GET(
-  req ,params
+  req, params
 ) {
   try {
     const supabase = createClient();
@@ -28,7 +28,7 @@ export async function GET(
 // UPDATE (owner or admin)
 export async function PATCH(
   req,
-   params 
+  params
 ) {
   try {
     const supabase = createClient();

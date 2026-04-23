@@ -12,7 +12,7 @@ export default function Home() {
   // const router = useRouter();
   // return (
   //   <>
-    
+
   //   </>
   // );
   redirect("/auth/init");
