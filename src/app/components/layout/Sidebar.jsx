@@ -2,7 +2,7 @@
 import { easeInOut, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { AiOutlineUser } from "react-icons/ai";
 import { BiPulse } from "react-icons/bi";
@@ -23,6 +23,7 @@ import { createPortal } from "react-dom";
 
 import { useModal } from "@/context/ModalContext";
 import clsx from "clsx";
+import { useAuth } from "@/context/AuthContext";
 
 const menuItems = [
   {
@@ -116,6 +117,7 @@ const menuItems = [
 
 export default function AppShell({ children }) {
   const { openModal } = useModal();
+  const { user, loading, setUser } = useAuth();
   // const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -196,11 +198,13 @@ export default function AppShell({ children }) {
 
   const [hoveredItem, setHoveredItem] = useState(null);
   const [tooltip, setTooltip] = useState({
-  visible: false,
-  text: "",
-  x: 0,
-  y: 0,
-});
+    visible: false,
+    text: "",
+    x: 0,
+    y: 0,
+  });
+
+  const router = useRouter();
 
   const isDefaultActions =
     currentHeader.actions.includes("notifications") ||
@@ -219,7 +223,10 @@ export default function AppShell({ children }) {
       >
         <div className="flex flex-col h-full">
           {/* Website Logo */}
-          <div className="h-[60px] bg-[#FAFAFA]  flex justify-center items-center ">
+          <div
+            className="h-[60px] bg-[#FAFAFA]  flex justify-center items-center "
+            onClick={() => router.push("/dashboard")}
+          >
             <Image
               src="/images/Adivisor/Navbar/navlogo.png"
               height={100}
@@ -239,21 +246,24 @@ export default function AppShell({ children }) {
             {/* Avatar */}
             <div
               className={`
-      rounded-full ring-[2px] ring-[#FEC564] bg-[#F59E0B] flex items-center justify-center
+      relative rounded-full ring-[2px] ring-[#FEC564] bg-[#F59E0B] flex items-center justify-center overflow-hidden
       ${collapsed ? "w-10 h-10" : "w-14 h-14"}
     `}
             >
-              {collapsed && (
-                <span className="text-black font-semibold text-sm">
-                  {initials}
-                </span>
-              )}
+              {/* {collapsed && ( */}
+              <Image
+                src={user?.selfie_url}
+                alt="User Image"
+                fill
+                className="object-cover"
+              />
+              {/* )} */}
             </div>
 
             {/* Name */}
             {!collapsed && (
               <p className="text-[#F8F6F1] font-poppins text-base font-semibold">
-                Krishna Mohan
+                {user?.name ? user.name : "Hi User"}
               </p>
             )}
 
@@ -290,22 +300,22 @@ export default function AppShell({ children }) {
                     <motion.div
                       key={j}
                       onMouseEnter={() =>
-    setTooltip((prev) => ({
-      ...prev,
-      visible: true,
-      text: item.label,
-    }))
-  }
-  onMouseLeave={() =>
-    setTooltip((prev) => ({ ...prev, visible: false }))
-  }
-  onMouseMove={(e) =>
-    setTooltip((prev) => ({
-      ...prev,
-      x: e.clientX + 12, // offset from cursor
-      y: e.clientY + 12,
-    }))
-  }
+                        setTooltip((prev) => ({
+                          ...prev,
+                          visible: true,
+                          text: item.label,
+                        }))
+                      }
+                      onMouseLeave={() =>
+                        setTooltip((prev) => ({ ...prev, visible: false }))
+                      }
+                      onMouseMove={(e) =>
+                        setTooltip((prev) => ({
+                          ...prev,
+                          x: e.clientX + 12, // offset from cursor
+                          y: e.clientY + 12,
+                        }))
+                      }
                       whileHover={{ scale: 1.01 }}
                       transition={{ duration: 0.2, ease: "easeOut" }}
                       className={` relative group flex w-full items-center cursor-pointer rounded-lg
@@ -397,8 +407,19 @@ export default function AppShell({ children }) {
               )}
 
               {currentHeader.actions.includes("profile") && (
-                <motion.button className="rounded-full h-10 w-10 bg-[#F59E0B] cursor-pointer ring-[2px] ring-[#FEC564] ">
-                  <p className="font-bold text-sm">KM</p>
+                <motion.button className="rounded-full h-10 w-10 bg-[#F59E0B] cursor-pointer ring-[2px] ring-[#FEC564] overflow-hidden relative flex items-center justify-center">
+                  {user?.selfie_url ? (
+                    <Image
+                      src={user.selfie_url}
+                      alt="Profile"
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <p className="font-bold text-sm text-white">
+                      {user?.name?.charAt(0) || "K"}
+                    </p>
+                  )}
                 </motion.button>
               )}
 
@@ -527,18 +548,18 @@ export default function AppShell({ children }) {
         <main className="flex-1 bg-[#F8F6F1]">{children}</main>
       </div>
       {tooltip.visible && collapsed && (
-  <div
-    style={{
-      position: "fixed",
-      top: tooltip.y,
-      left: tooltip.x,
-      zIndex: 99999,
-    }}
-    className="pointer-events-none bg-[#0f6f6f] text-white text-xs px-3 py-1.5 font-poppins rounded-md shadow-lg whitespace-nowrap"
-  >
-    {tooltip.text}
-  </div>
-)}
+        <div
+          style={{
+            position: "fixed",
+            top: tooltip.y,
+            left: tooltip.x,
+            zIndex: 99999,
+          }}
+          className="pointer-events-none bg-[#0f6f6f] text-white text-xs px-3 py-1.5 font-poppins rounded-md shadow-lg whitespace-nowrap"
+        >
+          {tooltip.text}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,12 +1,12 @@
 import { Eye, Share2, MessageSquare, Film, SmartphoneNfc } from "lucide-react";
 import { IoQrCode } from "react-icons/io5";
 import { FaEye } from "react-icons/fa";
-
+import Link from "next/link";
 
 const actions = [
-  { label: "View Profile", icon: FaEye },
+  { label: "View Profile", icon: FaEye, href: "/advisor/profile" },
   { label: "Share Profile", icon: Share2 },
-  { label: "Testimonials", icon: MessageSquare },
+  { label: "Testimonials", icon: MessageSquare, href: "/advisor/testimonials" },
   { label: "Add Intro Video", icon: Film },
   { label: "Download QR", icon: IoQrCode },
 ];
@@ -14,7 +14,9 @@ const actions = [
 export default function QuickActions() {
   return (
     <div className="space-y-4">
-      <h3 className="font-bold text-[#111827] text-[clamp(12px,1.5vw,16px)]">Quick Actions</h3>
+      <h3 className="font-bold text-[#111827] text-[clamp(12px,1.5vw,16px)]">
+        Quick Actions
+      </h3>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 ">
         {actions.map((action, i) => {
           const Icon = action.icon;
@@ -27,9 +29,18 @@ export default function QuickActions() {
                 className="text-gray-700 group-hover:text-[#124B48] transition-colors"
                 strokeWidth={1.5}
               />
-              <span className="text-[clamp(8px,1vw,12px)] font-bold text-[#374151]">
-                {action.label}
-              </span>
+              {action?.href ? (
+                <Link
+                  className="text-[clamp(8px,1vw,12px)] font-bold text-[#374151]"
+                  href={action.href}
+                >
+                  {action.label}
+                </Link>
+              ) : (
+                <span className="text-[clamp(8px,1vw,12px)] font-bold text-[#374151] opacity-50 cursor-default">
+                  {action.label}
+                </span>
+              )}
             </button>
           );
         })}

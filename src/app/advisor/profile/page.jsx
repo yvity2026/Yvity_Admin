@@ -1,6 +1,8 @@
 "use client";
 import Skeleton from "@/app/components/skeleton/Skeleton";
 import Toggle from "@/app/components/ui/ToggleButton";
+import { useAuth } from "@/context/AuthContext";
+import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { CgGirl } from "react-icons/cg";
 import { CiGlobe } from "react-icons/ci";
@@ -22,13 +24,22 @@ import { MdClose } from "react-icons/md";
 import { TfiGallery } from "react-icons/tfi";
 
 const page = () => {
+  const { user, setUser } = useAuth();
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
-
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [isUpload, setIsUpload] = useState(false);
+  const [formdata, setFormData] = useState({
+    name: "",
+    email: "",
+    dob: "",
+    gender: "",
+    city: "",
+    mobile: "",
+    irdai_number: "",
+  });
 
   //start camera
   const startCamera = async () => {
@@ -42,6 +53,31 @@ const page = () => {
       videoRef.current.srcObject = stream;
     }
   };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const res = await fetch("/api/auth/me");
+      const data = await res.json();
+      setUser(data);
+      setLoading(false);
+    };
+
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    setFormData({
+      name: user.name || "",
+      email: user.email || "",
+      dob: user.dob || "",
+      gender: user.gender || "",
+      city: user.city || "",
+      mobile: user.mobile || "",
+      irdai_number: user.irdai || "",
+    });
+  }, [user]);
 
   // start video
   const capturePhoto = () => {
@@ -137,13 +173,17 @@ const page = () => {
             {loading ? (
               <Skeleton className="w-26 h-26 rounded-full" />
             ) : (
-              <div className="w-26 h-26 rounded-full bg-blue-200"></div>
+              <>
+                <div className="w-26 h-26 rounded-full bg-blue-200 relative overflow-hidden">
+                  <Image src={user?.selfie_url} fill className="object-cover" />
+                </div>
+                <div className="absolute bottom-0 right-0 w-8 h-8 bg-[#0A4A4A] rounded-full flex items-center justify-center text-white shadow-md cursor-pointer">
+                  <FaPen size={14} />
+                </div>
+              </>
             )}
 
             {/* edit icon */}
-            <div className="absolute bottom-0 right-0 w-8 h-8 bg-[#0A4A4A] rounded-full flex items-center justify-center text-white shadow-md cursor-pointer">
-              <FaPen size={14} />
-            </div>
           </div>
           {loading ? (
             <div className="flex flex-col h-full justify-between items-center md:items-start gap-6 xl:gap-0 w-full">
@@ -186,46 +226,42 @@ const page = () => {
 
       {/* stage-2 */}
       {/* <div className="h-[449px] bg-white pl-10 pr-[35px] py-[22px] rounded-2xl bg-white shadow-sm"> */}
-      {
-        loading ? (
-           <div className="bg-white px-4 md:pl-10 md:pr-[35px] py-4 md:py-[22px] rounded-2xl shadow-sm">
-
-      {/* Title */}
-      <div className="flex items-center gap-2 mb-6">
-        <Skeleton className="h-5 w-5 rounded-full" />
-        <Skeleton className="h-5 w-40" />
-      </div>
-
-      {/* Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-        {/* Input field skeleton */}
-        {[1,2,3,4,5,6].map((_, i) => (
-          <div key={i} className="flex flex-col gap-2">
-            <Skeleton className="h-4 w-32" /> {/* label */}
-            <Skeleton className="h-11 w-full rounded-lg" /> {/* input */}
+      {loading ? (
+        <div className="bg-white px-4 md:pl-10 md:pr-[35px] py-4 md:py-[22px] rounded-2xl shadow-sm">
+          {/* Title */}
+          <div className="flex items-center gap-2 mb-6">
+            <Skeleton className="h-5 w-5 rounded-full" />
+            <Skeleton className="h-5 w-40" />
           </div>
-        ))}
 
-        {/* Gender special case */}
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-4 w-24" />
-          <div className="flex gap-2 mt-2">
-            <Skeleton className="h-10 flex-1 rounded-md" />
-            <Skeleton className="h-10 flex-1 rounded-md" />
-            <Skeleton className="h-10 flex-1 rounded-md" />
+          {/* Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Input field skeleton */}
+            {[1, 2, 3, 4, 5, 6].map((_, i) => (
+              <div key={i} className="flex flex-col gap-2">
+                <Skeleton className="h-4 w-32" /> {/* label */}
+                <Skeleton className="h-11 w-full rounded-lg" /> {/* input */}
+              </div>
+            ))}
+
+            {/* Gender special case */}
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-4 w-24" />
+              <div className="flex gap-2 mt-2">
+                <Skeleton className="h-10 flex-1 rounded-md" />
+                <Skeleton className="h-10 flex-1 rounded-md" />
+                <Skeleton className="h-10 flex-1 rounded-md" />
+              </div>
+            </div>
+
+            {/* Full width field (IRDAI) */}
+            <div className="flex flex-col gap-2 lg:col-span-2">
+              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-11 w-full rounded-lg" />
+            </div>
           </div>
         </div>
-
-        {/* Full width field (IRDAI) */}
-        <div className="flex flex-col gap-2 lg:col-span-2">
-          <Skeleton className="h-4 w-48" />
-          <Skeleton className="h-11 w-full rounded-lg" />
-        </div>
-
-      </div>
-    </div>
-        ) : (
+      ) : (
         <div className="bg-white px-4 md:pl-10 md:pr-[35px] py-4 md:py-[22px] rounded-2xl shadow-sm">
           <span className=" text-[#111827] text-base font-bold leading-normal font-poppins flex items-center gap-2">
             <FaUser />
@@ -239,6 +275,13 @@ const page = () => {
               </label>
               <input
                 type="text"
+                value={formdata.name}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    name: e.target.value,
+                  }))
+                }
                 placeholder="Krishna Mohan"
                 className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
               />
@@ -251,6 +294,13 @@ const page = () => {
               <input
                 type="date"
                 placeholder="15-06-1985"
+                value={formdata.dob}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    dob: e.target.value,
+                  }))
+                }
                 className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
               />
             </div>
@@ -269,6 +319,13 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
                   <input
                     type="radio"
                     name="gender"
+                    checked={formdata.gender === "male"}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        gender: e.target.value,
+                      }))
+                    }
                     value="male"
                     className="hidden w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[16px] px-4 md:px-[24px] text-sm md:text-base font-nunito "
                   />
@@ -286,6 +343,13 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
                   <input
                     type="radio"
                     name="gender"
+                    checked={formdata.gender === "female"}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        gender: e.target.value,
+                      }))
+                    }
                     value="female"
                     className="hidden w-full rounded-lg border border-[##DBE1E0] bg-[#FAFCFB] py-3 md:py-[16px] px-4 md:px-[24px] text-sm md:text-base font-bold leading-4 font-nunito"
                   />
@@ -303,6 +367,13 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
                   <input
                     type="radio"
                     name="gender"
+                    checked={formdata.gender === "other"}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        gender: e.target.value,
+                      }))
+                    }
                     value="other"
                     className="hidden w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[16px] px-4 md:px-[24px] text-sm md:text-base font-nunito"
                   />
@@ -317,6 +388,13 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
               </label>
               <input
                 type="text"
+                value={formdata.city}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    city: e.target.value,
+                  }))
+                }
                 placeholder="Nellore, AP"
                 className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
               />
@@ -328,6 +406,13 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
               </label>
               <input
                 type="email"
+                value={formdata.email}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    email: e.target.value,
+                  }))
+                }
                 placeholder="Krishna@email.com"
                 className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
               />
@@ -339,6 +424,13 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
               </label>
               <input
                 type="tel"
+                value={formdata.mobile}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    mobile: e.target.value,
+                  }))
+                }
                 placeholder="+91  9876543210"
                 className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
               />
@@ -353,265 +445,262 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
               <input
                 type="text"
                 name="irdaiLicenseNumber"
+                value={formdata.irdai_number}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    irdai_number: e.target.value,
+                  }))
+                }
                 placeholder="CM123456789"
                 className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
                 required
               />
             </div>
           </div>
-        </div>  
-        )
-      }
-
+        </div>
+      )}
 
       {/* stage - 3 */}
-      {
-        loading ? (
-          <div className="py-4 md:py-[35px] px-4 md:pl-[40px] md:pr-[35px] rounded-2xl bg-white shadow-sm">
-
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center gap-2 mb-6">
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-5 w-5 rounded-full" />
-          <Skeleton className="h-5 w-40" />
-        </div>
-        <Skeleton className="h-4 w-72 md:ml-2" />
-      </div>
-
-      {/* Rows */}
-      <div className="flex flex-col gap-4">
-        {[1,2,3,4,5,6].map((_, i) => (
-          <div
-            key={i}
-            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-gray-200 bg-gray-100"
-          >
-            {/* Left side */}
-            <div className="flex items-center gap-4 w-full">
+      {loading ? (
+        <div className="py-4 md:py-[35px] px-4 md:pl-[40px] md:pr-[35px] rounded-2xl bg-white shadow-sm">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center gap-2 mb-6">
+            <div className="flex items-center gap-2">
               <Skeleton className="h-5 w-5 rounded-full" />
+              <Skeleton className="h-5 w-40" />
+            </div>
+            <Skeleton className="h-4 w-72 md:ml-2" />
+          </div>
 
-              <div className="flex flex-col gap-2 w-full">
-                <Skeleton className="h-4 w-40" />
-                <Skeleton className="h-3 w-56" />
+          {/* Rows */}
+          <div className="flex flex-col gap-4">
+            {[1, 2, 3, 4, 5, 6].map((_, i) => (
+              <div
+                key={i}
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-gray-200 bg-gray-100"
+              >
+                {/* Left side */}
+                <div className="flex items-center gap-4 w-full">
+                  <Skeleton className="h-5 w-5 rounded-full" />
+
+                  <div className="flex flex-col gap-2 w-full">
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-3 w-56" />
+                  </div>
+                </div>
+
+                {/* Right side */}
+                <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+                  <Skeleton className="h-4 w-14" /> {/* "Public" */}
+                  <Skeleton className="h-6 w-10 rounded-full" /> {/* toggle */}
+                </div>
               </div>
-            </div>
-
-            {/* Right side */}
-            <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
-              <Skeleton className="h-4 w-14" /> {/* "Public" */}
-              <Skeleton className="h-6 w-10 rounded-full" /> {/* toggle */}
-            </div>
-          </div>
-        ))}
-      </div>
-
-    </div>
-        ) : (
-      <div className="py-4 md:py-[35px] px-4 md:pl-[40px] md:pr-[35px] rounded-2xl bg-white shadow-sm">
-        <span className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 mb-4 md:mb-[24px] text-gray-500 text-xs md:text-sm font-bold font-nunito">
-          <p className="text-sm md:text-[14px] font-bold font-poppins text-[#111827] flex items-center gap-2">
-            <FaLock />
-            Section Visibility
-          </p>
-          - Control what clients see on your public profile
-        </span>
-        <div className="flex flex-col justify-between gap-3 md:gap-[16px] bg-white">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between  gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* icon */}
-              <FaFolder className="text-sm md:text-base" />
-              <span className="flex flex-col gap-1 md:gap-2">
-                <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
-                  professional Journey
-                </p>
-                <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
-                  Work history and career timeline
-                </p>
-              </span>
-            </span>
-            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* public */}
-              <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
-                Public
-              </p>
-              <Toggle
-                onColor="bg-[#0A4A4A]"
-                offColor="bg-gray-400"
-                isOn={isJourney}
-                setIsOn={() => setIsJourney(!isJourney)}
-              />
-            </span>
-          </div>
-          {/* 2ND */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between  gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* icon */}
-              <IoShieldHalfOutline className="text-md md:text-base" />
-              <span className="flex flex-col gap-1 md:gap-2">
-                <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
-                  Services
-                </p>
-                <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
-                  Life & Health insurance offerings
-                </p>
-              </span>
-            </span>
-            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* public */}
-              <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
-                Public
-              </p>
-              <Toggle
-                onColor="bg-[#0A4A4A]"
-                offColor="bg-gray-400"
-                isOn={isService}
-                setIsOn={() => setIsService(!isService)}
-              />
-            </span>
-          </div>
-          {/* 3rd */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* icon */}
-              <FaTrophy className="text-sm md:text-base" />
-              <span className="flex flex-col gap-1 md:gap-2">
-                <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
-                  Achievements
-                </p>
-                <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
-                  MDRT, awards & milestones
-                </p>
-              </span>
-            </span>
-            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* public */}
-              <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
-                Public
-              </p>
-              <Toggle
-                onColor="bg-[#0A4A4A]"
-                offColor="bg-gray-400"
-                isOn={isAchievement}
-                setIsOn={() => setIsAchievement(!isAchievement)}
-              />
-            </span>
-          </div>
-          {/* 4th */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* icon */}
-              <TfiGallery className="text-sm md:text-base" />
-              <span className="flex flex-col gap-1 md:gap-2">
-                <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
-                  Gallery
-                </p>
-                <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
-                  Photos & event images
-                </p>
-              </span>
-            </span>
-            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* public */}
-              <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
-                Public
-              </p>
-              <Toggle
-                onColor="bg-[#0A4A4A]"
-                offColor="bg-gray-400"
-                isOn={isGallery}
-                setIsOn={() => setIsGallery(!isGallery)}
-              />
-            </span>
-          </div>
-          {/* 5th */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* icon */}
-              <IoMdChatboxes className="text-sm md:text-base" />
-              <span className="flex flex-col gap-1 md:gap-2">
-                <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
-                  Testimonials
-                </p>
-                <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
-                  Client reviews & ratings
-                </p>
-              </span>
-            </span>
-            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* public */}
-              <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
-                Public
-              </p>
-              <Toggle
-                onColor="bg-[#0A4A4A]"
-                offColor="bg-gray-400"
-                isOn={isTestimonial}
-                setIsOn={() => setIsTestimonial(!isTestimonial)}
-              />
-            </span>
-          </div>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* icon */}
-              <CiGlobe className="text-sm md:text-base" />
-              <span className="flex flex-col gap-1 md:gap-2">
-                <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
-                  Public Profile
-                </p>
-                <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
-                  Anyone with the link can view your profile
-                </p>
-              </span>
-            </span>
-            <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-              {/* public */}
-              <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
-                Public
-              </p>
-              <Toggle
-                onColor="bg-[#0A4A4A]"
-                offColor="bg-gray-400"
-                isOn={isProfile}
-                setIsOn={() => setIsProfile(!isProfile)}
-              />
-            </span>
+            ))}
           </div>
         </div>
-      </div>
-        )
-      }
+      ) : (
+        <div className="py-4 md:py-[35px] px-4 md:pl-[40px] md:pr-[35px] rounded-2xl bg-white shadow-sm">
+          <span className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 mb-4 md:mb-[24px] text-gray-500 text-xs md:text-sm font-bold font-nunito">
+            <p className="text-sm md:text-[14px] font-bold font-poppins text-[#111827] flex items-center gap-2">
+              <FaLock />
+              Section Visibility
+            </p>
+            - Control what clients see on your public profile
+          </span>
+          <div className="flex flex-col justify-between gap-3 md:gap-[16px] bg-white">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between  gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
+              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
+                {/* icon */}
+                <FaFolder className="text-sm md:text-base" />
+                <span className="flex flex-col gap-1 md:gap-2">
+                  <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+                    professional Journey
+                  </p>
+                  <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+                    Work history and career timeline
+                  </p>
+                </span>
+              </span>
+              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
+                {/* public */}
+                <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
+                  Public
+                </p>
+                <Toggle
+                  onColor="bg-[#0A4A4A]"
+                  offColor="bg-gray-400"
+                  isOn={isJourney}
+                  setIsOn={() => setIsJourney(!isJourney)}
+                />
+              </span>
+            </div>
+            {/* 2ND */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between  gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
+              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
+                {/* icon */}
+                <IoShieldHalfOutline className="text-md md:text-base" />
+                <span className="flex flex-col gap-1 md:gap-2">
+                  <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+                    Services
+                  </p>
+                  <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+                    Life & Health insurance offerings
+                  </p>
+                </span>
+              </span>
+              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
+                {/* public */}
+                <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
+                  Public
+                </p>
+                <Toggle
+                  onColor="bg-[#0A4A4A]"
+                  offColor="bg-gray-400"
+                  isOn={isService}
+                  setIsOn={() => setIsService(!isService)}
+                />
+              </span>
+            </div>
+            {/* 3rd */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
+              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
+                {/* icon */}
+                <FaTrophy className="text-sm md:text-base" />
+                <span className="flex flex-col gap-1 md:gap-2">
+                  <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+                    Achievements
+                  </p>
+                  <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+                    MDRT, awards & milestones
+                  </p>
+                </span>
+              </span>
+              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
+                {/* public */}
+                <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
+                  Public
+                </p>
+                <Toggle
+                  onColor="bg-[#0A4A4A]"
+                  offColor="bg-gray-400"
+                  isOn={isAchievement}
+                  setIsOn={() => setIsAchievement(!isAchievement)}
+                />
+              </span>
+            </div>
+            {/* 4th */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
+              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
+                {/* icon */}
+                <TfiGallery className="text-sm md:text-base" />
+                <span className="flex flex-col gap-1 md:gap-2">
+                  <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+                    Gallery
+                  </p>
+                  <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+                    Photos & event images
+                  </p>
+                </span>
+              </span>
+              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
+                {/* public */}
+                <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
+                  Public
+                </p>
+                <Toggle
+                  onColor="bg-[#0A4A4A]"
+                  offColor="bg-gray-400"
+                  isOn={isGallery}
+                  setIsOn={() => setIsGallery(!isGallery)}
+                />
+              </span>
+            </div>
+            {/* 5th */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
+              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
+                {/* icon */}
+                <IoMdChatboxes className="text-sm md:text-base" />
+                <span className="flex flex-col gap-1 md:gap-2">
+                  <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+                    Testimonials
+                  </p>
+                  <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+                    Client reviews & ratings
+                  </p>
+                </span>
+              </span>
+              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
+                {/* public */}
+                <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
+                  Public
+                </p>
+                <Toggle
+                  onColor="bg-[#0A4A4A]"
+                  offColor="bg-gray-400"
+                  isOn={isTestimonial}
+                  setIsOn={() => setIsTestimonial(!isTestimonial)}
+                />
+              </span>
+            </div>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
+              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
+                {/* icon */}
+                <CiGlobe className="text-sm md:text-base" />
+                <span className="flex flex-col gap-1 md:gap-2">
+                  <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+                    Public Profile
+                  </p>
+                  <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+                    Anyone with the link can view your profile
+                  </p>
+                </span>
+              </span>
+              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
+                {/* public */}
+                <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
+                  Public
+                </p>
+                <Toggle
+                  onColor="bg-[#0A4A4A]"
+                  offColor="bg-gray-400"
+                  isOn={isProfile}
+                  setIsOn={() => setIsProfile(!isProfile)}
+                />
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
       {/* stage-4 */}
-      {
-        loading ? (
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 px-4 md:px-6 py-4 md:py-[26px] bg-white">
-      
-      {/* Text */}
-      <Skeleton className="h-4 w-48" />
+      {loading ? (
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 px-4 md:px-6 py-4 md:py-[26px] bg-white">
+          {/* Text */}
+          <Skeleton className="h-4 w-48" />
 
-      {/* Buttons */}
-      <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3 md:gap-4">
-        <Skeleton className="h-[40px] w-full md:w-[150px] rounded-lg" />
-        <Skeleton className="h-[40px] w-full md:w-[150px] rounded-lg" />
-      </div>
-
-    </div>
-        ) : (
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 px-4 md:px-6 py-4 md:py-[26px] bg-white">
-        <p className="text-gray-500 ttext-[clamp(10px,1vw,14px)] font-normal leading-normal font-nunito">
-          Make Changes Above To Save
-        </p>
-        <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3 md:gap-4">
-          <button className="w-full md:w-auto  px-4 py-[7px] lg:px-[22px] lg:py-[14px] flex items-center justify-center gap-2 text-[clamp(8px,1vw,12px)] font-semibold font-poppins rounded-lg flex items-center gap-[8px] text-teal-950 text-xs font-semibold leading-normal font-poppins rounded-lg border border-[#D8D8D8] cursor-pointer">
-            <FiEye size={16} />
-            preview Proile
-          </button>
-          <button className="w-full md:w-auto px-4 md:px-[22px] flex items-center justify-center gap-2 text-xs text-[clamp(8px,1vw,12px)]  font-semibold font-poppins rounded-lg flex items-center gap-[8px] rounded-lg bg-[#0A4A4A] text-[#F8F6F1] text-xs font-semibold leading-normal font-poppins cursor-pointer">
-            <FiEye size={16} />
-            Save changes
-          </button>
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3 md:gap-4">
+            <Skeleton className="h-[40px] w-full md:w-[150px] rounded-lg" />
+            <Skeleton className="h-[40px] w-full md:w-[150px] rounded-lg" />
+          </div>
         </div>
-      </div>
-        )
-      }
+      ) : (
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 px-4 md:px-6 py-4 md:py-[26px] bg-white">
+          <p className="text-gray-500 ttext-[clamp(10px,1vw,14px)] font-normal leading-normal font-nunito">
+            Make Changes Above To Save
+          </p>
+          <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3 md:gap-4">
+            <button className="w-full md:w-auto  px-4 py-[7px] lg:px-[22px] lg:py-[14px] flex items-center justify-center gap-2 text-[clamp(8px,1vw,12px)] font-semibold font-poppins rounded-lg flex items-center gap-[8px] text-teal-950 text-xs font-semibold leading-normal font-poppins rounded-lg border border-[#D8D8D8] cursor-pointer">
+              <FiEye size={16} />
+              preview Proile
+            </button>
+            <button className="w-full md:w-auto px-4 md:px-[22px] flex items-center justify-center gap-2 text-xs text-[clamp(8px,1vw,12px)]  font-semibold font-poppins rounded-lg flex items-center gap-[8px] rounded-lg bg-[#0A4A4A] text-[#F8F6F1] text-xs font-semibold leading-normal font-poppins cursor-pointer">
+              <FiEye size={16} />
+              Save changes
+            </button>
+          </div>
+        </div>
+      )}
 
       {isUpload && (
         <div className="fixed inset-0 z-200 flex items-start md:items-center justify-center">
