@@ -1,5 +1,5 @@
 import { apiResponse } from "@/lib/apiResponse";
-import { getUser } from "@/lib/auth/Getuser";
+import { ValidateUser } from "@/lib/auth/ValidateUser";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function POST(req) {
@@ -26,8 +26,8 @@ export async function POST(req) {
     }
 
     // 3. Get user
-    const user = await await getUser();
-    if (!user?.token) {
+    const user = await ValidateUser();
+    if (!user) {
       return apiResponse(
         "Unauthorized",
         false,
@@ -39,27 +39,16 @@ export async function POST(req) {
 
     const supabase = createAdminClient();
 
-    // 4. Fetch user from DB
-    const { data: existingUser, error: userError } = await supabase
-      .from("users")
-      .select("id")
-      .filter("device_tokens", "cs", JSON.stringify([{ token: user.token }]))
-      .maybeSingle();
-
-    if (userError || !existingUser) {
-      return apiResponse("User not found", false, 2, "", userError?.message);
-    }
 
     // 5. Insert profile
     const { data: profile, error: profileError } = await supabase
       .from("advisor_profiles")
       .insert([
         {
-          user_id: existingUser.id,
+          advisor_id: user.id,
           advisor_role_id: "00000000-0000-0000-0000-000000000000",
           short_bio: bio,
           iridai_certificate_url: certificate_url,
-
           // ✅ store full JSONB array here
           services: services.map((s) => ({
             service: s.service,

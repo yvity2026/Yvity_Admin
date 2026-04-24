@@ -35,7 +35,7 @@ const Header = () => {
 
   const handleSubmit = async (payload) => {
     try {
-      const res = await fetch("/api/advisor/setprofile", {
+      const res = await fetch("/api/customer/setprofile", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -126,7 +126,7 @@ const Header = () => {
               </button>
 
               {
-                user?.roles?.[0] === "advisor" ? (
+                user?.roles?.includes("advisor") ? (
                   <button
                 className="flex items-center gap-2  text-[14px] bg-[#0A4A4A] hover:bg-[#023e3e] leading-[16px] px-4 py-2 rounded-lg font-medium text-white cursor-pointer"
                 onClick={() => router.push("/advisor/dashboard")}
@@ -165,7 +165,7 @@ const Header = () => {
                       className="object-cover w-full h-full"
                     />
                   ) : (
-                    <span>{user?.name.charAt(0).toUpperCase()}</span>
+                    <span>{user?.name?.charAt(0)?.toUpperCase()}</span>
                   )}
                 </div>
 

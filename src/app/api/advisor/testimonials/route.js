@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { ValidateUser } from "@/lib/auth/ValidateUser";
 
 // READ ONE
 export async function GET(
   req, params
 ) {
   try {
-    const supabase = createAdminClient();
 
+    const supabase = createAdminClient();
+    const user = ValidateUser()
     const { data, error } = await supabase
       .from("advisor_testimonials")
       .select("*")

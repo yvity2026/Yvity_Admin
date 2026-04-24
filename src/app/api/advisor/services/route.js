@@ -1,83 +1,97 @@
-// import { NextResponse } from "next/server";
+import { ValidateAdvisor } from "@/lib/auth/ValidateAdvisor";
+import { createAdminClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
 
-// // GET - Fetch all services for an advisor
-// export async function GET(request) {
-//   try {
-//     const { searchParams } = new URL(request.url);
-//     const advisorId = searchParams.get('advisorId');
+// GET - Fetch all services for an advisor
+export async function GET(request) {
+  try {
+    const advisor = await ValidateAdvisor();
 
-//     if (!advisorId) {
-//       return NextResponse.json(
-//         { error: "Advisor ID is required" },
-//         { status: 400 }
-//       );
-//     }
+    if (!advisor.id) {
+      return NextResponse.json(
+        { error: "Advisor ID is required" },
+        { status: 400 },
+      );
+    }
+    const supabase = createAdminClient();
 
-//     const services = await sql`
-//       SELECT * FROM advisor_services 
-//       WHERE advisor_id = ${advisorId}
-//       ORDER BY created_at DESC
-//     `;
+    const { data: services, error } = await supabase
+      .from("advisor_services")
+      .select("*")
+      .eq("advisor_id", advisor.id)
+      .order("created_at", { ascending: false });
 
-//     return NextResponse.json({ 
-//       success: true, 
-//       services: services.rows 
-//     });
-    
-//   } catch (error) {
-//     console.error("Error fetching services:", error);
-//     return NextResponse.json(
-//       { error: "Failed to fetch services" },
-//       { status: 500 }
-//     );
-//   }
-// }
+    if (error) {
+      console.error(error);
+    }
 
-// // POST - Create a new service
-// export async function POST(request) {
-//   try {
-//     const body = await request.json();
-//     const { serviceType, company, experience, services, advisorId } = body;
+    return NextResponse.json({
+      success: true,
+      services: services || [],
+    });
+  } catch (error) {
+    console.error("Error fetching services:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch services" },
+      { status: 500 },
+    );
+  }
+}
 
-//     // Validate required fields
-//     if (!serviceType || !company || !experience || !services || !advisorId) {
-//       return NextResponse.json(
-//         { error: "Missing required fields" },
-//         { status: 400 }
-//       );
-//     }
+// POST - Create a new service
+export async function POST(request) {
+  try {
+    const body = await request.json();
+    const { serviceType, company, experience, services } = body;
+    const advisor = await ValidateAdvisor();
+    if (!advisor || !advisor.id) {
+      return NextResponse.json(
+        { error: "Advisor profile not found" },
+        { status: 400 },
+      );
+    }
+    if (!serviceType || !company || !experience || !services) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 },
+      );
+    }
 
-//     const result = await sql`
-//       INSERT INTO advisor_services (
-//         advisor_id,
-//         service_type,
-//         company,
-//         experience,
-//         services,
-//         created_at,
-//         updated_at
-//       ) VALUES (
-//         ${advisorId},
-//         ${serviceType},
-//         ${company},
-//         ${experience},
-//         ${JSON.stringify(services)},
-//         NOW(),
-//         NOW()
-//       )
-//       RETURNING *
-//     `;
+    const supabase = createAdminClient();
 
-//     return NextResponse.json({ 
-//       success: true, 
-//       service: result.rows[0] 
-//     });
-    
-//   } catch (error) {
-//     console.error("Error creating service:", error);
-//     return NextResponse.json(
-//       { error: "Failed to create service" },
-//       { status: 500 }
-//     );
-//   }
-// }
+    const { data, error } = await supabase
+      .from("advisor_services")
+      .insert([
+        {
+          advisor_id: advisor.id,
+          service_type: serviceType,
+          company,
+          experience_years : experience,
+          key_services : services, // no JSON.stringify needed if column is json/jsonb
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Insert error:", error);
+      return NextResponse.json(
+        { error: "Failed to create service" },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      service: data,
+    });
+  } catch (error) {
+    console.error("Error creating service:", error);
+    return NextResponse.json(
+      { error: "Failed to create service" },
+      { status: 500 },
+    );
+  }
+}

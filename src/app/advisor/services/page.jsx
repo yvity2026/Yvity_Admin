@@ -10,6 +10,7 @@ import { HiPlus } from "react-icons/hi";
 import { HiOutlineBuildingLibrary } from "react-icons/hi2";
 import { LuClockAlert } from "react-icons/lu";
 import { MdClose } from "react-icons/md";
+const API = "/api/advisor/services";
 
 const initialServices = [
   {
@@ -29,6 +30,8 @@ export default function Page() {
   const [isOpen, setOpen] = useState(false);
   const [isEdit, setEdit] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
 
   const [form, setForm] = useState({
     serviceType: "",
@@ -36,8 +39,6 @@ export default function Page() {
     experience: "",
     services: [""],
   });
-
-  
 
   const validateForm = () => {
     if (!form.serviceType.trim()) {
@@ -95,20 +96,53 @@ export default function Page() {
     }
   }, [trigger]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    // success
-    toast.success("Service added successfully!");
+    try {
+      const res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    console.log("Final Form:", form);
+      const data = await res.json();
 
-    // optional reset
-    // setForm(initialState);
+      if (!res.ok) throw new Error(data.error);
 
-    // optional close modal
-    // setIsService(false);
+      toast.success("Service added successfully!");
+
+      setIsService(false);
+
+      // refresh list
+      fetchServices();
+    } catch (err) {
+      toast.error(err.message);
+    }
   };
+
+  //Fetch Services from the DB :
+  const [servicesList, setServicesList] = useState([]);
+
+  //fetch the users :
+  const fetchServices = async () => {
+    try {
+      const res = await fetch(API);
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error);
+
+      setServicesList(data.services);
+    } catch (err) {
+      toast.error("Failed to load services");
+    }
+  };
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  //edit
 
   const addServicePoint = () => {
     if (form.services.some((s) => !s.trim())) {
@@ -138,6 +172,7 @@ export default function Page() {
   };
 
   const validateEditServiceForm = () => {
+     const exp = String(form.experience || "");
     if (!form.serviceType.trim()) {
       toast.error("Service Type is required");
       return false;
@@ -148,7 +183,7 @@ export default function Page() {
       return false;
     }
 
-    if (!form.experience.trim()) {
+    if (!exp.trim()) {
       toast.error("Years of Experience is required");
       return false;
     }
@@ -173,34 +208,49 @@ export default function Page() {
     return true;
   };
 
-  const handleEditSubmit = () => {
+  const handleEditSubmit = async () => {
     if (!validateEditServiceForm()) return;
 
-    // success flow
-    toast.success("Service updated successfully!");
+    try {
+      const res = await fetch(`/api/advisor/services/${editId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    console.log("Updated Form:", form);
+      const data = await res.json();
 
-    // optional close modal
-    setEdit(false);
+      if (!res.ok) throw new Error(data.error);
+
+      toast.success("Updated successfully");
+      setEdit(false);
+
+      fetchServices();
+    } catch (err) {
+      toast.error(err.message);
+    }
   };
 
+  //Delete the Service
   const [isDeleting, setIsDeleting] = useState(false);
-
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
 
-      // 👉 Replace with real API call
-      await new Promise((res) => setTimeout(res, 1000));
+      const res = await fetch(`/api/advisor/services/${deleteId}`, {
+        method: "DELETE",
+      });
 
-      toast.success("Service deleted successfully");
+      const data = await res.json();
 
-      // optional: update state / remove item locally
+      if (!res.ok) throw new Error(data.error);
+
+      toast.success("Deleted successfully");
 
       setIsDelete(false);
+      fetchServices();
     } catch (err) {
-      toast.error("Failed to delete service");
+      toast.error(err.message);
     } finally {
       setIsDeleting(false);
     }
@@ -215,54 +265,31 @@ export default function Page() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full">
-        <ServiceSection setEdit={setEdit} setIsDelete={setIsDelete} />
-        <div className="w-full rounded-2xl border border-[#E2E1DC] bg-white pb-[38px] shadow-none min-w-[480px] lx:w-full">
-          <div className="h-[60px] px-3 sm:px-4 md:px-[30px] py-3 md:py-[18px] rounded-t-2xl bg-[#2A9D8F] shadow-[0_0_2px_0_rgba(0,0,0,0.25)] flex justify-between items-center">
-            <span className="flex items-center gap-2 text-[#F8F6F1] font-[Poppins] text-[16px] font-bold leading-normal">
-              <FaShield />
-              Life Insurance
-            </span>
-            <span className="flex flex-wrap gap-2 sm:gap-[11px]">
-              <button
-                className="p-[10px] rounded-[6px] h-[26px] flex items-center border border-[#D5D5D5] bg-white text-[#0A4A4A] font-poppins text-xs font-medium leading-normal"
-                onClick={() => setEdit(true)}
-              >
-                Edit
-              </button>
-              <button
-                className="p-[10px] rounded-[6px] h-[26px] flex items-center border border-[#F7C6C6] bg-white  text-[#D32323] font-poppins text-xs font-medium leading-normal"
-                onClick={() => setIsDelete(true)}
-              >
-                Delete
-              </button>
-            </span>
-          </div>
-          <div className="pl-3 sm:pl-4 md:pl-3 sm:pl-4 md:pl-[40px] mt-[16px] flex flex-col gap-2">
-            <span className="flex gap-2 justify-start items-center rounded-lg bg-[#E0F4F3] w-auto md:w-[116px] min-h-[30px] px-3 py-1 text-green-800 font-poppins text-[11px] sm:text-xs font-semibold ">
-              <HiOutlineBuildingLibrary />
-              LIC of India
-            </span>
-            <p className="text-[#6B7280] font-nunito text-[11px] sm:text-xs font-normal leading-4">
-              14+ years experience
-            </p>
-            <ul className="flex flex-col gap-2 text-[#374151] font-nunito text-[11px] sm:text-xs font-normal leading-4 list-disc pl-4">
-              <li>Term Insurance Plans</li>
-              <li>Endowment & Money Back</li>
-              <li>Child Education Plans</li>
-              <li>Pension & Retirement Plans</li>
-            </ul>
-          </div>
-        </div>
+        <ServiceSection
+          data={servicesList}
+          setEdit={setEdit}
+          setIsDelete={setIsDelete}
+          setEditData={(service) => {
+            setEditId(service.id);
+            setForm({
+              serviceType: service.service_type,
+              company: service.company,
+              experience: service.experience_years,
+              services: service.key_services || [""],
+            });
+          }}
+          setDeleteId={setDeleteId}
+        />
 
         {/* Add Card Button */}
-        <div className="w-full flex items-center justify-center cursor-pointer hover:opacity-90 rounded-2xl border-2 border-[#E2E1DC] border-dashed hover:border-[#785DC8] bg-white shadow-none min-w-[480px] lg:w-full  min-h-[240px] py-[80px]">
+        {/* <div className="w-full flex items-center justify-center cursor-pointer hover:opacity-90 rounded-2xl border-2 border-[#E2E1DC] border-dashed hover:border-[#785DC8] bg-white shadow-none min-w-[480px] lg:w-full  min-h-[240px] py-[80px]">
           <span className="flex flex-col justify-center items-center text-2xl">
             <FaPlus className="text-[#785DC8] w-10 h-10" />
             <p className="text-gray-500 text-center font-[Poppins] text-[clamp(12px,1.5vw,16px)] font-medium leading-normal">
               Add New Services
             </p>
           </span>
-        </div>
+        </div> */}
       </div>
 
       {/* Edit popup */}
@@ -373,9 +400,6 @@ export default function Page() {
               <button
                 className="w-full mt-2 bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4 rounded-2xl font-bold text-lg transition-transform active:scale-[0.98] shadow-lg shadow-emerald-900/10"
                 onClick={() => {
-                  validateForm();
-                }}
-                onSubmit={() => {
                   handleSubmit();
                 }}
               >
@@ -490,10 +514,7 @@ export default function Page() {
               {/* Submit Button */}
               <button
                 className="w-full mt-2 bg-[#0a4d4a] hover:bg-[#073a38] text-white py-3.5 rounded-2xl font-bold text-lg transition-transform active:scale-[0.98] shadow-lg shadow-emerald-900/10"
-                onClick={() => validateEditServiceForm()}
-                onSubmit={() => {
-                  handleEditSubmit();
-                }}
+                onClick={() => handleEditSubmit()}
               >
                 Save Changes
               </button>

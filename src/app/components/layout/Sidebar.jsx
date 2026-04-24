@@ -116,6 +116,7 @@ const menuItems = [
 ];
 
 export default function AppShell({ children }) {
+  const { collapsed } = useSidebar();
   const { openModal } = useModal();
   const { user, loading, setUser } = useAuth();
   // const [collapsed, setCollapsed] = useState(false);
@@ -182,7 +183,6 @@ export default function AppShell({ children }) {
     return <>{children}</>;
   }
 
-  const { collapsed } = useSidebar();
 
   const sidebarWidth = collapsed ? 80 : 260;
 
