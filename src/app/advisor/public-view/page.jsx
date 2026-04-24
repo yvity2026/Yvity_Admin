@@ -53,9 +53,11 @@ import { useAuth } from "@/context/AuthUserContext";
 import GiveTestimonialModal from "@/components/features/user/landing/modals/public-profile/GiveTestimonialModal";
 const page = () => {
   const qrRef = React.useRef(null);
-    const { user, advisor, setUser } = useAuth();
+  const { user, advisor, setUser } = useAuth();
   const [activeModal, setActiveModal] = useState(null);
+  const galleryData = [
 
+  ]
   const MODALS = {
     TESTIMONIAL: "testimonial",
     RECOMMEND: "recommend",
@@ -148,28 +150,28 @@ const page = () => {
   const [isOpen, setIsOpen] = useState(true);
   const footerheadings = [
     {
-      name : "Home",
-      isvisible : true
+      name: "Home",
+      isvisible: true
     },
     {
-      name : "Journey",
-      isvisible : advisor?.ispublic_professional
+      name: "Journey",
+      isvisible: advisor?.ispublic_professional
     },
     {
-      name : "Service",
-      isvisible : advisor?.ispublic_services
+      name: "Service",
+      isvisible: advisor?.ispublic_services
     },
     {
-      name : "Achievements",
-      isvisible : advisor?.ispublic_achievements
+      name: "Achievements",
+      isvisible: advisor?.ispublic_achievements
     },
     {
-      name : "Gallery",
-      isvisible : advisor?.ispublic_gallery
+      name: "Gallery",
+      isvisible: advisor?.ispublic_gallery
     },
     {
-      name : "Testimonials",
-      isvisible : advisor?.ispublic_testimonials
+      name: "Testimonials",
+      isvisible: advisor?.ispublic_testimonials
     },
   ];
 
@@ -201,7 +203,7 @@ const page = () => {
     {
       icon: <CiBank />,
       data: "Quick Response",
-      
+
     },
     {
       icon: <BiSolidCapsule />,
@@ -712,10 +714,10 @@ const page = () => {
           <div className="border-b border-[#E8F4F4] border-highlights rounded-t-2xl flex overflow-x-auto no-scrollbar md:pl-10">
             {loading
               ? [1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="p-[10px]">
-                    <Skeleton className="h-4 w-20 rounded-md" />
-                  </div>
-                ))
+                <div key={i} className="p-[10px]">
+                  <Skeleton className="h-4 w-20 rounded-md" />
+                </div>
+              ))
               : footerheadings.map((heading, index) => (
                 heading.isvisible && (
                   <button
@@ -724,11 +726,10 @@ const page = () => {
                     className="relative font-poppins p-[10px] text-center text-[clamp(10px,1vw,14px)] cursor-pointer text-sm font-bold"
                   >
                     <span
-                      className={`${
-                        activeTab?.name === heading.name
-                          ? "text-primary-900"
-                          : "text-gray-400"
-                      }`}
+                      className={`${activeTab?.name === heading.name
+                        ? "text-primary-900"
+                        : "text-gray-400"
+                        }`}
                     >
                       {heading.name}
                     </span>
@@ -747,7 +748,7 @@ const page = () => {
                     )}
                   </button>
                 )
-                ))}
+              ))}
           </div>
 
           {/* Dynamic content */}
@@ -963,11 +964,10 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Helpful & Honest")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${
-      selectedReasons.includes("Helpful & Honest")
-        ? "border-emerald-500 bg-emerald-50"
-        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-    }
+    ${selectedReasons.includes("Helpful & Honest")
+                      ? "border-emerald-500 bg-emerald-50"
+                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+                    }
   `}
                 >
                   <span className="text-xl">🤝</span>
@@ -979,11 +979,10 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Expert Knowledge")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${
-      selectedReasons.includes("Expert Knowledge")
-        ? "border-emerald-500 bg-emerald-50"
-        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-    }
+    ${selectedReasons.includes("Expert Knowledge")
+                      ? "border-emerald-500 bg-emerald-50"
+                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+                    }
   `}
                 >
                   <span className="text-xl">🏆</span>
@@ -995,11 +994,10 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Quick Response")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${
-      selectedReasons.includes("Quick Response")
-        ? "border-emerald-500 bg-emerald-50"
-        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-    }`}
+    ${selectedReasons.includes("Quick Response")
+                      ? "border-emerald-500 bg-emerald-50"
+                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+                    }`}
                 >
                   <span className="text-xl text-orange-500">⚡</span>
                   <span className="text-slate-600 font-bold text-[0.8rem] group-hover:text-emerald-800">
@@ -1010,11 +1008,10 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Best Policy Advice")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${
-      selectedReasons.includes("Best Policy Advice")
-        ? "border-emerald-500 bg-emerald-50"
-        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-    }`}
+    ${selectedReasons.includes("Best Policy Advice")
+                      ? "border-emerald-500 bg-emerald-50"
+                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+                    }`}
                 >
                   <span className="text-xl">💯</span>
                   <span className="text-slate-600 font-bold text-[0.8rem] group-hover:text-emerald-800">
@@ -1025,11 +1022,10 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Trustworthy")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${
-      selectedReasons.includes("Trustworthy")
-        ? "border-emerald-500 bg-emerald-50"
-        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-    }`}
+    ${selectedReasons.includes("Trustworthy")
+                      ? "border-emerald-500 bg-emerald-50"
+                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+                    }`}
                 >
                   <span className="text-xl text-blue-400">🛡️</span>
                   <span className="text-slate-600 font-bold text-[0.8rem] group-hover:text-emerald-800">
@@ -1040,11 +1036,10 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Great Experience")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${
-      selectedReasons.includes("Great Experience")
-        ? "border-emerald-500 bg-emerald-50"
-        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-    }`}
+    ${selectedReasons.includes("Great Experience")
+                      ? "border-emerald-500 bg-emerald-50"
+                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+                    }`}
                 >
                   <span className="text-xl">😊</span>
                   <span className="text-slate-600 font-bold text-[0.8rem] group-hover:text-emerald-800">

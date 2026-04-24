@@ -3,8 +3,8 @@ import { SectionWrapper, ProgressRow, InfoBox } from "./score-components";
 
 export default function VisibilitySection() {
   return (
-    <SectionWrapper title="Visibility" icon={Eye} score={26} max={30}>
-      
+    <SectionWrapper title="Visibility" icon={Eye} score={25} max={30}>
+
       {/* 1. Public Profile Active */}
       <ProgressRow
         label="Public Profile Active"
@@ -16,11 +16,11 @@ export default function VisibilitySection() {
       />
 
       {/* 2. Profile Sharing (self) */}
-      <ProgressRow 
-        label="Profile Sharing (self)" 
-        icon={<Share className="w-5 h-5 text-gray-700" />} 
-        score={3} 
-        max={5} 
+      <ProgressRow
+        label="Profile Sharing (self)"
+        icon={<Share className="w-5 h-5 text-gray-700" />}
+        score={3}
+        max={5}
         colorClass="bg-[#F59E0B]"
         textClass="text-[#F59E0B]"
       />
@@ -82,11 +82,11 @@ export default function VisibilitySection() {
       </InfoBox>
 
       {/* 4. Profile Strength */}
-      <ProgressRow 
-        label="Profile Strength" 
-        icon={<span className="text-[18px]">💪</span>} 
-        score={5} 
-        max={5} 
+      <ProgressRow
+        label="Profile Strength"
+        icon={<span className="text-[18px]">💪</span>}
+        score={5}
+        max={5}
         colorClass="bg-[#0A4A4A]"
         textClass="text-[#0A4A4A]"
       />
@@ -113,11 +113,11 @@ export default function VisibilitySection() {
       </InfoBox>
 
       {/* 5. Activity */}
-      <ProgressRow 
-        label="Activity" 
-        icon={<Zap className="w-5 h-5 fill-orange-500 text-orange-500" />} 
-        score={5} 
-        max={5} 
+      <ProgressRow
+        label="Activity"
+        icon={<Zap className="w-5 h-5 fill-orange-500 text-orange-500" />}
+        score={5}
+        max={5}
         colorClass="bg-[#0A4A4A]"
         textClass="text-[#0A4A4A]"
       />
@@ -141,7 +141,7 @@ export default function VisibilitySection() {
           </div>
         </div>
       </InfoBox>
-      
+
     </SectionWrapper>
   );
 }
