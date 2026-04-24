@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 
 // READ ONE
 export async function GET(
   req, params
 ) {
   try {
-    const supabase = createClient();
+    const supabase = createAdminClient();
 
     const { data, error } = await supabase
       .from("advisor_testimonials")
@@ -31,7 +31,7 @@ export async function PATCH(
   params
 ) {
   try {
-    const supabase = createClient();
+    const supabase = createAdminClient();
     const body = await req.json();
 
     const {
@@ -70,7 +70,7 @@ export async function DELETE(
   { params }
 ) {
   try {
-    const supabase = createClient();
+    const supabase = createAdminClient();
 
     const {
       data: { user },
