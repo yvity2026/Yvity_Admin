@@ -9,13 +9,14 @@ import EntryFormModal from "@/components/features/advisor/professional-journey/e
 import { useModal } from "@/context/ModalContext";
 
 // MOCK DATA: Structured for future backend API integration
- export const achievementsData = [
+export const achievementsData = [
   {
     id: "ach-1",
     icon: "🏆",
     iconBg: "bg-[#FEF3C7]", // Light yellow
     title: "MDRT Qualifier",
-    description: "Million Dollar Round Table — Global recognition for top advisors",
+    description:
+      "Million Dollar Round Table — Global recognition for top advisors",
     highlightText: "2022, 2023, 2024",
   },
   {
@@ -66,15 +67,17 @@ export default function AchievementsPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingAchievement, setDeletingAchievement] = useState(null);
 
+  const [achievements, setAchievements] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-   const { trigger, clearTrigger } = useModal();
-    const [isAchievement, setAchievement] = useState(false);
-    useEffect(() => {
-      if (trigger === "ADD_ACHIEVEMENT") {
-  setAchievement(true);
-        clearTrigger(); 
-      }
-    }, [trigger]);
+  const { trigger, clearTrigger } = useModal();
+  const [isAchievement, setAchievement] = useState(false);
+  useEffect(() => {
+    if (trigger === "ADD_ACHIEVEMENT") {
+      setAchievement(true);
+      clearTrigger();
+    }
+  }, [trigger]);
 
   const handleAddClick = () => {
     setEditingAchievement(null);
@@ -111,29 +114,65 @@ export default function AchievementsPage() {
     // Ready for backend integration
   };
 
+  //get all the acheivements :
+  const fetchAchievements = async () => {
+    try {
+      setLoading(true);
+
+      const res = await fetch("/api/advisor/achievements");
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error);
+
+      setAchievements(data.achievements);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAchievements();
+  }, []);
+
   return (
     <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
-     
-      {<EntryFormModal isOpen={isAchievement} onClose={() => setAchievement(false)} />}
-      
-      
+      {
+        <EntryFormModal
+          isOpen={isAchievement}
+          onClose={() => setAchievement(false)}
+        />
+      }
+
       <div className="p-4 md:p-6 lg:p-10 xl:px-15 space-y-6 mx-auto w-full pb-12">
         <InfoBanner />
-        
+
         {/* Achievements Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {achievementsData.map((achievement) => (
-            <AchievementCard 
-              key={achievement.id} 
-              data={achievement} 
-              onEditClick={() => handleEditClick(achievement)} 
+          {achievements.map((achievement) => (
+            <AchievementCard
+              key={achievement.id}
+              data={{
+                id: achievement.id,
+                icon: "🏆",
+                iconBg: "bg-[#FEF3C7]",
+                title: achievement.achievement_type,
+                description:
+                  achievement.certificate_url || "Certificate uploaded",
+                highlightText:
+                  achievement.from_year === achievement.to_year
+                    ? `${achievement.from_year}`
+                    : `${achievement.from_year} - ${achievement.to_year}`,
+              }}
+              onEditClick={() => handleEditClick(achievement)}
               onDeleteClick={() => handleDeleteClick(achievement)}
             />
           ))}
         </div>
       </div>
 
-      <AchievementFormModal 
+      <AchievementFormModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         initialData={editingAchievement}

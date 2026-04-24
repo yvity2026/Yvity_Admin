@@ -1,7 +1,7 @@
 import { getUser } from "@/lib/auth/Getuser";
 import { createAdminClient } from "@/lib/supabase/server";
 
-export async function ValidateUser() {
+export async function ValidateAdvisor() {
   try {
     const payload = await getUser();
     console.log(payload?.token);

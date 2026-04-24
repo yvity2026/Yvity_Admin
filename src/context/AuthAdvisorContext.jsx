@@ -40,6 +40,23 @@ export function AuthProvider({ children }) {
     fetchUser();
   }, []);
 
+  useEffect(() => {
+const fetchServices = async () => {
+  try {
+    const res = await fetch(API);
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error);
+
+    setServices(data.services);
+  } catch (err) {
+    toast.error("Failed to load services");
+  }
+};
+
+  fetchServices();
+}, []);
+
   return (
     <AuthContext.Provider value={{ user, advisor, setUser, setAdvisor, loading }}>
       {children}
