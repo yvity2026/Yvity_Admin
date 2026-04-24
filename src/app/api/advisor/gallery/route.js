@@ -115,6 +115,14 @@ export async function POST(req) {
 
     if (error) throw error;
 
+    const recalcResult = await supabase.rpc("recalculate_advisor_score", {
+      p_advisor: userRecord.id,
+    });
+
+    if (recalcResult.error) {
+      console.error("recalculate_advisor_score failed after gallery upload:", recalcResult.error);
+    }
+
     // Generate presigned URL for the returned newly created item
     if (data && data.image_url) {
       data.image_url = await generatePresignedUrl(data.image_url);
@@ -168,6 +176,14 @@ export async function DELETE(req) {
       .eq("advisor_id", userRecord.id);
 
     if (error) throw error;
+
+    const recalcResult = await supabase.rpc("recalculate_advisor_score", {
+      p_advisor: userRecord.id,
+    });
+
+    if (recalcResult.error) {
+      console.error("recalculate_advisor_score failed after gallery delete:", recalcResult.error);
+    }
 
     return apiResponse("Photo deleted successfully", true, 200);
   } catch (error) {
