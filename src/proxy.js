@@ -1,19 +1,28 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
-export function proxy(req) {
-  // const role = req.cookies.get('role'); // or from JWT
+export function proxy(request) {
+  const cookie = request.cookies.get("security_token")?.value;
 
-  // const url = req.nextUrl.clone();
+  let session = null;
 
-  // if (url.pathname.startsWith('/vendor') && role !== 'vendor') {
-  //   url.pathname = '/unauthorized';
-  //   return NextResponse.redirect(url);
-  // }
+  try {
+    session = cookie ? JSON.parse(cookie) : null;
+  } catch (err) {
+    session = null;
+  }
 
-  // if (url.pathname.startsWith('/dashboard') && role !== 'user') {
-  //   url.pathname = '/unauthorized';
-  //   return NextResponse.redirect(url);
-  // }
+  if (
+    !session ||
+    !session.token
+    // !session.expires_at ||
+    // new Date(session.expires_at) < new Date()
+  ) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
 
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: ["/dashboard/:path*"],
+};

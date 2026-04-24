@@ -8,7 +8,7 @@ import AdvisorFormModal from "./modals/AdvisorFormModal";
 import SuccessReviewModal from "./modals/SuccessReviewModal";
 import Image from "next/image";
 import Skeleton from "@/app/components/skeleton/Skeleton";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthUserContext";
 import { RxDashboard } from "react-icons/rx";
 import { useRouter } from "next/navigation";
 
@@ -24,7 +24,7 @@ const Header = () => {
   const { user, loading } = useAuth();
   const [profileFormData, setProfileFormData] = useState({});
 
-  console.log("sdfghjkhgfdsfghjmk,jhgfds", profileFormData);
+  console.log("sdfghjkhgfdsfghjmk,jhgfds", user);
 
   const updateStep = (data) => {
     setProfileFormData((prev) => ({
@@ -131,8 +131,8 @@ const Header = () => {
                 className="flex items-center gap-2  text-[14px] bg-[#0A4A4A] hover:bg-[#023e3e] leading-[16px] px-4 py-2 rounded-lg font-medium text-white cursor-pointer"
                 onClick={() => router.push("/advisor/dashboard")}
               >
-                <RxDashboard size={20} />
-                <span className="font-medium">Dashboard</span>
+                {/* <RxDashboard size={20} /> */}
+                <span className="font-medium">My Dashboard</span>
               </button>
                 )
                 : 
@@ -165,7 +165,7 @@ const Header = () => {
                       className="object-cover w-full h-full"
                     />
                   ) : (
-                    <span>KM</span>
+                    <span>{user?.name.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
 

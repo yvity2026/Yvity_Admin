@@ -1,29 +1,11 @@
 import { apiResponse } from "@/lib/apiResponse";
-import { getUser } from "@/lib/auth/Getuser";
-import { createAdminClient } from "@/lib/supabase/server";
+import { ValidateUser } from "@/lib/auth/ValidateUser";
 
 export async function GET() {
   try {
-    const user = await getUser();
-
-    if (!user?.token) {
-      return apiResponse(
-        "something went wrong please try again",
-        false,
-        1,
-        "",
-        "Unable to get the token from the sessions",
-      );
-    }
+    const user = await ValidateUser()
     console.log(user)
-    const supabase = createAdminClient();
-    const { data, error } = await supabase
-      .from("users")
-      .select("*")
-      .filter("device_tokens", "cs", JSON.stringify([{ token: user.token }]))
-      .maybeSingle()
-      
-    if (!data && error) {
+    if (!user) {
       return apiResponse(
         "User Not Found",
         false,
@@ -32,7 +14,7 @@ export async function GET() {
         "user not found based on the userId",
       );
     }
-    return apiResponse("user Retrieved successfully", true, 3, data, "");
+    return apiResponse("user Retrieved successfully", true, 3, user, "");
   } catch (error) {
     console.log(error);
     return apiResponse(

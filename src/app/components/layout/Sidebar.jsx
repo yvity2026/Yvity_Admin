@@ -23,7 +23,7 @@ import { createPortal } from "react-dom";
 
 import { useModal } from "@/context/ModalContext";
 import clsx from "clsx";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthUserContext";
 
 const menuItems = [
   {
@@ -246,24 +246,29 @@ export default function AppShell({ children }) {
             {/* Avatar */}
             <div
               className={`
-      relative rounded-full ring-[2px] ring-[#FEC564] bg-[#F59E0B] flex items-center justify-center overflow-hidden
-      ${collapsed ? "w-10 h-10" : "w-14 h-14"}
-    `}
+    relative rounded-full ring-[2px] ring-[#FEC564] bg-[#F59E0B] 
+    flex items-center justify-center overflow-hidden
+    ${collapsed ? "w-10 h-10" : "w-14 h-14"}
+  `}
             >
-              {/* {collapsed && ( */}
-              <Image
-                src={user?.selfie_url}
-                alt="User Image"
-                fill
-                className="object-cover"
-              />
-              {/* )} */}
+              {user?.selfie_url ? (
+                <Image
+                  src={user.selfie_url}
+                  alt="User Image"
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <span className="text-white font-semibold">
+                  {user?.name?.charAt(0).toUpperCase()}
+                </span>
+              )}
             </div>
 
             {/* Name */}
             {!collapsed && (
               <p className="text-[#F8F6F1] font-poppins text-base font-semibold">
-                {user?.name ? user.name : "Hi User"}
+                {user?.name}
               </p>
             )}
 

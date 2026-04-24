@@ -42,13 +42,14 @@ import { journeyData } from "../professional-journey/page";
 import AchievementCard from "@/components/features/advisor/achievements/achievement-card";
 import { achievementsData } from "../achievements/page";
 import Testimonials_filters from "@/components/features/advisor/Testimonials/Testimonials_filters";
-import { galleryData } from "../gallery/page";
+// import { galleryData } from "../gallery/page";
+const galleryData = [];
 import GalleryItem from "@/components/features/advisor/gallery/gallery-item";
 import ServiceSection from "@/components/features/advisor/services/ServiceSection";
 import { motion, AnimatePresence } from "framer-motion";
 import Skeleton from "@/app/components/skeleton/Skeleton";
 import Image from "next/image";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthUserContext";
 import GiveTestimonialModal from "@/components/features/user/landing/modals/public-profile/GiveTestimonialModal";
 const page = () => {
   const qrRef = React.useRef(null);
@@ -298,15 +299,6 @@ const page = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000); // 2 sec delay (adjust as needed)
-
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {

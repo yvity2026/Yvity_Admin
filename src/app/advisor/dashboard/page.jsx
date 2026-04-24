@@ -27,13 +27,6 @@ import RecentActivity from "@/components/features/advisor/dashboard/recent-activ
 export default function AdvisorDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
       {/* <DashboardHeader /> */}
