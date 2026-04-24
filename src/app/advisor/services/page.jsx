@@ -37,6 +37,8 @@ export default function Page() {
     services: [""],
   });
 
+  
+
   const validateForm = () => {
     if (!form.serviceType.trim()) {
       toast.error("Service Type is required");

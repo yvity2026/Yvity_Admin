@@ -10,7 +10,7 @@ import AppShell from "./components/layout/Sidebar";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { ModalProvider } from "@/context/ModalContext";
 import { Toaster } from "react-hot-toast";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider } from "@/context/AuthUserContext";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

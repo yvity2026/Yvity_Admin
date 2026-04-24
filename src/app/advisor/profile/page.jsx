@@ -1,7 +1,7 @@
 "use client";
 import Skeleton from "@/app/components/skeleton/Skeleton";
 import Toggle from "@/app/components/ui/ToggleButton";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthUserContext";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { CgGirl } from "react-icons/cg";
@@ -145,11 +145,9 @@ const page = () => {
         return;
       }
 
-      setUser(data.data); // sync UI
-      alert("Profile updated successfully");
+      setUser(data.data);
     } catch (err) {
       console.error(err);
-      alert("Something went wrong");
     }
   };
 

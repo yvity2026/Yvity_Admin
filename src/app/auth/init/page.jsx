@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-
 
 function getCookie(name) {
   const value = `; ${document.cookie}`;
@@ -14,40 +12,27 @@ function getCookie(name) {
 }
 
 export default function InitPage() {
-  const router = useRouter();
-
   useEffect(() => {
-    const run = async () => {
-      const userId = getCookie("yvity_user_id");
-      if (!userId) {
-        router.push("http://localhost:3000");
-        return;
+    const userId = getCookie("yvity_user_id");
+
+    if (!userId) {
+      window.location.href = "http://localhost:3000";
+      return;
+    }
+
+    // 🔥 let server handle redirect + cookie
+    fetch("/api/auth/sync", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId }),
+    }).then((res) => {
+      if (res.redirected) {
+        window.location.href = res.url;
       }
-
-      console.log(userId);
-      const response = await fetch("/api/auth/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
-      });
-
-      const result = await response.json();
-      if (!result || !result.success) {
-        console.error(result.error);
-        router.push("http://localhost:3000");
-        return;
-      }
-
-      router.push("/dashboard");
-    };
-
-    run();
+    });
   }, []);
 
-  return (
-    <>
-    <p>....</p>
-    {/* <DashboardLoader /> */}
-    </>
-  );
+  return <p>Loading...</p>;
 }
