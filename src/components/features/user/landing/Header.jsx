@@ -11,8 +11,10 @@ import Skeleton from "@/app/components/skeleton/Skeleton";
 import { useAuth } from "@/context/AuthUserContext";
 import { RxDashboard } from "react-icons/rx";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const Header = () => {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
 
@@ -33,31 +35,70 @@ const Header = () => {
     }));
   };
 
-  const handleSubmit = async (payload) => {
-    try {
-      const res = await fetch("/api/customer/setprofile", {
+const handleSubmit = async (payload) => {
+  try {
+    toast.loading("Saving profile...", { id: "profile" });
+
+    let certificate_url = payload.certificate_url;
+
+    // 🔥 STEP 1: Upload to S3 if file exists
+    if (payload.certificate_file) {
+      toast.loading("Uploading certificate...", { id: "profile" });
+
+      const formData = new FormData();
+      formData.append("file", payload.certificate_file);
+
+      const res = await fetch("/api/upload-cert", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        console.error(data);
+        toast.error("Certificate upload failed", { id: "profile" });
         return false;
       }
 
-      return true;
-    } catch (err) {
-      console.error(err);
+      certificate_url = data.url;
+
+      toast.success("Certificate uploaded", { id: "profile" });
+    }
+
+    // 🔥 STEP 2: Save profile
+    toast.loading("Saving profile details...", { id: "profile" });
+
+    const res = await fetch("/api/customer/setprofile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...payload,
+        certificate_url,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      toast.error(data?.message || "Failed to save profile", {
+        id: "profile",
+      });
       return false;
     }
-  };
 
-  const router = useRouter();
+    toast.success("Profile created successfully 🎉", {
+      id: "profile",
+    });
+
+    return true;
+  } catch (err) {
+    console.error(err);
+    toast.error("Something went wrong", { id: "profile" });
+    return false;
+  }
+};
 
   return (
     <>

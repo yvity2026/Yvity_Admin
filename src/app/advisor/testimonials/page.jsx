@@ -181,6 +181,35 @@ const page = () => {
 
     return true;
   };
+  //fetch testimonials : 
+
+  const fetchTestimonials = async (type = "All") => {
+  try {
+    setLoading(true);
+
+    const res = await fetch(`/api/testimonials?type=${type}`);
+    const json = await res.json();
+
+    if (!res.ok) throw new Error(json.error);
+
+    setTestimonials(json.data || []);
+  } catch (err) {
+    toast.error(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  fetchTestimonials(activeFilter);
+}, [activeFilter]);
+
+const normalizeType = (label) => {
+  if (label === "Text") return "text";
+  if (label === "Audio") return "audio";
+  if (label === "Video") return "video";
+  return "All";
+};
 
   return (
     <div>

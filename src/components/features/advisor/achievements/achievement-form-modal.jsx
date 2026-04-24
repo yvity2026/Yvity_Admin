@@ -25,7 +25,7 @@ export default function AchievementFormModal({ isOpen, onClose, initialData, onS
       setFormData({
         title: initialData.title || "",
         organisation: initialData.organisation || "",
-        year: initialData.highlightText || "",
+        year: initialData.year || "",
         description: initialData.description || "",
         icon: initialData.icon || "🏆",
       });
@@ -52,13 +52,64 @@ export default function AchievementFormModal({ isOpen, onClose, initialData, onS
     setFormData(prev => ({ ...prev, icon: emoji }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (onSubmit) {
-      onSubmit(formData);
-    }
-    onClose();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  // parse year input
+  let fromYear = null;
+  let toYear = null;
+
+  if (formData.year.includes("-")) {
+    const parts = formData.year.split("-").map(v => v.trim());
+    fromYear = Number(parts[0]);
+    toYear = Number(parts[1]);
+  } else {
+    fromYear = Number(formData.year);
+    toYear = fromYear;
+  }
+
+  const payload = {
+    achievement_type: formData.title,
+    organisation: formData.organisation,
+    description: formData.description,
+    icon: formData.icon,
+    from_year: fromYear,
+    to_year: toYear,
   };
+
+  try {
+    let res;
+
+    if (isEditing) {
+      // ✅ UPDATE
+      res = await fetch(`/api/advisor/achievements/${initialData.id}`, {
+        method: "PUT", // or PATCH based on your API
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      // ✅ CREATE
+      res = await fetch(`/api/advisor/achievements`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    }
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Something went wrong");
+    }
+
+    // optional: notify parent
+    onSubmit?.();
+
+    onClose();
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   return (
     <div className="fixed inset-0 z-200 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">

@@ -7,6 +7,7 @@ import AchievementFormModal from "@/components/features/advisor/achievements/ach
 import AchievementDeleteModal from "@/components/features/advisor/achievements/achievement-delete-modal";
 import EntryFormModal from "@/components/features/advisor/professional-journey/entry-form-modal";
 import { useModal } from "@/context/ModalContext";
+import toast from "react-hot-toast";
 
 // MOCK DATA: Structured for future backend API integration
 export const achievementsData = [
@@ -71,10 +72,10 @@ export default function AchievementsPage() {
   const [loading, setLoading] = useState(false);
 
   const { trigger, clearTrigger } = useModal();
-  const [isAchievement, setAchievement] = useState(false);
+  const [isAcheivementModal, setIsAcheivementModal] = useState(false);
   useEffect(() => {
     if (trigger === "ADD_ACHIEVEMENT") {
-      setAchievement(true);
+      setIsAcheivementModal(true);
       clearTrigger();
     }
   }, [trigger]);
@@ -109,11 +110,6 @@ export default function AchievementsPage() {
     // Ready for backend integration
   };
 
-  const handleDeleteSubmit = (achievement) => {
-    console.log("Delete Submitted:", achievement);
-    // Ready for backend integration
-  };
-
   //get all the acheivements :
   const fetchAchievements = async () => {
     try {
@@ -123,7 +119,7 @@ export default function AchievementsPage() {
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error);
-
+      console.log(achievements);
       setAchievements(data.achievements);
     } catch (err) {
       console.error(err);
@@ -136,12 +132,78 @@ export default function AchievementsPage() {
     fetchAchievements();
   }, []);
 
+  const handleEntrySubmit = async (payload) => {
+    const toastId = toast.loading("Creating entry...");
+
+    try {
+      const res = await fetch("/api/advisor/achievements", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create");
+      }
+
+      toast.success("Entry created successfully 🎉", { id: toastId });
+
+      await fetchAchievements();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "Something went wrong", { id: toastId });
+    }
+  };
+
+  const handleDeleteSubmit = async (achievement) => {
+    const toastId = toast.loading("Deleting...");
+
+    try {
+      const res = await fetch(
+        `/api/advisor/achievements/${achievement.id}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Delete failed");
+
+      toast.success("Deleted successfully", { id: toastId });
+
+      await fetchAchievements();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "Something went wrong", { id: toastId });
+    }
+  };
+
+  const formatYears = (from, to) => {
+    if (!from && !to) return "";
+
+    if (from && to && from !== to) {
+      const years = [];
+      for (let y = Number(from); y <= Number(to); y++) {
+        years.push(y);
+      }
+      return years.join(", ");
+    }
+
+    return from?.toString() || to?.toString() || "";
+  };
+
   return (
     <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
       {
         <EntryFormModal
-          isOpen={isAchievement}
-          onClose={() => setAchievement(false)}
+          isOpen={isAcheivementModal}
+          onClose={() => setIsAcheivementModal(false)}
+          onSubmit={handleEntrySubmit}
         />
       }
 
@@ -157,16 +219,25 @@ export default function AchievementsPage() {
                 id: achievement.id,
                 icon: "🏆",
                 iconBg: "bg-[#FEF3C7]",
-                title: achievement.achievement_type,
-                description:
-                  achievement.certificate_url || "Certificate uploaded",
-                highlightText:
-                  achievement.from_year === achievement.to_year
-                    ? `${achievement.from_year}`
-                    : `${achievement.from_year} - ${achievement.to_year}`,
+                title: achievement.title,
+                description: achievement.description || "Certificate uploaded",
+                highlightText: formatYears(
+                  achievement.from_year,
+                  achievement.to_year,
+                ),
               }}
-              onEditClick={() => handleEditClick(achievement)}
+              onEditClick={() =>
+                handleEditClick({
+                  id: achievement.id,
+                  title: achievement.title,
+                  organisation: achievement.organisation || "",
+                  year: `${achievement.from_year}, ${achievement.to_year}`,
+                  description: achievement.description || "",
+                  icon: achievement.icon || "🏆",
+                })
+              }
               onDeleteClick={() => handleDeleteClick(achievement)}
+              ShowActions={true}
             />
           ))}
         </div>

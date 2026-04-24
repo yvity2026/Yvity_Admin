@@ -15,24 +15,24 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
   ];
 
   useEffect(() => {
-  if (!isOpen) {
-    setFormData({
-      services: [],
-      certificate_url: "",
-      bio: "",
-    });
+    if (!isOpen) {
+      setFormData({
+        services: [],
+        certificate_url: "",
+        bio: "",
+      });
 
-    setServiceData({
-      service: "",
-      company: "",
-      license: "",
-      experience: "",
-    });
+      setServiceData({
+        service: "",
+        company: "",
+        license: "",
+        experience: "",
+      });
 
-    setFile(null);
-    setPreview(null);
-  }
-}, [isOpen]);
+      setFile(null);
+      setPreview(null);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (form) {
@@ -333,20 +333,14 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                     }
 
                     setFile(selectedFile);
-                    setErrors((prev) => ({ ...prev, file: null }));
 
                     const reader = new FileReader();
                     reader.onloadend = () => {
                       setPreview(reader.result);
-
-                      setFormData((prev) => ({
-                        ...prev,
-                        certificate_url: reader.result, // ✅ store base64 or later replace with Supabase URL
-                      }));
                     };
                     reader.readAsDataURL(selectedFile);
 
-                    toast.success("File uploaded successfully");
+                    toast.success("File selected (not uploaded yet)");
                   }}
                 />
                 <IoCloudUploadOutline
@@ -363,6 +357,45 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
               <p className="text-[#6B7280] text-center text-[14px] font-normal font-poppins leading-[24px]">
                 Click to simulate upload
               </p>
+              {file && preview && (
+                <div className="mt-4 p-4 bg-white border rounded-xl flex items-center gap-4 relative">
+                  {/* Preview */}
+                  <img
+                    src={preview}
+                    alt="preview"
+                    className="w-16 h-16 object-cover rounded-lg border"
+                  />
+
+                  {/* File Info */}
+                  <div className="flex flex-col">
+                    <p className="text-sm font-semibold text-gray-700">
+                      {file.name}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {(file.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                  </div>
+
+                  {/* Cancel Button */}
+                  <button
+                    onClick={() => {
+                      setFile(null);
+                      setPreview(null);
+                      setFormData((prev) => ({
+                        ...prev,
+                        certificate_url: "",
+                      }));
+
+                      document.getElementById("fileUpload").value = null;
+
+                      toast.success("File removed");
+                    }}
+                    className="ml-auto text-red-500 text-sm font-semibold hover:underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="space-y-1">

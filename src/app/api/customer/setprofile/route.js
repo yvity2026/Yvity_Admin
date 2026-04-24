@@ -49,7 +49,6 @@ export async function POST(req) {
           advisor_role_id: "00000000-0000-0000-0000-000000000000",
           short_bio: bio,
           iridai_certificate_url: certificate_url,
-          // ✅ store full JSONB array here
           services: services.map((s) => ({
             service: s.service,
             company: s.company,

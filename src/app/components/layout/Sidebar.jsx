@@ -122,6 +122,7 @@ export default function AppShell({ children }) {
   // const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+   const router = useRouter();
   const headerConfig = {
     "/advisor/dashboard": {
       title: "Dashboard",
@@ -204,7 +205,7 @@ export default function AppShell({ children }) {
     y: 0,
   });
 
-  const router = useRouter();
+ 
 
   const isDefaultActions =
     currentHeader.actions.includes("notifications") ||
