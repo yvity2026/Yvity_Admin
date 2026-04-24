@@ -70,7 +70,7 @@ export default function ImproveScoreDark() {
             Potential score with all improvements
           </span>
           <div className="flex items-center gap-3 text-lg font-bold text-[#EAB308]">
-            87 <ArrowRight className="w-4 h-4 text-gray-400" /> 99/100
+            86 <ArrowRight className="w-4 h-4 text-gray-400" /> 99/100
           </div>
         </div>
       </div>
