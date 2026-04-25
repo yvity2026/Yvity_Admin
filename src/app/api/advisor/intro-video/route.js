@@ -1,6 +1,7 @@
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getUser } from "@/lib/auth/Getuser";
 import { apiResponse } from "@/lib/apiResponse";
+import { recordAdvisorLoginActivity } from "@/lib/advisor-score/recordAdvisorLoginActivity";
 import { createAdminClient } from "@/lib/supabase/server";
 
 const MAX_VIDEO_SIZE_BYTES = 50 * 1024 * 1024;
@@ -65,6 +66,8 @@ export async function POST(req) {
     if (!Array.isArray(userRecord.roles) || !userRecord.roles.includes("advisor")) {
       return apiResponse("Unauthorized", false, 403, "", "Advisor access required");
     }
+
+    await recordAdvisorLoginActivity(supabase, userRecord);
 
     const formData = await req.formData();
     const file = formData.get("video");

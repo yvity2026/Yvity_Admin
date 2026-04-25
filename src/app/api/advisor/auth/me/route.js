@@ -1,5 +1,6 @@
 import { apiResponse } from "@/lib/apiResponse";
 import { getUser } from "@/lib/auth/Getuser";
+import { recordAdvisorLoginActivity } from "@/lib/advisor-score/recordAdvisorLoginActivity";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function GET() {
@@ -38,6 +39,8 @@ export async function GET() {
     if (!Array.isArray(userData.roles) || !userData.roles.includes("advisor")) {
       return apiResponse("UNAUTHORIZED", false, 3, "", "Unauthorized access");
     }
+
+    await recordAdvisorLoginActivity(supabase, userData);
 
     const { data: advisor, error: advisorError } = await supabase
       .from("advisor_profiles")

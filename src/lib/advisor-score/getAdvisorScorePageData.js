@@ -1,4 +1,5 @@
 import { getUser } from "@/lib/auth/Getuser";
+import { recordAdvisorLoginActivity } from "@/lib/advisor-score/recordAdvisorLoginActivity";
 import { createAdminClient } from "@/lib/supabase/server";
 
 const SCORE_LIMITS = {
@@ -402,6 +403,8 @@ export async function getAdvisorScorePageData() {
   if (advisorError || !advisor || !advisor.roles?.includes("advisor")) {
     return createEmptyState();
   }
+
+  await recordAdvisorLoginActivity(supabase, advisor);
 
   const { data: profile, error: profileError } = await supabase
     .from("advisor_profiles")

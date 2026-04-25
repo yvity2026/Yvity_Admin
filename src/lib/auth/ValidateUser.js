@@ -1,4 +1,5 @@
 import { getUser } from "@/lib/auth/Getuser";
+import { recordAdvisorLoginActivity } from "@/lib/advisor-score/recordAdvisorLoginActivity";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function ValidateUser() {
@@ -21,6 +22,9 @@ export async function ValidateUser() {
     if (error || !data) {
       return null;
     }
+
+    await recordAdvisorLoginActivity(supabase, data);
+
     return data;
   } catch (error) {
     return null;

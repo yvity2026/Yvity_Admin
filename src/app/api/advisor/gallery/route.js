@@ -3,6 +3,7 @@ import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } fro
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { apiResponse } from "@/lib/apiResponse";
 import { getUser } from "@/lib/auth/Getuser";
+import { recordAdvisorLoginActivity } from "@/lib/advisor-score/recordAdvisorLoginActivity";
 import { createAdminClient } from "@/lib/supabase/server";
 
 const s3Client = new S3Client({
@@ -38,9 +39,11 @@ export async function GET(req) {
     if (!user?.token) return apiResponse("Unauthorized", false, 401);
     
     const supabase = createAdminClient();
-    const { data: userRecord } = await supabase.from("users").select("id").filter("device_tokens", "cs", JSON.stringify([{ token: user.token }])).maybeSingle();
+    const { data: userRecord } = await supabase.from("users").select("id, roles").filter("device_tokens", "cs", JSON.stringify([{ token: user.token }])).maybeSingle();
     
     if (!userRecord) return apiResponse("User not found", false, 404);
+
+    await recordAdvisorLoginActivity(supabase, userRecord);
 
     const { data, error } = await supabase
       .from("advisor_gallery")
@@ -72,9 +75,11 @@ export async function POST(req) {
     if (!user?.token) return apiResponse("Unauthorized", false, 401);
 
     const supabase = createAdminClient();
-    const { data: userRecord } = await supabase.from("users").select("id").filter("device_tokens", "cs", JSON.stringify([{ token: user.token }])).maybeSingle();
+    const { data: userRecord } = await supabase.from("users").select("id, roles").filter("device_tokens", "cs", JSON.stringify([{ token: user.token }])).maybeSingle();
     
     if (!userRecord) return apiResponse("User not found", false, 404);
+
+    await recordAdvisorLoginActivity(supabase, userRecord);
 
     const formData = await req.formData();
     const file = formData.get("image");
@@ -144,9 +149,11 @@ export async function DELETE(req) {
     if (!user?.token) return apiResponse("Unauthorized", false, 401);
 
     const supabase = createAdminClient();
-    const { data: userRecord } = await supabase.from("users").select("id").filter("device_tokens", "cs", JSON.stringify([{ token: user.token }])).maybeSingle();
+    const { data: userRecord } = await supabase.from("users").select("id, roles").filter("device_tokens", "cs", JSON.stringify([{ token: user.token }])).maybeSingle();
     
     if (!userRecord) return apiResponse("User not found", false, 404);
+
+    await recordAdvisorLoginActivity(supabase, userRecord);
 
     const { data: galleryItem } = await supabase
       .from("advisor_gallery")
@@ -201,9 +208,11 @@ export async function PATCH(req) {
     if (!user?.token) return apiResponse("Unauthorized", false, 401);
 
     const supabase = createAdminClient();
-    const { data: userRecord } = await supabase.from("users").select("id").filter("device_tokens", "cs", JSON.stringify([{ token: user.token }])).maybeSingle();
+    const { data: userRecord } = await supabase.from("users").select("id, roles").filter("device_tokens", "cs", JSON.stringify([{ token: user.token }])).maybeSingle();
     
     if (!userRecord) return apiResponse("User not found", false, 404);
+
+    await recordAdvisorLoginActivity(supabase, userRecord);
 
     const body = await req.json();
     const updateData = {};
