@@ -1,38 +1,23 @@
 "use client";
 
-import { useEffect } from "react";
-
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) {
-    return decodeURIComponent(parts.pop().split(";").shift());
-  }
-  return null;
-}
-
 export default function InitPage() {
-  useEffect(() => {
-    const userId = getCookie("yvity_user_id");
-
-    if (!userId) {
-      window.location.href = "http://localhost:3000";
-      return;
-    }
-
-    // 🔥 let server handle redirect + cookie
-    fetch("/api/auth/sync", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId }),
-    }).then((res) => {
-      if (res.redirected) {
-        window.location.href = res.url;
-      }
-    });
-  }, []);
-
-  return <p>Loading...</p>;
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-white">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          Please set your security token
+        </h1>
+        <p className="text-gray-600 mb-6">
+          It appears you don't have a valid security token set up. 
+          Please contact your administrator to get authenticated.
+        </p>
+        <button
+          onClick={() => (window.location.href = "/login")}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Go to Login
+        </button>
+      </div>
+    </div>
+  );
 }
