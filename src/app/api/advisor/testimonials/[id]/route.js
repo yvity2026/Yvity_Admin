@@ -1,6 +1,7 @@
 import { ValidateAdvisor } from "@/lib/auth/ValidateAdvisor";
 import { createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+
 export async function PATCH(req, context) {
   try {
     const supabase = createAdminClient();
@@ -17,9 +18,11 @@ export async function PATCH(req, context) {
       return NextResponse.json({ error: "Missing id" }, { status: 400 });
     }
 
-    // You can optionally allow extra fields, but for approval we keep it strict
+    const body = await req.json().catch(() => ({}));
+    const status = body?.status === "rejected" ? "rejected" : "approved";
+
     const updates = {
-      status: "approved",
+      status,
       updated_at: new Date().toISOString(),
     };
 

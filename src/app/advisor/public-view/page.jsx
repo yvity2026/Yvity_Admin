@@ -35,6 +35,8 @@ import { AiOutlineLike } from "react-icons/ai";
 import { FaRegCirclePlay } from "react-icons/fa6";
 import { BiSolidCapsule } from "react-icons/bi";
 import { PiHospitalBold } from "react-icons/pi";
+import { MdVideoCameraFront } from "react-icons/md";
+
 import toast from "react-hot-toast";
 import { ChevronDown, ShieldCheck } from "lucide-react";
 import JourneySection from "@/components/features/advisor/professional-journey/journey-section";
@@ -55,6 +57,13 @@ const page = () => {
   const qrRef = React.useRef(null);
   const { user, advisor, setUser } = useAuth();
   const [activeModal, setActiveModal] = useState(null);
+  const introVideoUrl = advisor?.intro_url?.trim() || "";
+  const introVideoTitle = user?.name
+    ? `${user.name} Introduction`
+    : "Advisor Introduction";
+  const introVideoSubtitle = [user?.profession, user?.city]
+    .filter(Boolean)
+    .join(" • ");
   const galleryData = [
 
   ]
@@ -82,6 +91,15 @@ const page = () => {
   const handleDeleteClick = (entry) => {
     setDeletingEntry(entry);
     setIsDeleteModalOpen(true);
+  };
+
+  const handleOpenIntroVideo = () => {
+    if (!introVideoUrl) {
+      toast.error("Intro video is not available");
+      return;
+    }
+
+    setActiveModal(MODALS.VIDEO);
   };
 
   const downloadQR = () => {
@@ -443,7 +461,7 @@ const page = () => {
                   <div className="bg-amber-200 w-full  pl-[20px] pr-[23px] py-[9px] mt-[24px] bg-gradient-to-r from-[#022927] to-[#053F40] rounded-lg">
                     <span
                       className="flex gap-5 h-full cursor-pointer"
-                      onClick={() => setActiveModal(MODALS.VIDEO)}
+                      onClick={handleOpenIntroVideo}
                     >
                       <FaRegCirclePlay
                         size={40}
@@ -455,7 +473,7 @@ const page = () => {
                           Watch Intro Video
                         </span>
                         <p className="text-[#82ADAD] text-[10px] sm:text-xs font-normal leading-4 font-poppins">
-                          Krishna Mohan introduces himself
+                          {(user?.name || "Advisor")} introduces themselves
                         </p>
                       </span>
                     </span>
@@ -1166,7 +1184,8 @@ const page = () => {
               <div className="flex items-center justify-between px-8 py-5">
                 <div className="flex items-center gap-3">
                   <div className="text-slate-800 text-xl">
-                    <FiUpload />
+                    <MdVideoCameraFront />
+
                   </div>
                   <h2 className="text-xl font-bold text-slate-900">
                     Intro Video
@@ -1175,25 +1194,45 @@ const page = () => {
 
                 <button
                   onClick={() => setActiveModal(null)}
-                  className="text-gray-400 hover:text-gray-600 bg-cyan-50/50 p-1.5 rounded-full transition-colors"
+                  className="text-gray-400 hover:text-gray-600 bg-cyan-50/50 p-1.5 rounded-full transition-colors cursor-pointer"
                 >
                   <IoClose size={20} />
                 </button>
               </div>
 
               {/* Video Preview */}
-              <div className="w-full aspect-video bg-[#f2f8f8] flex items-center justify-center relative group cursor-pointer">
-                <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                  <FaPlay size={28} className="text-[#0a4d4a]" />
-                </div>
+              <div className="w-full aspect-video bg-[#f2f8f8] flex items-center justify-center relative overflow-hidden">
+                {introVideoUrl ? (
+                  <video
+                    key={introVideoUrl}
+                    className="h-full w-full bg-black object-cover"
+                    controls
+                    autoPlay
+                    playsInline
+                    preload="metadata"
+                  >
+                    <source src={introVideoUrl} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+                    <FaPlay size={28} className="text-[#0a4d4a]" />
+                  </div>
+                )}
               </div>
 
               {/* Footer */}
               <div className="p-8 space-y-1">
                 <h3 className="text-2xl font-bold text-slate-900 leading-tight">
-                  Krishna Mohan – Introduction
+                  {introVideoTitle}
                 </h3>
                 <p className="text-slate-500 font-medium text-lg">
+                  {introVideoSubtitle || "Advisor intro video"}
+                </p>
+                <h3 className="hidden text-2xl font-bold text-slate-900 leading-tight">
+                  Krishna Mohan – Introduction
+                </h3>
+                <p className="hidden text-slate-500 font-medium text-lg">
                   Senior LIC Advisor • Nellore, AP
                 </p>
               </div>
