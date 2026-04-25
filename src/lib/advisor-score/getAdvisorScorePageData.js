@@ -102,6 +102,7 @@ function buildPageData({
   advisor,
   profile,
   scoreRow,
+  journeyItems,
   serviceItems,
   testimonials,
   recommendations,
@@ -156,7 +157,7 @@ function buildPageData({
   const profileStrengthChecks = [
     {
       label: "Professional journey added",
-      complete: false,
+      complete: journeyItems.length > 0,
     },
     {
       label: "Services added",
@@ -431,6 +432,7 @@ export async function getAdvisorScorePageData() {
 
   const [
     scoreResult,
+    journeyResult,
     servicesResult,
     testimonialsResult,
     recommendationsResult,
@@ -444,6 +446,10 @@ export async function getAdvisorScorePageData() {
       .select("*")
       .eq("advisor_id", advisor.id)
       .maybeSingle(),
+    supabase
+      .from("advisor_journey")
+      .select("id")
+      .eq("user_id", advisor.id),
     supabase
       .from("advisor_services")
       .select("id")
@@ -479,6 +485,7 @@ export async function getAdvisorScorePageData() {
     advisor,
     profile,
     scoreRow: scoreResult.data ?? null,
+    journeyItems: journeyResult.data ?? [],
     serviceItems: servicesResult.data ?? [],
     testimonials: testimonialsResult.data ?? [],
     recommendations: recommendationsResult.data ?? [],

@@ -1,27 +1,29 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { Award, BriefcaseBusiness, GraduationCap } from "lucide-react";
+
+import EntryDeleteModal from "@/components/features/advisor/professional-journey/entry-delete-modal";
+import EntryFormModal from "@/components/features/advisor/professional-journey/entry-form-modal";
 import InfoBanner from "@/components/features/advisor/professional-journey/info-banner";
 import JourneySection from "@/components/features/advisor/professional-journey/journey-section";
-import EntryFormModal from "@/components/features/advisor/professional-journey/entry-form-modal";
-import EntryDeleteModal from "@/components/features/advisor/professional-journey/entry-delete-modal";
-import { Shield, HeartPulse, GraduationCap } from "lucide-react";
 import { useModal } from "@/context/ModalContext";
-import toast from "react-hot-toast";
 
 const SECTION_CONFIG = {
-  "Life Insurance": {
-    id: "life-insurance",
-    category: "Life Insurance",
+  Profession: {
+    id: "profession",
+    category: "Profession",
     themeColor: "bg-[#2A9D8F]",
     textColor: "text-[#F8F6F1]",
-    icon: Shield,
+    icon: BriefcaseBusiness,
   },
-  "Health Insurance": {
-    id: "health-insurance",
-    category: "Health Insurance",
+  Certificate: {
+    id: "certificate",
+    category: "Certification",
     themeColor: "bg-[#3498DB]",
     textColor: "text-[#F8F6F1]",
-    icon: HeartPulse,
+    icon: Award,
   },
   Education: {
     id: "education",
@@ -30,33 +32,21 @@ const SECTION_CONFIG = {
     textColor: "text-[#F8F6F1]",
     icon: GraduationCap,
   },
-  Others: {
-    id: "others",
-    category: "Others",
-    themeColor: "bg-[#2A9D8F]",
-    textColor: "text-[#F8F6F1]",
-    icon: Shield,
-  },
 };
 
-const SECTION_ORDER = [
-  "Life Insurance",
-  "Health Insurance",
-  "Education",
-  "Others",
-];
+const SECTION_ORDER = ["Profession", "Certificate", "Education"];
 
 const formatPeriod = (entry) => {
   if (entry.entry_type === "Certificate") {
     return entry.date ? String(entry.date) : "";
   }
 
-  if (entry.from_year && entry.to_year) {
-    return `${entry.from_year} - ${entry.to_year}`;
-  }
-
   if (entry.from_year && entry.is_ongoing) {
     return `${entry.from_year} - PRESENT`;
+  }
+
+  if (entry.from_year && entry.to_year) {
+    return `${entry.from_year} - ${entry.to_year}`;
   }
 
   if (entry.from_year) {
@@ -68,47 +58,70 @@ const formatPeriod = (entry) => {
 
 const getSectionKey = (entry) => {
   if (
-    entry.entry_type === "Education" ||
-    entry.entry_type === "Certificate"
+    entry?.entry_type === "Education" ||
+    entry?.entry_type === "Profession" ||
+    entry?.entry_type === "Certificate"
   ) {
-    return "Education";
+    return entry.entry_type;
   }
 
-  return entry.service_category || "Others";
+  return "Profession";
+};
+
+const getDisplayTitle = (entry) => {
+  if (entry.entry_type === "Education") {
+    return entry.degree_or_certificate || entry.title || "";
+  }
+
+  if (entry.entry_type === "Certificate") {
+    return entry.certificate_name || entry.title || "";
+  }
+
+  return entry.title || entry.organisation || "";
+};
+
+const getDisplaySubtitle = (entry) => {
+  if (entry.entry_type === "Education") {
+    return entry.institution || entry.organisation || "";
+  }
+
+  const category = entry.custom_service_category || entry.service_category || "";
+  const organisation = entry.organisation || "";
+
+  return [organisation, category]
+    .filter(Boolean)
+    .filter((value, index, array) => array.indexOf(value) === index)
+    .join(" • ");
 };
 
 const mapEntryToItem = (entry) => ({
   id: entry.id,
   period: formatPeriod(entry),
-  title: entry.title || "",
-  subtitle:
-    entry.entry_type === "Education" || entry.entry_type === "Certificate"
-      ? entry.organisation || ""
-      : entry.organisation ||
-        entry.custom_service_category ||
-        entry.service_category ||
-        "",
-  description: entry.description,
+  title: getDisplayTitle(entry),
+  subtitle: getDisplaySubtitle(entry),
+  description: entry.description || "",
   entryType: entry.entry_type,
-  category:
-    entry.entry_type === "Education" || entry.entry_type === "Certificate"
-      ? "Education"
-      : entry.service_category || "Others",
+  category: getSectionKey(entry),
+  entry_type: entry.entry_type,
+  service_category: entry.service_category,
+  custom_service_category: entry.custom_service_category,
+  from_year: entry.from_year,
+  to_year: entry.to_year,
+  date: entry.date,
+  is_ongoing: entry.is_ongoing,
+  degree_or_certificate: entry.degree_or_certificate,
+  institution: entry.institution,
+  certificate_name: entry.certificate_name,
+  organisation: entry.organisation,
+  raw_title: entry.title,
 });
 
 const buildJourneySections = (entries) => {
   const grouped = entries.reduce((acc, entry) => {
     const sectionKey = getSectionKey(entry);
+    const config = SECTION_CONFIG[sectionKey] || SECTION_CONFIG.Profession;
 
     if (!acc[sectionKey]) {
-      const config = SECTION_CONFIG[sectionKey] || {
-        id: sectionKey.toLowerCase().replace(/\s+/g, "-"),
-        category: sectionKey,
-        themeColor: "bg-[#2A9D8F]",
-        textColor: "text-[#F8F6F1]",
-        icon: Shield,
-      };
-
       acc[sectionKey] = {
         ...config,
         count: "0 entries",
@@ -120,22 +133,12 @@ const buildJourneySections = (entries) => {
     return acc;
   }, {});
 
-  Object.values(grouped).forEach((section) => {
-    section.count = `${section.entries.length} entr${
-      section.entries.length === 1 ? "y" : "ies"
-    }`;
-  });
-
-  return Object.values(grouped).sort((a, b) => {
-    const aIndex = SECTION_ORDER.indexOf(a.category);
-    const bIndex = SECTION_ORDER.indexOf(b.category);
-
-    if (aIndex === -1 && bIndex === -1) return 0;
-    if (aIndex === -1) return 1;
-    if (bIndex === -1) return -1;
-
-    return aIndex - bIndex;
-  });
+  return SECTION_ORDER.filter((key) => grouped[key]?.entries?.length).map((key) => ({
+    ...grouped[key],
+    count: `${grouped[key].entries.length} entr${
+      grouped[key].entries.length === 1 ? "y" : "ies"
+    }`,
+  }));
 };
 
 export default function ProfessionalJourneyPage() {
@@ -144,13 +147,15 @@ export default function ProfessionalJourneyPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingEntry, setDeletingEntry] = useState(null);
   const [journeyData, setJourneyData] = useState([]);
+  const [isProfessional, setProfessional] = useState(false);
 
   const { trigger, clearTrigger } = useModal();
-  const [isProfessional, setProfessional] = useState(false);
 
   const fetchJourney = async () => {
     try {
-      const response = await fetch("/api/advisor/journey");
+      const response = await fetch("/api/advisor/journey", {
+        cache: "no-store",
+      });
       const result = await response.json();
 
       if (!response.ok) {
@@ -161,6 +166,7 @@ export default function ProfessionalJourneyPage() {
     } catch (error) {
       console.error("Journey fetch failed:", error);
       setJourneyData([]);
+      toast.error(error.message || "Failed to fetch journey data");
     }
   };
 
@@ -170,6 +176,7 @@ export default function ProfessionalJourneyPage() {
 
   useEffect(() => {
     if (trigger === "ADD_PROFESSIONAL_JOURNEY") {
+      setEditingEntry(null);
       setProfessional(true);
       clearTrigger();
     }
@@ -188,6 +195,7 @@ export default function ProfessionalJourneyPage() {
   const handleCloseModal = () => {
     setIsEntryModalOpen(false);
     setEditingEntry(null);
+    setProfessional(false);
   };
 
   const handleCloseDeleteModal = () => {
@@ -195,24 +203,21 @@ export default function ProfessionalJourneyPage() {
     setDeletingEntry(null);
   };
 
-  const handleFormSubmit = async (data) => {
-    const isEditing = Boolean(editingEntry?.id);
-    const { icon, ...payload } = data;
+  const handleFormSubmit = async (data, entryId) => {
+    const isEditing = Boolean(entryId);
     const toastId = toast.loading(
       isEditing ? "Updating journey entry..." : "Creating journey entry..."
     );
 
     try {
       const response = await fetch(
-        isEditing
-          ? `/api/advisor/journey/${editingEntry.id}`
-          : "/api/advisor/journey",
+        isEditing ? `/api/advisor/journey/${entryId}` : "/api/advisor/journey",
         {
           method: isEditing ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
         }
       );
 
@@ -228,16 +233,18 @@ export default function ProfessionalJourneyPage() {
       }
 
       await fetchJourney();
-      setEditingEntry(null);
+      handleCloseModal();
       toast.success(
         isEditing
           ? "Journey entry updated successfully"
           : "Journey entry created successfully",
         { id: toastId }
       );
+      return true;
     } catch (error) {
       toast.error(error.message || "Something went wrong", { id: toastId });
       console.error("Journey submit failed:", error);
+      return false;
     }
   };
 
@@ -256,7 +263,7 @@ export default function ProfessionalJourneyPage() {
       }
 
       await fetchJourney();
-      setDeletingEntry(null);
+      handleCloseDeleteModal();
       toast.success("Journey entry deleted successfully", { id: toastId });
     } catch (error) {
       toast.error(error.message || "Something went wrong", { id: toastId });
@@ -266,14 +273,11 @@ export default function ProfessionalJourneyPage() {
 
   return (
     <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
-      {/* <PageHeader onAddClick={handleAddClick} /> */}
-      {
-        <EntryFormModal
-          isOpen={isProfessional}
-          onClose={() => setProfessional(false)}
-          onSubmit={handleFormSubmit}
-        />
-      }
+      <EntryFormModal
+        isOpen={isProfessional}
+        onClose={handleCloseModal}
+        onSubmit={handleFormSubmit}
+      />
 
       <div className="p-4 md:p-6 space-y-6 lg:p-10 xl:px-15 mx-auto w-full pb-12">
         <InfoBanner />
