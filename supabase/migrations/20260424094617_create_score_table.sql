@@ -350,7 +350,7 @@ begin
   into v_login
   from public.advisor_login_activity
   where advisor_id=p_advisor
-  and login_date >= current_date - interval '7 day';
+  and login_date >= current_date - interval '6 day';
 
   v_strength := public.get_profile_strength_score(p_advisor);
 

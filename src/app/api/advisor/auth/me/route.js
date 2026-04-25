@@ -1,4 +1,5 @@
 import { getUser } from "@/lib/auth/Getuser";
+import { recordAdvisorLoginActivity } from "@/lib/advisor-score/recordAdvisorLoginActivity";
 import { createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
@@ -49,6 +50,8 @@ export async function GET() {
         { status: 403 }
       );
     }
+
+    await recordAdvisorLoginActivity(supabase, userData);
 
     const { data: advisor, error: advisorError } = await supabase
       .from("advisor_profiles")

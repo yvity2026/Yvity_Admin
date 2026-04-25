@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/Getuser";
 import { apiResponse } from "@/lib/apiResponse";
+import { recordAdvisorLoginActivity } from "@/lib/advisor-score/recordAdvisorLoginActivity";
 
 export async function PATCH(req) {
   try {
@@ -16,7 +17,7 @@ export async function PATCH(req) {
     // Get user by device token - optimized query
     const { data: loggedUser, error: userError } = await supabase
       .from("users")
-      .select("id")
+      .select("id, roles")
       .filter("device_tokens", "cs", JSON.stringify([{ token: user.token }]))
       .maybeSingle();
 
@@ -24,6 +25,8 @@ export async function PATCH(req) {
       console.error("User fetch error:", userError);
       return apiResponse("Failed to fetch user", false, 1, "", userError?.message || "User not found");
     }
+
+    await recordAdvisorLoginActivity(supabase, loggedUser);
 
     const body = await req.json();
 

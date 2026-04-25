@@ -1,4 +1,5 @@
 import { getUser } from "@/lib/auth/Getuser";
+import { recordAdvisorLoginActivity } from "@/lib/advisor-score/recordAdvisorLoginActivity";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function ValidateAdvisor() {
@@ -20,13 +21,17 @@ export async function ValidateAdvisor() {
       return null;
     }
 
-    const { data: advisor, error: advisorError} = supabase
-    .from("advisor_profiles")
-    .select("*")
-    .eq("advisor_id", data.id)
-    .maybeSingle();
+    const { data: advisor, error: advisorError } = await supabase
+      .from("advisor_profiles")
+      .select("*")
+      .eq("advisor_id", data.id)
+      .maybeSingle();
 
-    if(!advisor || advisorError)
+    if (!advisor || advisorError) {
+      return null;
+    }
+
+    await recordAdvisorLoginActivity(supabase, data);
 
     return data;
   } catch (error) {
