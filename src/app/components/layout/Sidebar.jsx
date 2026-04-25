@@ -3,7 +3,7 @@ import { easeInOut, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AiOutlineUser } from "react-icons/ai";
 import { BiPulse } from "react-icons/bi";
 import { FaBell, FaCrown, FaRegStar } from "react-icons/fa";
@@ -118,7 +118,8 @@ const menuItems = [
 export default function AppShell({ children }) {
   const { collapsed } = useSidebar();
   const { openModal } = useModal();
-  const { user, loading, setUser } = useAuth();
+  const [user, setaUser] = useState();
+  const {loading, setLoading, setUser } = useAuth();
   // const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -180,23 +181,20 @@ export default function AppShell({ children }) {
   };
 
   // const hideSidebarRoutes = ["/advisor/public-view"];
-  if (!pathname.includes("/advisor")) {
-    return <>{children}</>;
-  }
-
-
+  
+  
   const sidebarWidth = collapsed ? 80 : 260;
-
+  
   const name = "Krishna Mohan";
   const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("");
+  .split(" ")
+  .map((n) => n[0])
+  .join("");
   const SIDEBAR_TRANSITION = {
     duration: 0.35,
     ease: [0.4, 0, 0.2, 1], // smoother than easeInOut
   };
-
+  
   const [hoveredItem, setHoveredItem] = useState(null);
   const [tooltip, setTooltip] = useState({
     visible: false,
@@ -204,13 +202,41 @@ export default function AppShell({ children }) {
     x: 0,
     y: 0,
   });
+  
+ useEffect(() => {
+  const fetchUser = async () => {
+    try {
+      const res = await fetch("/api/auth/me");
 
- 
+      const data = await res.json();
+      console.log("API response:", data);
 
+      if (!res.ok || !data.success) {
+        console.error("API Error:", data.error);
+        return;
+      }
+
+      setUser(data.data); // ✅ correct
+      setaUser(data.data)
+    } catch (err) {
+      console.error("Fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchUser();
+}, []);
+  
+  
+  
   const isDefaultActions =
-    currentHeader.actions.includes("notifications") ||
-    currentHeader.actions.includes("profile");
-
+  currentHeader.actions.includes("notifications") ||
+  currentHeader.actions.includes("profile");
+  
+  if (!pathname.includes("/advisor")) {
+    return <>{children}</>;
+  }
   return (
     <div className="min-h-screen flex">
       {/* SIDEBAR (FULL HEIGHT) */}

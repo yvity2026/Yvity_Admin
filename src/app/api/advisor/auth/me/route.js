@@ -1,18 +1,20 @@
-import { apiResponse } from "@/lib/apiResponse";
 import { getUser } from "@/lib/auth/Getuser";
 import { createAdminClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
     const user = await getUser();
 
     if (!user?.token) {
-      return apiResponse(
-        "Something went wrong, please try again",
-        false,
-        1,
-        "",
-        "Unable to get the token from the session"
+      return NextResponse.json(
+        {
+          success: false,
+          code: 1,
+          message: "Something went wrong, please try again",
+          error: "Unable to get the token from the session",
+        },
+        { status: 400 }
       );
     }
 
@@ -25,18 +27,27 @@ export async function GET() {
       .maybeSingle();
 
     if (userError || !userData) {
-      return apiResponse(
-        "User Not Found",
-        false,
-        2,
-        "",
-        userError?.message || "User not found based on the token"
+      return NextResponse.json(
+        {
+          success: false,
+          code: 2,
+          message: "User Not Found",
+          error: userError?.message || "User not found based on the token",
+        },
+        { status: 404 }
       );
     }
 
-    // Safe roles check
     if (!Array.isArray(userData.roles) || !userData.roles.includes("advisor")) {
-      return apiResponse("UNAUTHORIZED", false, 3, "", "Unauthorized access");
+      return NextResponse.json(
+        {
+          success: false,
+          code: 3,
+          message: "UNAUTHORIZED",
+          error: "Unauthorized access",
+        },
+        { status: 403 }
+      );
     }
 
     const { data: advisor, error: advisorError } = await supabase
@@ -46,24 +57,39 @@ export async function GET() {
       .maybeSingle();
 
     if (advisorError || !advisor) {
-      return apiResponse(
-        "Advisor profile not found",
-        false,
-        4,
-        "",
-        advisorError?.message || "No advisor profile exists for this user"
+      return NextResponse.json(
+        {
+          success: false,
+          code: 4,
+          message: "Advisor profile not found",
+          error:
+            advisorError?.message ||
+            "No advisor profile exists for this user",
+        },
+        { status: 404 }
       );
     }
 
-    return apiResponse("User retrieved successfully", true, 0, advisor, "");
+    return NextResponse.json(
+      {
+        success: true,
+        code: 0,
+        message: "User retrieved successfully",
+        data: advisor,
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("GET /api/advisor/auth/me error:", error);
-    return apiResponse(
-      "Internal Server Error",
-      false,
-      5,
-      "",
-      error.message || error
+
+    return NextResponse.json(
+      {
+        success: false,
+        code: 5,
+        message: "Internal Server Error",
+        error: error.message || error,
+      },
+      { status: 500 }
     );
   }
 }

@@ -34,7 +34,7 @@ export async function PATCH(req) {
     
     const ADVISOR_PROFILE_FIELDS = new Set([
       "ispublic_professional", "ispublic_services", "ispublic_achievements",
-      "ispublic_gallery", "ispublic_testimonials", "ispublic_profile"
+      "ispublic_gallery", "ispublic_testimonials", "ispublic_profile",
     ]);
 
     // Extract updates using object destructuring and filtering

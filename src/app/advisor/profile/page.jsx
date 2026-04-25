@@ -24,7 +24,7 @@ import { MdClose } from "react-icons/md";
 import { TfiGallery } from "react-icons/tfi";
 
 const page = () => {
-  const { user, setUser, advisor } = useAuth();
+  const { user, setUser, advisor, loading, setLoading } = useAuth();
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -118,7 +118,7 @@ const page = () => {
   const [isGallery, setIsGallery] = useState(false);
   const [isTestimonial, setIsTestimonial] = useState(false);
   const [isProfile, setIsProfile] = useState(false);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
 
   const handleSave = async () => {
     try {
@@ -161,9 +161,9 @@ const page = () => {
       gender: user.gender || "",
       city: user.city || "",
       mobile: user.mobile || "",
-      irdai_number: user.irdai || "",
+      irdai_number: advisor?.services[0].license || "",
     });
-  }, [user]);
+  }, [user, advisor]);
 
   useEffect(() => {
     if (!advisor) return;
