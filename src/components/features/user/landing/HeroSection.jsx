@@ -9,7 +9,7 @@ import { TbSearchOff } from "react-icons/tb";
 import { AdvisorCard } from "./AdvisorCard";
 import { IoIosArrowRoundForward } from "react-icons/io";
 
-const AdvisorSearchFilter = ({ onSearchChange }) => {
+const AdvisorSearchFilter = ({ onSearchChange, advisors = [] }) => {
   const [location, setLocation] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
@@ -21,81 +21,6 @@ const AdvisorSearchFilter = ({ onSearchChange }) => {
     "MDRT Advisors",
     "Near Me",
     "Top Rated",
-  ];
-
-  const advisors = [
-    {
-      name: "Krishna Mohan",
-      title: "Chief Life Planner",
-      location: "Nellore, AP",
-      score: 80,
-      scoreLabel: "Top 10% Advisor",
-      exp: "14+",
-      reviews: 32,
-      recs: 12,
-      clients: "200+",
-      tags: ["Life Insurance", "Health Insurance", "MDRT", "Founding"],
-    },
-    {
-      name: "Priya Sharma",
-      title: "Senior Financial Advisor",
-      location: "Hyderabad, TS",
-      score: 75,
-      scoreLabel: "Top 5% Advisor",
-      exp: "10+",
-      reviews: 45,
-      recs: 20,
-      clients: "350+",
-      tags: ["Life Insurance", "Health Insurance", "MDRT", "Founding"],
-    },
-    {
-      name: "Ravi Kumar",
-      title: "Insurance Consultant",
-      location: "Vijayawada, AP",
-      score: 70,
-      scoreLabel: "Top 20% Advisor",
-      exp: "8+",
-      reviews: 21,
-      recs: 9,
-      clients: "150+",
-      tags: ["Life Insurance", "Health Insurance", "MDRT", "Founding"],
-    },
-    {
-      name: "Anitha Reddy",
-      title: "Wealth & Protection Advisor",
-      location: "Vizag, AP",
-      score: 90,
-      scoreLabel: "Top 15% Advisor",
-      exp: "12+",
-      reviews: 38,
-      recs: 15,
-      clients: "180+",
-      tags: ["Life Insurance", "Health Insurance", "MDRT", "Founding"],
-    },
-    {
-      name: "Suresh Babu",
-      title: "Life & Health Specialist",
-      location: "Chennai, TN",
-      score: 76,
-      scoreLabel: "Top 25% Advisor",
-      exp: "6+",
-      reviews: 18,
-      recs: 7,
-      clients: "120+",
-      tags: ["Life Insurance", "Health Insurance", "MDRT", "Founding"],
-    },
-    {
-      name: "Meena Iyer",
-      title: "Financial Security Planner",
-      location: "Bangalore, KA",
-      score: 60,
-      scoreLabel: "Top 8% Advisor",
-      exp: "16+",
-      reviews: 52,
-      recs: 24,
-      clients: "400+",
-      tags: ["Life Insurance", "Health Insurance", "MDRT", "Founding"],
-    },
   ];
 
   // Mock function to handle search - in a real app, you'd pass this to a parent
@@ -276,7 +201,8 @@ const AdvisorSearchFilter = ({ onSearchChange }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredAdvisors.map((advisor, index) => (
             <AdvisorCard
-              key={index}
+              key={advisor.id || index}
+              id={advisor.id}
               name={advisor.name}
               title={advisor.title}
               location={advisor.location}
@@ -287,6 +213,7 @@ const AdvisorSearchFilter = ({ onSearchChange }) => {
               recs={advisor.recs}
               clients={advisor.clients}
               tags={advisor.tags}
+              selfie_url={advisor.selfie_url}
             />
           ))}
         </div>

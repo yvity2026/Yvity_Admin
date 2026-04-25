@@ -34,7 +34,6 @@ export default function EntryFormModal({
           ? "Certificate"
           : initialData.entryType || "Education";
       const initCategory = initialData.category || "Life Insurance";
-      // If initialData.category is not one of our predefined options, treat it as a custom 'Others'
       const isCustomCat =
         !SERVICE_CATEGORIES.includes(initCategory) && initCategory !== "";
 
@@ -47,13 +46,13 @@ export default function EntryFormModal({
         company: initialData.title || "",
         certificateName: initialData.title || "",
         fromYear: initialData.period
-          ? initialData.period.split(" - ")[0].replace("—", "").trim()
+          ? initialData.period.split(" - ")[0].replace("â€”", "").trim()
           : "",
         toYear:
           initialData.period &&
           (initialData.period.includes(" - ") ||
-            initialData.period.includes(" — "))
-            ? (initialData.period.split(/ - | — /)[1] || "")
+            initialData.period.includes(" â€” "))
+            ? (initialData.period.split(/ - | â€” /)[1] || "")
                 .replace("PRESENT", "")
                 .trim()
             : "",
@@ -101,50 +100,49 @@ export default function EntryFormModal({
     setFormData((prev) => ({ ...prev, serviceCategory: cat }));
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-    const handleSubmit = (e) => {
-      e.preventDefault();
-
-      const payload = {
-        title:
-          formData.entryType === "Education"
-            ? formData.degree
-            : formData.entryType === "Profession"
-              ? formData.company
-              : formData.certificateName,
-
-        organisation:
-          formData.entryType === "Education"
-            ? formData.institution
-            : formData.serviceCategory === "Others"
-              ? formData.customServiceCategory
-              : formData.serviceCategory,
-
-        description: formData.description,
-        icon: "🏆",
-
-        fromYear:
-          formData.entryType === "Certificate"
-            ? Number(formData.date)
-            : formData.fromYear
-              ? Number(formData.fromYear)
-              : null,
-
-        toYear:
-          formData.entryType === "Certificate"
+    const payload = {
+      entry_type: formData.entryType,
+      service_category: isEducation ? null : formData.serviceCategory,
+      custom_service_category:
+        formData.serviceCategory === "Others"
+          ? formData.customServiceCategory
+          : null,
+      title:
+        formData.entryType === "Education"
+          ? formData.degree
+          : formData.entryType === "Profession"
+            ? formData.company
+            : formData.certificateName,
+      organisation: isEducation ? formData.institution : null,
+      description: formData.description,
+      icon: "ðŸ†",
+      from_year:
+        formData.entryType === "Certificate"
+          ? null
+          : formData.fromYear
+            ? Number(formData.fromYear)
+            : null,
+      to_year:
+        formData.entryType === "Certificate"
+          ? null
+          : formData.isCurrent
             ? null
-            : formData.isCurrent
-              ? null
-              : formData.toYear
-                ? Number(formData.toYear)
-                : null,
-
-        isOngoing: formData.isCurrent,
-      };
-
-      onSubmit?.(payload);
-      onClose();
+            : formData.toYear
+              ? Number(formData.toYear)
+              : null,
+      date:
+        formData.entryType === "Certificate" && formData.date
+          ? Number(formData.date)
+          : null,
+      is_ongoing: formData.isCurrent,
     };
+
+    onSubmit?.(payload);
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-200 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">

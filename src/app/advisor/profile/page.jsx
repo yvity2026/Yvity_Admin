@@ -4,6 +4,7 @@ import Toggle from "@/app/components/ui/ToggleButton";
 import { useAuth } from "@/context/AuthUserContext";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { CgGirl } from "react-icons/cg";
 import { CiGlobe } from "react-icons/ci";
 import {
@@ -24,7 +25,7 @@ import { MdClose } from "react-icons/md";
 import { TfiGallery } from "react-icons/tfi";
 
 const page = () => {
-  const { user, setUser, advisor, loading, setLoading } = useAuth();
+  const { user, setUser, advisor, setAdvisor, loading } = useAuth();
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -53,17 +54,6 @@ const page = () => {
       videoRef.current.srcObject = stream;
     }
   };
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const res = await fetch("/api/auth/me");
-      const data = await res.json();
-      setUser(data);
-      setLoading(false);
-    };
-
-    fetchUser();
-  }, []);
 
   // start video
   const capturePhoto = () => {
@@ -118,38 +108,57 @@ const page = () => {
   const [isGallery, setIsGallery] = useState(false);
   const [isTestimonial, setIsTestimonial] = useState(false);
   const [isProfile, setIsProfile] = useState(false);
-  // const [loading, setLoading] = useState(true);
+  const hasShownLoadError = useRef(false);
 
   const handleSave = async () => {
-    try {
-      const res = await fetch("/api/advisor/profile/update", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formdata,
-          ispublic_professional: isJourney,
-          ispublic_services: isService,
-          ispublic_achievements: isAchievement,
-          ispublic_gallery: isGallery,
-          ispublic_testimonials: isTestimonial,
-          ispublic_profile: isProfile,
-        }),
-      });
+    const toastId = toast.loading("Saving profile changes...");
+  try {
+    const res = await fetch("/api/advisor/profile/update", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...formdata,
+        services: [
+          {
+            license: formdata.irdai_number,
+          },
+        ],
+        ispublic_professional: isJourney,
+        ispublic_services: isService,
+        ispublic_achievements: isAchievement,
+        ispublic_gallery: isGallery,
+        ispublic_testimonials: isTestimonial,
+        ispublic_profile: isProfile,
+      }),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (!res.ok) {
-        alert(data.error || "Update failed");
-        return;
-      }
-
-      setUser(data.data);
-    } catch (err) {
-      console.error(err);
+    if (!res.ok || !data.success) {
+      toast.dismiss(toastId);
+      toast.error(data.message || "Update failed ❌");
+      return;
     }
-  };
+
+    toast.success(data.message || "Profile updated successfully ✅");
+
+    toast.dismiss(toastId);
+
+    if (data.data?.user) {
+      setUser(data.data.user);
+    }
+
+    if (data.data?.advisor) {
+      setAdvisor(data.data.advisor);
+    }
+  } catch (err) {
+    console.error(err);
+    toast.dismiss(toastId);
+    toast.error("Something went wrong ❌");
+  }
+};
 
   useEffect(() => {
     if (!user) return;
@@ -161,7 +170,7 @@ const page = () => {
       gender: user.gender || "",
       city: user.city || "",
       mobile: user.mobile || "",
-      irdai_number: advisor?.services[0].license || "",
+      irdai_number: advisor?.services?.[0]?.license || "",
     });
   }, [user, advisor]);
 
@@ -175,6 +184,15 @@ const page = () => {
     setIsTestimonial(advisor.ispublic_testimonials);
     setIsProfile(advisor.ispublic_profile);
   }, [advisor]);
+
+  useEffect(() => {
+    if (loading || hasShownLoadError.current) return;
+
+    if (!user) {
+      toast.error("Failed to load profile data");
+      hasShownLoadError.current = true;
+    }
+  }, [loading, user]);
 
   return (
     <div className="p-4 md:p-8 flex flex-col gap-4 md:gap-6">

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { HiOutlineHome } from "react-icons/hi";
 import { FiUser, FiLogOut, FiMenu, FiX } from "react-icons/fi";
 import { IoNotificationsOutline } from "react-icons/io5";
@@ -9,18 +9,14 @@ import SuccessReviewModal from "./modals/SuccessReviewModal";
 import Image from "next/image";
 import Skeleton from "@/app/components/skeleton/Skeleton";
 import { useAuth } from "@/context/AuthUserContext";
-import { RxDashboard } from "react-icons/rx";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 const Header = () => {
   const router = useRouter();
-  const { user, setUser, loading } = useAuth();
+  const { user, loading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
-// const [user, setUser] = useState(null);
-const [userLoading, setUserLoading] = useState(true);
-const [userError, setUserError] = useState(null);
 
   const MODALS = {
     PROFILE: "profile",
@@ -38,144 +34,92 @@ const [userError, setUserError] = useState(null);
     }));
   };
 
-const handleSubmit = async (payload) => {
-  try {
-    toast.loading("Saving profile...", { id: "profile" });
+  const handleSubmit = async (payload) => {
+    try {
+      toast.loading("Saving profile...", { id: "profile" });
 
-    let certificate_url = payload.certificate_url;
+      let certificate_url = payload.certificate_url;
 
-    // 🔥 STEP 1: Upload to S3 if file exists
-    if (payload.certificate_file) {
-      toast.loading("Uploading certificate...", { id: "profile" });
+      if (payload.certificate_file) {
+        toast.loading("Uploading certificate...", { id: "profile" });
 
-      const formData = new FormData();
-      formData.append("file", payload.certificate_file);
+        const formData = new FormData();
+        formData.append("file", payload.certificate_file);
 
-      const res = await fetch("/api/upload-cert", {
+        const res = await fetch("/api/upload-cert", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          toast.error("Certificate upload failed", { id: "profile" });
+          return false;
+        }
+
+        certificate_url = data.url;
+
+        toast.success("Certificate uploaded", { id: "profile" });
+      }
+
+      toast.loading("Saving profile details...", { id: "profile" });
+
+      const res = await fetch("/api/customer/setprofile", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...payload,
+          certificate_url,
+        }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error("Certificate upload failed", { id: "profile" });
+        toast.error(data?.message || "Failed to save profile", {
+          id: "profile",
+        });
         return false;
       }
 
-      certificate_url = data.url;
-
-      toast.success("Certificate uploaded", { id: "profile" });
-    }
-
-    // 🔥 STEP 2: Save profile
-    toast.loading("Saving profile details...", { id: "profile" });
-
-    const res = await fetch("/api/customer/setprofile", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...payload,
-        certificate_url,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      toast.error(data?.message || "Failed to save profile", {
+      toast.success("Profile created successfully ðŸŽ‰", {
         id: "profile",
       });
+
+      return true;
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong", { id: "profile" });
       return false;
     }
-
-    toast.success("Profile created successfully 🎉", {
-      id: "profile",
-    });
-
-    return true;
-  } catch (err) {
-    console.error(err);
-    toast.error("Something went wrong", { id: "profile" });
-    return false;
-  }
-};
-
-useEffect(() => {
-  const controller = new AbortController();
-
-  const fetchUser = async () => {
-    try {
-      setUserLoading(true);
-      toast.loading("Fetching user...", { id: "user" });
-
-      const res = await fetch("/api/auth/me", {
-        method: "GET",
-        signal: controller.signal,
-      });
-
-      const result = await res.json();
-
-      if (!res.ok) {
-        throw new Error(result?.message || "Failed to fetch user");
-      }
-
-      // ✅ IMPORTANT: use result.data
-      setUser(result.data);
-
-      toast.success("Welcome back 👋", { id: "user" });
-    } catch (err) {
-      if (err.name === "AbortError") return;
-
-      console.error(err);
-      setUser(null);
-
-      toast.error(err.message || "Auth failed", { id: "user" });
-    } finally {
-      setUserLoading(false);
-    }
   };
-
-  fetchUser();
-
-  return () => controller.abort();
-}, []);
 
   return (
     <>
       {loading ? (
         <nav className="bg-white border-b border-gray-200 px-4 md:px-6 lg:px-10 xl:px-[120px] shadow-sm max-h-[70px]">
           <div className="mx-auto flex items-center justify-between">
-            {/* Logo */}
             <div className="flex items-center space-x-2">
               <Skeleton className="w-[90px] h-[40px] rounded-md" />
             </div>
 
-            {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-8">
-              {/* Home */}
               <div className="flex items-center gap-2">
                 <Skeleton className="w-5 h-5 rounded" />
                 <Skeleton className="w-16 h-4 rounded" />
               </div>
 
-              {/* Setup Profile */}
               <div className="flex items-center gap-2">
                 <Skeleton className="w-5 h-5 rounded" />
                 <Skeleton className="w-32 h-4 rounded" />
               </div>
 
-              {/* Right Section */}
               <div className="flex items-center space-x-4 pl-4 border-l border-gray-200">
-                {/* Notification */}
                 <Skeleton className="w-10 h-10 rounded-full" />
-
-                {/* Avatar */}
                 <Skeleton className="w-10 h-10 rounded-full" />
-
-                {/* Logout */}
                 <div className="flex items-center gap-2">
                   <Skeleton className="w-5 h-5 rounded" />
                   <Skeleton className="w-16 h-4 rounded" />
@@ -183,7 +127,6 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* Mobile Toggle */}
             <div className="md:hidden flex items-center">
               <Skeleton className="w-8 h-8 rounded" />
             </div>
@@ -192,7 +135,6 @@ useEffect(() => {
       ) : (
         <nav className="bg-white border-b border-gray-200 px-4 md:px-6 lg:px-10 xl:px-[120px] shadow-sm">
           <div className=" mx-auto flex items-center justify-between ">
-            {/* Left Side: Logo */}
             <div className="flex items-center space-x-2">
               <Image
                 src="/images/Adivisor/Navbar/navlogo.png"
@@ -202,37 +144,29 @@ useEffect(() => {
               />
             </div>
 
-            {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-8">
               <button className="flex items-center px-4 py-1 gap-2 hover:text-black transition text-[14px] leading-[16px] font-medium text-[var(--headings-important-text,#111827)] cursor-pointer">
                 <HiOutlineHome size={20} />
                 <span className="font-medium">Home</span>
               </button>
 
-              {
-                user?.roles?.includes("advisor") ? (
-                  <button
-                className="flex items-center gap-2 bg-[#0A4A4A] hover:bg-[#083c3c] text-white px-4 py-2 rounded-md text-sm font-semibold transition shadow-sm cursor-pointer"
-                onClick={() => router.push("/advisor/dashboard")}
-              >
-                {/* <RxDashboard size={20} /> */}
-                <span className="font-medium">My Dashboard</span>
-              </button>
-                )
-                : 
-                (
-              <button
-                className="flex items-center gap-2  text-[14px] leading-[16px] px-2 py-1 font-medium text-[var(--headings-important-text,#111827)] cursor-pointer"
-                onClick={() => setActiveModal(MODALS.PROFILE)}
-              >
-                <FiUser size={20} />
-                <span className="font-medium">Setup My Profile</span>
-              </button>
-                )
-              }
+              {user?.roles?.includes("advisor") ? (
+                <button
+                  className="flex items-center gap-2 bg-[#0A4A4A] hover:bg-[#083c3c] text-white px-4 py-2 rounded-md text-sm font-semibold transition shadow-sm cursor-pointer"
+                  onClick={() => router.push("/advisor/dashboard")}
+                >
+                  <span className="font-medium">My Dashboard</span>
+                </button>
+              ) : (
+                <button
+                  className="flex items-center gap-2  text-[14px] leading-[16px] px-2 py-1 font-medium text-[var(--headings-important-text,#111827)] cursor-pointer"
+                  onClick={() => setActiveModal(MODALS.PROFILE)}
+                >
+                  <FiUser size={20} />
+                  <span className="font-medium">Setup My Profile</span>
+                </button>
+              )}
 
-
-              {/* Icons & Logout */}
               <div className="flex items-center space-x-4 pl-4 border-l border-gray-200">
                 <div className="relative p-2 bg-gray-50 rounded-full border border-gray-100 cursor-pointer">
                   <IoNotificationsOutline size={22} className="text-gray-600" />
@@ -260,7 +194,6 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* Mobile Toggle */}
             <div className="md:hidden flex items-center">
               <button
                 onClick={() => setIsOpen(!isOpen)}
@@ -271,7 +204,6 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Mobile Menu Dropdown */}
           {isOpen && (
             <div className="md:hidden mt-4 space-y-4 pb-4 animate-in slide-in-from-top duration-300">
               <a
@@ -318,14 +250,12 @@ useEffect(() => {
               onClose={() => setActiveModal(null)}
               form={profileFormData}
               onContinue={async (formdata) => {
-                // 1. update parent state FIRST
                 setProfileFormData((prev) => {
                   const updated = {
                     ...prev,
                     ...formdata,
                   };
 
-                  // 2. call API with fresh data (not stale closure)
                   handleSubmit(updated).then((success) => {
                     if (success) {
                       setActiveModal(MODALS.SUCCESS);

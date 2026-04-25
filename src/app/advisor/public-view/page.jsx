@@ -40,7 +40,8 @@ import { MdVideoCameraFront } from "react-icons/md";
 import toast from "react-hot-toast";
 import { ChevronDown, ShieldCheck } from "lucide-react";
 import JourneySection from "@/components/features/advisor/professional-journey/journey-section";
-import { journeyData } from "../professional-journey/page";
+// import { journeyData } from "../professional-journey/page";
+const journeyData = [];
 import AchievementCard from "@/components/features/advisor/achievements/achievement-card";
 import { achievementsData } from "../achievements/page";
 import Testimonials_filters from "@/components/features/advisor/Testimonials/Testimonials_filters";
@@ -55,7 +56,7 @@ import { useAuth } from "@/context/AuthUserContext";
 import GiveTestimonialModal from "@/components/features/user/landing/modals/public-profile/GiveTestimonialModal";
 const page = () => {
   const qrRef = React.useRef(null);
-  const { user, advisor, setUser } = useAuth();
+  const { user, advisor, loading: authLoading } = useAuth();
   const [activeModal, setActiveModal] = useState(null);
   const introVideoUrl = advisor?.intro_url?.trim() || "";
   const introVideoTitle = user?.name
@@ -254,13 +255,13 @@ const page = () => {
   const [mobile, setMobile] = useState("");
   const [testimonial, setTestimonial] = useState("");
   const [rating, setRating] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [recommendLoading, setRecommendLoading] = useState(false);
 
   // ✅ Validation + Submit
 
   const [selectedReasons, setSelectedReasons] = useState([]);
   // const [mobile, setMobile] = useState("");
-  // const [loading, setLoading] = useState(false);
+  // const [authLoading, setLoading] = useState(false);
 
   const reasonsList = [
     "Helpful & Honest",
@@ -293,7 +294,7 @@ const page = () => {
     }
 
     try {
-      setLoading(true);
+      setRecommendLoading(true);
 
       // 🔥 replace with real API
       await fetch("/api/recommend", {
@@ -316,20 +317,9 @@ const page = () => {
       toast.error("Something went wrong");
     } finally {
       await new Promise((res) => setTimeout(res, 1500)); // simulate delay
-      setLoading(false);
+      setRecommendLoading(false);
     }
   };
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const res = await fetch("/api/auth/me");
-      const data = await res.json();
-      setUser(data);
-      setLoading(false);
-    };
-
-    fetchUser();
-  }, []);
 
   return (
     <div className="bg-[#F8F6F1]">
@@ -350,7 +340,7 @@ const page = () => {
           <div className="relative rounded-2xl bg-white shadow-sm flex-1">
             <div className="h-[78px] bg-gradient-to-r from-[#032B2B] to-[#095A5B] mb-[65px] w-full rounded-t-2xl"></div>
             {/* profile circle */}
-            {loading ? (
+            {authLoading ? (
               <span className="absolute top-[39px] left-4 md:left-[30px]">
                 <Skeleton className="h-16 w-16 sm:h-20 sm:w-20 md:h-22 md:w-22 rounded-full" />
               </span>
@@ -372,7 +362,7 @@ const page = () => {
               </span>
             )}
             {/* Advisor Details */}
-            {loading ? (
+            {authLoading ? (
               <div className="px-4 md:px-6">
                 {/* Header */}
                 <div className="flex justify-between items-start">
@@ -560,7 +550,7 @@ const page = () => {
           {/* Right potion */}
           <div className="flex flex-col gap-4 lg:justify-between w-full lg:w-[320px]">
             {/* R1 */}
-            {loading ? (
+            {authLoading ? (
               <div className="w-full py-6 px-[17px] flex flex-col gap-3 rounded-2xl bg-white shadow-soft">
                 {/* Heading */}
                 <div className="flex items-center gap-2">
@@ -633,7 +623,7 @@ const page = () => {
             )}
 
             {/* R2 */}
-            {loading ? (
+            {authLoading ? (
               <div className="w-full px-[17px] py-[23px] flex flex-col gap-[15px] rounded-2xl bg-white shadow-soft">
                 {/* Heading */}
                 <div className="flex items-center gap-[15px]">
@@ -683,7 +673,7 @@ const page = () => {
             )}
 
             {/* R3 */}
-            {loading ? (
+            {authLoading ? (
               <div className="w-full py-[23px] pl-[20px] pr-[53px] flex flex-col gap-3 rounded-2xl bg-white shadow-soft">
                 {/* Heading */}
                 <div className="flex items-center gap-2">
@@ -730,7 +720,7 @@ const page = () => {
         {/* second layer */}
         <div className="rounded-2xl bg-white shadow-soft">
           <div className="border-b border-[#E8F4F4] border-highlights rounded-t-2xl flex overflow-x-auto no-scrollbar md:pl-10">
-            {loading
+            {authLoading
               ? [1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="p-[10px]">
                   <Skeleton className="h-4 w-20 rounded-md" />
@@ -771,7 +761,7 @@ const page = () => {
 
           {/* Dynamic content */}
           <div className="pt-[20px] px-4 xl:pl-[40px] xl:pr-[240px] pb-[36px] flex flex-col gap-2">
-            {loading ? (
+            {authLoading ? (
               <>
                 {/* Paragraph */}
                 <Skeleton className="h-4 w-full rounded-md" />
@@ -897,7 +887,6 @@ const page = () => {
         <GiveTestimonialModal
           open={activeModal}
           onClose={() => setActiveModal(null)}
-          loading={loading}
         />
       )}
       {activeModal === MODALS.QR && (

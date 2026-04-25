@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 import ShieldIcon from "../../../../../public/svgs/home/advisor_card/twemoji_shield.svg";
 import CapsuleIcon from "../../../../../public/svgs/home/advisor_card/bi_capsule.svg";
@@ -29,6 +30,7 @@ const tagConfig = {
 };
 
 export const AdvisorCard = ({
+  id,
   name,
   title,
   location,
@@ -39,20 +41,31 @@ export const AdvisorCard = ({
   recs,
   clients,
   tags,
+  selfie_url,
 }) => {
+  const router = useRouter();
+
   return (
     <div className="bg-white rounded-[32px] p-2 sm:p-2.5 md:p-3 lg:p-2 xl:p-4 shadow-[0_0_4px_0_rgba(0,0,0,0.25)] hover:shadow-[0_0_6px_4px_rgba(255,169,70,0.25)]">
       <div className="bg-white rounded-[inherit] p-5 md:p-3 border-[1.5px] border-[#f59e0b] relative group shadow-sm flex flex-col h-full font-sans">
         <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
           <div className="relative flex-shrink-0">
             <div className=" rounded-full border-[2.5px] border-[#f59e0b] flex items-center justify-center">
-              <div className="w-[59px] h-[59px] sm:w-[64px] sm:h-[64px] md:w-[68px] md:h-[68px] xl:h-[73px] xl:w-[73px] rounded-full bg-[#115e59] text-center text-white font-poppins font-bold text-[12px] sm:text-[13px] md:text-[14px] lg:text-[16px] flex items-center justify-center justify-center">
-                <p className="text-[16px] md:text-[19px] lg:text-[22px]">
-                  {name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </p>
+              <div className="w-[59px] h-[59px] sm:w-[64px] sm:h-[64px] md:w-[68px] md:h-[68px] xl:h-[73px] xl:w-[73px] rounded-full bg-[#115e59] text-center text-white font-poppins font-bold text-[12px] sm:text-[13px] md:text-[14px] lg:text-[16px] flex items-center justify-center justify-center overflow-hidden">
+                {selfie_url ? (
+                  <img
+                    src={selfie_url}
+                    alt={name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <p className="text-[16px] md:text-[19px] lg:text-[22px]">
+                    {name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -286,7 +299,10 @@ export const AdvisorCard = ({
         </div>
 
         {/* Button */}
-        <button className="cursor-pointer font-poppins w-full py-2.5 sm:py-3 text-[13px] sm:text-[14px] md:text-[15px] rounded-full border-[1.5px] border-[#115e59] text-[#115e59] font-extrabold  hover:bg-[#076868] hover:text-[#F59E0B] transition-colors flex items-center justify-center gap-2 mt-auto mb-2">
+        <button
+          className="cursor-pointer font-poppins w-full py-2.5 sm:py-3 text-[13px] sm:text-[14px] md:text-[15px] rounded-full border-[1.5px] border-[#115e59] text-[#115e59] font-extrabold  hover:bg-[#076868] hover:text-[#F59E0B] transition-colors flex items-center justify-center gap-2 mt-auto mb-2"
+          onClick={() => id && router.push(`/dashboard/${id}`)}
+        >
           View Profile
           <svg
             className="w-4 h-4"
