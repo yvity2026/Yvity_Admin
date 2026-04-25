@@ -123,7 +123,7 @@ export default function AppShell({ children }) {
   // const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
-   const router = useRouter();
+  const router = useRouter();
   const headerConfig = {
     "/advisor/dashboard": {
       title: "Dashboard",
