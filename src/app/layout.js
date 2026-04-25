@@ -54,20 +54,16 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <ModalProvider>
             <SidebarProvider>
-              <AppShell>
-                <main className="flex-1 flex flex-col">
-                  <Toaster
-                    position="top-right"
-                    toastOptions={{
-                      duration: 3000,
-                      style: {
-                        zIndex: 99999,
-                      },
-                    }}
-                  />
-                  {children}
-                </main>
-              </AppShell>
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  duration: 3000,
+                  style: {
+                    zIndex: 99999,
+                  },
+                }}
+              />
+              {children}
             </SidebarProvider>
           </ModalProvider>
         </AuthProvider>
