@@ -4,7 +4,12 @@ import { useState, useEffect } from "react";
 const SERVICE_CATEGORIES = ["Life Insurance", "Health Insurance", "Others"];
 const ENTRY_TYPES = ["Education", "Profession", "Certificate"];
 
-export default function EntryFormModal({ isOpen, onClose, initialData, onSubmit }) {
+export default function EntryFormModal({
+  isOpen,
+  onClose,
+  initialData,
+  onSubmit,
+}) {
   const isEditing = !!initialData;
 
   const [formData, setFormData] = useState({
@@ -24,10 +29,14 @@ export default function EntryFormModal({ isOpen, onClose, initialData, onSubmit 
 
   useEffect(() => {
     if (initialData && isOpen) {
-      const mappedEntryType = initialData.entryType === "Certifications" ? "Certificate" : (initialData.entryType || "Education");
+      const mappedEntryType =
+        initialData.entryType === "Certifications"
+          ? "Certificate"
+          : initialData.entryType || "Education";
       const initCategory = initialData.category || "Life Insurance";
       // If initialData.category is not one of our predefined options, treat it as a custom 'Others'
-      const isCustomCat = !SERVICE_CATEGORIES.includes(initCategory) && initCategory !== "";
+      const isCustomCat =
+        !SERVICE_CATEGORIES.includes(initCategory) && initCategory !== "";
 
       setFormData({
         entryType: mappedEntryType,
@@ -37,10 +46,23 @@ export default function EntryFormModal({ isOpen, onClose, initialData, onSubmit 
         institution: initialData.subtitle || "",
         company: initialData.title || "",
         certificateName: initialData.title || "",
-        fromYear: initialData.period ? initialData.period.split(" - ")[0].replace("—", "").trim() : "",
-        toYear: initialData.period && (initialData.period.includes(" - ") || initialData.period.includes(" — ")) ? (initialData.period.split(/ - | — /)[1] || "").replace("PRESENT", "").trim() : "",
-        date: initialData.period ? initialData.period.replace("PRESENT", "").trim() : "",
-        isCurrent: initialData.period ? initialData.period.includes("PRESENT") : false,
+        fromYear: initialData.period
+          ? initialData.period.split(" - ")[0].replace("—", "").trim()
+          : "",
+        toYear:
+          initialData.period &&
+          (initialData.period.includes(" - ") ||
+            initialData.period.includes(" — "))
+            ? (initialData.period.split(/ - | — /)[1] || "")
+                .replace("PRESENT", "")
+                .trim()
+            : "",
+        date: initialData.period
+          ? initialData.period.replace("PRESENT", "").trim()
+          : "",
+        isCurrent: initialData.period
+          ? initialData.period.includes("PRESENT")
+          : false,
         description: initialData.description || "",
       });
     } else if (!isOpen) {
@@ -79,11 +101,50 @@ export default function EntryFormModal({ isOpen, onClose, initialData, onSubmit 
     setFormData((prev) => ({ ...prev, serviceCategory: cat }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (onSubmit) onSubmit(formData);
-    onClose();
-  };
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+
+      const payload = {
+        title:
+          formData.entryType === "Education"
+            ? formData.degree
+            : formData.entryType === "Profession"
+              ? formData.company
+              : formData.certificateName,
+
+        organisation:
+          formData.entryType === "Education"
+            ? formData.institution
+            : formData.serviceCategory === "Others"
+              ? formData.customServiceCategory
+              : formData.serviceCategory,
+
+        description: formData.description,
+        icon: "🏆",
+
+        fromYear:
+          formData.entryType === "Certificate"
+            ? Number(formData.date)
+            : formData.fromYear
+              ? Number(formData.fromYear)
+              : null,
+
+        toYear:
+          formData.entryType === "Certificate"
+            ? null
+            : formData.isCurrent
+              ? null
+              : formData.toYear
+                ? Number(formData.toYear)
+                : null,
+
+        isOngoing: formData.isCurrent,
+      };
+
+      onSubmit?.(payload);
+      onClose();
+    };
 
   return (
     <div className="fixed inset-0 z-200 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
@@ -128,8 +189,18 @@ export default function EntryFormModal({ isOpen, onClose, initialData, onSubmit 
                   ))}
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </div>
               </div>
@@ -261,12 +332,15 @@ export default function EntryFormModal({ isOpen, onClose, initialData, onSubmit 
                     onChange={handleChange}
                     placeholder="2015"
                     className="w-full border border-[#DBE1E0] rounded-xl px-4 py-3 text-[14px] outline-none focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A] transition-all bg-[#FAFCFB]"
-                    required={(isEducation || isProfession)}
+                    required={isEducation || isProfession}
                   />
                 </div>
                 <div className="flex-1">
                   <label className="block text-[14px] font-bold text-[#111827] mb-1.5">
-                    To Year {!formData.isCurrent && <span className="text-red-500">*</span>}
+                    To Year{" "}
+                    {!formData.isCurrent && (
+                      <span className="text-red-500">*</span>
+                    )}
                   </label>
                   <input
                     type="text"
@@ -276,9 +350,13 @@ export default function EntryFormModal({ isOpen, onClose, initialData, onSubmit 
                     placeholder="2020"
                     disabled={formData.isCurrent}
                     className={`w-full border border-[#DBE1E0] rounded-xl px-4 py-3 text-[14px] outline-none transition-all ${
-                      formData.isCurrent ? "bg-gray-50 text-gray-400" : "bg-[#FAFCFB] focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A]"
+                      formData.isCurrent
+                        ? "bg-gray-50 text-gray-400"
+                        : "bg-[#FAFCFB] focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A]"
                     }`}
-                    required={(!formData.isCurrent) && (isEducation || isProfession)}
+                    required={
+                      !formData.isCurrent && (isEducation || isProfession)
+                    }
                   />
                 </div>
               </div>
@@ -313,7 +391,10 @@ export default function EntryFormModal({ isOpen, onClose, initialData, onSubmit 
                   onChange={handleChange}
                   className="w-4 h-4 text-[#0A4A4A] border-[#DBE1E0] rounded focus:ring-[#0A4A4A] cursor-pointer bg-[#FAFCFB]"
                 />
-                <label htmlFor="isCurrent" className="text-[14px] text-[#4B5563] cursor-pointer">
+                <label
+                  htmlFor="isCurrent"
+                  className="text-[14px] text-[#4B5563] cursor-pointer"
+                >
                   Currently working here / Ongoing
                 </label>
               </div>

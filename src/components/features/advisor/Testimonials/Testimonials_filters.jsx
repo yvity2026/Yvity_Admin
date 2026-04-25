@@ -1,4 +1,5 @@
 import { ModalWrapper } from "@/app/components/layout/ModalWrapper";
+import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { AiFillEdit } from "react-icons/ai";
@@ -101,50 +102,56 @@ const Testimonials_filters = ({ showActions = true }) => {
   const [loading, setLoading] = useState(true);
 
   const validateTestimonialAction = (action) => {
-  // Example conditions — adjust based on real logic
-  if (!action) {
-    toast.error("Invalid action");
-    return false;
-  }
+    // Example conditions — adjust based on real logic
+    if (!action) {
+      toast.error("Invalid action");
+      return false;
+    }
 
-  return true;
-};
+    return true;
+  };
 
-const handleApprove = async () => {
-  if (!validateTestimonialAction("approve")) return;
+  const handleApprove = async () => {
+    if (!validateTestimonialAction("approve")) return;
 
-  try {
-    setLoading(true);
-    // await API call
-    await new Promise((res) => setTimeout(res, 1000));
+    try {
+      setLoading(true);
+      // await API call
+      await new Promise((res) => setTimeout(res, 1000));
 
-    toast.success("Approved successfully");
+      toast.success("Approved successfully");
+      setIsTextOpen(false);
+    } catch (err) {
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReject = () => {
+    if (!validateTestimonialAction("reject")) return;
+
+    // API call here
+    toast.success("Testimonial rejected");
     setIsTextOpen(false);
-  } catch (err) {
-    toast.error("Something went wrong");
-  } finally {
-    setLoading(false);
-  }
-};
-
-const handleReject = () => {
-  if (!validateTestimonialAction("reject")) return;
-
-  // API call here
-  toast.success("Testimonial rejected");
-  setIsTextOpen(false);
-};
+  };
 
   useEffect(() => {
-      setLoading(true)
-        const fetchData = async () => {
-          // await your API
-          await new Promise((res) => setTimeout(res, 1500)); // simulate delay
-          setLoading(false);
-        };
-    
-        fetchData();
-      }, []);
+    setLoading(true);
+    const fetchData = async () => {
+      // await your API
+      await new Promise((res) => setTimeout(res, 1500)); // simulate delay
+      setLoading(false);
+    };
+
+    fetchData();
+  }, []);
+
+  const renderStars = (rating = 1) => {
+  const fullStars = Math.floor(rating);
+
+  return "⭐".repeat(fullStars);
+};
   return (
     <>
       {loading ? (
@@ -221,32 +228,87 @@ const handleReject = () => {
 
           {/* CARDS */}
           <div className="flex flex-col gap-4">
-            {/* TEXT CARD */}
-            {(activeFilter === "All" || activeFilter === "Text") && (
+            {testimonials.map((testimonial) => (
               <div className="w-full px-4 sm:px-6 md:px-[50px] py-4 md:py-[19px] flex flex-col gap-[18px] md:gap-[18px] rounded-2xl border-l-4 border-l-[#E2E1DC] hover:border-l-[#0D6060] bg-white transition-all duration-300">
                 <div className="flex flex-col sm:flex-row justify-between gap-3 sm:items-center">
                   <div className="flex gap-[16px] md:gap-[16px] items-center">
-                    <div className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] rounded-full bg-green-950"></div>
+                    <div className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] relative rounded-full bg-green-950">
+                      <Image
+                        src={testimonial?.user?.selfie_url}
+                        fill
+                        alt="user"
+                        className="object-cover"
+                      />
+                    </div>
                     <div className="flex flex-col gap-1">
                       <p className="text-sm sm:text-base font-bold text-[#111827]">
-                        Priya Devi
+                        {testimonial?.user?.name}
                       </p>
                       <p className="text-[10px] sm:text-xs text-[#6B7280]">
-                        Teacher • Hyderabad • 5 days ago
+                        `${testimonial?.user?.name}`
                       </p>
                     </div>
                   </div>
-                  <span className="flex items-center gap-1 text-[#0A4A4A] text-xs rounded-2xl bg-[#E8F4F4] font-semibold p-[10px]">
-                    <AiFillEdit /> Text
-                  </span>
+                  {testimonial.type === "text" && (
+                    <span className="flex items-center gap-1 text-[#0A4A4A] text-xs rounded-2xl bg-[#E8F4F4] font-semibold p-[10px]">
+                      <AiFillEdit /> Text
+                    </span>
+                  )}
+                  {testimonial.type === "audio" && (
+                    <span className="flex items-center gap-1 text-[#0A4A4A] text-xs rounded-2xl bg-[#E8F4F4] font-semibold p-[10px]">
+                      <IoIosMusicalNotes /> Audio
+                    </span>
+                  )}
+                  {testimonial.type === "video" && (
+                    <span className="flex items-center gap-1 text-[#0A4A4A] text-xs rounded-2xl bg-[#FDF8E5] font-semibold p-[10px]">
+                      <RiVideoAiFill /> Video
+                    </span>
+                  )}
                 </div>
 
-                <p className="text-[#374151] text-xs sm:text-sm italic">
-                  "Excellent guidance on health insurance. Highly recommend!"
-                </p>
+                {testimonial.type === "text" && (
+                  <p className="text-[#374151] text-xs sm:text-sm italic">
+                    {testimonial.text}
+                  </p>
+                )}
+                {testimonial.type === "audio" && (
+                  <div className="flex items-center gap-2 rounded-lg bg-[#F0F8F8] px-4 py-2">
+                    <audio
+                      ref={audioRef}
+                      src={testimonial.media_url}
+                      onTimeUpdate={handleTimeUpdate}
+                      onLoadedMetadata={handleLoadedMetadata}
+                      onEnded={() => setIsPlaying(false)}
+                    />
+
+                    <FaPlayCircle
+                      onClick={togglePlay}
+                      className="w-[28px] h-[28px] text-[#0A4A4A] cursor-pointer"
+                    />
+
+                    <div className="flex-1 h-[6px] bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#0A4A4A]"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+
+                    <span className="text-gray-500 font-nunito text-xs font-bold leading-4">
+                      {formatTime(currentTime)} / {formatTime(duration)}
+                    </span>
+                  </div>
+                )}
+                {testimonial.type === "video" && (
+                  <video
+                    className="w-full h-[120px] rounded-md object-cover cursor-pointer"
+                    controls
+                  >
+                    <source src={testimonial.media_url} type="video/mp4" />
+                  </video>
+                )}
 
                 <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
-                  <p>⭐⭐⭐⭐</p>
+                  <p>{renderStars(testimonial.testimonial_rating)}</p>
 
                   <span className="flex gap-2 items-center text-xs text-[#065F46] font-semibold">
                     <MdOutlineVerifiedUser />
@@ -267,10 +329,13 @@ const handleReject = () => {
                   )}
                 </div>
               </div>
-            )}
+            ))}
+            {/* TEXT CARD */}
+            {/* {(activeFilter === "All" || activeFilter === "Text") && (
+            )} */}
 
             {/* AUDIO CARD */}
-            {(activeFilter === "All" || activeFilter === "Audio") && (
+            {/* {(activeFilter === "All" || activeFilter === "Audio") && (
               <div className="w-full px-4 sm:px-6 md:px-[50px] py-4 md:py-[19px] flex flex-col gap-[18px] md:gap-[18px] rounded-2xl border-l-4 border-l-[#E2E1DC] hover:border-l-[#0D6060] bg-white">
                 <div className="flex flex-col sm:flex-row justify-between gap-3 sm:items-center">
                   <div className="flex gap-[16px] md:gap-[16px] items-center">
@@ -284,36 +349,6 @@ const handleReject = () => {
                       </p>
                     </div>
                   </div>
-
-                  <span className="flex items-center gap-1 text-[#0A4A4A] text-xs rounded-2xl bg-[#E8F4F4] font-semibold p-[10px]">
-                    <IoIosMusicalNotes /> Audio
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 rounded-lg bg-[#F0F8F8] px-4 py-2">
-                  <audio
-                    ref={audioRef}
-                    src="/your-audio.mp3"
-                    onTimeUpdate={handleTimeUpdate}
-                    onLoadedMetadata={handleLoadedMetadata}
-                    onEnded={() => setIsPlaying(false)}
-                  />
-
-                  <FaPlayCircle
-                    onClick={togglePlay}
-                    className="w-[28px] h-[28px] text-[#0A4A4A] cursor-pointer"
-                  />
-
-                  <div className="flex-1 h-[6px] bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-[#0A4A4A]"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-
-                  <span className="text-gray-500 font-nunito text-xs font-bold leading-4">
-                    {formatTime(currentTime)} / {formatTime(duration)}
-                  </span>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
@@ -334,10 +369,10 @@ const handleReject = () => {
                   </span>
                 </div>
               </div>
-            )}
+            )} */}
 
             {/* VIDEO CARD */}
-            {(activeFilter === "All" || activeFilter === "Video") && (
+            {/* {(activeFilter === "All" || activeFilter === "Video") && (
               <div className="w-full px-4 sm:px-6 md:px-[50px] py-4 md:py-[19px] flex flex-col gap-[18px] rounded-2xl border-l-4 border-l-[#E2E1DC] hover:border-l-[#0D6060] bg-white">
                 <div className="flex flex-col sm:flex-row justify-between gap-[16px] sm:items-center">
                   <div className="flex gap-3 items-center">
@@ -351,18 +386,7 @@ const handleReject = () => {
                       </p>
                     </div>
                   </div>
-
-                  <span className="flex items-center gap-1 text-[#0A4A4A] text-xs rounded-2xl bg-[#FDF8E5] font-semibold p-[10px]">
-                    <RiVideoAiFill /> Video
-                  </span>
                 </div>
-
-                <video
-                  className="w-full h-[120px] rounded-md object-cover cursor-pointer"
-                  controls
-                >
-                  <source src="/your-video.mp4" type="video/mp4" />
-                </video>
 
                 <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
                   <p>⭐⭐⭐⭐</p>
@@ -384,7 +408,7 @@ const handleReject = () => {
                   )}
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       )}
@@ -432,8 +456,10 @@ const handleReject = () => {
 
               {/* ACTION BUTTONS */}
               <div className="flex flex-col sm:flex-row gap-3 sm:justify-end mt-2">
-                <button className="px-4 py-3 rounded-lg bg-[#FEF2F2] text-[#E85D5D] border border-[#FEB5B5] text-xs font-semibold"
-                onClick={() => handleApprove()}>
+                <button
+                  className="px-4 py-3 rounded-lg bg-[#FEF2F2] text-[#E85D5D] border border-[#FEB5B5] text-xs font-semibold"
+                  onClick={() => handleApprove()}
+                >
                   Approve
                 </button>
 

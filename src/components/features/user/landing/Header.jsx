@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HiOutlineHome } from "react-icons/hi";
 import { FiUser, FiLogOut, FiMenu, FiX } from "react-icons/fi";
 import { IoNotificationsOutline } from "react-icons/io5";
@@ -11,17 +11,22 @@ import Skeleton from "@/app/components/skeleton/Skeleton";
 import { useAuth } from "@/context/AuthUserContext";
 import { RxDashboard } from "react-icons/rx";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const Header = () => {
+  const router = useRouter();
+  const { user, setUser, loading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
+// const [user, setUser] = useState(null);
+const [userLoading, setUserLoading] = useState(true);
+const [userError, setUserError] = useState(null);
 
   const MODALS = {
     PROFILE: "profile",
     FORM: "form",
     SUCCESS: "success",
   };
-  const { user, loading } = useAuth();
   const [profileFormData, setProfileFormData] = useState({});
 
   console.log("sdfghjkhgfdsfghjmk,jhgfds", user);
@@ -33,36 +38,115 @@ const Header = () => {
     }));
   };
 
-  const handleSubmit = async (payload) => {
-    try {
-      const res = await fetch("/api/customer/setprofile", {
+const handleSubmit = async (payload) => {
+  try {
+    toast.loading("Saving profile...", { id: "profile" });
+
+    let certificate_url = payload.certificate_url;
+
+    // 🔥 STEP 1: Upload to S3 if file exists
+    if (payload.certificate_file) {
+      toast.loading("Uploading certificate...", { id: "profile" });
+
+      const formData = new FormData();
+      formData.append("file", payload.certificate_file);
+
+      const res = await fetch("/api/upload-cert", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        console.error(data);
+        toast.error("Certificate upload failed", { id: "profile" });
         return false;
       }
 
-      return true;
-    } catch (err) {
-      console.error(err);
+      certificate_url = data.url;
+
+      toast.success("Certificate uploaded", { id: "profile" });
+    }
+
+    // 🔥 STEP 2: Save profile
+    toast.loading("Saving profile details...", { id: "profile" });
+
+    const res = await fetch("/api/customer/setprofile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...payload,
+        certificate_url,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      toast.error(data?.message || "Failed to save profile", {
+        id: "profile",
+      });
       return false;
+    }
+
+    toast.success("Profile created successfully 🎉", {
+      id: "profile",
+    });
+
+    return true;
+  } catch (err) {
+    console.error(err);
+    toast.error("Something went wrong", { id: "profile" });
+    return false;
+  }
+};
+
+useEffect(() => {
+  const controller = new AbortController();
+
+  const fetchUser = async () => {
+    try {
+      setUserLoading(true);
+      toast.loading("Fetching user...", { id: "user" });
+
+      const res = await fetch("/api/auth/me", {
+        method: "GET",
+        signal: controller.signal,
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result?.message || "Failed to fetch user");
+      }
+
+      // ✅ IMPORTANT: use result.data
+      setUser(result.data);
+
+      toast.success("Welcome back 👋", { id: "user" });
+    } catch (err) {
+      if (err.name === "AbortError") return;
+
+      console.error(err);
+      setUser(null);
+
+      toast.error(err.message || "Auth failed", { id: "user" });
+    } finally {
+      setUserLoading(false);
     }
   };
 
-  const router = useRouter();
+  fetchUser();
+
+  return () => controller.abort();
+}, []);
 
   return (
     <>
       {loading ? (
-        <nav className="bg-white border-b border-gray-200 px-4 md:px-6 lg:px-10 xl:px-[120px] shadow-sm">
+        <nav className="bg-white border-b border-gray-200 px-4 md:px-6 lg:px-10 xl:px-[120px] shadow-sm max-h-[70px]">
           <div className="mx-auto flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center space-x-2">
@@ -128,7 +212,7 @@ const Header = () => {
               {
                 user?.roles?.includes("advisor") ? (
                   <button
-                className="flex items-center gap-2  text-[14px] bg-[#0A4A4A] hover:bg-[#023e3e] leading-[16px] px-4 py-2 rounded-lg font-medium text-white cursor-pointer"
+                className="flex items-center gap-2 bg-[#0A4A4A] hover:bg-[#083c3c] text-white px-4 py-2 rounded-md text-sm font-semibold transition shadow-sm cursor-pointer"
                 onClick={() => router.push("/advisor/dashboard")}
               >
                 {/* <RxDashboard size={20} /> */}

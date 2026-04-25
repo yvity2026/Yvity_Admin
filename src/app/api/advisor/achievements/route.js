@@ -5,7 +5,6 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     const advisor = await ValidateAdvisor();
-
     if (!advisor?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -22,21 +21,29 @@ export async function GET() {
 
     return NextResponse.json({ achievements: data });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error(err);
+    return NextResponse.json({ error: "Fetch failed" }, { status: 500 });
   }
 }
 
-// 🟢 CREATE ACHIEVEMENT
 export async function POST(request) {
   try {
     const advisor = await ValidateAdvisor();
-
     if (!advisor?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
-    const { achievement_type, from_year, to_year, certificate_url } = body;
+
+    const {
+      title,
+      organisation,
+      description,
+      icon,
+      fromYear,
+      toYear,
+      isOngoing,
+    } = body;
 
     const supabase = createAdminClient();
 
@@ -44,10 +51,13 @@ export async function POST(request) {
       .from("advisor_achievements")
       .insert({
         advisor_id: advisor.id,
-        achievement_type,
-        from_year: Number(from_year),
-        to_year : String(to_year),
-        certificate_url,
+        title,
+        organisation,
+        description,
+        icon,
+        from_year: Number(fromYear),
+        to_year: toYear ? Number(toYear) : null,
+        is_ongoing: isOngoing || false,
       })
       .select()
       .single();
@@ -56,6 +66,7 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true, achievement: data });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error(err);
+    return NextResponse.json({ error: "Create failed" }, { status: 500 });
   }
 }
