@@ -17,7 +17,7 @@ export function proxy(request) {
     // !session.expires_at ||
     // new Date(session.expires_at) < new Date()
   ) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/auth/init", request.url));
   }
 
   return NextResponse.next();
