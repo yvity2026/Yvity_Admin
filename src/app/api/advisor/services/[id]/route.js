@@ -40,6 +40,14 @@ export async function PUT(request,  context ) {
 
     if (error) throw error;
 
+    const recalcResult = await supabase.rpc("recalculate_advisor_score", {
+      p_advisor: advisor.id,
+    });
+
+    if (recalcResult.error) {
+      console.error("recalculate_advisor_score failed after service update:", recalcResult.error);
+    }
+
     return NextResponse.json({ success: true, service: data });
   } catch (err) {
     console.log(error)
@@ -69,6 +77,14 @@ export async function DELETE(request, context ) {
       .eq("advisor_id", advisor.id);
 
     if (error) throw error;
+
+    const recalcResult = await supabase.rpc("recalculate_advisor_score", {
+      p_advisor: advisor.id,
+    });
+
+    if (recalcResult.error) {
+      console.error("recalculate_advisor_score failed after service delete:", recalcResult.error);
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

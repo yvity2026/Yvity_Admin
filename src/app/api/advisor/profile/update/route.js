@@ -102,10 +102,45 @@ export async function PATCH(req) {
     const advisor = advisorResult.status === 'fulfilled' ? advisorResult.value.data : null;
     const update = userResult.status === 'fulfilled' ? userResult.value.data : null;
 
+    let score = null;
+    const shouldRefreshScore = Object.prototype.hasOwnProperty.call(
+      advisorProfileUpdates,
+      "intro_url"
+    );
+
+    if (shouldRefreshScore) {
+      const recalculateResult = await supabase.rpc("recalculate_advisor_score", {
+        p_advisor: loggedUser.id,
+      });
+
+      if (recalculateResult.error) {
+        console.error(
+          "recalculate_advisor_score failed after intro_url update:",
+          recalculateResult.error
+        );
+      } else {
+        const { data: scoreRow, error: scoreError } = await supabase
+          .from("advisor_scores")
+          .select("*")
+          .eq("advisor_id", loggedUser.id)
+          .maybeSingle();
+
+        if (scoreError) {
+          console.error(
+            "Failed to fetch advisor_scores after intro_url update:",
+            scoreError
+          );
+        } else {
+          score = scoreRow;
+        }
+      }
+    }
+
     // Return appropriate response based on what was updated
     const updatedFields = {
       ...(Object.keys(userProfileUpdates).length > 0 && { user: update }),
-      ...(Object.keys(advisorProfileUpdates).length > 0 && { advisor })
+      ...(Object.keys(advisorProfileUpdates).length > 0 && { advisor }),
+      ...(score && { score }),
     };
 
     return apiResponse("Profile updated successfully", true, 0, updatedFields);

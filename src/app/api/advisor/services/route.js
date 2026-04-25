@@ -83,6 +83,14 @@ export async function POST(request) {
       );
     }
 
+    const recalcResult = await supabase.rpc("recalculate_advisor_score", {
+      p_advisor: advisor.id,
+    });
+
+    if (recalcResult.error) {
+      console.error("recalculate_advisor_score failed after service create:", recalcResult.error);
+    }
+
     return NextResponse.json({
       success: true,
       service: data,
