@@ -26,7 +26,6 @@ export async function PATCH(req) {
     }
 
     const body = await req.json();
-
     // Define allowed fields - moved outside for better performance
     const USER_PROFILE_FIELDS = new Set([
       "name", "dob", "gender", "city", "email", "mobile"
@@ -34,7 +33,7 @@ export async function PATCH(req) {
     
     const ADVISOR_PROFILE_FIELDS = new Set([
       "ispublic_professional", "ispublic_services", "ispublic_achievements",
-      "ispublic_gallery", "ispublic_testimonials", "ispublic_profile",
+      "ispublic_gallery", "ispublic_testimonials", "ispublic_profile","services"
     ]);
 
     // Extract updates using object destructuring and filtering
