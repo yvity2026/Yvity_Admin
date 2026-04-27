@@ -4,6 +4,17 @@ import { getUser } from "@/lib/auth/Getuser";
 import { apiResponse } from "@/lib/apiResponse";
 import { recordAdvisorLoginActivity } from "@/lib/advisor-score/recordAdvisorLoginActivity";
 
+const validateMobile = (mobile) => {
+  const mobileRegex = /^\d{10}$/; // Regex for exactly 10 digits
+  return mobileRegex.test(mobile);
+};
+
+// Function to validate email format
+const validateEmail = (email) => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; // Simple email regex
+  return emailRegex.test(email);
+};
+
 export async function PATCH(req) {
   try {
     const user = await getUser();
@@ -39,6 +50,8 @@ export async function PATCH(req) {
       "ispublic_gallery", "ispublic_testimonials", "ispublic_profile","services"
     ]);
 
+    
+
     // Extract updates using object destructuring and filtering
     const userProfileUpdates = Object.fromEntries(
       Object.entries(body)
@@ -49,6 +62,15 @@ export async function PATCH(req) {
       Object.entries(body)
         .filter(([key]) => ADVISOR_PROFILE_FIELDS.has(key))
     );
+
+    //validate the user : 
+    if (userProfileUpdates.mobile && !validateMobile(userProfileUpdates.mobile)) {
+      return apiResponse("Invalid mobile number. It must be exactly 10 digits.", false, 4);
+    }
+
+    if (userProfileUpdates.email && !validateEmail(userProfileUpdates.email)) {
+      return apiResponse("Invalid email format.", false, 4);
+    }
 
     if (Object.keys(userProfileUpdates).length === 0 && 
         Object.keys(advisorProfileUpdates).length === 0) {
