@@ -269,7 +269,7 @@ useEffect(() => {
         <div className="flex flex-col h-full">
           {/* Website Logo */}
           <div
-            className="h-[60px] bg-[#FAFAFA]  flex justify-center items-center "
+            className="h-[60px] bg-[#FAFAFA]  flex justify-center items-center cursor-pointer"
             onClick={() => router.push("/dashboard")}
           >
             <Image

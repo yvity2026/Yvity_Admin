@@ -162,7 +162,7 @@ const handleSubmit = () => {
       ...formData,
       file,
     });
-    toast.success("Profile submitted");
+    // toast.success("Profile submitted");
   };
 
 

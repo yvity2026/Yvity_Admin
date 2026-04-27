@@ -282,7 +282,7 @@ function buildPageData({
     remainingClientShares: Math.max(5 - clientShareCount, 0),
     profileStrength: visibilityProfileStrength,
     loginActivity: visibilityLoginActivity,
-    activeDays: Math.max(loginActivity.length, scoreRow?.login_activity_pts ?? 0),
+    activeDays: loginActivity.length,
     profileStrengthChecks,
   };
 
@@ -416,17 +416,27 @@ function buildPageData({
 export async function getAdvisorScorePageData() {
   const sessionUser = await getUser();
 
-  if (!sessionUser?.token) {
+  if (!sessionUser?.userId && !sessionUser?.token) {
     return createEmptyState();
   }
 
   const supabase = createAdminClient();
 
-  const { data: advisor, error: advisorError } = await supabase
+  let advisorQuery = supabase
     .from("users")
-    .select("id,name,roles,mobile_verified,email_verified,selfie_url")
-    .filter("device_tokens", "cs", JSON.stringify([{ token: sessionUser.token }]))
-    .maybeSingle();
+    .select("id,name,roles,mobile_verified,email_verified,selfie_url");
+
+  if (sessionUser?.userId) {
+    advisorQuery = advisorQuery.eq("id", sessionUser.userId);
+  } else {
+    advisorQuery = advisorQuery.filter(
+      "device_tokens",
+      "cs",
+      JSON.stringify([{ token: sessionUser.token }])
+    );
+  }
+
+  const { data: advisor, error: advisorError } = await advisorQuery.maybeSingle();
 
   if (advisorError || !advisor || !advisor.roles?.includes("advisor")) {
     return createEmptyState();
@@ -451,7 +461,7 @@ export async function getAdvisorScorePageData() {
   });
 
   const sinceDate = new Date();
-  sinceDate.setDate(sinceDate.getDate() - 6);
+  sinceDate.setDate(1);
 
   const [
     scoreResult,
