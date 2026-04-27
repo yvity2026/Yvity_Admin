@@ -113,16 +113,8 @@ export default function VisibilitySection({ visibility }) {
       />
       <InfoBox className=" mt-3 mb-7">
         <ul className="text-[clamp(10px,1vw,14px)] text-[#374151] space-y-2.5 font-medium w-full">
-<<<<<<< Anil/TrustSection
-          {visibility.profileStrengthChecks.map((item) => (
-            <li
-              key={item.label}
-              className="flex justify-between items-center pr-1"
-            >
-=======
           {profileStrengthChecks.map((item) => (
             <li key={item.label} className="flex justify-between items-center pr-1">
->>>>>>> main
               <div className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#0A4A4A]" />
                 <span>{item.label}</span>

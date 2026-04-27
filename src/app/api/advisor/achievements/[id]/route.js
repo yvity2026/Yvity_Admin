@@ -35,14 +35,10 @@ export async function PUT(request, context ) {
       organisation,
       description,
       icon,
-<<<<<<< Anil/TrustSection
       achievement_year,
-=======
-      year_of_achievement,
->>>>>>> main
     } = body;
 
-    if (!title || !organisation || !year_of_achievement) {
+    if (!title || !organisation || !achievement_year) {
       return NextResponse.json(
         { error: "Title, organisation, and year are required" },
         { status: 400 }
@@ -58,11 +54,7 @@ export async function PUT(request, context ) {
         organisation,
         description,
         icon,
-<<<<<<< Anil/TrustSection
         achievement_year,
-=======
-        year_of_achievement,
->>>>>>> main
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
