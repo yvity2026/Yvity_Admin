@@ -16,7 +16,7 @@ export default function IdentitySection({ identity }) {
         max={10}
       />
       <ProgressRow
-        label="Mobile Verification"
+        label="Mobile and Email Verification"
         icon="📱"
         score={identity.mobile}
         max={5}

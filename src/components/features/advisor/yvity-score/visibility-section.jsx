@@ -20,7 +20,7 @@ const DEFAULT_PROFILE_STRENGTH_CHECKS = [
 ];
 
 export default function VisibilitySection({ visibility }) {
-  const hasFullActivityScore = visibility.activeDays >= 5;
+  const hasFullActivityScore = visibility.loginActivity >= 5;
   const profileStrengthChecks =
     visibility.profileStrengthChecks?.length > 0
       ? visibility.profileStrengthChecks
@@ -150,7 +150,7 @@ export default function VisibilitySection({ visibility }) {
             </li>
             <li className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-[#0A4A4A]" />
-              <span>Active last {visibility.activeDays} of 7 days</span>
+              <span>Active {visibility.activeDays} day{visibility.activeDays === 1 ? "" : "s"} this month</span>
             </li>
           </ul>
           <div className="text-right text-[13px] font-bold text-[#0A4A4A] flex flex-col gap-1">

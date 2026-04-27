@@ -5,22 +5,33 @@ export async function recordAdvisorLoginActivity(supabase, user) {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  const { error } = await supabase
-    .from("advisor_login_activity")
-    .upsert(
-      {
-        advisor_id: user.id,
-        login_date: today,
-      },
-      {
-        onConflict: "advisor_id,login_date",
-        ignoreDuplicates: true,
-      }
-    );
+  const { error } = await supabase.from("advisor_login_activity").insert({
+    advisor_id: user.id,
+    login_date: today,
+  });
 
-  if (error) {
+  const isDuplicateLogin = error?.code === "23505";
+
+  if (error && !isDuplicateLogin) {
     console.error("Failed to record advisor login activity:", error);
     return;
+  }
+
+  const { error: scoreError } = await supabase.rpc(
+    "increment_advisor_login_score",
+    {
+      p_advisor: user.id,
+      p_login_date: today,
+    }
+  );
+
+  if (scoreError) {
+    console.error("Failed to update advisor login score:", {
+      code: scoreError.code ?? null,
+      message: scoreError.message ?? "Unknown Supabase RPC error",
+      details: scoreError.details ?? null,
+      hint: scoreError.hint ?? null,
+    });
   }
 
   const { error: userError } = await supabase
