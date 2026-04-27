@@ -92,40 +92,9 @@ const Header = () => {
         toast.error("Failed to read certificate file", { id: "profile" });
       };
 
-        toast.success("Certificate uploaded", { id: "profile" });
-      }
-
-      toast.loading("Saving profile details...", { id: "profile" });
-
-      const res = await fetch("/api/customer/setprofile", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...payload,
-          certificate_url,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data?.message || "Failed to save profile", {
-          id: "profile",
-        });
-        return false;
-      }
-
-      toast.success("Profile created successfully", {
-        id: "profile",
-      });
-
-      return true;
-    } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong", { id: "profile" });
-      return false;
+      reader.readAsDataURL(file);
+    } else {
+      await saveProfileData(certificate_url, payload);
     }
 setIsSubmitting(false);
     return true;
@@ -250,7 +219,7 @@ const saveProfileData = async (certificateUrl, payload) => {
                 <span className="font-medium">Home</span>
               </button>
 
-              {user?.roles?.includes("advisor") ? (
+              {user?.roles?.includes("advisor") && advisor?.profile_status ? (
                 <button
                   className="flex items-center gap-2 bg-[#0A4A4A] hover:bg-[#083c3c] text-white px-4 py-2 rounded-md text-sm font-semibold transition shadow-sm cursor-pointer"
                   onClick={() => router.push("/advisor/dashboard")}
