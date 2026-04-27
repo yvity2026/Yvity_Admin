@@ -68,7 +68,6 @@ export default function AchievementFormModal({
     };
 
     try {
-<<<<<<< Anil/TrustSection
       const res = await fetch(
         isEditing
           ? `/api/advisor/achievements/${initialData.id}`
@@ -88,13 +87,6 @@ export default function AchievementFormModal({
 
       await onSubmit?.();
       onClose();
-=======
-      const success = await onSubmit?.(payload, initialData?.id);
-
-      if (success !== false) {
-        onClose();
-      }
->>>>>>> main
     } catch (err) {
       console.error(err);
     }

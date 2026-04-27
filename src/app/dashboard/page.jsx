@@ -2,7 +2,8 @@ import Header from '@/components/features/user/landing/Header'
 import AdvisorSearchFilter from '@/components/features/user/landing/HeroSection'
 import LandingPopup from '@/components/features/user/landing/LandingPopup'
 import SavedProfiles from '@/components/features/user/landing/SavedProfiles'
-import { headers } from 'next/headers';
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "YVITY Dashboard",
