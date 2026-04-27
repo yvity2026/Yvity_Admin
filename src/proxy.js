@@ -7,17 +7,12 @@ export function proxy(request) {
 
   try {
     session = cookie ? JSON.parse(cookie) : null;
-  } catch (err) {
+  } catch {
     session = null;
   }
 
-  if (
-    !session ||
-    !session.token
-    // !session.expires_at ||
-    // new Date(session.expires_at) < new Date()
-  ) {
-    return NextResponse.redirect(new URL("yvity.vercel.app", request.url));
+  if (!session || !session.token) {
+    return NextResponse.redirect(new URL("https://yvity.vercel.app", request.url));
   }
 
   return NextResponse.next();
