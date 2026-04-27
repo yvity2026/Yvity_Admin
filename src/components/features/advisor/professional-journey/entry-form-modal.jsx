@@ -1,8 +1,23 @@
-import { X, Plus } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Plus, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const SERVICE_CATEGORIES = ["Life Insurance", "Health Insurance", "Others"];
 const ENTRY_TYPES = ["Education", "Profession", "Certificate"];
+
+const getDefaultFormData = () => ({
+  entryType: "Education",
+  serviceCategory: "Life Insurance",
+  customServiceCategory: "",
+  degree: "",
+  institution: "",
+  company: "",
+  certificateName: "",
+  fromYear: "",
+  toYear: "",
+  date: "",
+  isCurrent: false,
+  description: "",
+});
 
 export default function EntryFormModal({
   isOpen,
@@ -11,74 +26,50 @@ export default function EntryFormModal({
   onSubmit,
 }) {
   const isEditing = !!initialData;
-
-  const [formData, setFormData] = useState({
-    entryType: "Education",
-    serviceCategory: "Life Insurance",
-    customServiceCategory: "",
-    degree: "",
-    institution: "",
-    company: "",
-    certificateName: "",
-    fromYear: "",
-    toYear: "",
-    date: "",
-    isCurrent: false,
-    description: "",
-  });
+  const [formData, setFormData] = useState(getDefaultFormData());
 
   useEffect(() => {
     if (initialData && isOpen) {
-      const mappedEntryType =
-        initialData.entryType === "Certifications"
-          ? "Certificate"
-          : initialData.entryType || "Education";
-      const initCategory = initialData.category || "Life Insurance";
-      const isCustomCat =
-        !SERVICE_CATEGORIES.includes(initCategory) && initCategory !== "";
+      const mappedEntryType = initialData.entry_type || initialData.entryType || "Education";
+      const initialCategory =
+        initialData.service_category ||
+        initialData.custom_service_category ||
+        "Life Insurance";
+      const isCustomCategory =
+        Boolean(initialData.custom_service_category) ||
+        (initialCategory &&
+          !SERVICE_CATEGORIES.includes(initialCategory) &&
+          initialCategory !== "");
 
       setFormData({
         entryType: mappedEntryType,
-        serviceCategory: isCustomCat ? "Others" : initCategory,
-        customServiceCategory: isCustomCat ? initCategory : "",
-        degree: initialData.title || "",
-        institution: initialData.subtitle || "",
-        company: initialData.title || "",
-        certificateName: initialData.title || "",
-        fromYear: initialData.period
-          ? initialData.period.split(" - ")[0].replace("â€”", "").trim()
+        serviceCategory: mappedEntryType === "Education"
+          ? "Life Insurance"
+          : isCustomCategory
+            ? "Others"
+            : initialData.service_category || "Life Insurance",
+        customServiceCategory: isCustomCategory
+          ? initialData.custom_service_category || initialCategory
           : "",
-        toYear:
-          initialData.period &&
-          (initialData.period.includes(" - ") ||
-            initialData.period.includes(" â€” "))
-            ? (initialData.period.split(/ - | â€” /)[1] || "")
-                .replace("PRESENT", "")
-                .trim()
+        degree:
+          initialData.degree_or_certificate ||
+          (mappedEntryType === "Education" ? initialData.title || "" : ""),
+        institution: initialData.institution || "",
+        company:
+          mappedEntryType === "Profession"
+            ? initialData.organisation || initialData.raw_title || initialData.title || ""
             : "",
-        date: initialData.period
-          ? initialData.period.replace("PRESENT", "").trim()
-          : "",
-        isCurrent: initialData.period
-          ? initialData.period.includes("PRESENT")
-          : false,
+        certificateName:
+          initialData.certificate_name ||
+          (mappedEntryType === "Certificate" ? initialData.title || "" : ""),
+        fromYear: initialData.from_year ? String(initialData.from_year) : "",
+        toYear: initialData.to_year ? String(initialData.to_year) : "",
+        date: initialData.date ? String(initialData.date) : "",
+        isCurrent: Boolean(initialData.is_ongoing),
         description: initialData.description || "",
       });
     } else if (!isOpen) {
-      setFormData({
-        entryType: "Education",
-        serviceCategory: "Life Insurance",
-        customServiceCategory: "",
-        degree: "",
-        institution: "",
-        company: "",
-        certificateName: "",
-        fromYear: "",
-        toYear: "",
-        date: "",
-        isCurrent: false,
-        description: "",
-      });
+      setFormData(getDefaultFormData());
     }
   }, [initialData, isOpen]);
 
@@ -96,63 +87,76 @@ export default function EntryFormModal({
     }));
   };
 
-  const handleCategorySelect = (cat) => {
-    setFormData((prev) => ({ ...prev, serviceCategory: cat }));
+  const handleCategorySelect = (category) => {
+    setFormData((prev) => ({
+      ...prev,
+      serviceCategory: category,
+      customServiceCategory: category === "Others" ? prev.customServiceCategory : "",
+    }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const serviceCategory = !isEducation
+      ? formData.serviceCategory === "Others"
+        ? null
+        : formData.serviceCategory
+      : null;
+    const customServiceCategory =
+      !isEducation && formData.serviceCategory === "Others"
+        ? formData.customServiceCategory.trim()
+        : null;
+    const title = isEducation
+      ? formData.degree.trim()
+      : isProfession
+        ? formData.company.trim()
+        : formData.certificateName.trim();
+    const organisation = isEducation
+      ? formData.institution.trim()
+      : isProfession
+        ? formData.company.trim()
+        : null;
 
     const payload = {
       entry_type: formData.entryType,
-      service_category: isEducation ? null : formData.serviceCategory,
-      custom_service_category:
-        formData.serviceCategory === "Others"
-          ? formData.customServiceCategory
-          : null,
-      title:
-        formData.entryType === "Education"
-          ? formData.degree
-          : formData.entryType === "Profession"
-            ? formData.company
-            : formData.certificateName,
-      organisation: isEducation ? formData.institution : null,
-      description: formData.description,
-      icon: "ðŸ†",
+      service_category: serviceCategory,
+      custom_service_category: customServiceCategory,
+      title,
+      organisation,
+      description: formData.description.trim() || null,
       from_year:
-        formData.entryType === "Certificate"
-          ? null
-          : formData.fromYear
-            ? Number(formData.fromYear)
-            : null,
+        isCertificate || !formData.fromYear ? null : Number(formData.fromYear),
       to_year:
-        formData.entryType === "Certificate"
+        isCertificate || formData.isCurrent || !formData.toYear
           ? null
-          : formData.isCurrent
-            ? null
-            : formData.toYear
-              ? Number(formData.toYear)
-              : null,
-      date:
-        formData.entryType === "Certificate" && formData.date
-          ? Number(formData.date)
-          : null,
-      is_ongoing: formData.isCurrent,
+          : Number(formData.toYear),
+      date: isCertificate && formData.date ? Number(formData.date) : null,
+      is_ongoing: isProfession ? formData.isCurrent : false,
+      degree_or_certificate: isEducation ? formData.degree.trim() : null,
+      institution: isEducation ? formData.institution.trim() : null,
+      certificate_name: isCertificate ? formData.certificateName.trim() : null,
     };
 
-    onSubmit?.(payload);
-    onClose();
+    try {
+      const success = await onSubmit?.(payload, initialData?.id);
+
+      if (success !== false) {
+        onClose();
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
     <div className="fixed inset-0 z-200 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="bg-white rounded-[24px] w-full max-w-[500px] shadow-2xl overflow-hidden flex flex-col">
-        {/* Header */}
         <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center">
             <Plus className="w-5 h-5 text-[#8B5CF6] mr-2 stroke-[3]" />
             <h2 className="text-[18px] font-bold text-[#111827]">
-              {isEditing ? "Edit Career & Education" : "Add Carrer & Education"}
+              {isEditing ? "Edit Career & Education" : "Add Career & Education"}
             </h2>
           </div>
           <button
@@ -164,10 +168,8 @@ export default function EntryFormModal({
           </button>
         </div>
 
-        {/* Form Body */}
         <div className="p-6 overflow-y-auto max-h-[80vh] no-scrollbar">
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Entry Type */}
             <div>
               <label className="block text-[14px] font-bold text-[#111827] mb-1.5">
                 Entry Type <span className="text-red-500">*</span>
@@ -204,7 +206,6 @@ export default function EntryFormModal({
               </div>
             </div>
 
-            {/* Service Category (Hidden if Education) */}
             {!isEducation && (
               <div className="space-y-3">
                 <div>
@@ -212,18 +213,18 @@ export default function EntryFormModal({
                     Service Category <span className="text-red-500">*</span>
                   </label>
                   <div className="flex flex-wrap items-center gap-3">
-                    {SERVICE_CATEGORIES.map((cat) => (
+                    {SERVICE_CATEGORIES.map((category) => (
                       <button
-                        key={cat}
+                        key={category}
                         type="button"
-                        onClick={() => handleCategorySelect(cat)}
+                        onClick={() => handleCategorySelect(category)}
                         className={`px-4 py-2 text-[13px] rounded-lg border transition-all cursor-pointer ${
-                          formData.serviceCategory === cat
+                          formData.serviceCategory === category
                             ? "border-[#0A4A4A] bg-[#FAFCFB] text-[#111827] font-medium shadow-sm"
                             : "border-gray-200 text-gray-600 hover:border-gray-300"
                         }`}
                       >
-                        {cat}
+                        {category}
                       </button>
                     ))}
                   </div>
@@ -238,14 +239,13 @@ export default function EntryFormModal({
                       onChange={handleChange}
                       placeholder="Specify your category"
                       className="w-full border border-[#DBE1E0] rounded-xl px-4 py-3 text-[14px] outline-none focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A] transition-all bg-[#FAFCFB]"
-                      required={formData.serviceCategory === "Others"}
+                      required
                     />
                   </div>
                 )}
               </div>
             )}
 
-            {/* Education Fields */}
             {isEducation && (
               <>
                 <div>
@@ -259,7 +259,7 @@ export default function EntryFormModal({
                     onChange={handleChange}
                     placeholder="e.g. B.com, Licentiate"
                     className="w-full border border-[#DBE1E0] rounded-xl px-4 py-3 text-[14px] outline-none focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A] transition-all bg-[#FAFCFB]"
-                    required={isEducation}
+                    required
                   />
                 </div>
 
@@ -272,15 +272,14 @@ export default function EntryFormModal({
                     name="institution"
                     value={formData.institution}
                     onChange={handleChange}
-                    placeholder="e.g. Nararjuna University"
+                    placeholder="e.g. Nagarjuna University"
                     className="w-full border border-[#DBE1E0] rounded-xl px-4 py-3 text-[14px] outline-none focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A] transition-all bg-[#FAFCFB]"
-                    required={isEducation}
+                    required
                   />
                 </div>
               </>
             )}
 
-            {/* Profession Fields */}
             {isProfession && (
               <div>
                 <label className="block text-[14px] font-bold text-[#111827] mb-1.5">
@@ -293,12 +292,11 @@ export default function EntryFormModal({
                   onChange={handleChange}
                   placeholder="e.g. SBI Life"
                   className="w-full border border-[#DBE1E0] rounded-xl px-4 py-3 text-[14px] outline-none focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A] transition-all bg-[#FAFCFB]"
-                  required={isProfession}
+                  required
                 />
               </div>
             )}
 
-            {/* Certificate Fields */}
             {isCertificate && (
               <div>
                 <label className="block text-[14px] font-bold text-[#111827] mb-1.5">
@@ -309,14 +307,13 @@ export default function EntryFormModal({
                   name="certificateName"
                   value={formData.certificateName}
                   onChange={handleChange}
-                  placeholder="e.g. SBI Life"
+                  placeholder="e.g. IRDAI Certification"
                   className="w-full border border-[#DBE1E0] rounded-xl px-4 py-3 text-[14px] outline-none focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A] transition-all bg-[#FAFCFB]"
-                  required={isCertificate}
+                  required
                 />
               </div>
             )}
 
-            {/* From Year / To Year (For Education and Profession) */}
             {(isEducation || isProfession) && (
               <div className="flex gap-4">
                 <div className="flex-1">
@@ -330,15 +327,12 @@ export default function EntryFormModal({
                     onChange={handleChange}
                     placeholder="2015"
                     className="w-full border border-[#DBE1E0] rounded-xl px-4 py-3 text-[14px] outline-none focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A] transition-all bg-[#FAFCFB]"
-                    required={isEducation || isProfession}
+                    required
                   />
                 </div>
                 <div className="flex-1">
                   <label className="block text-[14px] font-bold text-[#111827] mb-1.5">
-                    To Year{" "}
-                    {!formData.isCurrent && (
-                      <span className="text-red-500">*</span>
-                    )}
+                    To Year {!formData.isCurrent && <span className="text-red-500">*</span>}
                   </label>
                   <input
                     type="text"
@@ -352,15 +346,12 @@ export default function EntryFormModal({
                         ? "bg-gray-50 text-gray-400"
                         : "bg-[#FAFCFB] focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A]"
                     }`}
-                    required={
-                      !formData.isCurrent && (isEducation || isProfession)
-                    }
+                    required={!formData.isCurrent}
                   />
                 </div>
               </div>
             )}
 
-            {/* Date (For Certificate) */}
             {isCertificate && (
               <div>
                 <label className="block text-[14px] font-bold text-[#111827] mb-1.5">
@@ -373,12 +364,11 @@ export default function EntryFormModal({
                   onChange={handleChange}
                   placeholder="2015"
                   className="w-full border border-[#DBE1E0] rounded-xl px-4 py-3 text-[14px] outline-none focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A] transition-all bg-[#FAFCFB]"
-                  required={isCertificate}
+                  required
                 />
               </div>
             )}
 
-            {/* Currently working here / Ongoing (Hidden if Education or Certificate) */}
             {isProfession && (
               <div className="flex items-center gap-2 mt-2">
                 <input
@@ -398,7 +388,6 @@ export default function EntryFormModal({
               </div>
             )}
 
-            {/* Description (Hidden if Education) */}
             {!isEducation && (
               <div>
                 <label className="block text-[14px] font-bold text-[#111827] mb-1.5">
@@ -411,11 +400,10 @@ export default function EntryFormModal({
                   placeholder="Brief description of your role or achievement..."
                   rows={3}
                   className="w-full border border-[#DBE1E0] rounded-xl px-4 py-3 text-[14px] outline-none focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A] transition-all bg-[#FAFCFB] resize-none"
-                ></textarea>
+                />
               </div>
             )}
 
-            {/* Submit Button */}
             <div className="pt-2">
               <button
                 type="submit"

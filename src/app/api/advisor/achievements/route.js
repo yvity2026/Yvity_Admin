@@ -40,10 +40,15 @@ export async function POST(request) {
       organisation,
       description,
       icon,
-      fromYear,
-      toYear,
-      isOngoing,
+      achievement_year,
     } = body;
+
+    if (!title || !organisation || !achievement_year) {
+      return NextResponse.json(
+        { error: "Title, organisation, and year are required" },
+        { status: 400 }
+      );
+    }
 
     const supabase = createAdminClient();
 
@@ -55,9 +60,7 @@ export async function POST(request) {
         organisation,
         description,
         icon,
-        from_year: Number(fromYear),
-        to_year: toYear ? Number(toYear) : null,
-        is_ongoing: isOngoing || false,
+        achievement_year,
       })
       .select()
       .single();
@@ -67,6 +70,9 @@ export async function POST(request) {
     return NextResponse.json({ success: true, achievement: data });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Create failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Create failed" },
+      { status: 500 }
+    );
   }
 }

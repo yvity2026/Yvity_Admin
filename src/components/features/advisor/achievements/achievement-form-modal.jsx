@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const ICONS = [
   { emoji: "🏆", bg: "bg-[#FEF3C7]" },
@@ -7,17 +7,22 @@ const ICONS = [
   { emoji: "🌟", bg: "bg-[#FEF3C7]" },
   { emoji: "📜", bg: "bg-[#F3F4F6]" },
   { emoji: "💎", bg: "bg-[#EFF6FF]" },
-  { emoji: "🎓", bg: "bg-[#F4ECE1]" }
+  { emoji: "🎓", bg: "bg-[#F4ECE1]" },
 ];
 
-export default function AchievementFormModal({ isOpen, onClose, initialData, onSubmit }) {
+export default function AchievementFormModal({
+  isOpen,
+  onClose,
+  initialData,
+  onSubmit,
+}) {
   const isEditing = !!initialData;
   const [formData, setFormData] = useState({
     title: "",
     organisation: "",
     year: "",
     description: "",
-    icon: "🏆"
+    icon: "🏆",
   });
 
   useEffect(() => {
@@ -30,13 +35,12 @@ export default function AchievementFormModal({ isOpen, onClose, initialData, onS
         icon: initialData.icon || "🏆",
       });
     } else if (!isOpen) {
-      // reset form on close
       setFormData({
         title: "",
         organisation: "",
         year: "",
         description: "",
-        icon: "🏆"
+        icon: "🏆",
       });
     }
   }, [initialData, isOpen]);
@@ -45,76 +49,38 @@ export default function AchievementFormModal({ isOpen, onClose, initialData, onS
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleIconSelect = (emoji) => {
-    setFormData(prev => ({ ...prev, icon: emoji }));
+    setFormData((prev) => ({ ...prev, icon: emoji }));
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // parse year input
-  let fromYear = null;
-  let toYear = null;
+    const payload = {
+      title: formData.title.trim(),
+      organisation: formData.organisation.trim(),
+      description: formData.description.trim(),
+      icon: formData.icon,
+      achievement_year: formData.year.trim(),
+    };
 
-  if (formData.year.includes("-")) {
-    const parts = formData.year.split("-").map(v => v.trim());
-    fromYear = Number(parts[0]);
-    toYear = Number(parts[1]);
-  } else {
-    fromYear = Number(formData.year);
-    toYear = fromYear;
-  }
+    try {
+      const success = await onSubmit?.(payload, initialData?.id);
 
-  const payload = {
-    achievement_type: formData.title,
-    organisation: formData.organisation,
-    description: formData.description,
-    icon: formData.icon,
-    from_year: fromYear,
-    to_year: toYear,
+      if (success !== false) {
+        onClose();
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
-
-  try {
-    let res;
-
-    if (isEditing) {
-      // ✅ UPDATE
-      res = await fetch(`/api/advisor/achievements/${initialData.id}`, {
-        method: "PUT", // or PATCH based on your API
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-    } else {
-      // ✅ CREATE
-      res = await fetch(`/api/advisor/achievements`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-    }
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || "Something went wrong");
-    }
-
-    // optional: notify parent
-    onSubmit?.();
-
-    onClose();
-  } catch (err) {
-    console.error(err);
-  }
-};
 
   return (
     <div className="fixed inset-0 z-200 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="bg-white rounded-[24px] w-full max-w-[500px] shadow-2xl overflow-hidden flex flex-col">
-        {/* Header */}
         <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-2xl">🏆</span>
@@ -131,10 +97,8 @@ export default function AchievementFormModal({ isOpen, onClose, initialData, onS
           </button>
         </div>
 
-        {/* Form Body */}
         <div className="p-6 overflow-y-auto max-h-[80vh] no-scrollbar">
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Achievement Title */}
             <div>
               <label className="block text-[14px] font-bold text-[#111827] mb-1.5">
                 Achievement Title <span className="text-red-500">*</span>
@@ -150,7 +114,6 @@ export default function AchievementFormModal({ isOpen, onClose, initialData, onS
               />
             </div>
 
-            {/* Organisation / Issuer */}
             <div>
               <label className="block text-[14px] font-bold text-[#111827] mb-1.5">
                 Organisation / Issuer <span className="text-red-500">*</span>
@@ -166,7 +129,6 @@ export default function AchievementFormModal({ isOpen, onClose, initialData, onS
               />
             </div>
 
-            {/* Year */}
             <div>
               <label className="block text-[14px] font-bold text-[#111827] mb-1.5">
                 Year <span className="text-red-500">*</span>
@@ -182,7 +144,6 @@ export default function AchievementFormModal({ isOpen, onClose, initialData, onS
               />
             </div>
 
-            {/* Description */}
             <div>
               <label className="block text-[14px] font-bold text-[#111827] mb-1.5">
                 Description (optional)
@@ -194,10 +155,9 @@ export default function AchievementFormModal({ isOpen, onClose, initialData, onS
                 placeholder="Brief description of your role or achievement..."
                 rows={3}
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A] transition-all bg-white resize-none"
-              ></textarea>
+              />
             </div>
 
-            {/* Icon / Badge */}
             <div>
               <label className="block text-[14px] font-bold text-[#111827] mb-2">
                 Icon / Badge <span className="text-red-500">*</span>
@@ -220,7 +180,6 @@ export default function AchievementFormModal({ isOpen, onClose, initialData, onS
               </div>
             </div>
 
-            {/* Submit Button */}
             <div className="pt-2">
               <button
                 type="submit"
