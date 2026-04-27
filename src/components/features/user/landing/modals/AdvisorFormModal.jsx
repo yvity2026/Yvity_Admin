@@ -14,6 +14,24 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
     "Mutual Funds",
   ];
 
+  const resetForm = () => {
+    setFormData({
+      services: [],
+      bio: "",
+      certificate_url: "",
+    });
+
+    setServiceData({
+      service: "",
+      company: "",
+      license: "",
+      experience: "",
+    });
+
+    setFile(null);
+    setPreview(null);
+  };
+
   useEffect(() => {
     if (!isOpen) {
       setFormData({
@@ -42,7 +60,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
         bio: form?.bio || "",
       });
 
-      setFile(form?.license_file || null);
+      setFile(form?.certificate_file || null);
     }
   }, [form]);
 
@@ -66,8 +84,8 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
 
   const [formData, setFormData] = useState({
     services: [],
-    certificate_url: "",
     bio: "",
+    certificate_url: "",
   });
 
   const [serviceData, setServiceData] = useState({
@@ -122,34 +140,30 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
     );
   }
 
-const useSounds = () => {
-  const sounds = useRef({});
+  const useSounds = () => {
+    const sounds = useRef({});
 
-  useEffect(() => {
-    sounds.current = {
-      // click: new Audio("/sounds/click.mp3"),
-      success: new Audio("/sounds/success.mp3"),
-      // error: new Audio("/sounds/error.mp3"),
-      // upload: new Audio("/sounds/upload.mp3"),
-      // remove: new Audio("/sounds/remove.mp3"),
+    useEffect(() => {
+      sounds.current = {
+        success: new Audio("/sounds/success.mp3"),
+      };
+    }, []);
+
+    const play = (type) => {
+      const sound = sounds.current[type];
+      if (sound) {
+        sound.currentTime = 0;
+        sound.volume = 0.5; // 
+        sound.play().catch(() => {});
+      }
     };
-  }, []);
 
-  const play = (type) => {
-    const sound = sounds.current[type];
-    if (sound) {
-      sound.currentTime = 0;
-      sound.volume = 0.5; // 🔥 keep it subtle
-      sound.play().catch(() => {});
-    }
+    return { play };
   };
 
-  return { play };
-};
+  const { play } = useSounds();
 
-const { play } = useSounds();
-
-const handleSubmit = () => {
+  const handleSubmit = () => {
     if (!validateForm()) return;
 
     console.log("MODAL DATA:", {
@@ -157,15 +171,21 @@ const handleSubmit = () => {
       file,
     });
 
-    play("success");
+    play('success');
+
+    const cleanServices = formData.services.map(({ id, ...rest }) => rest);
+
     onContinue({
       ...formData,
-      file,
+      services: cleanServices,
+      certificate_file: file,
     });
     // toast.success("Profile submitted");
   };
 
-
+  useEffect(() => {
+    if (!isOpen) resetForm();
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -175,7 +195,10 @@ const handleSubmit = () => {
         {/* Header */}
         <div className="bg-[#0D4D4D] p-6 text-white shrink-0 cursor-pointer">
           <button
-            onClick={onClose}
+            onClick={() => {
+              resetForm();
+              onClose();
+            }}
             className="absolute top-6 right-6 p-2 bg-white/10 rounded-full hover:bg-white/20 cursor-pointer"
           >
             <IoClose size={20} />
@@ -462,7 +485,7 @@ const handleSubmit = () => {
         {/* Footer */}
         <div className="p-6 bg-white shrink-0 border-t">
           <button
-            disabled={!file}
+            disabled={!validateForm}
             className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all
     ${
       file
