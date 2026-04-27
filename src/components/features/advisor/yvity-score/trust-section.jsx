@@ -4,7 +4,9 @@ import { MdVerifiedUser } from "react-icons/md";
 
 export default function TrustSection({ trust }) {
   const achievementLabel = trust.latestAchievement
-    ? `${trust.latestAchievement.type} ${trust.latestAchievement.year}`
+    ? [trust.latestAchievement.type, trust.latestAchievement.year || null]
+        .filter(Boolean)
+        .join(" ")
     : "No achievement added";
 
   return (
@@ -15,7 +17,7 @@ export default function TrustSection({ trust }) {
         score={trust.testimonials}
         max={15}
       />
-      <div className="pl-8 pr-2 mt-3 mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className=" pr-2 mt-3 mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
         <TestimonialBox
           icon="📝"
           title="Text"
@@ -69,7 +71,7 @@ export default function TrustSection({ trust }) {
         score={trust.recommendations}
         max={15}
       />
-      <div className="pl-8 pr-2 mt-2 mb-4">
+      <div className=" pr-2 mt-2 mb-4">
         <InfoBox>
           <div className="flex justify-between items-start text-sm w-full gap-4">
             <ul className="text-[#4B5563] space-y-2 font-medium list-disc ml-4">
@@ -84,7 +86,7 @@ export default function TrustSection({ trust }) {
         </InfoBox>
       </div>
 
-      <div className="pl-8 pr-2 space-y-3 mb-6">
+      <div className=" pr-2 space-y-3 mb-6">
         <div className="bg-[#F2F7F4] border border-[#D1E5D8] rounded-xl p-4">
           <h4 className="text-[clamp(10px,1vw,14px)] font-bold text-[#065F46] flex items-center gap-2 mb-1">
             🌟 Continuity Bonus
@@ -101,16 +103,7 @@ export default function TrustSection({ trust }) {
           </p>
         </div>
 
-        <div className="bg-[#FEF2F2] border border-[#DADEDE] rounded-[16px] p-4">
-          <h4 className="text-[clamp(10px,1vw,14px)] font-bold text-[#C42F2F] flex items-center gap-2 mb-1">
-            ⚠️ Negative Rule
-          </h4>
-          <p className="text-[clamp(10px,1vw,14px)] text-[#374151] font-medium leading-relaxed">
-            If no recommendation is received in a month, 1 point can be lost
-            until activity resumes. Keep collecting recommendations to protect
-            your score.
-          </p>
-        </div>
+        
       </div>
 
       <ProgressRow
@@ -119,7 +112,7 @@ export default function TrustSection({ trust }) {
         score={trust.achievements}
         max={10}
       />
-      <div className="pl-8 pr-2 mt-2">
+      <div className=" pr-2 mt-2">
         <InfoBox>
           <div className="flex justify-between items-center w-full font-medium text-[#374151]">
             <p className="text-[clamp(10px,1vw,14px)]">

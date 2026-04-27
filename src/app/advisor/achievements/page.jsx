@@ -1,64 +1,21 @@
 "use client";
-import { useState, useEffect } from "react";
-import PageHeader from "@/components/features/advisor/achievements/page-header";
+import { useEffect, useState } from "react";
 import InfoBanner from "@/components/features/advisor/achievements/info-banner";
 import AchievementCard from "@/components/features/advisor/achievements/achievement-card";
 import AchievementFormModal from "@/components/features/advisor/achievements/achievement-form-modal";
 import AchievementDeleteModal from "@/components/features/advisor/achievements/achievement-delete-modal";
-import EntryFormModal from "@/components/features/advisor/professional-journey/entry-form-modal";
 import { useModal } from "@/context/ModalContext";
 import toast from "react-hot-toast";
 
-// MOCK DATA: Structured for future backend API integration
 export const achievementsData = [
   {
     id: "ach-1",
     icon: "🏆",
-    iconBg: "bg-[#FEF3C7]", // Light yellow
+    iconBg: "bg-[#FEF3C7]",
     title: "MDRT Qualifier",
     description:
-      "Million Dollar Round Table — Global recognition for top advisors",
+      "Million Dollar Round Table - Global recognition for top advisors",
     highlightText: "2022, 2023, 2024",
-  },
-  {
-    id: "ach-2",
-    icon: "🏵️",
-    iconBg: "bg-[#F3F4F6]", // Light gray
-    title: "Branch Champion",
-    description: "Highest premium collection in Nellore LIC branch",
-    highlightText: "2023",
-  },
-  {
-    id: "ach-3",
-    icon: "🌟",
-    iconBg: "bg-[#FEF3C7]",
-    title: "500+ Clients Served",
-    description: "Successfully secured coverage for 500+ families",
-    highlightText: "2024 milestone",
-  },
-  {
-    id: "ach-4",
-    icon: "📜",
-    iconBg: "bg-[#F3F4F6]",
-    title: "IRDAI Certified",
-    description: "Valid IRDAI license verified by YVITY platform",
-    highlightText: "Active",
-  },
-  {
-    id: "ach-5",
-    icon: "💎",
-    iconBg: "bg-[#EFF6FF]", // Light blue
-    title: "YVITY Founding Advisor",
-    description: "Among first 500 verified advisors on YVITY",
-    highlightText: "2024",
-  },
-  {
-    id: "ach-6",
-    icon: "🎓",
-    iconBg: "bg-[#F4ECE1]", // Light tan/brown
-    title: "Licentiate Cleared",
-    description: "Insurance Institute of India — Professional certification",
-    highlightText: "2015",
   },
 ];
 
@@ -67,23 +24,17 @@ export default function AchievementsPage() {
   const [editingAchievement, setEditingAchievement] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingAchievement, setDeletingAchievement] = useState(null);
-
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const { trigger, clearTrigger } = useModal();
   const [isAcheivementModal, setIsAcheivementModal] = useState(false);
+
   useEffect(() => {
     if (trigger === "ADD_ACHIEVEMENT") {
       setIsAcheivementModal(true);
       clearTrigger();
     }
-  }, [trigger]);
-
-  const handleAddClick = () => {
-    setEditingAchievement(null);
-    setIsModalOpen(true);
-  };
+  }, [trigger, clearTrigger]);
 
   const handleEditClick = (achievement) => {
     setEditingAchievement(achievement);
@@ -105,22 +56,14 @@ export default function AchievementsPage() {
     setDeletingAchievement(null);
   };
 
-  const handleFormSubmit = (data) => {
-    console.log("Form Submitted:", data);
-    // Ready for backend integration
-  };
-
-  //get all the acheivements :
   const fetchAchievements = async () => {
     try {
       setLoading(true);
-
       const res = await fetch("/api/advisor/achievements");
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.error);
-      console.log(achievements);
-      setAchievements(data.achievements);
+      if (!res.ok) throw new Error(data.error || "Failed to fetch achievements");
+      setAchievements(data.achievements || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -132,50 +75,23 @@ export default function AchievementsPage() {
     fetchAchievements();
   }, []);
 
-  const handleEntrySubmit = async (payload) => {
-    const toastId = toast.loading("Creating entry...");
-
-    try {
-      const res = await fetch("/api/advisor/achievements", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to create");
-      }
-
-      toast.success("Entry created successfully 🎉", { id: toastId });
-
-      await fetchAchievements();
-    } catch (err) {
-      console.error(err);
-      toast.error(err.message || "Something went wrong", { id: toastId });
-    }
+  const handleFormSubmit = async () => {
+    await fetchAchievements();
   };
 
   const handleDeleteSubmit = async (achievement) => {
     const toastId = toast.loading("Deleting...");
 
     try {
-      const res = await fetch(
-        `/api/advisor/achievements/${achievement.id}`,
-        {
-          method: "DELETE",
-        },
-      );
+      const res = await fetch(`/api/advisor/achievements/${achievement.id}`, {
+        method: "DELETE",
+      });
 
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error || "Delete failed");
 
       toast.success("Deleted successfully", { id: toastId });
-
       await fetchAchievements();
     } catch (err) {
       console.error(err);
@@ -183,63 +99,44 @@ export default function AchievementsPage() {
     }
   };
 
-  const formatYears = (from, to) => {
-    if (!from && !to) return "";
-
-    if (from && to && from !== to) {
-      const years = [];
-      for (let y = Number(from); y <= Number(to); y++) {
-        years.push(y);
-      }
-      return years.join(", ");
-    }
-
-    return from?.toString() || to?.toString() || "";
-  };
-
   return (
     <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
-      {
-        <EntryFormModal
-          isOpen={isAcheivementModal}
-          onClose={() => setIsAcheivementModal(false)}
-          onSubmit={handleEntrySubmit}
-        />
-      }
+      <AchievementFormModal
+        isOpen={isAcheivementModal}
+        onClose={() => setIsAcheivementModal(false)}
+        onSubmit={handleFormSubmit}
+      />
 
       <div className="p-4 md:p-6 lg:p-10 xl:px-15 space-y-6 mx-auto w-full pb-12">
         <InfoBanner />
 
-        {/* Achievements Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {achievements.map((achievement) => (
-            <AchievementCard
-              key={achievement.id}
-              data={{
-                id: achievement.id,
-                icon: "🏆",
-                iconBg: "bg-[#FEF3C7]",
-                title: achievement.title,
-                description: achievement.description || "Certificate uploaded",
-                highlightText: formatYears(
-                  achievement.from_year,
-                  achievement.to_year,
-                ),
-              }}
-              onEditClick={() =>
-                handleEditClick({
+          {!loading &&
+            achievements.map((achievement) => (
+              <AchievementCard
+                key={achievement.id}
+                data={{
                   id: achievement.id,
-                  title: achievement.title,
-                  organisation: achievement.organisation || "",
-                  year: `${achievement.from_year}, ${achievement.to_year}`,
-                  description: achievement.description || "",
                   icon: achievement.icon || "🏆",
-                })
-              }
-              onDeleteClick={() => handleDeleteClick(achievement)}
-              ShowActions={true}
-            />
-          ))}
+                  iconBg: "bg-[#FEF3C7]",
+                  title: achievement.title,
+                  description: achievement.description || "Certificate uploaded",
+                  highlightText: achievement.achievement_year || "",
+                }}
+                onEditClick={() =>
+                  handleEditClick({
+                    id: achievement.id,
+                    title: achievement.title,
+                    organisation: achievement.organisation || "",
+                    year: achievement.achievement_year || "",
+                    description: achievement.description || "",
+                    icon: achievement.icon || "🏆",
+                  })
+                }
+                onDeleteClick={() => handleDeleteClick(achievement)}
+                ShowActions={true}
+              />
+            ))}
         </div>
       </div>
 
