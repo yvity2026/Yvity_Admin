@@ -16,9 +16,9 @@ const ServiceSection = ({
   return (
     <>
       {loading ? (
-        <div className="w-full rounded-2xl border border-[#E2E1DC] bg-white pb-[38px] shadow-none min-w-[480px] lx:w-full">
+        <div className="w-full rounded-2xl border border-[#E2E1DC] bg-white pb-[38px] shadow-none">
           {/* Header Skeleton */}
-          <div className="h-[60px] px-3 sm:px-4 md:px-[30px] py-3 md:py-[18px] rounded-t-2xl bg-[#2A9D8F] flex justify-between items-center">
+          <div className="max-h-[60px] px-3 sm:px-4 md:px-[30px] py-3 md:py-[18px] rounded-t-2xl bg-[#2A9D8F] flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Skeleton className="h-5 w-5 rounded-full bg-white/40" />
               <Skeleton className="h-4 w-32 bg-white/40 rounded-md" />
@@ -53,17 +53,17 @@ const ServiceSection = ({
             data.map((service) => (
               <div
                 key={service.id}
-                className="w-full rounded-2xl border border-[#E2E1DC] bg-white pb-[38px] shadow-none min-w-[480px] lx:w-full"
+                className="w-full rounded-2xl border border-[#E2E1DC] bg-white pb-4 sm:pb-6 md:pb-[38px] shadow-none lg:min-w-[480px] lg:min-h-[240px] lx:w-full"
               >
                 {/* Header */}
-                <div className="h-[60px] px-3 sm:px-4 md:px-[30px] py-3 md:py-[18px] rounded-t-2xl bg-[#2A9D8F] shadow-[0_0_2px_0_rgba(0,0,0,0.25)] flex justify-between items-center">
-                  <span className="flex items-center gap-2 text-[#F8F6F1] font-[Poppins] text-[16px] font-bold leading-normal">
+                <div className="min-h-[56px] px-3 sm:px-4 lg:px-[30px] py-3 md:py-[18px] rounded-t-2xl bg-[#2A9D8F] shadow-[0_0_2px_0_rgba(0,0,0,0.25)] flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                  <span className="flex items-center gap-2 text-[#F8F6F1] font-[Poppins] text-[clamp(12px,1.5vw,16px)] font-bold leading-normal">
                     <FaShield />
                     {service.service_type}
                   </span>
 
                   {ShowActions && (
-                    <span className="flex flex-wrap gap-2 sm:gap-[11px]">
+                    <span className="flex gap-2 w-full sm:w-auto justify-end">
                       <button
                         className="p-[10px] rounded-[6px] h-[26px] flex items-center border border-[#D5D5D5] bg-white text-[#0A4A4A] font-poppins text-xs font-medium leading-normal cursor-pointer"
                         onClick={() => {
@@ -89,16 +89,16 @@ const ServiceSection = ({
 
                 {/* Body */}
                 <div className="pl-3 sm:pl-4 md:pl-[40px] mt-[16px] flex flex-col gap-2">
-                  <span className="flex gap-2 justify-start items-center rounded-lg bg-[#E0F4F3] w-auto md:w-[116px] min-h-[30px] px-3 py-1 text-green-800 font-poppins text-[11px] sm:text-xs font-semibold ">
+                  <span className="flex gap-2 justify-start items-center rounded-lg bg-[#E0F4F3] w-fit max-w-full min-h-[30px] px-3 py-1 text-green-800 font-poppins text-[clamp(8px,1vw,12px)] sm:text-xs font-semibold ">
                     <HiOutlineBuildingLibrary />
                     {service.company}
                   </span>
 
-                  <p className="text-[#6B7280] font-nunito text-[11px] sm:text-xs font-normal leading-4">
+                  <p className="text-[#6B7280] font-nunito text-[clamp(8px,1vw,12px)] sm:text-xs font-normal leading-4">
                     {service.experience_years} years experience
                   </p>
 
-                  <ul className="flex flex-col gap-2 text-[#374151] font-nunito text-[11px] sm:text-xs font-normal leading-4 list-disc pl-4">
+                  <ul className="flex flex-col gap-2 text-[#374151] font-nunito text-[clamp(8px,1vw,12px)] sm:text-xs font-normal leading-4 list-disc pl-4 sm:pl-5">
                     {service.key_services?.map((item, i) => (
                       <li key={i}>{item}</li>
                     ))}

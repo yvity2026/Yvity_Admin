@@ -40,7 +40,6 @@ import { MdVideoCameraFront } from "react-icons/md";
 import toast from "react-hot-toast";
 import { ChevronDown, ShieldCheck } from "lucide-react";
 import JourneySection from "@/components/features/advisor/professional-journey/journey-section";
-// import { journeyData } from "../professional-journey/page";
 const journeyData = [];
 import AchievementCard from "@/components/features/advisor/achievements/achievement-card";
 import { achievementsData } from "../achievements/page";
@@ -152,12 +151,6 @@ const page = () => {
       label: "Clients",
     },
   ];
-  // const actions = [
-  //   { label: "Recommendations" },
-  //   { label: "Testimonials" },
-  //   { label: "Share" },
-  //   { label: "QR Code" },
-  // ];
 
   const statsData = [
     { label: "Testimonials", value: 12 },

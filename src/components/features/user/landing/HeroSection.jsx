@@ -8,11 +8,13 @@ import {
 import { TbSearchOff } from "react-icons/tb";
 import { AdvisorCard } from "./AdvisorCard";
 import { IoIosArrowRoundForward } from "react-icons/io";
+import { useAuth } from "@/context/AuthUserContext";
 
 const AdvisorSearchFilter = ({ onSearchChange, advisors = [] }) => {
   const [location, setLocation] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
+  const { user, advisor, loading } = useAuth();
 
   const filterTags = [
     "All",
@@ -69,14 +71,14 @@ const AdvisorSearchFilter = ({ onSearchChange, advisors = [] }) => {
     return ["Good night", "🌙"];
   };
 
-  const Wave = getGreeting()
+  const Wave = getGreeting();
   return (
-    <div className="w-full  mx-auto bg-[#0D4D4D] text-white  xl:pt-[66px] overflow-hidden font-poppins">
+    <div className="w-full  mx-auto bg-[#0D4D4D] text-white pt-[66px] overflow-hidden font-poppins">
       {/* 1. HERO SECTION */}
-      <div className=" mx-auto pt-[66px] pb-[39px] px-4 md:px-6 lg:px-10 lg:px-[15px] xl:px-[120px]">
+      <div className=" mx-auto  px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 pb-[39px] ">
         <div className="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700 flex flex-col gap-3">
           <p className="flex items-center gap-2 text-[clamp(12px,1.5vw,16px)] font-normal text-[#B4B1AA]">
-            {Wave[0]}, krishna{" "}
+            {Wave[0]}, {user?.name}{" "}
             <span role="img" aria-label="wave">
               {Wave[1]}
             </span>
@@ -94,30 +96,32 @@ const AdvisorSearchFilter = ({ onSearchChange, advisors = [] }) => {
         {/* 2. SEARCH BAR CONTAINER */}
         <form
           onSubmit={handleSearch}
-          className="bg-white rounded-3xl p-3 xl:px-[47px] xl:py-[22px] shadow-2xl transition-all duration-300 hover:shadow-orange-400/10 border border-white/10 flex flex-col gap-4"
+          className="bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-4 xl:pl-[47px] xl:pr-[53px] xl:py-[22px] shadow-2xl transition-all duration-300 hover:shadow-orange-400/10 border border-white/10 flex flex-col gap-3 sm:gap-4 mb-6"
         >
-          <div className="flex flex-col md:flex-row items-center gap">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 md:gap-0">
             {/* Location Input */}
-            <div className="flex items-center gap-3 flex-1 w-full border-b md:border-b-0 md:border-r border-gray-100 px-4 md:pb-0 py-2 group">
+            <div className="flex items-center gap-3 flex-1 w-full border-b md:border-b-0 md:border-r border-gray-100 px-3 sm:px-4 py-2 group">
               <HiOutlineLocationMarker className="text-gray-400 text-xl shrink-0 group-focus-within:text-orange-400 transition-colors" />
+
               <input
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="City (e.g. Nellore, Hyderabad)"
-                className="w-full outline-none placeholder:text-[#6B7280] font-poppins bg-transparent py-2 text-[#6B7280] font-normal text-[clamp(12px,1.5vw,16px)] leading-[16px] "
+                className="w-full outline-none bg-transparent py-2 text-sm sm:text-base text-[#6B7280] font-poppins"
               />
             </div>
 
             {/* Name/Service Input */}
-            <div className="flex items-center gap-2 flex-1 w-full px-4 py-2 group">
+            <div className="flex items-center gap-3 flex-1 w-full px-3 sm:px-4 py-2 group">
               <HiOutlineSearch className="text-gray-400 text-xl shrink-0 group-focus-within:text-orange-400 transition-colors" />
+
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Name or service..."
-                className="w-full outline-none placeholder:text-gray-400 bg-transparent py-2 text-[#6B7280] font-normal text-[clamp(12px,1.5vw,16px)] leading-[16px]  font-poppins"
+                className="w-full outline-none bg-transparent py-2 text-sm sm:text-base text-[#6B7280] font-poppins"
               />
             </div>
           </div>
@@ -125,24 +129,26 @@ const AdvisorSearchFilter = ({ onSearchChange, advisors = [] }) => {
           {/* Search Button */}
           <button
             type="submit"
-            className="w-full bg-[#0A3D3D] hover:bg-[#1A5D5D] text-white font-bold py-3 pl-[47px] pr-[53px] rounded-2xl flex items-center justify-between transition-all group active:scale-[0.98] cursor-pointer"
+            className="w-full bg-[#0A3D3D] hover:bg-[#1A5D5D] text-white font-bold py-3 sm:py-4 px-5 sm:px-8 rounded-xl sm:rounded-2xl flex items-center justify-between transition-all group active:scale-[0.98] cursor-pointer"
           >
-            <span className="text-lg">Search</span>
+            <span className="text-base sm:text-lg">Search</span>
             <HiOutlineArrowRight className="text-xl group-hover:translate-x-2 transition-transform duration-300" />
           </button>
         </form>
 
         {/* 3. FILTER TAGS */}
-        <div className="flex flex-wrap gap-4 mt-[24px] ">
+        <div className="flex p-1 overflow-x-scroll md:overflow-visible md:p-0 no-scrollbar h-full flex-nowrap md:flex-wrap gap-3 sm:gap-4">
           {filterTags.map((tag) => (
             <button
               key={tag}
               onClick={() => setActiveFilter(tag)}
-              className={`px-[16px] py-[6px] rounded-full border text-sm transition-all duration-300 cursor-pointer ${
-                activeFilter === tag
-                  ? "bg-orange-400 border-orange-400 text-[#0D4D4D] font-bold shadow-lg shadow-orange-400/20"
-                  : "border-gray-500 bg-white/5 hover:bg-white/10 text-gray-200"
-              }`}
+              className={`px-4 py-1.5 rounded-full text-sm transition-all duration-200 cursor-pointer border border-transparent whitespace-nowrap
+        ${
+          activeFilter === tag
+            ? "bg-orange-400 text-[#0D4D4D] shadow-md shadow-orange-400/20 ring-2 ring-orange-300"
+            : "bg-white/5 text-gray-200 border-gray-600 hover:bg-white/10 hover:border-gray-400"
+        }
+      `}
             >
               {tag}
             </button>
@@ -151,11 +157,11 @@ const AdvisorSearchFilter = ({ onSearchChange, advisors = [] }) => {
       </div>
 
       {/* 4. STATS BAR */}
-      <div className="w-full bg-[#083D3D]/60 border-t border-white/5 py-8">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-y-8 md:gap-y-0 text-center md:text-left xl:px-[150px]">
+      <div className="w-full bg-[#083D3D]/60 border-t border-white/5 md:px-[120px]">
+        <div className="mx-auto py-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-y-8 md:gap-y-0 md: md:justify-items-stretch text-center md:text-left xl:px-[150px]">
             <div className="flex flex-col md:flex-row items-center md:items-center gap-2 md:border-r border-white/10 px-4">
-              <span className="text-center font-poppins text-2xl font-bold text-[#F59E0B]">
+              <span className="text-[clamp(18px,3vw,24px)] font-bold text-[#F59E0B] text-center font-poppins">
                 250+
               </span>
               <span className="text-[clamp(10px,1vw,14px)] font-normal text-[#F8F6F1] font-poppins">
@@ -164,7 +170,7 @@ const AdvisorSearchFilter = ({ onSearchChange, advisors = [] }) => {
             </div>
 
             <div className="flex flex-col md:flex-row items-center md:items-center gap-2 md:justify-center md:border-r border-white/10 px-4">
-              <span className="text-center font-poppins text-2xl font-bold text-[#F59E0B]">
+              <span className="text-[clamp(18px,3vw,24px)] font-bold text-[#F59E0B] text-center font-poppins">
                 30+
               </span>
               <span className="text-[clamp(10px,1vw,14px)] font-normal text-[#F8F6F1] font-poppins">
@@ -172,8 +178,8 @@ const AdvisorSearchFilter = ({ onSearchChange, advisors = [] }) => {
               </span>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center md:items-center gap-2 md:justify-end pl-4">
-              <span className="text-center font-poppins text-2xl font-bold text-[#F59E0B]">
+            <div className="flex flex-col md:flex-row items-center md:items-center gap-2 md:justify-end px-4">
+              <span className="text-[clamp(18px,3vw,24px)] font-bold text-[#F59E0B] text-center font-poppins">
                 5,991+
               </span>
               <span className="text-[clamp(10px,1vw,14px)] font-normal text-[#F8F6F1] font-poppins">
@@ -185,20 +191,20 @@ const AdvisorSearchFilter = ({ onSearchChange, advisors = [] }) => {
       </div>
 
       {/* Data Displyed here */}
-      <div className="p-4 md:p-6 lg:p-10 xl:px-[120px] pt-[62px] pb-[54px] flex flex-col gap-10 bg-[#FFFFFF] w-full">
+      <div className="px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 pt-[62px] pb-[54px] flex flex-col gap-10 bg-[#FFFFFF] w-full">
         <span className="flex items-center justify-between">
-          <span className="text-[48px] leading-[50px]  font-bold  font-cormorant text-[#111827] flex itemcen gap-3">
+          <span className="text-[clamp(32px,5vw,48px)] leading-[50px]  font-bold  font-cormorant text-[#111827] flex itemcen gap-3">
             Featured
-            <p className="text-[var(--ct-as-badges-accents,#F59E0B)] italic">
+            <p className="text-[clamp(32px,5vw,48px)] font-bold italic text-[#F59E0B]  font-cormorant">
               Advisors{" "}
             </p>
           </span>
-          <button className="flex gap-[10px] text-[clamp(10px,1vw,14px)] font-normal text-[var(--primary-900,#0A4A4A)] ">
+          <button className="hidden md:flex gap-[10px] text-[clamp(10px,1vw,14px)] font-normal text-[var(--primary-900,#0A4A4A)]">
             View all
             <IoIosArrowRoundForward />
           </button>
         </span>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6 xl:px-16">
           {filteredAdvisors.map((advisor, index) => (
             <AdvisorCard
               key={advisor.id || index}
@@ -216,6 +222,12 @@ const AdvisorSearchFilter = ({ onSearchChange, advisors = [] }) => {
               selfie_url={advisor.selfie_url}
             />
           ))}
+        </div>
+        <div className="flex md:hidden justify-center ">
+          <button className="flex items-center gap-[10px] text-[14px] font-normal bg-[#0A4A4A] text-gray-200 px-6 py-3 rounded-xl">
+            View all
+            <IoIosArrowRoundForward />
+          </button>
         </div>
       </div>
     </div>

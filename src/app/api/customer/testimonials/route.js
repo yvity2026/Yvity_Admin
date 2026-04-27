@@ -6,7 +6,6 @@ export async function POST(req) {
   try {
     const supabase = createAdminClient();
     const body = await req.json();
-
     const {
       advisor_id,
       user_id,

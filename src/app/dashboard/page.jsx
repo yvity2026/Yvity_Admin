@@ -72,7 +72,7 @@ const getAdvisors = async () => {
       return [];
     }
 
-    const res = await fetch(`api/customer/advisor`, {
+    const res = await fetch(`${protocol}://${host}/api/customer/advisor`, {
       method: "GET",
       headers: {
         cookie: cookieStore.toString(),
@@ -81,7 +81,6 @@ const getAdvisors = async () => {
     });
 
     const result = await res.json();
-
     if (!res.ok) {
       return [];
     }

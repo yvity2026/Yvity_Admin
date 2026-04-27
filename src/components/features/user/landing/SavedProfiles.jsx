@@ -6,8 +6,8 @@ const SavedProfiles = ({ savedAdvisors = [] }) => {
   const isEmpty = savedAdvisors.length === 0;
 
   return (
-    <section className="w-full bg-[#F9F8F3] py-16 px-6 min-h-[400px]">
-      <div className="max-w-7xl mx-auto">
+    <section className="w-full bg-[#F9F8F3] py-16 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 min-h-[400px]">
+      <div className="mx-auto">
         
         {/* Title */}
         <h2 className="xl:text-[48px] md:text-4xl font-cormorant text-[#111827] font-bold mb-10 leading-[50px]">
