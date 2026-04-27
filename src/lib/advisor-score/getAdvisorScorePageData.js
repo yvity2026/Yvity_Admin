@@ -45,6 +45,7 @@ function createEmptyState() {
       irda: 0,
       introVideo: 0,
       missingIntroVideoPoints: SCORE_LIMITS.introVideo,
+      irdaPendingVerification: false,
     },
     visibility: {
       total: 0,
@@ -109,6 +110,7 @@ function buildPageData({
   achievements,
   galleryItems,
   shareEvents,
+  profileStats,
   loginActivity,
 }) {
   const approvedTestimonials = testimonials.filter(
@@ -181,21 +183,47 @@ function buildPageData({
     selfie: advisor?.selfie_url ? SCORE_LIMITS.selfie : 0,
     mobile:
       (advisor?.mobile_verified ? 3 : 0) + (advisor?.email_verified ? 2 : 0),
-    irda: profile?.is_verified ? SCORE_LIMITS.irda : 0,
-    introVideo: profile?.intro_url ? SCORE_LIMITS.introVideo : 0,
+    irda: profile?.profile_status ? SCORE_LIMITS.irda : 0,
+    introVideo:
+      typeof profile?.intro_url === "string" && profile.intro_url.trim()
+        ? SCORE_LIMITS.introVideo
+        : 0,
   };
+  const hasIrdaCertificate = Boolean(
+    typeof profile?.iridai_certificate_url === "string"
+      ? profile.iridai_certificate_url.trim()
+      : profile?.iridai_certificate_url
+  );
 
-  const selfShareCount = shareEvents.filter(
+  const rawSelfShareCount = shareEvents.filter(
     (item) => item.share_type === "self"
   ).length;
-  const clientShareCount = shareEvents.filter(
+  const rawClientShareCount = shareEvents.filter(
     (item) => item.share_type === "client"
   ).length;
+  const fallbackClientShareCount = profileStats.filter(
+    (item) => item.stats_type === "share"
+  ).length;
+  const calculatedSelfShareCount = Math.max(
+    rawSelfShareCount,
+    (scoreRow?.self_share_pts ?? 0) * 5
+  );
+  const calculatedClientShareCount = Math.max(
+    rawClientShareCount,
+    fallbackClientShareCount,
+    scoreRow?.client_share_pts ?? 0
+  );
 
   const calculatedVisibility = {
     publicProfile: profile?.ispublic_profile ? SCORE_LIMITS.publicProfile : 0,
-    selfShare: Math.min(Math.floor(selfShareCount / 5), SCORE_LIMITS.selfShare),
-    clientShare: Math.min(clientShareCount, SCORE_LIMITS.clientShare),
+    selfShare: Math.min(
+      Math.floor(calculatedSelfShareCount / 5),
+      SCORE_LIMITS.selfShare
+    ),
+    clientShare: Math.min(
+      calculatedClientShareCount,
+      SCORE_LIMITS.clientShare
+    ),
     profileStrength: profileStrengthChecks.filter((item) => item.complete).length,
     loginActivity: Math.min(loginActivity.length, SCORE_LIMITS.loginActivity),
   };
@@ -210,22 +238,17 @@ function buildPageData({
   };
 
   const identity = {
-    total:
-      scoreRow?.identity_total ??
-      Object.values(calculatedIdentity).reduce((sum, value) => sum + value, 0),
+    total: Object.values(calculatedIdentity).reduce((sum, value) => sum + value, 0),
     max: SCORE_LIMITS.identity,
-    selfie: scoreRow?.selfie_pts ?? calculatedIdentity.selfie,
-    mobile:
-      scoreRow?.mobile_pts !== undefined || scoreRow?.email_pts !== undefined
-        ? (scoreRow?.mobile_pts ?? 0) + (scoreRow?.email_pts ?? 0)
-        : calculatedIdentity.mobile,
-    irda: scoreRow?.irda_pts ?? calculatedIdentity.irda,
-    introVideo: scoreRow?.intro_video_pts ?? calculatedIdentity.introVideo,
+    selfie: calculatedIdentity.selfie,
+    mobile: calculatedIdentity.mobile,
+    irda: calculatedIdentity.irda,
+    introVideo: calculatedIdentity.introVideo,
     missingIntroVideoPoints: Math.max(
-      SCORE_LIMITS.introVideo -
-        (scoreRow?.intro_video_pts ?? calculatedIdentity.introVideo),
+      SCORE_LIMITS.introVideo - calculatedIdentity.introVideo,
       0
     ),
+    irdaPendingVerification: hasIrdaCertificate && !profile?.profile_status,
   };
 
   const visibilityPublicProfile =
@@ -234,16 +257,21 @@ function buildPageData({
     scoreRow?.self_share_pts ?? calculatedVisibility.selfShare;
   const visibilityClientShare =
     scoreRow?.client_share_pts ?? calculatedVisibility.clientShare;
-  const visibilityProfileStrength = calculatedVisibility.profileStrength;
-  const visibilityLoginActivity = calculatedVisibility.loginActivity;
+  const visibilityProfileStrength =
+    scoreRow?.profile_strength_pts ?? calculatedVisibility.profileStrength;
+  const visibilityLoginActivity =
+    scoreRow?.login_activity_pts ?? calculatedVisibility.loginActivity;
+  const selfShareCount = calculatedSelfShareCount;
+  const clientShareCount = calculatedClientShareCount;
 
   const visibility = {
     total:
-      visibilityPublicProfile +
-      visibilitySelfShare +
-      visibilityClientShare +
-      visibilityProfileStrength +
-      visibilityLoginActivity,
+      scoreRow?.visibility_total ??
+      (visibilityPublicProfile +
+        visibilitySelfShare +
+        visibilityClientShare +
+        visibilityProfileStrength +
+        visibilityLoginActivity),
     max: SCORE_LIMITS.visibility,
     publicProfile: visibilityPublicProfile,
     selfShare: visibilitySelfShare,
@@ -254,7 +282,7 @@ function buildPageData({
     remainingClientShares: Math.max(5 - clientShareCount, 0),
     profileStrength: visibilityProfileStrength,
     loginActivity: visibilityLoginActivity,
-    activeDays: loginActivity.length,
+    activeDays: Math.max(loginActivity.length, scoreRow?.login_activity_pts ?? 0),
     profileStrengthChecks,
   };
 
@@ -286,8 +314,7 @@ function buildPageData({
   };
 
   const score = {
-    total:
-      identity.total + visibility.total + trust.total,
+    total: identity.total + visibility.total + trust.total,
     max: SCORE_LIMITS.total,
     identity: identity.total,
     visibility: visibility.total,
@@ -410,17 +437,13 @@ export async function getAdvisorScorePageData() {
   const { data: profile, error: profileError } = await supabase
     .from("advisor_profiles")
     .select(
-      "advisor_id,intro_url,is_verified,ispublic_profile,score_last_recalculated_at"
+      "id,advisor_id,intro_url,iridai_certificate_url,profile_status,ispublic_profile,score_last_recalculated_at"
     )
     .eq("advisor_id", advisor.id)
     .maybeSingle();
 
-  if (profileError || !profile) {
-    return {
-      ...createEmptyState(),
-      isAuthenticated: true,
-      advisor,
-    };
+  if (profileError) {
+    console.error("Failed to fetch advisor profile for score page:", profileError);
   }
 
   await supabase.rpc("recalculate_advisor_score", {
@@ -439,6 +462,7 @@ export async function getAdvisorScorePageData() {
     achievementsResult,
     galleryResult,
     shareEventsResult,
+    profileStatsResult,
     loginActivityResult,
   ] = await Promise.all([
     supabase
@@ -474,6 +498,12 @@ export async function getAdvisorScorePageData() {
       .from("advisor_share_events")
       .select("share_type,created_at")
       .eq("advisor_id", advisor.id),
+    profile?.id
+      ? supabase
+          .from("advisor_profile_stats")
+          .select("stats_type,created_at")
+          .eq("profile_id", profile.id)
+      : Promise.resolve({ data: [], error: null }),
     supabase
       .from("advisor_login_activity")
       .select("login_date")
@@ -492,6 +522,7 @@ export async function getAdvisorScorePageData() {
     achievements: achievementsResult.data ?? [],
     galleryItems: galleryResult.data ?? [],
     shareEvents: shareEventsResult.data ?? [],
+    profileStats: profileStatsResult.data ?? [],
     loginActivity: loginActivityResult.data ?? [],
   });
 }
