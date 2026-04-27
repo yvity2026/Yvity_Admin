@@ -12,20 +12,23 @@ import { useAuth } from "@/context/AuthUserContext";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { AnimatePresence, motion } from "framer-motion";
+import PricingSelectionPlan from "./modals/PricingSelectionPlan";
+import PricingModal from "./modals/PricingSelectionPlan";
 
 const Header = () => {
   const router = useRouter();
   const { user, advisor, loading, setLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
+   const [isSubmitting, setIsSubmitting] = useState(false); 
 
   const MODALS = {
     PROFILE: "profile",
     FORM: "form",
+    PLAN: "plan",
     SUCCESS: "success",
   };
   const [profileFormData, setProfileFormData] = useState({});
-
 
   const updateStep = (data) => {
     setProfileFormData((prev) => ({
@@ -34,68 +37,106 @@ const Header = () => {
     }));
   };
 
-  const handleSubmit = async (payload) => {
-    try {
-      toast.loading("Saving profile...", { id: "profile" });
+  const handleProfileSetupSubmit = async (payload) => {
+  try {
+    toast.loading("Processing profile setup...", { id: "profile" });
+     setIsSubmitting(true);
+    let certificate_url = payload.certificate_url;
 
-      let certificate_url = payload.certificate_url;
+    // Handle certificate file upload if provided
+    if (payload.certificate_file) {
+      toast.loading("Uploading IRDAI certificate...", { id: "profile" });
 
-      if (payload.certificate_file) {
-        toast.loading("Uploading certificate...", { id: "profile" });
+      const file = payload.certificate_file;
+      const reader = new FileReader();
 
-        const formData = new FormData();
-        formData.append("file", payload.certificate_file);
+      reader.onload = async () => {
+        try {
+          // Convert file to base64 for production-safe transmission
+          const base64Data = reader.result.split(',')[1];
+          
+          const certRes = await fetch("/api/customer/upload-cert", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              fileName: file.name,
+              fileType: file.type,
+              fileBuffer: base64Data,
+            }),
+          });
 
-        const res = await fetch("/api/upload-cert", {
-          method: "POST",
-          body: formData,
-        });
+          const certData = await certRes.json();
 
-        const data = await res.json();
+          if (!certRes.ok) {
+            toast.error(certData?.error || "Certificate upload failed", {
+              id: "profile",
+            });
+            setIsSubmitting(false);
+            return false;
+          }
 
-        if (!res.ok) {
-          toast.error("Certificate upload failed", { id: "profile" });
-          return false;
+          certificate_url = certData.url;
+          
+          // Only proceed after successful upload
+          await saveProfileData(certificate_url, payload);
+        } catch (err) {
+          console.error("[CERT_UPLOAD_ERROR]", err.message);
+          toast.error("Certificate processing failed", { id: "profile" });
+          setIsSubmitting(false);
         }
+      };
 
-        certificate_url = data.url;
+      reader.onerror = () => {
+        toast.error("Failed to read certificate file", { id: "profile" });
+      };
 
-        toast.success("Certificate uploaded", { id: "profile" });
-      }
-
-      toast.loading("Saving profile details...", { id: "profile" });
-
-      const res = await fetch("/api/customer/setprofile", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...payload,
-          certificate_url,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data?.message || "Failed to save profile", {
-          id: "profile",
-        });
-        return false;
-      }
-
-      toast.success("Profile created successfully ðŸŽ‰", {
-        id: "profile",
-      });
-
-      return true;
-    } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong", { id: "profile" });
-      return false;
+      reader.readAsDataURL(file);
+    } else {
+      await saveProfileData(certificate_url, payload);
     }
-  };
+setIsSubmitting(false);
+    return true;
+  } catch (err) {
+    console.error("[PROFILE_SETUP_ERROR]", err.message);
+    toast.error("Unexpected error during profile setup", { id: "profile" });
+    setIsSubmitting(false);
+    return false;
+  }
+};
+
+// Extract profile save logic for reusability
+const saveProfileData = async (certificateUrl, payload) => {
+  toast.loading("Saving profile details...", { id: "profile" });
+  const res = await fetch("/api/customer/setprofile", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      advisor_role_id: payload.advisor_role_id, // Use correct field name
+      services: payload.services,
+      certificate_url: certificateUrl,
+      bio: payload.bio,
+    }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    toast.error(data?.message || "Failed to save profile", {
+      id: "profile",
+    });
+    return false;
+  }
+
+  toast.success("Profile created successfully 🎉", {
+    id: "profile",
+  });
+
+  return true;
+};
 
   const [roles, setRoles] = useState([]);
 
@@ -124,7 +165,6 @@ const Header = () => {
 
     fetchRoles();
   }, []);
-  
 
   return (
     <>
@@ -280,7 +320,7 @@ const Header = () => {
           {activeModal === MODALS.PROFILE && (
             <AdvisorProfileModal
               isOpen={true}
-              onClose={() => setActiveModal(null)}
+              onClose={() => !isSubmitting && setActiveModal(null)}
               form={profileFormData}
               onContinue={(selectedRoleId) => {
                 updateStep({ advisor_role_id: selectedRoleId });
@@ -301,6 +341,29 @@ const Header = () => {
                     ...prev,
                     ...formdata,
                   };
+                  handleProfileSetupSubmit(updated).then((success) => {
+                    if (success) {
+                      setActiveModal(MODALS.PLAN);
+                    }
+                  });
+                  return updated;
+                });
+              }}
+              onBack={() => setActiveModal(MODALS.PROFILE)}
+            />
+          )}
+
+          {activeModal === MODALS.PLAN && (
+            <PricingModal
+              isOpen={true}
+              onClose={() => setActiveModal(null)}
+              form={profileFormData}
+              onContinue={async (formdata) => {
+                setProfileFormData((prev) => {
+                  const updated = {
+                    ...prev,
+                    ...formdata,
+                  };
 
                   handleSubmit(updated).then((success) => {
                     if (success) {
@@ -311,7 +374,6 @@ const Header = () => {
                   return updated;
                 });
               }}
-              onBack={() => setActiveModal(MODALS.PROFILE)}
             />
           )}
 
