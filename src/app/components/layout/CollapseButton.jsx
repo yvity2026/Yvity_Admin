@@ -13,8 +13,11 @@ export default function CollapseButton({ sidebarWidth }) {
   return (
     <motion.button
       onClick={toggleCollapse}
-      animate={{ left: sidebarWidth - 20 }}
-      transition={SIDEBAR_TRANSITION}
+      style={{
+    left: `calc((100vw - min(1536px, 100vw)) / 2 + ${sidebarWidth}px)`
+  }}
+      // animate={{ left: sidebarWidth - 20 }}
+      // transition={SIDEBAR_TRANSITION}
       className="
         hidden md:flex
         items-center justify-center
@@ -22,7 +25,7 @@ export default function CollapseButton({ sidebarWidth }) {
         rounded-full
         bg-white
         text-[#0A4A4A]
-        fixed top-1/2 -translate-y-1/2
+        fixed top-1/2 -translate-y-1/2 -translate-x-1/2
         z-200
         shadow-lg
         border border-gray-200
