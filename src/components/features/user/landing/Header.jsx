@@ -26,7 +26,6 @@ const Header = () => {
   };
   const [profileFormData, setProfileFormData] = useState({});
 
-  console.log("sdfghjkhgfdsfghjmk,jhgfds", user);
 
   const updateStep = (data) => {
     setProfileFormData((prev) => ({
