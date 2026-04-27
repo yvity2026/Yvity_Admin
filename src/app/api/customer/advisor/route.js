@@ -38,7 +38,7 @@ const mapAdvisorCard = (user, profile) => {
     short_bio: profile?.short_bio || "",
     intro_url: profile?.intro_url || "",
     services,
-    is_verified: profile?.is_verified || false,
+    is_verified: profile?.profile_status || false,
   };
 };
 
@@ -70,7 +70,7 @@ export async function GET() {
           services,
           short_bio,
           intro_url,
-          is_verified,
+          profile_status,
           ispublic_profile,
           ispublic_professional,
           ispublic_services,

@@ -35,7 +35,7 @@ begin
   where id=p_advisor;
 
   select
-    case when is_verified then 5 else 0 end,
+    case when profile_status then 5 else 0 end,
     case when coalesce(intro_url,'') <> '' then 10 else 0 end
   into v_irda,v_intro
   from public.advisor_profiles

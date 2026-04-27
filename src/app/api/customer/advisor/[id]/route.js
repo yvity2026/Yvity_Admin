@@ -39,7 +39,7 @@ export async function GET(req,  context) {
           services,
           short_bio,
           iridai_certificate_url,
-          is_verified,
+          profile_status,
           created_at,
           updated_at,
           intro_url,
@@ -82,7 +82,10 @@ export async function GET(req,  context) {
         selfie_url: data.selfie_url,
         mobile_verified: data.mobile_verified,
         email_verified: data.email_verified,
-        advisor_profile: profile,
+        advisor_profile: {
+          ...profile,
+          is_verified: profile?.profile_status || false,
+        },
       },
     });
   } catch (error) {

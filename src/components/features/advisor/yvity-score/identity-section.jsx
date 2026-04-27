@@ -34,13 +34,23 @@ export default function IdentitySection({ identity }) {
         max={10}
       />
 
-      {identity.missingIntroVideoPoints > 0 && (
-        <div className="pl-8 pr-2 mt-4">
-          <InfoBox
-            title="Add intro video to earn full points"
-            subtitle="Upload a short intro video on your profile to unlock the remaining identity score."
-            badge={`+${identity.missingIntroVideoPoints} pts available`}
-          />
+      {(identity.missingIntroVideoPoints > 0 || identity.irdaPendingVerification) && (
+        <div className="pl-8 pr-2 mt-4 space-y-3">
+          {identity.missingIntroVideoPoints > 0 && (
+            <InfoBox
+              title="Add intro video to earn full points"
+              subtitle="Upload a short intro video on your profile to unlock the remaining identity score."
+              badge={`+${identity.missingIntroVideoPoints} pts available`}
+            />
+          )}
+
+          {identity.irdaPendingVerification && (
+            <InfoBox
+              title="IRDAI certificate uploaded"
+              subtitle="IRDAI points are added after your license is verified by the YVITY team."
+              badge="Verification pending"
+            />
+          )}
         </div>
       )}
     </SectionWrapper>
