@@ -46,7 +46,7 @@ export default function VisibilitySection({ visibility }) {
         score={visibility.selfShare}
         max={5}
       />
-      <InfoBox className="ml-8 mt-3 mb-7">
+      <InfoBox className="mt-3 mb-7">
         <div className="flex justify-between w-full items-start">
           <div>
             <ul className="text-[clamp(10px,1vw,14px)] text-[#374151] space-y-1.5 font-medium">
@@ -78,7 +78,7 @@ export default function VisibilitySection({ visibility }) {
         score={visibility.clientShare}
         max={5}
       />
-      <InfoBox className="ml-8 mt-3 mb-7">
+      <InfoBox className=" mt-3 mb-7">
         <div className="flex justify-between items-start w-full">
           <div>
             <ul className="text-[clamp(10px,1vw,14px)] text-[#374151] space-y-1.5 font-medium">
@@ -89,7 +89,8 @@ export default function VisibilitySection({ visibility }) {
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#0A4A4A]" />
                 <span>
-                  Current : {visibility.clientShareCount} users shared your profile
+                  Current : {visibility.clientShareCount} users shared your
+                  profile
                 </span>
               </li>
             </ul>
@@ -110,10 +111,18 @@ export default function VisibilitySection({ visibility }) {
         score={visibility.profileStrength}
         max={5}
       />
-      <InfoBox className="ml-8 mt-3 mb-7">
+      <InfoBox className=" mt-3 mb-7">
         <ul className="text-[clamp(10px,1vw,14px)] text-[#374151] space-y-2.5 font-medium w-full">
+<<<<<<< Anil/TrustSection
+          {visibility.profileStrengthChecks.map((item) => (
+            <li
+              key={item.label}
+              className="flex justify-between items-center pr-1"
+            >
+=======
           {profileStrengthChecks.map((item) => (
             <li key={item.label} className="flex justify-between items-center pr-1">
+>>>>>>> main
               <div className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#0A4A4A]" />
                 <span>{item.label}</span>
@@ -137,7 +146,7 @@ export default function VisibilitySection({ visibility }) {
         score={visibility.loginActivity}
         max={5}
       />
-      <InfoBox className="ml-8 mt-3 mb-2">
+      <InfoBox className=" mt-3 mb-2">
         <div className="flex justify-between items-start pr-1 w-full">
           <ul className="text-[clamp(10px,1vw,14px)] text-[#374151] space-y-1.5 font-medium">
             <li className="flex items-center gap-2">
@@ -157,7 +166,8 @@ export default function VisibilitySection({ visibility }) {
             <div>Max : 5 pts</div>
             {hasFullActivityScore ? (
               <div className="flex items-center gap-1.5 justify-end">
-                <ShieldCheck className="w-[18px] h-[18px] text-[#0A7B61]" /> Full score
+                <ShieldCheck className="w-[18px] h-[18px] text-[#0A7B61]" />{" "}
+                Full score
               </div>
             ) : (
               <div />
@@ -165,6 +175,38 @@ export default function VisibilitySection({ visibility }) {
           </div>
         </div>
       </InfoBox>
+      <div className="bg-[#FEF2F2] border border-[#DADEDE] rounded-[16px] p-4 mt-6">
+        <h4 className="text-[clamp(10px,1vw,14px)] font-bold text-[#C42F2F] flex items-center gap-2 mb-3">
+          ⚠️ Negative Rule
+        </h4>
+
+        <ul className="text-[clamp(10px,1vw,14px)] text-[#374151] font-medium leading-relaxed list-disc pl-5 space-y-3">
+          <li>
+            <strong>Profile Views:</strong> Every 5 unique views = 1 pt (Max: 10
+            pts). <br />
+            <span className="text-[#C42F2F]">Decay:</span> 0 views in a month
+            results in -1 pt/month (Max: -10 pts).
+          </li>
+          <li>
+            <strong>Self-Share:</strong> Every 5 shares = 1 pt (Max: 5 pts).{" "}
+            <br />
+            <span className="text-[#C42F2F]">Decay:</span> &lt; 5 shares/month
+            results in -1 pt/month (Max: -5 pts).
+          </li>
+          <li>
+            <strong>Others-Share:</strong> 1 logged-in customer share = 1 pt
+            (Max: 5 pts). <br />
+            <span className="text-[#C42F2F]">Decay:</span> 0 customer
+            shares/month results in -1 pt/month (Max: -5 pts).
+          </li>
+          <li>
+            <strong>Login Activity:</strong> 5 logins in a month = 5 pts (Max: 5
+            pts). <br />
+            <span className="text-[#C42F2F]">Decay:</span> 0 logins in a month
+            results in -1 pt/month (Max: -5 pts).
+          </li>
+        </ul>
+      </div>
     </SectionWrapper>
   );
 }

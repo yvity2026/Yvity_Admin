@@ -83,20 +83,118 @@ function createEmptyState() {
   };
 }
 
-function getAchievementYear(achievement) {
-  return Number(
-    achievement?.achievement_year ??
-      achievement?.to_year ??
-      achievement?.from_year ??
-      0
-  );
+function getAchievementSource(achievement) {
+  return [
+    achievement?.achievement_year,
+    achievement?.title,
+    achievement?.description,
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
-function getAchievementPoints(type) {
+function getAchievementYears(achievement) {
+  const source = getAchievementSource(achievement);
+  const matches = source.match(/\b(19|20)\d{2}\b/g) ?? [];
+  return [...new Set(matches.map(Number))];
+}
+
+function getAchievementYear(achievement) {
+  const years = getAchievementYears(achievement);
+  if (years.length === 0) return 0;
+  return Math.max(...years);
+}
+
+function getAchievementType(achievement) {
+  const source = getAchievementSource(achievement).toUpperCase();
+
+  if (/\bTOT\b/.test(source)) return "TOT";
+  if (/\bCOT\b/.test(source)) return "COT";
+  if (/\bMDRT\b/.test(source)) return "MDRT";
+  return null;
+}
+
+function getAchievementPointsByType(type) {
   if (type === "TOT") return 10;
   if (type === "COT") return 8;
   if (type === "MDRT") return 2;
   return 0;
+}
+
+function getAchievementSummary(achievements) {
+  if (!Array.isArray(achievements) || achievements.length === 0) {
+    return {
+      points: 0,
+      latest: null,
+    };
+  }
+
+  const parsed = achievements
+    .map((achievement) => {
+      const type = getAchievementType(achievement);
+      const years = getAchievementYears(achievement);
+      return {
+        raw: achievement,
+        type,
+        years,
+        latestYear: years.length > 0 ? Math.max(...years) : 0,
+      };
+    })
+    .filter((item) => item.type);
+
+  if (parsed.length === 0) {
+    return {
+      points: 0,
+      latest: null,
+    };
+  }
+
+  const hasTot = parsed.some((item) => item.type === "TOT");
+  const latest = [...parsed].sort((left, right) => {
+    if (right.latestYear !== left.latestYear) {
+      return right.latestYear - left.latestYear;
+    }
+    return (
+      getAchievementPointsByType(right.type) -
+      getAchievementPointsByType(left.type)
+    );
+  })[0];
+
+  if (hasTot) {
+    const latestTot =
+      [...parsed]
+        .filter((item) => item.type === "TOT")
+        .sort((left, right) => right.latestYear - left.latestYear)[0] ?? latest;
+
+    return {
+      points: SCORE_LIMITS.achievements,
+      latest: {
+        type: latestTot.type,
+        year: latestTot.latestYear,
+      },
+    };
+  }
+
+  const uniqueYearTypeKeys = new Set();
+  let points = 0;
+
+  for (const item of parsed) {
+    const years = item.years.length > 0 ? item.years : [0];
+    for (const year of years) {
+      const key = `${item.type}:${year || item.raw?.id}`;
+      if (uniqueYearTypeKeys.has(key)) continue;
+      uniqueYearTypeKeys.add(key);
+      points += getAchievementPointsByType(item.type);
+    }
+  }
+
+  return {
+    points: Math.min(points, SCORE_LIMITS.achievements),
+    latest: {
+      type: latest.type,
+      year: latest.latestYear,
+    },
+  };
 }
 
 function buildPageData({
@@ -148,12 +246,9 @@ function buildPageData({
   );
   const recommendationBonusPoints = recentRecommendationCount > 0 ? 1 : 0;
 
-  const latestAchievement = [...achievements].sort(
-    (left, right) => getAchievementYear(right) - getAchievementYear(left)
-  )[0];
-  const achievementPoints = latestAchievement
-    ? getAchievementPoints(latestAchievement.achievement_type)
-    : 0;
+  const achievementSummary = getAchievementSummary(achievements);
+  const latestAchievement = achievementSummary.latest;
+  const achievementPoints = achievementSummary.points;
   const galleryPhotoCount = galleryItems.length;
 
   const profileStrengthChecks = [
@@ -282,19 +377,20 @@ function buildPageData({
     remainingClientShares: Math.max(5 - clientShareCount, 0),
     profileStrength: visibilityProfileStrength,
     loginActivity: visibilityLoginActivity,
-    activeDays: loginActivity.length,
+    activeDays: Math.max(loginActivity.length, scoreRow?.login_activity_pts ?? 0),
     profileStrengthChecks,
   };
 
   const trust = {
     total:
-      scoreRow?.trust_total ??
-      Object.values(calculatedTrust).reduce((sum, value) => sum + value, 0),
+      (scoreRow?.testimonial_pts ?? calculatedTrust.testimonials) +
+      (scoreRow?.recommendation_pts ?? calculatedTrust.recommendations) +
+      achievementPoints,
     max: SCORE_LIMITS.trust,
     testimonials: scoreRow?.testimonial_pts ?? calculatedTrust.testimonials,
     recommendations:
       scoreRow?.recommendation_pts ?? calculatedTrust.recommendations,
-    achievements: scoreRow?.achievement_pts ?? calculatedTrust.achievements,
+    achievements: achievementPoints,
     testimonialBreakdown: {
       text: { count: textCount, points: textPoints, max: SCORE_LIMITS.textTestimonials },
       audio: { count: audioCount, points: audioPoints, max: SCORE_LIMITS.audioTestimonials },
@@ -306,8 +402,8 @@ function buildPageData({
     hasContinuityBonus: recommendationBonusPoints > 0,
     latestAchievement: latestAchievement
       ? {
-          type: latestAchievement.achievement_type,
-          year: getAchievementYear(latestAchievement),
+          type: latestAchievement.type,
+          year: latestAchievement.year,
           points: achievementPoints,
         }
       : null,

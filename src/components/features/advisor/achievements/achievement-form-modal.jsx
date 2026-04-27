@@ -68,11 +68,33 @@ export default function AchievementFormModal({
     };
 
     try {
+<<<<<<< Anil/TrustSection
+      const res = await fetch(
+        isEditing
+          ? `/api/advisor/achievements/${initialData.id}`
+          : "/api/advisor/achievements",
+        {
+          method: isEditing ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+
+      await onSubmit?.();
+      onClose();
+=======
       const success = await onSubmit?.(payload, initialData?.id);
 
       if (success !== false) {
         onClose();
       }
+>>>>>>> main
     } catch (err) {
       console.error(err);
     }
@@ -123,7 +145,7 @@ export default function AchievementFormModal({
                 name="organisation"
                 value={formData.organisation}
                 onChange={handleChange}
-                placeholder="e.g. MDRT, LIC, YVITY"
+                placeholder="e.g. LIC, YVITY"
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A] transition-all bg-white"
                 required
               />
@@ -131,14 +153,14 @@ export default function AchievementFormModal({
 
             <div>
               <label className="block text-[14px] font-bold text-[#111827] mb-1.5">
-                Year <span className="text-red-500">*</span>
+                Achievement Year <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 name="year"
                 value={formData.year}
                 onChange={handleChange}
-                placeholder="e.g. 2024 or 2022, 2023, 2024"
+                placeholder="e.g. MDRT 2024 or COT 2022, TOT 2023,"
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A] transition-all bg-white"
                 required
               />

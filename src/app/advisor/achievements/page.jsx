@@ -1,12 +1,20 @@
 "use client";
+<<<<<<< Anil/TrustSection
+import { useEffect, useState } from "react";
+import InfoBanner from "@/components/features/advisor/achievements/info-banner";
+=======
 
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
+>>>>>>> main
 import AchievementCard from "@/components/features/advisor/achievements/achievement-card";
 import AchievementDeleteModal from "@/components/features/advisor/achievements/achievement-delete-modal";
+<<<<<<< Anil/TrustSection
+=======
 import AchievementFormModal from "@/components/features/advisor/achievements/achievement-form-modal";
 import InfoBanner from "@/components/features/advisor/achievements/info-banner";
+>>>>>>> main
 import { useModal } from "@/context/ModalContext";
 
 export const achievementsData = [
@@ -19,6 +27,8 @@ export const achievementsData = [
       "Million Dollar Round Table - Global recognition for top advisors",
     highlightText: "2022, 2023, 2024",
   },
+<<<<<<< Anil/TrustSection
+=======
   {
     id: "ach-2",
     icon: "🏵️",
@@ -59,6 +69,7 @@ export const achievementsData = [
     description: "Insurance Institute of India - Professional certification",
     highlightText: "2015",
   },
+>>>>>>> main
 ];
 
 export default function AchievementsPage() {
@@ -68,9 +79,14 @@ export default function AchievementsPage() {
   const [deletingAchievement, setDeletingAchievement] = useState(null);
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(false);
+<<<<<<< Anil/TrustSection
+  const { trigger, clearTrigger } = useModal();
+  const [isAcheivementModal, setIsAcheivementModal] = useState(false);
+=======
   const [isAcheivementModal, setIsAcheivementModal] = useState(false);
 
   const { trigger, clearTrigger } = useModal();
+>>>>>>> main
 
   useEffect(() => {
     if (trigger === "ADD_ACHIEVEMENT") {
@@ -104,6 +120,13 @@ export default function AchievementsPage() {
   const fetchAchievements = async () => {
     try {
       setLoading(true);
+<<<<<<< Anil/TrustSection
+      const res = await fetch("/api/advisor/achievements");
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Failed to fetch achievements");
+      setAchievements(data.achievements || []);
+=======
 
       const res = await fetch("/api/advisor/achievements", {
         cache: "no-store",
@@ -115,6 +138,7 @@ export default function AchievementsPage() {
       }
 
       setAchievements(Array.isArray(data.achievements) ? data.achievements : []);
+>>>>>>> main
     } catch (err) {
       console.error(err);
       toast.error(err.message || "Failed to fetch achievements");
@@ -127,6 +151,10 @@ export default function AchievementsPage() {
     fetchAchievements();
   }, []);
 
+<<<<<<< Anil/TrustSection
+  const handleFormSubmit = async () => {
+    await fetchAchievements();
+=======
   const handleAchievementSubmit = async (payload, achievementId) => {
     const isEditing = Boolean(achievementId);
     const toastId = toast.loading(
@@ -170,6 +198,7 @@ export default function AchievementsPage() {
       toast.error(err.message || "Something went wrong", { id: toastId });
       return false;
     }
+>>>>>>> main
   };
 
   const handleDeleteSubmit = async (achievement) => {
@@ -195,14 +224,22 @@ export default function AchievementsPage() {
     }
   };
 
+<<<<<<< Anil/TrustSection
+=======
   const formatAchievementYear = (value) => value?.toString() || "";
 
+>>>>>>> main
   return (
     <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
       <AchievementFormModal
         isOpen={isAcheivementModal}
+<<<<<<< Anil/TrustSection
+        onClose={() => setIsAcheivementModal(false)}
+        onSubmit={handleFormSubmit}
+=======
         onClose={handleCloseModal}
         onSubmit={handleAchievementSubmit}
+>>>>>>> main
       />
 
       <div className="p-4 md:p-6 lg:p-10 xl:px-15 space-y-6 mx-auto w-full pb-12">
@@ -219,16 +256,24 @@ export default function AchievementsPage() {
                   iconBg: "bg-[#FEF3C7]",
                   title: achievement.title,
                   description: achievement.description || "Certificate uploaded",
+<<<<<<< Anil/TrustSection
+                  highlightText: achievement.achievement_year || "",
+=======
                   highlightText: formatAchievementYear(
                     achievement.year_of_achievement
                   ),
+>>>>>>> main
                 }}
                 onEditClick={() =>
                   handleEditClick({
                     id: achievement.id,
                     title: achievement.title,
                     organisation: achievement.organisation || "",
+<<<<<<< Anil/TrustSection
+                    year: achievement.achievement_year || "",
+=======
                     year: achievement.year_of_achievement || "",
+>>>>>>> main
                     description: achievement.description || "",
                     icon: achievement.icon || "🏆",
                   })

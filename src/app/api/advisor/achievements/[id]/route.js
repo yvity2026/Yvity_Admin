@@ -2,6 +2,19 @@ import { ValidateAdvisor } from "@/lib/auth/ValidateAdvisor";
 import { createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
+async function refreshAdvisorScore(supabase, advisorId) {
+  const recalcResult = await supabase.rpc("recalculate_advisor_score", {
+    p_advisor: advisorId,
+  });
+
+  if (recalcResult.error) {
+    console.error(
+      "recalculate_advisor_score failed after achievement change:",
+      recalcResult.error
+    );
+  }
+}
+
 export async function PUT(request, context ) {
   try {
     const advisor = await ValidateAdvisor();
@@ -22,7 +35,11 @@ export async function PUT(request, context ) {
       organisation,
       description,
       icon,
+<<<<<<< Anil/TrustSection
+      achievement_year,
+=======
       year_of_achievement,
+>>>>>>> main
     } = body;
 
     if (!title || !organisation || !year_of_achievement) {
@@ -41,7 +58,11 @@ export async function PUT(request, context ) {
         organisation,
         description,
         icon,
+<<<<<<< Anil/TrustSection
+        achievement_year,
+=======
         year_of_achievement,
+>>>>>>> main
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
@@ -50,6 +71,8 @@ export async function PUT(request, context ) {
       .single();
 
     if (error) throw error;
+
+    await refreshAdvisorScore(supabase, advisor.id);
 
     return NextResponse.json({ success: true, achievement: data });
   } catch (err) {
@@ -83,6 +106,8 @@ export async function DELETE(request, context) {
       .eq("advisor_id", advisor.id);
 
     if (error) throw error;
+
+    await refreshAdvisorScore(supabase, advisor.id);
 
     return NextResponse.json({ success: true });
   } catch (err) {

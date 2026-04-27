@@ -2,6 +2,19 @@ import { ValidateAdvisor } from "@/lib/auth/ValidateAdvisor";
 import { createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
+async function refreshAdvisorScore(supabase, advisorId) {
+  const recalcResult = await supabase.rpc("recalculate_advisor_score", {
+    p_advisor: advisorId,
+  });
+
+  if (recalcResult.error) {
+    console.error(
+      "recalculate_advisor_score failed after achievement change:",
+      recalcResult.error
+    );
+  }
+}
+
 export async function GET() {
   try {
     const advisor = await ValidateAdvisor();
@@ -66,6 +79,8 @@ export async function POST(request) {
       .single();
 
     if (error) throw error;
+
+    await refreshAdvisorScore(supabase, advisor.id);
 
     return NextResponse.json({ success: true, achievement: data });
   } catch (err) {

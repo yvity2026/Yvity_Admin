@@ -148,37 +148,93 @@ returns int
 language plpgsql
 as $$
 declare
-  v_year int;
+  v_points int := 0;
 begin
-  select max(achievement_year)
-  into v_year
-  from public.advisor_achievements
-  where advisor_id = p_advisor;
-
-  if v_year is null then return 0; end if;
-
   if exists (
-    select 1 from public.advisor_achievements
-    where advisor_id=p_advisor
-    and achievement_year=v_year
-    and achievement_type='TOT'
-  ) then return 10; end if;
+    select 1
+    from public.advisor_achievements
+    where advisor_id = p_advisor
+      and upper(
+        concat_ws(' ',
+          coalesce(title, ''),
+          coalesce(achievement_year, ''),
+          coalesce(description, '')
+        )
+      ) ~ '\mTOT\M'
+  ) then
+    return 10;
+  end if;
 
-  if exists (
-    select 1 from public.advisor_achievements
-    where advisor_id=p_advisor
-    and achievement_year=v_year
-    and achievement_type='COT'
-  ) then return 8; end if;
+  with achievement_rows as (
+    select
+      id,
+      upper(
+        concat_ws(' ',
+          coalesce(title, ''),
+          coalesce(achievement_year, ''),
+          coalesce(description, '')
+        )
+      ) as achievement_text
+    from public.advisor_achievements
+    where advisor_id = p_advisor
+  ),
+  achievement_years as (
+    select distinct
+      ar.id,
+      case
+        when ar.achievement_text ~ '\mCOT\M' then 'COT'
+        when ar.achievement_text ~ '\mMDRT\M' then 'MDRT'
+        else null
+      end as achievement_type,
+      match[1]::int as achievement_year
+    from achievement_rows ar
+    cross join lateral regexp_matches(
+      ar.achievement_text,
+      '((?:19|20)\d{2})',
+      'g'
+    ) as match
+    where ar.achievement_text ~ '\mCOT\M'
+       or ar.achievement_text ~ '\mMDRT\M'
+  ),
+  yearless_achievements as (
+    select
+      ar.id,
+      case
+        when ar.achievement_text ~ '\mCOT\M' then 'COT'
+        when ar.achievement_text ~ '\mMDRT\M' then 'MDRT'
+        else null
+      end as achievement_type
+    from achievement_rows ar
+    where (ar.achievement_text ~ '\mCOT\M' or ar.achievement_text ~ '\mMDRT\M')
+      and not exists (
+        select 1
+        from regexp_matches(ar.achievement_text, '((?:19|20)\d{2})', 'g')
+      )
+  )
+  select least(
+    coalesce(sum(
+      case
+        when achievement_type = 'COT' then 8
+        when achievement_type = 'MDRT' then 2
+        else 0
+      end
+    ), 0),
+    10
+  )
+  into v_points
+  from (
+    select distinct achievement_type, achievement_year::text as dedupe_key
+    from achievement_years
+    where achievement_type is not null
 
-  if exists (
-    select 1 from public.advisor_achievements
-    where advisor_id=p_advisor
-    and achievement_year=v_year
-    and achievement_type='MDRT'
-  ) then return 2; end if;
+    union
 
-  return 0;
+    select distinct achievement_type, id::text as dedupe_key
+    from yearless_achievements
+    where achievement_type is not null
+  ) scored;
+
+  return coalesce(v_points, 0);
 end;
 $$;
 
