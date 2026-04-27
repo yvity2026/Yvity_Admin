@@ -13,6 +13,7 @@ export function proxy(request) {
 
   if (!session || !session.token) {
     return NextResponse.redirect(new URL("https://yvity.vercel.app", request.url));
+    
   }
 
   return NextResponse.next();
