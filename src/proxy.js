@@ -7,22 +7,21 @@ export function proxy(request) {
 
   try {
     session = cookie ? JSON.parse(cookie) : null;
-  } catch (err) {
+  } catch (error) {
     session = null;
   }
 
-  if (
-    !session ||
-    !session.token
-    // !session.expires_at ||
-    // new Date(session.expires_at) < new Date()
-  ) {
-    return NextResponse.redirect(new URL("/", request.url));
+  // If no session or invalid token, redirect to login
+  if (!session || !session.token) {
+    const loginUrl = new URL("https://yvity.vercel.app"); 
+    loginUrl.searchParams.set('redirect', request.url);
+    return NextResponse.redirect(loginUrl);
   }
 
+  // If the session is valid, proceed to the next step
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*"],  // Protect the /dashboard path and its subpaths
 };

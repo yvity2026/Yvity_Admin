@@ -5,19 +5,25 @@ import { createAdminClient } from "@/lib/supabase/server";
 export async function ValidateUser() {
   try {
     const payload = await getUser();
-    console.log(payload?.token);
 
-    if (!payload?.token) {
+    if (!payload?.userId && !payload?.token) {
       return null;
     }
+
     const supabase = createAdminClient();
-    const { data, error } = await supabase
-      .from("users")
-      .select("*")
-      .filter("device_tokens", "cs", JSON.stringify([{ token: payload.token }]))
-      .maybeSingle();
-    console.log("errorrrrr", error);
-    console.log("lklkjlkjlkjkll", data);
+    let query = supabase.from("users").select("*");
+
+    if (payload?.userId) {
+      query = query.eq("id", payload.userId);
+    } else {
+      query = query.filter(
+        "device_tokens",
+        "cs",
+        JSON.stringify([{ token: payload.token }])
+      );
+    }
+
+    const { data, error } = await query.maybeSingle();
 
     if (error || !data) {
       return null;

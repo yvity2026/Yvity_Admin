@@ -5,6 +5,8 @@ import TrustSection from "@/components/features/advisor/yvity-score/trust-sectio
 import VisibilitySection from "@/components/features/advisor/yvity-score/visibility-section";
 import { getAdvisorScorePageData } from "@/lib/advisor-score/getAdvisorScorePageData";
 
+export const dynamic = "force-dynamic";
+
 export default async function YvityScorePage() {
   const scoreData = await getAdvisorScorePageData();
 

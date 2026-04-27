@@ -56,6 +56,13 @@ export async function POST(request) {
       achievement_year,
     } = body;
 
+    if (!title || !organisation || !achievement_year) {
+      return NextResponse.json(
+        { error: "Title, organisation, and year are required" },
+        { status: 400 }
+      );
+    }
+
     const supabase = createAdminClient();
 
     const { data, error } = await supabase
@@ -78,6 +85,9 @@ export async function POST(request) {
     return NextResponse.json({ success: true, achievement: data });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Create failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Create failed" },
+      { status: 500 }
+    );
   }
 }

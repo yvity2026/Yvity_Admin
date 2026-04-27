@@ -1,9 +1,8 @@
-import Header from "@/components/features/user/landing/Header";
-import AdvisorSearchFilter from "@/components/features/user/landing/HeroSection";
-import LandingPopup from "@/components/features/user/landing/LandingPopup";
-import SavedProfiles from "@/components/features/user/landing/SavedProfiles";
-import { headers, cookies } from "next/headers";
-import React from "react";
+import Header from '@/components/features/user/landing/Header'
+import AdvisorSearchFilter from '@/components/features/user/landing/HeroSection'
+import LandingPopup from '@/components/features/user/landing/LandingPopup'
+import SavedProfiles from '@/components/features/user/landing/SavedProfiles'
+import { headers } from 'next/headers';
 
 export const metadata = {
   title: "YVITY Dashboard",
@@ -44,7 +43,6 @@ const getTagsFromAdvisor = (advisor) => {
 
 const normalizeAdvisor = (advisor, index) => {
   const tags = getTagsFromAdvisor(advisor);
-
   return {
     id: advisor?.id || `advisor-${index}`,
     name: advisor?.name || "Advisor",
@@ -63,20 +61,8 @@ const normalizeAdvisor = (advisor, index) => {
 
 const getAdvisors = async () => {
   try {
-    const headerStore = await headers();
-    const cookieStore = await cookies();
-    const host = headerStore.get("host") || "localhost:3001"
-    const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-
-    if (!host) {
-      return [];
-    }
-
-    const res = await fetch(`api/customer/advisor`, {
+    const res = await fetch("/api/customer/advisor", {
       method: "GET",
-      headers: {
-        cookie: cookieStore.toString(),
-      },
       cache: "no-store",
     });
 
@@ -87,6 +73,7 @@ const getAdvisors = async () => {
     }
 
     const advisors = Array.isArray(result?.data) ? result.data : [];
+
     return advisors.map(normalizeAdvisor);
   } catch (error) {
     console.error("Dashboard advisor fetch failed:", error);
@@ -96,15 +83,14 @@ const getAdvisors = async () => {
 
 const page = async () => {
   const advisors = await getAdvisors();
-
   return (
     <>
-      <Header />
-      <LandingPopup />
-      <AdvisorSearchFilter advisors={advisors} />
-      <SavedProfiles />
+    <Header />
+    <LandingPopup />
+    <AdvisorSearchFilter advisors={advisors} />
+    <SavedProfiles />
     </>
-  );
-};
+  )
+}
 
-export default page;
+export default page

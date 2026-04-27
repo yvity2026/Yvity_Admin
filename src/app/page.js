@@ -16,7 +16,7 @@ export default function Home() {
   //     setLoading(false);
   //   }
   // }, [user, router]);
-
+{/* <PricingSelectionPlan /> */}
   // if (loading) return <div>Loading...</div>;
 
   // return <div>Landing Page</div>;

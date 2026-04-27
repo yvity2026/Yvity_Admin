@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IoClose, IoChevronDown, IoCloudUploadOutline } from "react-icons/io5";
 import { HiOutlineArrowLeft, HiOutlineArrowRight } from "react-icons/hi";
 import { LuPlus } from "react-icons/lu";
@@ -13,6 +13,24 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
     "General Insurance",
     "Mutual Funds",
   ];
+
+  const resetForm = () => {
+    setFormData({
+      services: [],
+      bio: "",
+      certificate_url: "",
+    });
+
+    setServiceData({
+      service: "",
+      company: "",
+      license: "",
+      experience: "",
+    });
+
+    setFile(null);
+    setPreview(null);
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -42,7 +60,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
         bio: form?.bio || "",
       });
 
-      setFile(form?.license_file || null);
+      setFile(form?.certificate_file || null);
     }
   }, [form]);
 
@@ -66,8 +84,8 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
 
   const [formData, setFormData] = useState({
     services: [],
-    certificate_url: "",
     bio: "",
+    certificate_url: "",
   });
 
   const [serviceData, setServiceData] = useState({
@@ -76,21 +94,6 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
     license: "",
     experience: "",
   });
-
-  const handleSubmit = () => {
-    if (!validateForm()) return;
-
-    console.log("MODAL DATA:", {
-      ...formData,
-      file,
-    });
-
-    onContinue({
-      ...formData,
-      file,
-    });
-    toast.success("Profile submitted");
-  };
 
   // Filter dropdown to hide already added services
   const availableServices = initialServices.filter(
@@ -136,6 +139,54 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
       <p className="text-red-500 text-xs mt-1">{errors.service}</p>
     );
   }
+
+  const useSounds = () => {
+    const sounds = useRef({});
+
+    useEffect(() => {
+      sounds.current = {
+        success: new Audio("/sounds/success.mp3"),
+      };
+    }, []);
+
+    const play = (type) => {
+      const sound = sounds.current[type];
+      if (sound) {
+        sound.currentTime = 0;
+        sound.volume = 0.5; // 
+        sound.play().catch(() => {});
+      }
+    };
+
+    return { play };
+  };
+
+  const { play } = useSounds();
+
+  const handleSubmit = () => {
+    if (!validateForm()) return;
+
+    console.log("MODAL DATA:", {
+      ...formData,
+      file,
+    });
+
+    play('success');
+
+    const cleanServices = formData.services.map(({ id, ...rest }) => rest);
+
+    onContinue({
+      ...formData,
+      services: cleanServices,
+      certificate_file: file,
+    });
+    // toast.success("Profile submitted");
+  };
+
+  useEffect(() => {
+    if (!isOpen) resetForm();
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -144,7 +195,10 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
         {/* Header */}
         <div className="bg-[#0D4D4D] p-6 text-white shrink-0 cursor-pointer">
           <button
-            onClick={onClose}
+            onClick={() => {
+              resetForm();
+              onClose();
+            }}
             className="absolute top-6 right-6 p-2 bg-white/10 rounded-full hover:bg-white/20 cursor-pointer"
           >
             <IoClose size={20} />
@@ -255,21 +309,29 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                 </select>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-1">
                   <label className="text-sm font-bold text-gray-700">
                     IRDAI License No.
                   </label>
                   <input
                     value={serviceData.license}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, "");
                       setServiceData({
                         ...serviceData,
-                        license: e.target.value,
-                      })
-                    }
+                        license: value,
+                      });
+                    }}
+                    onKeyPress={(e) => {
+                      if (!/[0-9]/.test(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
                     type="text"
                     placeholder="e.g. 1234567"
+                    inputMode="numeric"
+                    maxLength="7"
                     className="w-full p-3 rounded-xl border bg-white border-gray-200"
                   />
                 </div>
@@ -287,15 +349,16 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                     }
                     type="text"
                     className="w-full p-3 rounded-xl border border-gray-200 bg-white"
+                    inputMode="numeric"
                     placeholder="e.g. 1"
                   />
                 </div>
               </div>
             </div>
-            <p className="text-[#374151] text-[16px] font-medium font-poppins leading-normal">
+            <p className="text-[#374151] text-base sm:text-[16px] font-medium font-poppins leading-normal">
               Upload IRDAI Certificate
             </p>
-            <div className="px-5 pt-[29px] pb-[23px] flex flex-col gap-4 rounded-lg border border-[#E6E6E6] bg-[#F8F6F1]">
+            <div className="px-3 sm:px-5 pt-6 sm:pt-[29px] pb-6 sm:pb-[23px] flex flex-col gap-4 rounded-lg border border-[#E6E6E6] bg-[#F8F6F1]">
               <p className="text-[#6B7280] text-[12px] font-normal font-poppins leading-[20px]">
                 Upload a single screenshot or image of your IRDAI license. It
                 should show all your registered companies and details.
@@ -308,22 +371,27 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
 
               {/* Upload Box */}
               <div
-                className="border-2 border-dashed border-gray-300 rounded-2xl p-8 bg-white flex flex-col items-center justify-center text-center cursor-pointer"
+                className={`border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition
+  ${file ? "border-green-400 bg-green-50" : "border-gray-300 bg-white"}`}
                 onClick={() => document.getElementById("fileUpload").click()}
               >
                 <input
                   type="file"
-                  accept="image/png, image/jpeg"
-                  className="hidden"
                   id="fileUpload"
+                  className="hidden"
+                  accept=".png,.jpg,.jpeg,.pdf"
                   onChange={(e) => {
                     const selectedFile = e.target.files[0];
                     if (!selectedFile) return;
 
-                    const validTypes = ["image/jpeg", "image/png"];
+                    const validTypes = [
+                      "image/jpeg",
+                      "image/png",
+                      "application/pdf",
+                    ];
 
                     if (!validTypes.includes(selectedFile.type)) {
-                      toast.error("Only JPG and PNG files are allowed");
+                      toast.error("Only JPG, PNG, or PDF files are allowed");
                       return;
                     }
 
@@ -334,41 +402,49 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
 
                     setFile(selectedFile);
 
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setPreview(reader.result);
-                    };
-                    reader.readAsDataURL(selectedFile);
+                    // Preview only for images
+                    if (selectedFile.type.startsWith("image/")) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setPreview(reader.result);
+                      };
+                      reader.readAsDataURL(selectedFile);
+                    } else {
+                      setPreview(null);
+                    }
 
-                    toast.success("File selected (not uploaded yet)");
+                    toast.success("Certificate Uploaded Successfully");
                   }}
                 />
-                <IoCloudUploadOutline
-                  size={40}
-                  className="text-gray-400 mb-2"
-                />
-                <p className="font-bold text-gray-700">
-                  Tap to Upload Certificate
-                </p>
-                <p className="text-[10px] text-gray-400">
-                  IRDAI license screenshot • JPG, PNG • Max 5MB
-                </p>
-              </div>
-              <p className="text-[#6B7280] text-center text-[14px] font-normal font-poppins leading-[24px]">
-                Click to simulate upload
-              </p>
-              {file && preview && (
-                <div className="mt-4 p-4 bg-white border rounded-xl flex items-center gap-4 relative">
-                  {/* Preview */}
-                  <img
-                    src={preview}
-                    alt="preview"
-                    className="w-16 h-16 object-cover rounded-lg border"
-                  />
 
-                  {/* File Info */}
-                  <div className="flex flex-col">
-                    <p className="text-sm font-semibold text-gray-700">
+                {!file ? (
+                  <>
+                    <IoCloudUploadOutline
+                      size={36}
+                      className="text-gray-400 mb-2"
+                    />
+                    <p className="font-semibold text-gray-700">
+                      Tap to upload certificate
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      JPG, PNG, PDF • Max 5MB • Single file
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2 text-green-600 font-semibold">
+                      ✅ Certificate Uploaded Successfully
+                    </div>
+                    <p className="text-[#6B7280] text-center text-xs sm:text-[14px] font-normal font-poppins leading-[20px] sm:leading-[24px]">
+                      Click to simulate upload
+                    </p>
+                  </>
+                )}
+              </div>
+              {file && (
+                <div className="mt-4 p-4 bg-white border rounded-xl flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700 truncate">
                       {file.name}
                     </p>
                     <p className="text-xs text-gray-500">
@@ -376,21 +452,13 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                     </p>
                   </div>
 
-                  {/* Cancel Button */}
                   <button
                     onClick={() => {
                       setFile(null);
                       setPreview(null);
-                      setFormData((prev) => ({
-                        ...prev,
-                        certificate_url: "",
-                      }));
-
                       document.getElementById("fileUpload").value = null;
-
-                      toast.success("File removed");
                     }}
-                    className="ml-auto text-red-500 text-sm font-semibold hover:underline"
+                    className="text-red-500 text-sm font-semibold hover:underline"
                   >
                     Remove
                   </button>
@@ -417,10 +485,16 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
         {/* Footer */}
         <div className="p-6 bg-white shrink-0 border-t">
           <button
-            className="w-full bg-[#F39C12] hover:bg-[#E67E22] text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all font-poppins cursor-pointer"
+            disabled={!validateForm}
+            className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all
+    ${
+      file
+        ? "bg-[#F39C12] hover:bg-[#E67E22] text-white cursor-pointer"
+        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+    }`}
             onClick={handleSubmit}
           >
-            Save & Submit Profile <HiOutlineArrowRight />
+            Submit for Review <HiOutlineArrowRight />
           </button>
         </div>
       </div>

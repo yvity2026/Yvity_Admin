@@ -6,7 +6,7 @@ export async function POST(req) {
   try {
     // 1. Parse body
     const body = await req.json();
-    const { roleId, services, certificate_url, bio } = body;
+    const { advisor_role_id, services, certificate_url, bio } = body;
 
     // 2. Validate input
     if (
@@ -14,7 +14,7 @@ export async function POST(req) {
       services.length === 0 ||
       !certificate_url ||
       !bio ||
-      !roleId
+      !advisor_role_id
     ) {
       return apiResponse(
         "Missing required fields",
@@ -46,7 +46,7 @@ export async function POST(req) {
       .insert([
         {
           advisor_id: user.id,
-          advisor_role_id: "00000000-0000-0000-0000-000000000000",
+          advisor_role_id,
           short_bio: bio,
           iridai_certificate_url: certificate_url,
           services: services.map((s) => ({

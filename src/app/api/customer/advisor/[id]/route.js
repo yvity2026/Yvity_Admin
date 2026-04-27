@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { ValidateUser } from "@/lib/auth/ValidateUser";
 import { createAdminClient } from "@/lib/supabase/server";
 
-export async function GET(req, { params }) {
+export async function GET(req,  context) {
   try {
     const currentUser = await ValidateUser();
 
@@ -10,7 +10,7 @@ export async function GET(req, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await context.params;
     const supabase = createAdminClient();
 
     const { data, error } = await supabase
@@ -23,7 +23,6 @@ export async function GET(req, { params }) {
         dob,
         gender,
         city,
-        profession,
         selfie_url,
         mobile_verified,
         email_verified,
@@ -32,12 +31,15 @@ export async function GET(req, { params }) {
         updated_at,
         advisor_profiles (
           id,
-          advisor_id,
           advisor_role_id,
+          advisor_roles (
+        title
+        ),
+          advisor_id,
           services,
           short_bio,
           iridai_certificate_url,
-          is_verified,
+          profile_status,
           created_at,
           updated_at,
           intro_url,
@@ -51,7 +53,7 @@ export async function GET(req, { params }) {
         )
       `)
       .eq("id", id)
-      .contains("roles", ["advisor"])
+      .filter("roles", "cs", JSON.stringify(["advisor"]))
       .single();
 
     if (error || !data) {
@@ -62,9 +64,9 @@ export async function GET(req, { params }) {
       ? data.advisor_profiles[0]
       : data.advisor_profiles;
 
-    if (!profile?.ispublic_profile) {
-      return NextResponse.json({ error: "Advisor profile is private" }, { status: 403 });
-    }
+    // if (!profile?.ispublic_profile) {
+    //   return NextResponse.json({ error: "Advisor profile is private" }, { status: 403 });
+    // }
 
     return NextResponse.json({
       success: true,
@@ -80,7 +82,10 @@ export async function GET(req, { params }) {
         selfie_url: data.selfie_url,
         mobile_verified: data.mobile_verified,
         email_verified: data.email_verified,
-        advisor_profile: profile,
+        advisor_profile: {
+          ...profile,
+          is_verified: profile?.profile_status || false,
+        },
       },
     });
   } catch (error) {

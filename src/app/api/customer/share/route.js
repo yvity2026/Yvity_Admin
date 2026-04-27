@@ -12,7 +12,6 @@ export async function POST(req) {
 
     let viewerId = null;
 
-    // ✅ Get logged-in user (via token match)
     if (user?.token) {
       const { data: viewer } = await supabase
         .from("users")
@@ -25,22 +24,34 @@ export async function POST(req) {
       }
     }
 
-    // ✅ Anonymous tracking
     const ip =
       req.headers.get("x-forwarded-for") ||
       req.headers.get("x-real-ip") ||
       "unknown";
-
     const userAgent = req.headers.get("user-agent") || "unknown";
-
     const anonymousId = crypto
       .createHash("sha256")
-      .update(ip + userAgent + "share") // 🔥 differentiate from views
+      .update(ip + userAgent + "share")
       .digest("hex");
 
-    // ✅ Prevent duplicate shares (optional 24h rule)
+    const { data: advisorProfile, error: profileError } = await supabase
+      .from("advisor_profiles")
+      .select("id,advisor_id")
+      .eq("id", profileId)
+      .maybeSingle();
+
+    if (profileError || !advisorProfile?.advisor_id) {
+      return NextResponse.json(
+        { error: profileError?.message || "Advisor profile not found" },
+        { status: 404 }
+      );
+    }
+
+    const shareType =
+      viewerId && viewerId === advisorProfile.advisor_id ? "self" : "client";
+
     const { data: existing } = await supabase
-      .from("profile_shares")
+      .from("advisor_profile_stats")
       .select("id")
       .eq("profile_id", profileId)
       .eq("stats_type", "share")
@@ -59,16 +70,49 @@ export async function POST(req) {
       return apiResponse({ message: "Already shared recently" });
     }
 
-    // ✅ Insert share record
-    await supabase.from("advisor_profile_stats").insert({
-      profile_id: profileId,
-      viewer_id: viewerId,
-      anonymous_id: viewerId ? null : anonymousId,
-      stats_type : "share"
+    const { error: statsError } = await supabase
+      .from("advisor_profile_stats")
+      .insert({
+        profile_id: profileId,
+        viewer_id: viewerId,
+        anonymous_id: viewerId ? null : anonymousId,
+        stats_type: "share",
+      });
+
+    if (statsError) {
+      throw statsError;
+    }
+
+    const { error: shareEventError } = await supabase
+      .from("advisor_share_events")
+      .insert({
+        advisor_id: advisorProfile.advisor_id,
+        user_id: viewerId,
+        share_type: shareType,
+        channel: "public-profile",
+      });
+
+    if (shareEventError) {
+      throw shareEventError;
+    }
+
+    const recalculateResult = await supabase.rpc("recalculate_advisor_score", {
+      p_advisor: advisorProfile.advisor_id,
     });
+
+    if (recalculateResult.error) {
+      console.error(
+        "recalculate_advisor_score failed after share create:",
+        recalculateResult.error
+      );
+    }
+
     return apiResponse({ success: true });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
   }
 }

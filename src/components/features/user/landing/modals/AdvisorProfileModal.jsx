@@ -11,37 +11,15 @@ import AdvisorFormModal from "./AdvisorFormModal";
 import Image from "next/image";
 import toast from "react-hot-toast";
 
-const AdvisorProfileModal = ({ isOpen, onClose, onContinue, form }) => {
+// Icon mapping for dynamic icon rendering
+const iconMap = {
+  IoShieldCheckmark,
+  IoStatsChart,
+  IoBusiness,
+};
+
+const AdvisorProfileModal = ({ isOpen, onClose, onContinue, form, roles }) => {
   const [selectedRoleId, setSelectedRoleId] = useState("");
-
- useEffect(() => {
-  setSelectedRoleId(form?.advisor_role_id || "");
-}, [form]);
-
-  const roles = [
-    {
-      id: "1",
-      title: "Insurance Advisor",
-      desc: "Build a verified credibility profile, collect OTP reviews, showcase IRDAI license & achievements",
-      icon: <IoShieldCheckmark className="text-blue-400" size={32} />,
-      isAvailable: true,
-    },
-    {
-      id: "2",
-      title: "MFD / Financial Advisor",
-      desc: "Mutual fund distributors and financial planners",
-      icon: <IoStatsChart className="text-blue-300" size={32} />,
-      isAvailable: false,
-    },
-    {
-      id: "3",
-      title: "Real Estate Advisor",
-      desc: "Property agents and real estate professionals",
-      icon: <IoBusiness className="text-blue-300" size={32} />,
-      isAvailable: false,
-    },
-  ];
-
   if (!isOpen) return null;
 
   const validateRoleSelection = () => {
@@ -75,7 +53,7 @@ const AdvisorProfileModal = ({ isOpen, onClose, onContinue, form }) => {
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        className="relative w-full max-w-lg bg-white rounded-3xl  shadow-[0_0_8px_2px_rgba(245,158,11,0.25)] overflow-hidden flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-lg bg-white rounded-3xl  shadow-[0_0_8px_2px_rgba(245,158,11,0.25)] overflow-hidden flex flex-col max-h-[90vh] max-w-[600px]"
       >
         {/* FIXED Header Section */}
         <div className="bg-[#0D4D4D] p-8 pb-5 text-white relative shrink-0 sticky">
@@ -105,33 +83,38 @@ const AdvisorProfileModal = ({ isOpen, onClose, onContinue, form }) => {
 
         {/* SCROLLABLE Roles List */}
         <div className="p-6 space-y-4 mt-3 overflow-y-auto custom-scrollbar flex-1 bg-white rounded-t-[2rem] no-scrollbar">
-          {roles.map((role) => (
-            <div
-              key={role.id}
-              onClick={() => role.isAvailable && setSelectedRoleId(role.id)}
-              className={`
-                relative flex items-start gap-4 p-5 rounded-2xl border-2 transition-all cursor-pointer
-                ${!role.isAvailable ? "bg-gray-50 opacity-80" : "bg-[#FAF9F4]"}
-                ${selectedRoleId === role.id && role.isAvailable ? "border-orange-400 ring-1 ring-orange-400" : "border-transparent"}
-              `}
-            >
-              <div className="shrink-0 mt-1">{role.icon}</div>
-
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-bold text-[#1A3C40]">{role.title}</h3>
-                  {!role.isAvailable && (
-                    <span className="text-[10px] font-bold bg-[#E0F2F1] text-[#00695C] px-2 py-0.5 rounded-full uppercase">
-                      Coming Soon
-                    </span>
-                  )}
+          {roles.map((role) => {
+            const IconComponent = iconMap[role.iconName] || IoBusiness;
+            return (
+              <div
+                key={role.id}
+                onClick={() => role.isAvailable && setSelectedRoleId(role.id)}
+                className={`
+                  relative flex items-start gap-4 p-5 rounded-2xl border-2 transition-all cursor-pointer
+                  ${!role.isAvailable ? "bg-gray-50 opacity-80" : "bg-[#FAF9F4]"}
+                  ${selectedRoleId === role.id && role.isAvailable ? "border-orange-400 ring-1 ring-orange-400" : "border-transparent"}
+                `}
+              >
+                <div className="shrink-0 mt-1">
+                  <IconComponent className="text-blue-300" size={32} />
                 </div>
-                <p className="text-xs text-gray-500 leading-relaxed">
-                  {role.desc}
-                </p>
+
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-bold text-[#1A3C40]">{role.title}</h3>
+                    {!role.isAvailable && (
+                      <span className="text-[10px] font-bold bg-[#E0F2F1] text-[#00695C] px-2 py-0.5 rounded-full uppercase">
+                        Coming Soon
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    {role.desc}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* FIXED Footer Action */}

@@ -112,53 +112,53 @@ const page = () => {
 
   const handleSave = async () => {
     const toastId = toast.loading("Saving profile changes...");
-  try {
-    const res = await fetch("/api/advisor/profile/update", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...formdata,
-        services: [
-          {
-            license: formdata.irdai_number,
-          },
-        ],
-        ispublic_professional: isJourney,
-        ispublic_services: isService,
-        ispublic_achievements: isAchievement,
-        ispublic_gallery: isGallery,
-        ispublic_testimonials: isTestimonial,
-        ispublic_profile: isProfile,
-      }),
-    });
+    try {
+      const res = await fetch("/api/advisor/profile/update", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formdata,
+          services: [
+            {
+              license: formdata.irdai_number,
+            },
+          ],
+          ispublic_professional: isJourney,
+          ispublic_services: isService,
+          ispublic_achievements: isAchievement,
+          ispublic_gallery: isGallery,
+          ispublic_testimonials: isTestimonial,
+          ispublic_profile: isProfile,
+        }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok || !data.success) {
+      if (!res.ok || !data.success) {
+        toast.dismiss(toastId);
+        toast.error(data.message || "Update failed ❌");
+        return;
+      }
+
+      toast.success(data.message || "Profile updated successfully ✅");
+
       toast.dismiss(toastId);
-      toast.error(data.message || "Update failed ❌");
-      return;
+
+      if (data.data?.user) {
+        setUser(data.data.user);
+      }
+
+      if (data.data?.advisor) {
+        setAdvisor(data.data.advisor);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.dismiss(toastId);
+      toast.error("Something went wrong ❌");
     }
-
-    toast.success(data.message || "Profile updated successfully ✅");
-
-    toast.dismiss(toastId);
-
-    if (data.data?.user) {
-      setUser(data.data.user);
-    }
-
-    if (data.data?.advisor) {
-      setAdvisor(data.data.advisor);
-    }
-  } catch (err) {
-    console.error(err);
-    toast.dismiss(toastId);
-    toast.error("Something went wrong ❌");
-  }
-};
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -224,7 +224,7 @@ const page = () => {
               <Skeleton className="w-26 h-26 rounded-full" />
             ) : (
               <>
-                <div className=" w-20 h-20 md:w-26 md:h-26 rounded-full bg-blue-200 relative overflow-hidden">
+                <div className=" w-[77px] h-[77px] md:w-26 md:h-26 rounded-full bg-blue-200 relative overflow-hidden ring-[3px] ring-[#E0F4F3] ">
                   {user?.selfie_url ? (
                     <Image
                       src={user.selfie_url}
@@ -234,7 +234,10 @@ const page = () => {
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-300 flex items-center justify-center">
-                      <span className="text-gray-600 text-sm"> {user?.name ? user.name.charAt(0).toUpperCase() : "U"}</span>
+                      <span className="text-gray-600 text-sm">
+                        {" "}
+                        {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -243,7 +246,6 @@ const page = () => {
                 </div>
               </>
             )}
-
             {/* edit icon */}
           </div>
           {loading ? (
@@ -265,16 +267,19 @@ const page = () => {
             </div>
           ) : (
             <div className="flex flex-col h-full justify-between items-center md:items-start gap-6 xl:gap-0">
-              <span className="flex items-start sm:items-center text-left gap-4 py-[12px] px-[10px] xl:pl-[21px] text-amber-600 text-[clamp(10px,1vw,14px)] font-semibold leading-4 font-nunito rounded-lg border border-[#ECE4C8] bg-[#FDF9ED] shadow-none">
-                <FaTriangleExclamation />
-                <p>
+              {/* ALERT BOX */}
+              <span className="flex flex-col sm:flex-row sm:items-center text-left gap-3 py-3 px-3 xl:pl-[21px] text-amber-600 text-[clamp(10px,1vw,14px)] font-semibold leading-4 font-nunito rounded-lg border border-[#ECE4C8] bg-[#FDF9ED] shadow-none">
+                <FaTriangleExclamation className="shrink-0 text-lg" />
+
+                <p className="leading-snug">
                   You can update your profile photo only once a year. Next
                   update will be available on your birthday.
                 </p>
               </span>
 
+              {/* BUTTON */}
               <button
-                className="w-full sm:w-auto px-4 h-[40px] flex text-center py-[14px] gap-2 rounded-lg bg-[#0A4A4A] hover:bg-[#076868] hover:shadow-sm items-center text-[#F8F6F1] text-[clamp(8px,1vw,12px)] font-semibold font-poppins cursor-pointer"
+                className="w-full sm:w-auto px-4 h-[40px] flex justify-center items-center gap-2 rounded-lg bg-[#0A4A4A] hover:bg-[#076868] hover:shadow-sm text-[#F8F6F1] text-[clamp(10px,1vw,12px)] font-semibold font-poppins cursor-pointer"
                 onClick={() => setIsUpload(true)}
               >
                 <FaCamera />
@@ -570,78 +575,89 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
             - Control what clients see on your public profile
           </span>
           <div className="flex flex-col justify-between gap-3 md:gap-[16px] bg-white">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between  gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-                {/* icon */}
-                <FaFolder className="text-sm md:text-base" />
-                <span className="flex flex-col gap-1 md:gap-2">
-                  <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
-                    professional Journey
+            {/* 1st */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8] active:scale-[0.98] transition-transform">
+              {/* LEFT SIDE */}
+              <div className="flex items-start sm:items-center gap-3 md:gap-[23px] w-full">
+                <FaFolder className="text-base shrink-0" />
+
+                <div className="flex flex-col gap-1">
+                  <p className="text-[13px] md:text-[14px] font-semibold text-[#111827]">
+                    Professional Journey
                   </p>
-                  <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+                  <p className="text-[12px] md:text-[14px] text-[#374151] font-nunito leading-[16px]">
                     Work history and career timeline
                   </p>
-                </span>
-              </span>
-              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-                {/* public */}
-                <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
+                </div>
+              </div>
+
+              {/* RIGHT SIDE */}
+              <div className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full sm:w-auto">
+                <p className="text-xs md:text-[14px] font-semibold text-[#0D6060] whitespace-nowrap">
                   Public
                 </p>
+
                 <Toggle
                   onColor="bg-[#0A4A4A]"
                   offColor="bg-gray-400"
                   isOn={isJourney}
                   setIsOn={() => setIsJourney(!isJourney)}
                 />
-              </span>
+              </div>
             </div>
             {/* 2ND */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between  gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-                {/* icon */}
-                <IoShieldHalfOutline className="text-md md:text-base" />
-                <span className="flex flex-col gap-1 md:gap-2">
-                  <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8] active:scale-[0.98] transition-transform">
+              {/* LEFT SIDE */}
+              <div className="flex items-start sm:items-center gap-3 md:gap-[23px] w-full">
+                <IoShieldHalfOutline className="text-base shrink-0" />
+
+                <div className="flex flex-col gap-1">
+                  <p className="text-[13px] md:text-[14px] font-semibold text-[#111827]">
                     Services
                   </p>
-                  <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+                  <p className="text-[12px] md:text-[14px] text-[#374151] font-nunito leading-[16px]">
                     Life & Health insurance offerings
                   </p>
-                </span>
-              </span>
-              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-                {/* public */}
-                <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
+                </div>
+              </div>
+
+              {/* RIGHT SIDE */}
+              <div className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full sm:w-auto">
+                <p className="text-xs md:text-[14px] font-semibold text-[#0D6060] whitespace-nowrap">
                   Public
                 </p>
+
                 <Toggle
                   onColor="bg-[#0A4A4A]"
                   offColor="bg-gray-400"
                   isOn={isService}
                   setIsOn={() => setIsService(!isService)}
                 />
-              </span>
+              </div>
             </div>
             {/* 3rd */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-                {/* icon */}
-                <FaTrophy className="text-sm md:text-base" />
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8] active:scale-[0.98] transition-transform">
+              {/* LEFT SIDE */}
+              <span className="flex items-start sm:items-center gap-3 md:gap-[23px] w-full md:w-auto">
+                <FaTrophy className="text-base md:text-base shrink-0" />
+
                 <span className="flex flex-col gap-1 md:gap-2">
-                  <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+                  <p className="text-[13px] md:text-[14px] font-semibold text-[#111827]">
                     Achievements
                   </p>
-                  <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+
+                  <p className="text-[12px] md:text-[14px] leading-[16px] text-[#374151] font-nunito">
                     MDRT, awards & milestones
                   </p>
                 </span>
               </span>
+
+              {/* RIGHT SIDE */}
               <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-                {/* public */}
-                <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
+                <p className="text-xs md:text-[14px] font-semibold text-[#0D6060] font-poppins">
                   Public
                 </p>
+
                 <Toggle
                   onColor="bg-[#0A4A4A]"
                   offColor="bg-gray-400"
@@ -651,24 +667,28 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
               </span>
             </div>
             {/* 4th */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-                {/* icon */}
-                <TfiGallery className="text-sm md:text-base" />
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8] active:scale-[0.98] transition-transform">
+              {/* LEFT SIDE */}
+              <span className="flex items-start sm:items-center gap-3 md:gap-[23px] w-full md:w-auto">
+                <TfiGallery className="text-base md:text-base shrink-0" />
+
                 <span className="flex flex-col gap-1 md:gap-2">
-                  <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+                  <p className="text-[13px] md:text-[14px] font-semibold text-[#111827]">
                     Gallery
                   </p>
-                  <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+
+                  <p className="text-[12px] md:text-[14px] leading-[16px] text-[#374151] font-nunito">
                     Photos & event images
                   </p>
                 </span>
               </span>
+
+              {/* RIGHT SIDE */}
               <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-                {/* public */}
-                <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
+                <p className="text-xs md:text-[14px] font-semibold text-[#0D6060] font-poppins">
                   Public
                 </p>
+
                 <Toggle
                   onColor="bg-[#0A4A4A]"
                   offColor="bg-gray-400"
@@ -678,24 +698,28 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
               </span>
             </div>
             {/* 5th */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-                {/* icon */}
-                <IoMdChatboxes className="text-sm md:text-base" />
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8] active:scale-[0.98] transition-transform">
+              {/* LEFT SIDE */}
+              <span className="flex items-start sm:items-center gap-3 md:gap-[23px] w-full md:w-auto">
+                <IoMdChatboxes className="text-base md:text-base shrink-0" />
+
                 <span className="flex flex-col gap-1 md:gap-2">
-                  <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+                  <p className="text-[13px] md:text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
                     Testimonials
                   </p>
-                  <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+
+                  <p className="text-[12px] md:text-[14px] leading-[16px] text-[var(--Body-content,#374151)] font-nunito">
                     Client reviews & ratings
                   </p>
                 </span>
               </span>
+
+              {/* RIGHT SIDE */}
               <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-                {/* public */}
-                <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
+                <p className="text-xs md:text-[14px] font-semibold leading-normal text-[#0D6060] font-poppins">
                   Public
                 </p>
+
                 <Toggle
                   onColor="bg-[#0A4A4A]"
                   offColor="bg-gray-400"
@@ -704,24 +728,29 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
                 />
               </span>
             </div>
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8]">
-              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-                {/* icon */}
-                <CiGlobe className="text-sm md:text-base" />
+            {/* 6th */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-0 px-4 md:px-10 py-3 md:py-[14px] rounded-lg border border-[#DBE1E0] bg-[#F0F8F8] active:scale-[0.98] transition-transform">
+              {/* LEFT SIDE */}
+              <span className="flex items-start sm:items-center gap-3 md:gap-[23px] w-full md:w-auto">
+                <CiGlobe className="text-base md:text-base shrink-0" />
+
                 <span className="flex flex-col gap-1 md:gap-2">
-                  <p className="text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
+                  <p className="text-[13px] md:text-[14px] font-semibold leading-normal text-[var(--headings-important-text,#111827)]">
                     Public Profile
                   </p>
-                  <p className="text-[14px] font-normal leading-[16px] text-[var(--Body-content,#374151)] self-stretch font-nunito">
+
+                  <p className="text-[12px] md:text-[14px] leading-[16px] text-[var(--Body-content,#374151)] font-nunito">
                     Anyone with the link can view your profile
                   </p>
                 </span>
               </span>
-              <span className="flex items-center justify-between sm:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
-                {/* public */}
-                <p className="text-xs md:text-[14px] font-semibold leading-normal text-(--gradients-hover-state,#0D6060) text-center font-poppins">
+
+              {/* RIGHT SIDE */}
+              <span className="flex items-center justify-between md:justify-start gap-3 md:gap-[23px] w-full md:w-auto">
+                <p className="text-xs md:text-[14px] font-semibold leading-normal text-[#0D6060] font-poppins">
                   Public
                 </p>
+
                 <Toggle
                   onColor="bg-[#0A4A4A]"
                   offColor="bg-gray-400"
@@ -746,21 +775,24 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
           </div>
         </div>
       ) : (
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 px-4 md:px-6 py-4 md:py-[26px] bg-white">
-          <p className="text-gray-500 ttext-[clamp(10px,1vw,14px)] font-normal leading-normal font-nunito">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 px-4 md:px-6 py-4 md:py-[26px] rounded-2xl bg-white">
+          <p className="text-gray-500 text-[clamp(10px,1vw,14px)] font-normal leading-normal font-nunito">
             Make Changes Above To Save
           </p>
           <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3 md:gap-4">
-            <button className="w-full md:w-auto  px-4 py-[7px] lg:px-[22px] lg:py-[14px] flex items-center justify-center gap-2 text-[clamp(8px,1vw,12px)]  rounded-lg flex items-center gap-[8px] text-teal-950 text-xs font-semibold leading-normal font-poppins rounded-lg border border-[#D8D8D8] cursor-pointer">
+            {/* Preview Button */}
+            <button className="w-full md:w-auto px-4 py-[7px] lg:px-[22px] lg:py-[14px] flex items-center justify-center gap-2 text-[clamp(8px,1vw,12px)] rounded-lg text-teal-950 font-semibold leading-normal font-poppins border border-[#D8D8D8] cursor-pointer">
               <FiEye size={16} />
-              preview Proile
+              <span className="whitespace-nowrap">Preview Profile</span>
             </button>
+
+            {/* Save Button */}
             <button
-              className="w-full md:w-auto  px-4 py-[7px] lg:px-[22px] lg:py-[14px] flex items-center justify-center gap-2 text-xs text-[clamp(8px,1vw,12px)]  font-semibold font-poppins rounded-lg flex items-center gap-[8px] rounded-lg bg-[#0A4A4A] text-[#F8F6F1] text-xs font-semibold leading-normal font-poppins cursor-pointer"
+              className="w-full md:w-auto px-4 py-[7px] lg:px-[22px] lg:py-[14px] flex items-center justify-center gap-2 text-[clamp(8px,1vw,12px)] font-semibold font-poppins rounded-lg bg-[#0A4A4A] text-[#F8F6F1] cursor-pointer"
               onClick={() => handleSave()}
             >
               <FiEye size={16} />
-              Save changes
+              <span className="whitespace-nowrap">Save changes</span>
             </button>
           </div>
         </div>

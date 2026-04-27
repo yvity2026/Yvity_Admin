@@ -11,8 +11,20 @@ import {
 import { FaArrowRight } from "react-icons/fa";
 import { InfoBox, ProgressRow, SectionWrapper } from "./score-components";
 
+const DEFAULT_PROFILE_STRENGTH_CHECKS = [
+  { label: "Professional journey added", complete: false },
+  { label: "Services added", complete: false },
+  { label: "Achievements added", complete: false },
+  { label: "Testimonials received", complete: false },
+  { label: "Gallery photos added", complete: false },
+];
+
 export default function VisibilitySection({ visibility }) {
-  const hasFullActivityScore = visibility.activeDays >= 5;
+  const hasFullActivityScore = visibility.loginActivity >= 5;
+  const profileStrengthChecks =
+    visibility.profileStrengthChecks?.length > 0
+      ? visibility.profileStrengthChecks
+      : DEFAULT_PROFILE_STRENGTH_CHECKS;
 
   return (
     <SectionWrapper
@@ -101,11 +113,16 @@ export default function VisibilitySection({ visibility }) {
       />
       <InfoBox className=" mt-3 mb-7">
         <ul className="text-[clamp(10px,1vw,14px)] text-[#374151] space-y-2.5 font-medium w-full">
+<<<<<<< Anil/TrustSection
           {visibility.profileStrengthChecks.map((item) => (
             <li
               key={item.label}
               className="flex justify-between items-center pr-1"
             >
+=======
+          {profileStrengthChecks.map((item) => (
+            <li key={item.label} className="flex justify-between items-center pr-1">
+>>>>>>> main
               <div className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#0A4A4A]" />
                 <span>{item.label}</span>
@@ -142,7 +159,7 @@ export default function VisibilitySection({ visibility }) {
             </li>
             <li className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-[#0A4A4A]" />
-              <span>Active last {visibility.activeDays} of 7 days</span>
+              <span>Active {visibility.activeDays} day{visibility.activeDays === 1 ? "" : "s"} this month</span>
             </li>
           </ul>
           <div className="text-right text-[13px] font-bold text-[#0A4A4A] flex flex-col gap-1">

@@ -35,8 +35,19 @@ export async function PUT(request, context ) {
       organisation,
       description,
       icon,
+<<<<<<< Anil/TrustSection
       achievement_year,
+=======
+      year_of_achievement,
+>>>>>>> main
     } = body;
+
+    if (!title || !organisation || !year_of_achievement) {
+      return NextResponse.json(
+        { error: "Title, organisation, and year are required" },
+        { status: 400 }
+      );
+    }
 
     const supabase = createAdminClient();
 
@@ -47,7 +58,11 @@ export async function PUT(request, context ) {
         organisation,
         description,
         icon,
+<<<<<<< Anil/TrustSection
         achievement_year,
+=======
+        year_of_achievement,
+>>>>>>> main
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
@@ -62,7 +77,10 @@ export async function PUT(request, context ) {
     return NextResponse.json({ success: true, achievement: data });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Update failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Update failed" },
+      { status: 500 }
+    );
   }
 }
 

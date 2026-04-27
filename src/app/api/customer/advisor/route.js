@@ -16,7 +16,10 @@ const getAdvisorTags = (services = []) => {
 };
 
 const mapAdvisorCard = (user, profile) => {
-  const services = Array.isArray(profile?.services) ? profile.services : [];
+  const services = Array.isArray(profile?.services)
+    ? profile.services
+    : [];
+
   const tags = getAdvisorTags(services);
 
   return {
@@ -35,7 +38,7 @@ const mapAdvisorCard = (user, profile) => {
     short_bio: profile?.short_bio || "",
     intro_url: profile?.intro_url || "",
     services,
-    is_verified: profile?.is_verified || false,
+    is_verified: profile?.profile_status || false,
   };
 };
 
@@ -51,20 +54,23 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from("users")
-      .select(`
+      .select(
+        `
         id,
         name,
         city,
-        profession,
         selfie_url,
-        roles,
         advisor_profiles (
           id,
+          advisor_role_id,
+          advisor_roles (
+        title
+        ),
           advisor_id,
           services,
           short_bio,
           intro_url,
-          is_verified,
+          profile_status,
           ispublic_profile,
           ispublic_professional,
           ispublic_services,
@@ -72,21 +78,21 @@ export async function GET() {
           ispublic_gallery,
           ispublic_testimonials
         )
-      `)
-      .contains("roles", ["advisor"])
+      `,
+      )
+      .filter("roles", "cs", JSON.stringify(["advisor"]))
       .order("created_at", { ascending: false });
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
-
     const advisors = (data || [])
       .map((item) => {
         const profile = Array.isArray(item.advisor_profiles)
           ? item.advisor_profiles[0]
           : item.advisor_profiles;
 
-        if (!profile?.ispublic_profile) return null;
+        // if (!profile?.ispublic_profile) return null;
 
         return mapAdvisorCard(item, profile);
       })
@@ -96,7 +102,7 @@ export async function GET() {
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message || "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
