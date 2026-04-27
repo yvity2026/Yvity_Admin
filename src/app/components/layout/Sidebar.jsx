@@ -205,6 +205,12 @@ export default function AppShell({ children }) {
   
  useEffect(() => {
   const fetchUser = async () => {
+    // Only fetch user data if we're on an advisor page
+    if (!pathname.includes("/advisor")) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch("/api/auth/me");
 
