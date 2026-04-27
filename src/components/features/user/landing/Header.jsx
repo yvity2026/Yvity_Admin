@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HiOutlineHome } from "react-icons/hi";
 import { FiUser, FiLogOut, FiMenu, FiX } from "react-icons/fi";
 import { IoNotificationsOutline } from "react-icons/io5";
@@ -11,10 +11,11 @@ import Skeleton from "@/app/components/skeleton/Skeleton";
 import { useAuth } from "@/context/AuthUserContext";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { AnimatePresence, motion } from "framer-motion";
 
 const Header = () => {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, advisor, loading, setLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
 
@@ -97,16 +98,45 @@ const Header = () => {
     }
   };
 
+  const [roles, setRoles] = useState([]);
+
+  // Fetch roles from API
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await fetch("/api/customer/roles");
+        const result = await response.json();
+
+        if (result.success && result.data) {
+          const formattedRoles = result.data.map((role) => ({
+            id: role.id,
+            title: role.title,
+            desc: role.description,
+            iconName: role.icon,
+            isAvailable: role.is_available,
+          }));
+          setRoles(formattedRoles);
+        }
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+        toast.error("Failed to load roles");
+      }
+    };
+
+    fetchRoles();
+  }, []);
+  
+
   return (
     <>
       {loading ? (
-        <nav className="bg-white border-b border-gray-200 px-4 md:px-6 lg:px-10 xl:px-[120px] shadow-sm max-h-[70px]">
+        <nav className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 md:h-[70px] shadow-sm relative after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-px after:bg-gradient-to-r after:from-[#0D6060] after:to-[#F59E0B]">
           <div className="mx-auto flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Skeleton className="w-[90px] h-[40px] rounded-md" />
             </div>
 
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center gap-4 lg:gap-6 xl:gap-8">
               <div className="flex items-center gap-2">
                 <Skeleton className="w-5 h-5 rounded" />
                 <Skeleton className="w-16 h-4 rounded" />
@@ -133,8 +163,8 @@ const Header = () => {
           </div>
         </nav>
       ) : (
-        <nav className="bg-white border-b border-gray-200 px-4 md:px-6 lg:px-10 xl:px-[120px] shadow-sm">
-          <div className=" mx-auto flex items-center justify-between ">
+        <nav className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 md:h-[70px] shadow-sm relative after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-px after:bg-gradient-to-r after:from-[#0D6060] after:to-[#F59E0B]">
+          <div className="h-full mx-auto flex items-center justify-between ">
             <div className="flex items-center space-x-2">
               <Image
                 src="/images/Adivisor/Navbar/navlogo.png"
@@ -144,22 +174,23 @@ const Header = () => {
               />
             </div>
 
-            <div className="hidden md:flex items-center space-x-8">
-              <button className="flex items-center px-4 py-1 gap-2 hover:text-black transition text-[14px] leading-[16px] font-medium text-[var(--headings-important-text,#111827)] cursor-pointer">
+            <div className="hidden md:flex items-center gap-4 lg:gap-6 xl:gap-8">
+              <button className="flex items-center px-4 py-1 gap-2 hover:text-black transition text-[clamp(10px,1vw,14px)] leading-[16px] font-medium text-[var(--headings-important-text,#111827)] cursor-pointer">
                 <HiOutlineHome size={20} />
                 <span className="font-medium">Home</span>
               </button>
 
-              {user?.roles?.includes("advisor") ? (
+              {user?.roles?.includes("advisor") && advisor?.profile_status ? (
                 <button
                   className="flex items-center gap-2 bg-[#0A4A4A] hover:bg-[#083c3c] text-white px-4 py-2 rounded-md text-sm font-semibold transition shadow-sm cursor-pointer"
                   onClick={() => router.push("/advisor/dashboard")}
                 >
-                  <span className="font-medium">My Dashboard</span>
+                  {" "}
+                  <span className="font-medium">My Dashboard</span>{" "}
                 </button>
               ) : (
                 <button
-                  className="flex items-center gap-2  text-[14px] leading-[16px] px-2 py-1 font-medium text-[var(--headings-important-text,#111827)] cursor-pointer"
+                  className="flex items-center gap-2  text-[clamp(10px,1vw,14px)] leading-[16px] px-2 py-1 font-medium text-[#111827] cursor-pointer"
                   onClick={() => setActiveModal(MODALS.PROFILE)}
                 >
                   <FiUser size={20} />
@@ -167,27 +198,31 @@ const Header = () => {
                 </button>
               )}
 
-              <div className="flex items-center space-x-4 pl-4 border-l border-gray-200">
-                <div className="relative p-2 bg-gray-50 rounded-full border border-gray-100 cursor-pointer">
-                  <IoNotificationsOutline size={22} className="text-gray-600" />
-                  <span className="absolute top-2 right-2.5 w-2 h-2 bg-orange-400 rounded-full border border-white"></span>
-                </div>
-
-                <div className="w-10 h-10 bg-[#004D4D] text-white flex items-center justify-center rounded-full font-semibold cursor-pointer ring-[2px] ring-[#197272] overflow-hidden">
-                  {user?.selfie_url ? (
-                    <Image
-                      src={user.selfie_url}
-                      width={60}
-                      height={60}
-                      alt="profile"
-                      className="object-cover w-full h-full"
+              <div className="flex items-center gap-4 pl-4">
+                <div className="hidden md:flex items-center gap-3 lg:gap-4 xl:gap-6">
+                  <div className="relative shrink-0 h-9.75 w-9.75 p-2 bg-gray-50 rounded-full border border-gray-100 cursor-pointer ring-[1px] ring-[#E4E2DB]">
+                    <IoNotificationsOutline
+                      size={22}
+                      className="text-gray-600"
                     />
-                  ) : (
-                    <span>{user?.name?.charAt(0)?.toUpperCase()}</span>
-                  )}
+                    <span className="absolute top-2 right-2.5 w-2 h-2 bg-orange-400 rounded-full border border-white"></span>
+                  </div>
+
+                  <div className="relative shrink-0 h-[38px] w-[38px] p-2 bg-[#004D4D] text-white flex items-center justify-center rounded-full font-semibold cursor-pointer ring-[2px] ring-[#197272] overflow-hidden">
+                    {user?.selfie_url ? (
+                      <Image
+                        src={user.selfie_url}
+                        fill
+                        alt="profile"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span>{user?.name?.charAt(0)?.toUpperCase()}</span>
+                    )}
+                  </div>
                 </div>
 
-                <button className="flex items-center gap-2 text-[14px] leading-[16px] font-medium text-[#EF5555] font-poppins cursor-pointer px-2 py-1">
+                <button className="flex items-center gap-2 text-[clamp(10px,1vw,14px)] leading-[16px] font-medium text-[#EF5555] font-poppins cursor-pointer px-2 py-1">
                   <FiLogOut size={20} />
                   Logout
                 </button>
@@ -204,33 +239,44 @@ const Header = () => {
             </div>
           </div>
 
-          {isOpen && (
-            <div className="md:hidden mt-4 space-y-4 pb-4 animate-in slide-in-from-top duration-300">
-              <a
-                href="#"
-                className="flex items-center gap-3 px-2 py-2 text-gray-700 border-b"
+          <AnimatePresence initial={false}>
+            {isOpen && (
+              <motion.div
+                key="mobile-menu"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{
+                  height: { duration: 0.35, ease: [0.4, 0, 0.2, 1] },
+                  opacity: { duration: 0.2 },
+                }}
+                className="md:hidden overflow-hidden"
               >
-                <HiOutlineHome size={20} /> Home
-              </a>
-              <a
-                href="#"
-                className="flex items-center gap-3 px-2 py-2 text-gray-700 border-b"
-              >
-                <FiUser size={20} /> Setup My Profile
-              </a>
-              <div className="flex items-center justify-between px-2 pt-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#004D4D] text-white flex items-center justify-center rounded-full text-xs">
-                    KM
+                <div className="mt-4 space-y-2 pb-4 border-t pt-4">
+                  <a className="flex items-center gap-3 px-2 py-2 text-gray-700 border-b">
+                    <HiOutlineHome size={20} /> Home
+                  </a>
+
+                  <a className="flex items-center gap-3 px-2 py-2 text-gray-700 border-b">
+                    <FiUser size={20} /> Setup My Profile
+                  </a>
+
+                  <div className="flex items-center justify-between px-2 pt-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-[#004D4D] text-white flex items-center justify-center rounded-full text-xs">
+                        KM
+                      </div>
+                      <span className="font-medium">Account</span>
+                    </div>
+
+                    <button className="text-red-500 flex items-center gap-1">
+                      <FiLogOut /> Logout
+                    </button>
                   </div>
-                  <span className="font-medium">Account</span>
                 </div>
-                <button className="text-red-500 flex items-center gap-1">
-                  <FiLogOut /> Logout
-                </button>
-              </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {activeModal === MODALS.PROFILE && (
             <AdvisorProfileModal
@@ -238,9 +284,10 @@ const Header = () => {
               onClose={() => setActiveModal(null)}
               form={profileFormData}
               onContinue={(selectedRoleId) => {
-                updateStep({ roleId: selectedRoleId });
+                updateStep({ advisor_role_id: selectedRoleId });
                 setActiveModal(MODALS.FORM);
               }}
+              roles={roles}
             />
           )}
 

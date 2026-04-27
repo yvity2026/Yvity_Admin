@@ -257,7 +257,7 @@ export default function Page() {
   };
 
   return (
-    <div className="px-4 sm:px-6 md:px-[90px] pt-4 sm:pt-6 md:pt-[30px] min-h-full">
+    <div className="px-4 sm:px-6 lg:px-[90px] pt-4 sm:pt-6 md:pt-[30px] min-h-full">
       {/* Info */}
       <div className="mb-[20px] text-[clamp(10px,1vw,14px)] rounded-lg border border-[#DBE1E0] bg-[#E0F4F3] px-3 sm:px-4 md:pl-[30px] py-3 md:py-[14px] flex gap-[15px] items-center">
         <LuClockAlert />

@@ -291,23 +291,6 @@ const Page = () => {
 
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold">
-                  Testimonial Type <span className="text-red-600">*</span>
-                </label>
-
-                <select
-                  className="py-3 px-4 rounded-lg border bg-[#FAFCFB] text-sm"
-                  value={requestForm.type}
-                  onChange={(e) => handleRequestChange("type", e.target.value)}
-                >
-                  <option value="">Select type</option>
-                  <option value="text">Text</option>
-                  <option value="audio">Audio</option>
-                  <option value="video">Video</option>
-                </select>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold">
                   Personal Message (Optional)
                 </label>
 

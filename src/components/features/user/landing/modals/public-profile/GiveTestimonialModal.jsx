@@ -195,7 +195,7 @@ const GiveTestimonialModal = ({ open, onClose, advisorId, userId }) => {
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <span className="text-2xl">📷</span>
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-[clamp(12px,1.5vw,16px)] font-bold text-slate-900">
               Give Testimonial
             </h2>
           </div>
