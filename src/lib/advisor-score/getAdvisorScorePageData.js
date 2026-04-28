@@ -346,8 +346,7 @@ function buildPageData({
     irdaPendingVerification: hasIrdaCertificate && !profile?.profile_status,
   };
 
-  const visibilityPublicProfile =
-    scoreRow?.public_profile_pts ?? calculatedVisibility.publicProfile;
+  const visibilityPublicProfile = calculatedVisibility.publicProfile;
   const visibilitySelfShare =
     scoreRow?.self_share_pts ?? calculatedVisibility.selfShare;
   const visibilityClientShare =
@@ -361,12 +360,11 @@ function buildPageData({
 
   const visibility = {
     total:
-      scoreRow?.visibility_total ??
-      (visibilityPublicProfile +
-        visibilitySelfShare +
-        visibilityClientShare +
-        visibilityProfileStrength +
-        visibilityLoginActivity),
+      visibilityPublicProfile +
+      visibilitySelfShare +
+      visibilityClientShare +
+      visibilityProfileStrength +
+      visibilityLoginActivity,
     max: SCORE_LIMITS.visibility,
     publicProfile: visibilityPublicProfile,
     selfShare: visibilitySelfShare,

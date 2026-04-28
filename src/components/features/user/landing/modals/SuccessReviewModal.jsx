@@ -7,13 +7,15 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 const SuccessReviewModal = ({ isOpen, onClose, score = 12 }) => {
-  const router = useRouter()
+  const router = useRouter();
   if (!isOpen) return null;
 
   const handleSubmit = () => {
-    toast.success("Your IRDAI details have been submitted. Our team will verify them and activate your profile with in 48 Hours")
-    router.push("/")
-  }
+    toast.success(
+      "Your IRDAI details have been submitted. Our team will verify them and activate your profile with in 48 Hours",
+    );
+    router.push("/");
+  };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
@@ -42,13 +44,15 @@ const SuccessReviewModal = ({ isOpen, onClose, score = 12 }) => {
 
           <div className="flex flex-col items-start mb-2">
             <Image
-              src="/images/Adivisor/Navbar/navlogo.png"
+              src="/images/yvity.png"
               height={100}
               width={100}
               alt="Navbar logo"
             />
           </div>
-          <h2 className="text-white text-[32px] font-bold font-cormorant leading-normal">Insurance Advisor Profile</h2>
+          <h2 className="text-white text-[32px] font-bold font-cormorant leading-normal">
+            Insurance Advisor Profile
+          </h2>
           <p className="text-[#A9A9A9] text-[16px] font-normal font-poppins leading-normal">
             Fill your advisor details—this is your public profile
           </p>
@@ -74,8 +78,12 @@ const SuccessReviewModal = ({ isOpen, onClose, score = 12 }) => {
               Your YVITY Score
             </p>
             <div className="flex items-baseline justify-center gap-1">
-              <span className="text-[#0A4A4A] text-center text-[32px] font-bold font-poppins leading-normal">{score}</span>
-              <span className="text-[#6B7280] text-[16px] font-bold font-poppins leading-normal">/100</span>
+              <span className="text-[#0A4A4A] text-center text-[32px] font-bold font-poppins leading-normal">
+                {score}
+              </span>
+              <span className="text-[#6B7280] text-[16px] font-bold font-poppins leading-normal">
+                /100
+              </span>
             </div>
             <p className="text-[#F59E0B] text-center text-[14px] font-semibold font-poppins leading-[24px]">
               Complete identify verification to increase your score
@@ -84,7 +92,9 @@ const SuccessReviewModal = ({ isOpen, onClose, score = 12 }) => {
 
           {/* Action Button */}
           <button
-            onClick={() => {router.push("/")}}
+            onClick={() => {
+              router.push("/");
+            }}
             className="w-full bg-[#0D4D4D] hover:bg-[#0A3D3D] text-white font-bold py-4 rounded-xl transition-all active:scale-[0.98] cursor-pointer"
           >
             Go to Dashboard

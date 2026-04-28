@@ -20,7 +20,7 @@ const Header = () => {
   const { user, advisor, loading, setLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
-   const [isSubmitting, setIsSubmitting] = useState(false); 
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const MODALS = {
     PROFILE: "profile",
@@ -38,105 +38,105 @@ const Header = () => {
   };
 
   const handleProfileSetupSubmit = async (payload) => {
-  try {
-    toast.loading("Processing profile setup...", { id: "profile" });
-     setIsSubmitting(true);
-    let certificate_url = payload.certificate_url;
+    try {
+      toast.loading("Processing profile setup...", { id: "profile" });
+      setIsSubmitting(true);
+      let certificate_url = payload.certificate_url;
 
-    // Handle certificate file upload if provided
-    if (payload.certificate_file) {
-      toast.loading("Uploading IRDAI certificate...", { id: "profile" });
+      // Handle certificate file upload if provided
+      if (payload.certificate_file) {
+        toast.loading("Uploading IRDAI certificate...", { id: "profile" });
 
-      const file = payload.certificate_file;
-      const reader = new FileReader();
+        const file = payload.certificate_file;
+        const reader = new FileReader();
 
-      reader.onload = async () => {
-        try {
-          // Convert file to base64 for production-safe transmission
-          const base64Data = reader.result.split(',')[1];
-          
-          const certRes = await fetch("/api/customer/upload-cert", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              fileName: file.name,
-              fileType: file.type,
-              fileBuffer: base64Data,
-            }),
-          });
+        reader.onload = async () => {
+          try {
+            // Convert file to base64 for production-safe transmission
+            const base64Data = reader.result.split(",")[1];
 
-          const certData = await certRes.json();
-
-          if (!certRes.ok) {
-            toast.error(certData?.error || "Certificate upload failed", {
-              id: "profile",
+            const certRes = await fetch("/api/customer/upload-cert", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                fileName: file.name,
+                fileType: file.type,
+                fileBuffer: base64Data,
+              }),
             });
+
+            const certData = await certRes.json();
+
+            if (!certRes.ok) {
+              toast.error(certData?.error || "Certificate upload failed", {
+                id: "profile",
+              });
+              setIsSubmitting(false);
+              return false;
+            }
+
+            certificate_url = certData.url;
+
+            // Only proceed after successful upload
+            await saveProfileData(certificate_url, payload);
+          } catch (err) {
+            console.error("[CERT_UPLOAD_ERROR]", err.message);
+            toast.error("Certificate processing failed", { id: "profile" });
             setIsSubmitting(false);
-            return false;
           }
+        };
 
-          certificate_url = certData.url;
-          
-          // Only proceed after successful upload
-          await saveProfileData(certificate_url, payload);
-        } catch (err) {
-          console.error("[CERT_UPLOAD_ERROR]", err.message);
-          toast.error("Certificate processing failed", { id: "profile" });
-          setIsSubmitting(false);
-        }
-      };
+        reader.onerror = () => {
+          toast.error("Failed to read certificate file", { id: "profile" });
+        };
 
-      reader.onerror = () => {
-        toast.error("Failed to read certificate file", { id: "profile" });
-      };
-
-      reader.readAsDataURL(file);
-    } else {
-      await saveProfileData(certificate_url, payload);
+        reader.readAsDataURL(file);
+      } else {
+        await saveProfileData(certificate_url, payload);
+      }
+      setIsSubmitting(false);
+      return true;
+    } catch (err) {
+      console.error("[PROFILE_SETUP_ERROR]", err.message);
+      toast.error("Unexpected error during profile setup", { id: "profile" });
+      setIsSubmitting(false);
+      return false;
     }
-setIsSubmitting(false);
-    return true;
-  } catch (err) {
-    console.error("[PROFILE_SETUP_ERROR]", err.message);
-    toast.error("Unexpected error during profile setup", { id: "profile" });
-    setIsSubmitting(false);
-    return false;
-  }
-};
+  };
 
-// Extract profile save logic for reusability
-const saveProfileData = async (certificateUrl, payload) => {
-  toast.loading("Saving profile details...", { id: "profile" });
-  const res = await fetch("/api/customer/setprofile", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      advisor_role_id: payload.advisor_role_id, // Use correct field name
-      services: payload.services,
-      certificate_url: certificateUrl,
-      bio: payload.bio,
-    }),
-  });
+  // Extract profile save logic for reusability
+  const saveProfileData = async (certificateUrl, payload) => {
+    toast.loading("Saving profile details...", { id: "profile" });
+    const res = await fetch("/api/customer/setprofile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        advisor_role_id: payload.advisor_role_id, // Use correct field name
+        services: payload.services,
+        certificate_url: certificateUrl,
+        bio: payload.bio,
+      }),
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (!res.ok) {
-    toast.error(data?.message || "Failed to save profile", {
+    if (!res.ok) {
+      toast.error(data?.message || "Failed to save profile", {
+        id: "profile",
+      });
+      return false;
+    }
+
+    toast.success("Profile created successfully 🎉", {
       id: "profile",
     });
-    return false;
-  }
 
-  toast.success("Profile created successfully 🎉", {
-    id: "profile",
-  });
-
-  return true;
-};
+    return true;
+  };
 
   const [roles, setRoles] = useState([]);
 
@@ -206,7 +206,7 @@ const saveProfileData = async (certificateUrl, payload) => {
           <div className="h-full mx-auto flex items-center justify-between ">
             <div className="flex items-center space-x-2">
               <Image
-                src="/images/Adivisor/Navbar/navlogo.png"
+                src="/images/yvity.png"
                 height={90}
                 width={90}
                 alt="Navbarlogo"

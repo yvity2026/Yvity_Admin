@@ -205,7 +205,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
           </button>
           <div className="">
             <Image
-              src="/images/Adivisor/Navbar/navlogo.png"
+              src="/images/yvity.png"
               height={100}
               width={100}
               alt="Navbar logo"
