@@ -25,12 +25,12 @@ export default function AchievementCard({
 
         {ShowActions && (
           <div className="flex items-center gap-3 mt-3">
-            <button
+            {/* <button
               onClick={onEditClick}
               className="px-5 py-1.5 rounded-lg text-[clamp(8px,1vw,12px)] font-bold text-[#0A4A4A] transition-all border border-[#D5D5D5] bg-[#E8F4F4] cursor-pointer"
             >
               Edit
-            </button>
+            </button> */}
             <button
               onClick={onDeleteClick}
               className="px-5 py-1.5 rounded-lg text-[clamp(8px,1vw,12px)] font-bold text-[#D32323] bg-[#FFF2F2] transition-all border border-[#F7C6C6] cursor-pointer"

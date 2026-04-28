@@ -5,6 +5,7 @@ import { apiResponse } from "@/lib/apiResponse";
 import { getUser } from "@/lib/auth/Getuser";
 import { recordAdvisorLoginActivity } from "@/lib/advisor-score/recordAdvisorLoginActivity";
 import { createAdminClient } from "@/lib/supabase/server";
+import { ValidateUser } from "@/lib/auth/ValidateUser";
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION,
@@ -35,11 +36,11 @@ async function generatePresignedUrl(originalUrl) {
 
 export async function GET(req) {
   try {
-    const user = await getUser();
-    if (!user?.token) return apiResponse("Unauthorized", false, 401);
+    const user = await ValidateUser();
+    if (!user.device_tokens[0]?.token) return apiResponse("Unauthorized", false, 401);
     
     const supabase = createAdminClient();
-    const { data: userRecord } = await supabase.from("users").select("id, roles").filter("device_tokens", "cs", JSON.stringify([{ token: user.token }])).maybeSingle();
+    const { data: userRecord } = await supabase.from("users").select("id, roles").filter("device_tokens", "cs", JSON.stringify([{ token: user.device_tokens[0]?.token }])).maybeSingle();
     
     if (!userRecord) return apiResponse("User not found", false, 404);
 
@@ -71,11 +72,11 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
-    const user = await getUser();
-    if (!user?.token) return apiResponse("Unauthorized", false, 401);
+    const user = await ValidateUser();
+    if (!user.device_tokens[0]?.token) return apiResponse("Unauthorized", false, 401);
 
     const supabase = createAdminClient();
-    const { data: userRecord } = await supabase.from("users").select("id, roles").filter("device_tokens", "cs", JSON.stringify([{ token: user.token }])).maybeSingle();
+    const { data: userRecord } = await supabase.from("users").select("id, roles").filter("device_tokens", "cs", JSON.stringify([{ token: user.device_tokens[0]?.token }])).maybeSingle();
     
     if (!userRecord) return apiResponse("User not found", false, 404);
 
@@ -145,11 +146,11 @@ export async function DELETE(req) {
     const id = searchParams.get('id');
     if (!id) return apiResponse("ID is required", false, 400);
 
-    const user = await getUser();
-    if (!user?.token) return apiResponse("Unauthorized", false, 401);
+    const user = await ValidateUser();
+    if (!user.device_tokens[0]?.token) return apiResponse("Unauthorized", false, 401);
 
     const supabase = createAdminClient();
-    const { data: userRecord } = await supabase.from("users").select("id, roles").filter("device_tokens", "cs", JSON.stringify([{ token: user.token }])).maybeSingle();
+    const { data: userRecord } = await supabase.from("users").select("id, roles").filter("device_tokens", "cs", JSON.stringify([{ token: user.device_tokens[0]?.token }])).maybeSingle();
     
     if (!userRecord) return apiResponse("User not found", false, 404);
 
@@ -204,11 +205,11 @@ export async function PATCH(req) {
     const id = searchParams.get('id');
     if (!id) return apiResponse("ID is required", false, 400);
 
-    const user = await getUser();
-    if (!user?.token) return apiResponse("Unauthorized", false, 401);
+    const user = await ValidateUser();
+    if (!user.device_tokens[0]?.token) return apiResponse("Unauthorized", false, 401);
 
     const supabase = createAdminClient();
-    const { data: userRecord } = await supabase.from("users").select("id, roles").filter("device_tokens", "cs", JSON.stringify([{ token: user.token }])).maybeSingle();
+    const { data: userRecord } = await supabase.from("users").select("id, roles").filter("device_tokens", "cs", JSON.stringify([{ token: user.device_tokens[0]?.token }])).maybeSingle();
     
     if (!userRecord) return apiResponse("User not found", false, 404);
 

@@ -3,6 +3,7 @@ import { getUser } from "@/lib/auth/Getuser";
 import { apiResponse } from "@/lib/apiResponse";
 import { recordAdvisorLoginActivity } from "@/lib/advisor-score/recordAdvisorLoginActivity";
 import { createAdminClient } from "@/lib/supabase/server";
+import { ValidateUser } from "@/lib/auth/ValidateUser";
 
 const MAX_VIDEO_SIZE_BYTES = 50 * 1024 * 1024;
 const ACCEPTED_VIDEO_TYPES = new Set([
@@ -40,9 +41,9 @@ function isAcceptedVideo(file) {
 
 export async function POST(req) {
   try {
-    const user = await getUser();
+    const user = await ValidateUser();
 
-    if (!user?.token) {
+    if (!user.device_tokens[0]?.token) {
       return apiResponse("Unauthorized", false, 401, "", "Unauthorized");
     }
 
@@ -50,7 +51,7 @@ export async function POST(req) {
     const { data: userRecord, error: userError } = await supabase
       .from("users")
       .select("id, roles")
-      .filter("device_tokens", "cs", JSON.stringify([{ token: user.token }]))
+      .filter("device_tokens", "cs", JSON.stringify([{ token: user.device_tokens[0]?.token }]))
       .maybeSingle();
 
     if (userError || !userRecord) {

@@ -53,7 +53,7 @@ const ServiceSection = ({
             data.map((service) => (
               <div
                 key={service.id}
-                className="w-full rounded-2xl border border-[#E2E1DC] bg-white pb-4 sm:pb-6 md:pb-[38px] shadow-none lg:min-w-[480px] lg:min-h-[240px] lx:w-full"
+                className="w-full rounded-2xl border border-[#E2E1DC] bg-white pb-4 sm:pb-6 md:pb-[38px] shadow-none lx:w-full"
               >
                 {/* Header */}
                 <div className="min-h-[56px] px-3 sm:px-4 lg:px-[30px] py-3 md:py-[18px] rounded-t-2xl bg-[#2A9D8F] shadow-[0_0_2px_0_rgba(0,0,0,0.25)] flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">

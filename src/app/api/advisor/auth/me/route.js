@@ -2,12 +2,14 @@ import { getUser } from "@/lib/auth/Getuser";
 import { recordAdvisorLoginActivity } from "@/lib/advisor-score/recordAdvisorLoginActivity";
 import { createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { ValidateUser } from "@/lib/auth/ValidateUser";
 
 export async function GET() {
   try {
-    const user = await getUser();
+    const user = await ValidateUser();
+          // console.log("harsha123",user);
 
-    if (!user?.token) {
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
@@ -24,7 +26,7 @@ export async function GET() {
     const { data: userData, error: userError } = await supabase
       .from("users")
       .select("id, roles")
-      .filter("device_tokens", "cs", JSON.stringify([{ token: user.token }]))
+      .filter("device_tokens", "cs", JSON.stringify([{ token: user.device_tokens[0].token }]))
       .maybeSingle();
 
     if (userError || !userData) {
