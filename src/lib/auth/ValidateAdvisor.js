@@ -11,22 +11,12 @@ export async function ValidateAdvisor() {
     }
 
     const supabase = createAdminClient();
-    const { data, error} = await supabase.from("users").select("*").eq("id", payload.id).maybeSingle();
+    const { data, error} = await supabase.from("users").select("*").eq("id", payload.id).contains("roles", "advisor").maybeSingle();
 
     if (error || !data || !data.id || !data.roles.includes("advisor")) {
       return null;
     }
-
-    const { data: advisor, error: advisorError } = await supabase
-      .from("advisor_profiles")
-      .select("*")
-      .eq("advisor_id", data.id)
-      .maybeSingle();
-
-    if (!advisor || advisorError) {
-      return null;
-    }
-
+    
     await recordAdvisorLoginActivity(supabase, data);
 
     return data;
