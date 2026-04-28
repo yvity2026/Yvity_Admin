@@ -1,15 +1,65 @@
 import { NextResponse } from "next/server";
+import { verifyJwt } from "./lib/auth/jwt/VerifyJwt";
 
-export async function proxy(request) {
-  // Access cookies directly from the request
-  const rawToken = request.cookies.get("security_token")?.value;
-  
-  if (!rawToken) {
-    const loginUrl = new URL("https://yvity.vercel.app");
-    loginUrl.searchParams.set("redirect", request.url);
 
-    return NextResponse.redirect(loginUrl);
+const PUBLIC_PATHS = ["/api/auth/validate"];
+
+export async function proxy(req) {
+  const { pathname } = req.nextUrl;
+
+  if (PUBLIC_PATHS.some((path) => pathname.startsWith(path))) {
+    return NextResponse.next();
   }
 
-  return NextResponse.next();
+  const token = req.cookies.get("session")?.value;
+
+  if (!token) {
+    return redirectToLogin(req, "no_session");
+  }
+
+  try {
+    const payload = verifyJwt(token);
+    console.log(payload);
+
+    if (!payload || !payload.id) {
+      throw new Error("Invalid payload");
+    }
+
+    // ✅ Attach user info to request headers (for downstream usage)
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set("x-user-id", String(payload.id));
+
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+  } catch (err) {
+    console.error("JWT validation failed:", err);
+    return redirectToLogin(req, "invalid_session");
+  }
 }
+
+function redirectToLogin(req, error) {
+  const loginUrl = new URL("/login", req.url);
+  loginUrl.searchParams.set("error", error);
+
+  const response = NextResponse.redirect(loginUrl);
+
+  response.cookies.set("session", "", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+
+  return response;
+}
+
+export const config = {
+  matcher: [
+    "/dashboard/:path*",
+    "/api/protected/:path*", // optional
+  ],
+};
