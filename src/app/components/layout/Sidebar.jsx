@@ -273,10 +273,12 @@ useEffect(() => {
             onClick={() => router.push("/dashboard")}
           >
             <Image
-              src="/images/Adivisor/Navbar/navlogo.png"
+              src="/images/yvity.png"
               height={100}
               width={100}
               alt="Navbar logo"
+              className="h-10 w-auto object-contain"
+              priority
             />
           </div>
           <hr className="mt-5 border-t border-[#107171]" />
@@ -435,7 +437,7 @@ useEffect(() => {
       {/* RIGHT SIDE (HEADER + MAIN) */}
       <div className="flex flex-col flex-1 ">
         {/* HEADER (TOP RIGHT) */}
-        <header className="py-[18px] px-4 max-h-[60px] sticky top-0 z-10  flex items-center justify-between md:px-[90px] md:py-[10px] bg-white shadow-[0_0_4px_0_rgba(0,0,0,0.25)]">
+        <header className="py-[18px] px-4 min-h-[60px] sticky top-0 z-10  flex items-center justify-between md:px-[90px] md:py-[10px] bg-white shadow-[0_0_4px_0_rgba(0,0,0,0.25)]">
           <h3 className="text-black font-poppins text-base font-bold leading-normal">
             {currentHeader.title}
           </h3>

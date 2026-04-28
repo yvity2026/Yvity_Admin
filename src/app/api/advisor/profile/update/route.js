@@ -127,10 +127,15 @@ export async function PATCH(req) {
     const update = userResult.status === 'fulfilled' ? userResult.value.data : null;
 
     let score = null;
-    const shouldRefreshScore = Object.prototype.hasOwnProperty.call(
-      advisorProfileUpdates,
-      "intro_url"
-    );
+    const shouldRefreshScore =
+      Object.prototype.hasOwnProperty.call(
+        advisorProfileUpdates,
+        "intro_url"
+      ) ||
+      Object.prototype.hasOwnProperty.call(
+        advisorProfileUpdates,
+        "ispublic_profile"
+      );
 
     if (shouldRefreshScore) {
       const recalculateResult = await supabase.rpc("recalculate_advisor_score", {
@@ -139,7 +144,7 @@ export async function PATCH(req) {
 
       if (recalculateResult.error) {
         console.error(
-          "recalculate_advisor_score failed after intro_url update:",
+          "recalculate_advisor_score failed after profile score-impacting update:",
           recalculateResult.error
         );
       } else {
@@ -151,7 +156,7 @@ export async function PATCH(req) {
 
         if (scoreError) {
           console.error(
-            "Failed to fetch advisor_scores after intro_url update:",
+            "Failed to fetch advisor_scores after profile score-impacting update:",
             scoreError
           );
         } else {
