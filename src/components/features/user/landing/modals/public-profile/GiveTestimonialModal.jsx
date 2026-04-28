@@ -124,69 +124,63 @@ const GiveTestimonialModal = ({ open, onClose, advisorId, userId }) => {
     return await response.json();
   };
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    
-    try {
-      let mediaUrl = null;
-      let content = null;
+ const handleSubmit = async () => {
+  setLoading(true);
 
-      // Handle file uploads for audio/video
-      if (activeTab === "audio" && audioBlob) {
-        mediaUrl = await uploadToS3(audioBlob, 'audio');
-      } else if (activeTab === "video" && videoBlob) {
-        mediaUrl = await uploadToS3(videoBlob, 'video');
-      } else if (activeTab === "text" && testimonial) {
-        content = testimonial;
-      }
+  try {
+    let mediaUrl = null;
+    let contentData = null;
 
-      // Generate OTP
-      const otpData = await generateOTP(mobile);
-
-      // Prepare payload for backend
-      const payload = {
-        advisor_id: advisorId,
-        user_id: userId,
-        name: name,
-        mobile_number: mobile,
-        is_mobile_verified: false,
-        testimonial_type: activeTab,
-        content: content,
-        media_url: mediaUrl,
-        otp_code: otpData.otp_code,
-        otp_expires_at: otpData.otp_expires_at,
-        is_verified: false,
-        status: 'pending',
-        is_public: true,
-        rating: rating
-      };
-
-      // Send to backend
-      const response = await fetch('/api/testimonials', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit testimonial');
-      }
-
-      const result = await response.json();
-      
-      // Show OTP verification modal or redirect
-      alert('OTP sent successfully! Please verify your mobile number.');
-      onClose();
-      
-    } catch (error) {
-      console.error('Error submitting testimonial:', error);
-      alert('Failed to submit testimonial. Please try again.');
-    } finally {
-      setLoading(false);
+    // Upload first
+    if (activeTab === "audio" && audioBlob) {
+      mediaUrl = await uploadToS3(audioBlob, "audio");
+    } else if (activeTab === "video" && videoBlob) {
+      mediaUrl = await uploadToS3(videoBlob, "video");
+    } else if (activeTab === "text") {
+      contentData = testimonial;
     }
-  };
+
+    // Create testimonial (NO OTP HERE)
+    const response = await fetch("/api/customer/testimonials", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        advisor_id: advisorId,
+        name,
+        mobile_number: mobile,
+        testimonial_type: activeTab,
+        content: contentData,
+        media_url: mediaUrl,
+        rating,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error);
+    }
+
+    // Now trigger OTP send
+    await fetch("/api/send-otp", {
+      method: "POST",
+      body: JSON.stringify({ mobile_number: mobile }),
+    });
+
+    alert("OTP sent. Please verify.");
+    
+    // 👉 open OTP modal here instead of closing
+    // setShowOtpModal(true)
+
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <ModalWrapper onClose={() => onClose()}>

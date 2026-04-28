@@ -209,7 +209,7 @@ const saveProfileData = async (certificateUrl, payload) => {
                 src="/images/Adivisor/Navbar/navlogo.png"
                 height={90}
                 width={90}
-                alt="Navbar logo"
+                alt="Navbarlogo"
               />
             </div>
 
@@ -219,7 +219,7 @@ const saveProfileData = async (certificateUrl, payload) => {
                 <span className="font-medium">Home</span>
               </button>
 
-              {user?.roles?.includes("advisor") && advisor?.profile_status ? (
+              {user?.roles?.includes("advisor") ? (
                 <button
                   className="flex items-center gap-2 bg-[#0A4A4A] hover:bg-[#083c3c] text-white px-4 py-2 rounded-md text-sm font-semibold transition shadow-sm cursor-pointer"
                   onClick={() => router.push("/advisor/dashboard")}

@@ -42,15 +42,25 @@ const mapAdvisorCard = (user, profile) => {
   };
 };
 
-export async function GET() {
+export async function GET(request) {
   try {
+    // Add request logging
+    console.log("Dashboard API: Starting request");
+    
     const user = await ValidateUser();
+    console.log("Dashboard API: User validation result:", user ? "User found" : "No user");
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      console.log("Dashboard API: Unauthorized - no user");
+      return NextResponse.json(
+        { error: "Unauthorized", success: false }, 
+        { status: 401 }
+      );
     }
 
     const supabase = createAdminClient();
+    
+    console.log("Dashboard API: Fetching advisors from Supabase");
 
     const { data, error } = await supabase
       .from("users")
@@ -64,8 +74,8 @@ export async function GET() {
           id,
           advisor_role_id,
           advisor_roles (
-        title
-        ),
+            title
+          ),
           advisor_id,
           services,
           short_bio,
@@ -78,31 +88,63 @@ export async function GET() {
           ispublic_gallery,
           ispublic_testimonials
         )
-      `,
+        `
       )
       .filter("roles", "cs", JSON.stringify(["advisor"]))
       .order("created_at", { ascending: false });
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      console.error("Dashboard API: Supabase error:", error);
+      return NextResponse.json(
+        { error: error.message, success: false }, 
+        { status: 400 }
+      );
     }
+
+    console.log("Dashboard API: Found advisors:", data?.length || 0);
+
     const advisors = (data || [])
       .map((item) => {
         const profile = Array.isArray(item.advisor_profiles)
           ? item.advisor_profiles[0]
           : item.advisor_profiles;
 
+        // Uncomment if you want to filter by public profile
         // if (!profile?.ispublic_profile) return null;
 
         return mapAdvisorCard(item, profile);
       })
       .filter(Boolean);
 
-    return NextResponse.json({ success: true, data: advisors });
-  } catch (error) {
+    // Ensure we always return JSON with proper content-type
     return NextResponse.json(
-      { success: false, error: error.message || "Internal Server Error" },
-      { status: 500 },
+      { success: true, data: advisors },
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    
+  } catch (error) {
+    // Log the full error for debugging
+    console.error("Dashboard API: Unexpected error:", error);
+    console.error("Error stack:", error.stack);
+    
+    // Return a proper JSON error response
+    return NextResponse.json(
+      { 
+        success: false, 
+        error: error.message || "Internal Server Error",
+        details: process.env.NODE_ENV === "development" ? error.stack : undefined
+      },
+      { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
     );
   }
 }

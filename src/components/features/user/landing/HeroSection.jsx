@@ -10,7 +10,7 @@ import { AdvisorCard } from "./AdvisorCard";
 import { IoIosArrowRoundForward } from "react-icons/io";
 import { useAuth } from "@/context/AuthUserContext";
 
-const AdvisorSearchFilter = ({ onSearchChange, advisors = [] }) => {
+const AdvisorSearchFilter = ({ onSearchChange, advisors }) => {
   const [location, setLocation] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");

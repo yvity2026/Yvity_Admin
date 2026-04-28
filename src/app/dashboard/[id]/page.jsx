@@ -78,9 +78,7 @@ const page = () => {
   const [advisor, setAdvisor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeModal, setActiveModal] = useState(null);
-  const galleryData = [
-
-  ]
+  const galleryData = [];
   const MODALS = {
     TESTIMONIAL: "testimonial",
     RECOMMEND: "recommend",
@@ -143,14 +141,16 @@ const page = () => {
   ];
   const aboutData =
     serviceLabels.length > 0
-      ? [...serviceLabels.slice(0, 2), advisor?.is_verified ? "Licence verified" : "Verified Advisor"]
+      ? [
+          ...serviceLabels.slice(0, 2),
+          advisor?.is_verified ? "Licence verified" : "Verified Advisor",
+        ]
       : ["Founding Advisor", "Licence verifiled", "MDRT Advisor"];
   const summaryData = [
     {
-      count:
-        advisor?.services?.[0]?.experience
-          ? `${advisor.services[0].experience}+`
-          : "14+",
+      count: advisor?.services?.[0]?.experience
+        ? `${advisor.services[0].experience}+`
+        : "14+",
       label: "Exp",
     },
     {
@@ -184,27 +184,27 @@ const page = () => {
   const footerheadings = [
     {
       name: "Home",
-      isvisible: true
+      isvisible: true,
     },
     {
       name: "Journey",
-      isvisible: advisor?.ispublic_professional
+      isvisible: advisor?.ispublic_professional,
     },
     {
       name: "Service",
-      isvisible: advisor?.ispublic_services
+      isvisible: advisor?.ispublic_services,
     },
     {
       name: "Achievements",
-      isvisible: advisor?.ispublic_achievements
+      isvisible: advisor?.ispublic_achievements,
     },
     {
       name: "Gallery",
-      isvisible: advisor?.ispublic_gallery
+      isvisible: advisor?.ispublic_gallery,
     },
     {
       name: "Testimonials",
-      isvisible: advisor?.ispublic_testimonials
+      isvisible: advisor?.ispublic_testimonials,
     },
   ];
 
@@ -236,7 +236,6 @@ const page = () => {
     {
       icon: <CiBank />,
       data: "Quick Response",
-
     },
     {
       icon: <BiSolidCapsule />,
@@ -263,9 +262,6 @@ const page = () => {
     { label: "Share", icon: <BsShare />, modal: MODALS.SHARE },
     { label: "QR Code", icon: <IoQrCode />, modal: MODALS.QR },
   ];
-
-
-  const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [testimonial, setTestimonial] = useState("");
   const [rating, setRating] = useState(0);
@@ -274,8 +270,10 @@ const page = () => {
   // ✅ Validation + Submit
 
   const [selectedReasons, setSelectedReasons] = useState([]);
-  // const [mobile, setMobile] = useState("");
-  // const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState("form"); // form | otp
+  const [verificationToken, setVerificationToken] = useState(null);
+  const [otp, setOtp] = useState("");
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const reasonsList = [
     "Helpful & Honest",
@@ -296,44 +294,99 @@ const page = () => {
   };
 
   // ✅ submit
-  const handleRecommend = async () => {
+  const handleSubmit = async () => {
     if (selectedReasons.length === 0) {
-      toast.error("Please select at least one reason");
+      toast.error("Select at least one reason");
       return;
     }
 
     if (!/^[6-9]\d{9}$/.test(mobile)) {
-      toast.error("Enter valid 10 digit mobile number");
+      toast.error("Enter valid mobile number");
       return;
     }
 
     try {
-      setRecommendLoading(true);
+      setSubmitLoading(true);
 
-      // 🔥 replace with real API
-      await fetch("/api/recommend", {
+      const res = await fetch("/api/customer/recommendation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          reasons: selectedReasons,
-          mobile,
+          advisor_id: advisorId,
+          mobile_number: mobile,
+          recommendations: selectedReasons,
         }),
       });
 
-      toast.success("Recommendation submitted & OTP sent");
+      const data = await res.json();
 
-      // reset
-      setSelectedReasons([]);
-      setMobile("");
+      // ✅ Case 1: OTP required
+      if (data.require_otp) {
+        setVerificationToken(data.verification_token); // 🔥 IMPORTANT
+        setStep("otp");
+        toast.success("OTP sent to your mobile");
+        return;
+      }
+
+      // ✅ Case 2: Success
+      if (res.ok) {
+        toast.success("Recommendation submitted 🎉");
+        setActiveModal(null);
+        return;
+      }
+
+      throw new Error(data.error);
     } catch (err) {
-      toast.error("Something went wrong");
+      toast.error(err.message || "Something went wrong");
     } finally {
-      await new Promise((res) => setTimeout(res, 1500)); // simulate delay
-      setRecommendLoading(false);
+      setSubmitLoading(false);
     }
   };
+
+  //verify otp :
+  const handleVerifyOtp = async () => {
+    if (!/^\d{6}$/.test(otp)) {
+      toast.error("Enter valid 6-digit OTP");
+      return;
+    }
+
+    try {
+      setSubmitLoading(true);
+
+      const res = await fetch("/api/otp/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mobile_number: mobile,
+          otp_code: otp,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error);
+
+      // ✅ Save token
+      setVerificationToken(data.verification_token);
+
+      toast.success("OTP verified");
+
+      // ✅ Retry submission automatically
+      await handleSubmit();
+    } catch (err) {
+      toast.error(err.message || "OTP failed");
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  if (otp.length === 6) {
+  handleVerifyOtp();
+}
 
   useEffect(() => {
     if (!advisorId) return;
@@ -376,6 +429,16 @@ const page = () => {
 
     fetchAdvisor();
   }, [advisorId]);
+
+  useEffect(() => {
+  if (!activeModal) {
+    setStep("form");
+    setOtp("");
+    setVerificationToken(null);
+    setSelectedReasons([]);
+    setMobile("");
+  }
+}, [activeModal]);
 
   return (
     <div className="bg-[#F8F6F1]">
@@ -778,41 +841,43 @@ const page = () => {
           <div className="border-b border-[#E8F4F4] border-highlights rounded-t-2xl flex overflow-x-auto no-scrollbar md:pl-10">
             {loading
               ? [1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="p-[10px]">
-                  <Skeleton className="h-4 w-20 rounded-md" />
-                </div>
-              ))
-              : footerheadings.map((heading, index) => (
-                heading.isvisible && (
-                  <button
-                    key={index}
-                    onClick={() => setActiveTab(heading)}
-                    className="relative font-poppins p-[10px] text-center text-[clamp(10px,1vw,14px)] cursor-pointer text-sm font-bold"
-                  >
-                    <span
-                      className={`${activeTab?.name === heading.name
-                        ? "text-primary-900"
-                        : "text-gray-400"
-                        }`}
-                    >
-                      {heading.name}
-                    </span>
+                  <div key={i} className="p-[10px]">
+                    <Skeleton className="h-4 w-20 rounded-md" />
+                  </div>
+                ))
+              : footerheadings.map(
+                  (heading, index) =>
+                    heading.isvisible && (
+                      <button
+                        key={index}
+                        onClick={() => setActiveTab(heading)}
+                        className="relative font-poppins p-[10px] text-center text-[clamp(10px,1vw,14px)] cursor-pointer text-sm font-bold"
+                      >
+                        <span
+                          className={`${
+                            activeTab?.name === heading.name
+                              ? "text-primary-900"
+                              : "text-gray-400"
+                          }`}
+                        >
+                          {heading.name}
+                        </span>
 
-                    {/* Animated underline */}
-                    {activeTab === heading && (
-                      <motion.div
-                        layoutId="footerTabUnderline"
-                        className="absolute left-0 right-0 -bottom-[1px] h-[2px] bg-primary-900 rounded-full"
-                        transition={{
-                          type: "spring",
-                          stiffness: 500,
-                          damping: 35,
-                        }}
-                      />
-                    )}
-                  </button>
-                )
-              ))}
+                        {/* Animated underline */}
+                        {activeTab === heading && (
+                          <motion.div
+                            layoutId="footerTabUnderline"
+                            className="absolute left-0 right-0 -bottom-[1px] h-[2px] bg-primary-900 rounded-full"
+                            transition={{
+                              type: "spring",
+                              stiffness: 500,
+                              damping: 35,
+                            }}
+                          />
+                        )}
+                      </button>
+                    ),
+                )}
           </div>
 
           {/* Dynamic content */}
@@ -901,7 +966,8 @@ const page = () => {
                       {/* Life Insurance Card */}
                       <ServiceSection ShowActions={false} />
                     </div>
-                  ) : activeTab === "Achievements" && advisor?.ispublic_achievements ? (
+                  ) : activeTab === "Achievements" &&
+                    advisor?.ispublic_achievements ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {achievementsData.map((achievement) => (
                         <AchievementCard
@@ -917,9 +983,11 @@ const page = () => {
                         <GalleryItem key={item.id} data={item} />
                       ))}
                     </div>
-                  ) : activeTab === "Testimonials" && advisor?.ispublic_testimonials ? (
+                  ) : activeTab === "Testimonials" &&
+                    advisor?.ispublic_testimonials ? (
                     <Testimonials_filters showActions={false} />
-                  ) : activeTab === "Journey" && advisor?.ispublic_professional ? (
+                  ) : activeTab === "Journey" &&
+                    advisor?.ispublic_professional ? (
                     journeyData.map((section) => (
                       <JourneySection
                         key={section.id}
@@ -1028,10 +1096,11 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Helpful & Honest")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${selectedReasons.includes("Helpful & Honest")
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-                    }
+    ${
+      selectedReasons.includes("Helpful & Honest")
+        ? "border-emerald-500 bg-emerald-50"
+        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+    }
   `}
                 >
                   <span className="text-xl">🤝</span>
@@ -1043,10 +1112,11 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Expert Knowledge")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${selectedReasons.includes("Expert Knowledge")
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-                    }
+    ${
+      selectedReasons.includes("Expert Knowledge")
+        ? "border-emerald-500 bg-emerald-50"
+        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+    }
   `}
                 >
                   <span className="text-xl">🏆</span>
@@ -1058,10 +1128,11 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Quick Response")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${selectedReasons.includes("Quick Response")
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-                    }`}
+    ${
+      selectedReasons.includes("Quick Response")
+        ? "border-emerald-500 bg-emerald-50"
+        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+    }`}
                 >
                   <span className="text-xl text-orange-500">⚡</span>
                   <span className="text-slate-600 font-bold text-[0.8rem] group-hover:text-emerald-800">
@@ -1072,10 +1143,11 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Best Policy Advice")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${selectedReasons.includes("Best Policy Advice")
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-                    }`}
+    ${
+      selectedReasons.includes("Best Policy Advice")
+        ? "border-emerald-500 bg-emerald-50"
+        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+    }`}
                 >
                   <span className="text-xl">💯</span>
                   <span className="text-slate-600 font-bold text-[0.8rem] group-hover:text-emerald-800">
@@ -1086,10 +1158,11 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Trustworthy")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${selectedReasons.includes("Trustworthy")
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-                    }`}
+    ${
+      selectedReasons.includes("Trustworthy")
+        ? "border-emerald-500 bg-emerald-50"
+        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+    }`}
                 >
                   <span className="text-xl text-blue-400">🛡️</span>
                   <span className="text-slate-600 font-bold text-[0.8rem] group-hover:text-emerald-800">
@@ -1100,10 +1173,11 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Great Experience")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${selectedReasons.includes("Great Experience")
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-                    }`}
+    ${
+      selectedReasons.includes("Great Experience")
+        ? "border-emerald-500 bg-emerald-50"
+        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+    }`}
                 >
                   <span className="text-xl">😊</span>
                   <span className="text-slate-600 font-bold text-[0.8rem] group-hover:text-emerald-800">
@@ -1121,15 +1195,44 @@ const page = () => {
                 <input
                   type="tel"
                   placeholder="10 digit mobile number"
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value)}
                   className="w-full px-5 py-3.5 bg-slate-50 border border-gray-100 rounded-2xl text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-slate-400"
                 />
               </div>
+              {step === "form" ? (
+                <button
+                  onClick={handleSubmit}
+                  disabled={submitLoading}
+                  className="w-full bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-transform active:scale-[0.98]"
+                >
+                  {submitLoading ? "Submitting..." : "Submit"}
+                  <FiArrowRight size={18} />
+                </button>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-center text-gray-600">
+                    Enter OTP sent to {mobile}
+                  </p>
 
-              {/* Action Button */}
-              <button className="w-full bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-transform active:scale-[0.98]">
-                Submit
-                <FiArrowRight size={18} />
-              </button>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    placeholder="Enter 6-digit OTP"
+                    className="w-full px-5 py-3 border rounded-xl text-center text-lg tracking-widest"
+                  />
+
+                  <button
+                    onClick={handleVerifyOtp}
+                    disabled={submitLoading}
+                    className="w-full bg-green-600 text-white py-3 rounded-xl"
+                  >
+                    {submitLoading ? "Verifying..." : "Verify OTP"}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </ModalWrapper>
