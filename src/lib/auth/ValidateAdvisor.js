@@ -6,24 +6,12 @@ export async function ValidateAdvisor() {
   try {
     const payload = await getUser();
 
-    if (!payload?.userId && !payload?.token) {
+    if (!payload?.id ||  !payload) {
       return null;
     }
 
     const supabase = createAdminClient();
-    let query = supabase.from("users").select("*");
-
-    if (payload?.userId) {
-      query = query.eq("id", payload.userId);
-    } else {
-      query = query.filter(
-        "device_tokens",
-        "cs",
-        JSON.stringify([{ token: payload.token }])
-      );
-    }
-
-    const { data, error } = await query.maybeSingle();
+    const { data, error} = await supabase.from("users").select("*").eq("id", payload.id).maybeSingle();
 
     if (error || !data || !data.id || !data.roles.includes("advisor")) {
       return null;

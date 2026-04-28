@@ -1,9 +1,15 @@
 import { cookies } from "next/headers";
+import { verifyJwt } from "@/lib/auth/jwt/VerifyJwt";
 
 export async function getUser() {
-  const cookieStore =  await cookies()
-  const token = cookieStore.get("security_token")?.value
+  const cookieStore = await cookies(); // no need for await
+  const token = cookieStore.get("session")?.value;
+
   if (!token) return null;
-console.log(token)
-  return JSON.parse(token);
+
+  const payload = verifyJwt(token);
+
+  if (!payload) return null;
+
+  return payload; // { id, roles, ... }
 }
