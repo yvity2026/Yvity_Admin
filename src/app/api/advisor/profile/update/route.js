@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/Getuser";
 import { apiResponse } from "@/lib/apiResponse";
 import { recordAdvisorLoginActivity } from "@/lib/advisor-score/recordAdvisorLoginActivity";
+import { ValidateUser } from "@/lib/auth/ValidateUser";
 
 const validateMobile = (mobile) => {
   const mobileRegex = /^\d{10}$/; // Regex for exactly 10 digits
@@ -17,9 +18,9 @@ const validateEmail = (email) => {
 
 export async function PATCH(req) {
   try {
-    const user = await getUser();
+    const user = await ValidateUser();
 
-    if (!user?.token) {
+    if (!user.device_tokens[0]?.token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -29,7 +30,7 @@ export async function PATCH(req) {
     const { data: loggedUser, error: userError } = await supabase
       .from("users")
       .select("id, roles")
-      .filter("device_tokens", "cs", JSON.stringify([{ token: user.token }]))
+      .filter("device_tokens", "cs", JSON.stringify([{ token: user.device_tokens[0]?.token }]))
       .maybeSingle();
 
     if (userError || !loggedUser) {
@@ -96,7 +97,7 @@ export async function PATCH(req) {
         ? supabase
             .from("users")
             .update({ ...userProfileUpdates, updated_at: now })
-            .filter("device_tokens", "cs", JSON.stringify([{ token: user.token }]))
+            .filter("device_tokens", "cs", JSON.stringify([{ token: user.device_tokens[0]?.token }]))
             .select("*")
             .single()
         : Promise.resolve({ data: null, error: null })
@@ -118,7 +119,7 @@ export async function PATCH(req) {
     }
 
     if (errors.length > 0) {
-      console.error("Update errors:", errors);
+      console.error("Update errors:", error);
       return apiResponse("Failed to update profile", false, 5, "", errors[0].error.message);
     }
 
