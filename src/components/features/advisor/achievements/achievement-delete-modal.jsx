@@ -7,7 +7,7 @@ export default function AchievementDeleteModal({ isOpen, onClose, achievement, o
   const handleDelete = () => {
     if (onDelete) {
       onDelete(achievement);
-      toast.success("Deleted Successfully")
+      // toast.success("Deleted Successfully")
     }
     onClose();
   };
