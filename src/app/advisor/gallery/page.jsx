@@ -1,10 +1,22 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Skeleton from "@/app/components/skeleton/Skeleton";
 import InfoBanner from "@/components/features/advisor/gallery/info-banner";
 import GalleryItem from "@/components/features/advisor/gallery/gallery-item";
 import { AddPhotosModal, ImageDetailsModal } from "@/components/features/advisor/gallery/gallery-modals";
 import { useModal } from "@/context/ModalContext";
+
+function GalleryItemSkeleton() {
+  return (
+    <div className="flex flex-col gap-3">
+      <Skeleton className="aspect-square rounded-2xl w-full" />
+      <div className="px-1 mt-1">
+        <Skeleton className="h-5 w-[70%] rounded-md" />
+      </div>
+    </div>
+  );
+}
 
 export default function GalleryPage() {
   const [isAddPhotosOpen, setIsAddPhotosOpen] = useState(false);
@@ -55,14 +67,18 @@ export default function GalleryPage() {
 
         {/* Gallery Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
-          {galleryItems.map((item) => (
-            <GalleryItem
-              key={item.id}
-              data={item}
-              onEdit={(data) => setSelectedImage(data)}
-              onView={(data) => setViewImage(data)}
-            />
-          ))}
+          {isLoading
+            ? Array.from({ length: 6 }).map((_, index) => (
+                <GalleryItemSkeleton key={`gallery-skeleton-${index}`} />
+              ))
+            : galleryItems.map((item) => (
+                <GalleryItem
+                  key={item.id}
+                  data={item}
+                  onEdit={(data) => setSelectedImage(data)}
+                  onView={(data) => setViewImage(data)}
+                />
+              ))}
 
           {/* Always show the Add Photo card at the end of the grid */}
         </div>

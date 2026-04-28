@@ -3,6 +3,7 @@ import Skeleton from "@/app/components/skeleton/Skeleton";
 import React from "react";
 import { FaShield } from "react-icons/fa6";
 import { HiOutlineBuildingLibrary } from "react-icons/hi2";
+import { FaBuildingColumns } from "react-icons/fa6";
 
 const ServiceSection = ({
   data = [],
@@ -90,7 +91,7 @@ const ServiceSection = ({
                 {/* Body */}
                 <div className="pl-3 sm:pl-4 md:pl-[40px] mt-[16px] flex flex-col gap-2">
                   <span className="flex gap-2 justify-start items-center rounded-lg bg-[#E0F4F3] w-fit max-w-full min-h-[30px] px-3 py-1 text-green-800 font-poppins text-[clamp(8px,1vw,12px)] sm:text-xs font-semibold ">
-                    <HiOutlineBuildingLibrary />
+                    <FaBuildingColumns size={16} />
                     {service.company}
                   </span>
 

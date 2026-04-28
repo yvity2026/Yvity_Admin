@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Award, BriefcaseBusiness, GraduationCap } from "lucide-react";
+import Skeleton from "@/app/components/skeleton/Skeleton";
 
 import EntryDeleteModal from "@/components/features/advisor/professional-journey/entry-delete-modal";
 import EntryFormModal from "@/components/features/advisor/professional-journey/entry-form-modal";
@@ -141,6 +142,39 @@ const buildJourneySections = (entries) => {
   }));
 };
 
+function JourneySectionSkeleton({ themeColor }) {
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className={`${themeColor} px-6 py-4 flex items-center justify-between`}>
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-5 w-5 rounded-full bg-white/40" />
+          <Skeleton className="h-6 w-36 rounded-md bg-white/40" />
+          <Skeleton className="h-4 w-16 rounded-md bg-white/30" />
+        </div>
+      </div>
+
+      <div className="p-6">
+        <div className="relative border-l-2 border-gray-100 ml-4 space-y-6 pb-2">
+          {[1, 2].map((item) => (
+            <div key={item} className="relative pl-8">
+              <Skeleton className="absolute -left-[9px] top-1 h-4 w-4 rounded-full" />
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-28 rounded-md" />
+                <Skeleton className="h-5 w-48 rounded-md" />
+                <Skeleton className="h-4 w-40 rounded-md" />
+                <div className="space-y-2">
+                  <Skeleton className="h-3 w-full rounded-md" />
+                  <Skeleton className="h-3 w-[88%] rounded-md" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ProfessionalJourneyPage() {
   const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
@@ -148,11 +182,13 @@ export default function ProfessionalJourneyPage() {
   const [deletingEntry, setDeletingEntry] = useState(null);
   const [journeyData, setJourneyData] = useState([]);
   const [isProfessional, setProfessional] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const { trigger, clearTrigger } = useModal();
 
   const fetchJourney = async () => {
     try {
+      setLoading(true);
       const response = await fetch("/api/advisor/journey", {
         cache: "no-store",
       });
@@ -167,6 +203,8 @@ export default function ProfessionalJourneyPage() {
       console.error("Journey fetch failed:", error);
       setJourneyData([]);
       toast.error(error.message || "Failed to fetch journey data");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -283,14 +321,25 @@ export default function ProfessionalJourneyPage() {
         <InfoBanner />
 
         <div className="space-y-8">
-          {journeyData.map((section) => (
-            <JourneySection
-              key={section.id}
-              data={section}
-              onEditClick={handleEditClick}
-              onDeleteClick={handleDeleteClick}
-            />
-          ))}
+          {loading
+            ? [
+                { id: "profession-skeleton", themeColor: SECTION_CONFIG.Profession.themeColor },
+                { id: "certificate-skeleton", themeColor: SECTION_CONFIG.Certificate.themeColor },
+                { id: "education-skeleton", themeColor: SECTION_CONFIG.Education.themeColor },
+              ].map((section) => (
+                <JourneySectionSkeleton
+                  key={section.id}
+                  themeColor={section.themeColor}
+                />
+              ))
+            : journeyData.map((section) => (
+                <JourneySection
+                  key={section.id}
+                  data={section}
+                  onEditClick={handleEditClick}
+                  onDeleteClick={handleDeleteClick}
+                />
+              ))}
         </div>
       </div>
 

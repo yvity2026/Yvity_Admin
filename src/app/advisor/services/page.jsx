@@ -722,10 +722,12 @@ export default function Page() {
 
   //Fetch Services from the DB :
   const [servicesList, setServicesList] = useState([]);
+  const [loadingServices, setLoadingServices] = useState(true);
 
   //fetch the users :
   const fetchServices = async () => {
     try {
+      setLoadingServices(true);
       const res = await fetch(API);
       const data = await res.json();
 
@@ -734,6 +736,8 @@ export default function Page() {
       setServicesList(data.services);
     } catch (err) {
       toast.error("Failed to load services");
+    } finally {
+      setLoadingServices(false);
     }
   };
 
@@ -885,6 +889,7 @@ export default function Page() {
           data={servicesList}
           setEdit={setEdit}
           setIsDelete={setIsDelete}
+          loading={loadingServices}
           setEditData={(service) => {
             setEditId(service.id);
             setForm({
