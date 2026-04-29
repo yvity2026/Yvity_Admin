@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { HiOutlineHome } from "react-icons/hi";
-import { FiUser, FiLogOut, FiMenu, FiX } from "react-icons/fi";
+import { FiUser, FiLogOut, FiMenu, FiX, FiShield } from "react-icons/fi";
 import { IoNotificationsOutline } from "react-icons/io5";
 import AdvisorProfileModal from "./modals/AdvisorProfileModal";
 import AdvisorFormModal from "./modals/AdvisorFormModal";
@@ -20,7 +20,7 @@ const Header = () => {
   const { user, advisor, loading, setLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
-   const [isSubmitting, setIsSubmitting] = useState(false); 
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const MODALS = {
     PROFILE: "profile",
@@ -38,105 +38,105 @@ const Header = () => {
   };
 
   const handleProfileSetupSubmit = async (payload) => {
-  try {
-    toast.loading("Processing profile setup...", { id: "profile" });
-     setIsSubmitting(true);
-    let certificate_url = payload.certificate_url;
+    try {
+      toast.loading("Processing profile setup...", { id: "profile" });
+      setIsSubmitting(true);
+      let certificate_url = payload.certificate_url;
 
-    // Handle certificate file upload if provided
-    if (payload.certificate_file) {
-      toast.loading("Uploading IRDAI certificate...", { id: "profile" });
+      // Handle certificate file upload if provided
+      if (payload.certificate_file) {
+        toast.loading("Uploading IRDAI certificate...", { id: "profile" });
 
-      const file = payload.certificate_file;
-      const reader = new FileReader();
+        const file = payload.certificate_file;
+        const reader = new FileReader();
 
-      reader.onload = async () => {
-        try {
-          // Convert file to base64 for production-safe transmission
-          const base64Data = reader.result.split(',')[1];
-          
-          const certRes = await fetch("/api/customer/upload-cert", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              fileName: file.name,
-              fileType: file.type,
-              fileBuffer: base64Data,
-            }),
-          });
+        reader.onload = async () => {
+          try {
+            // Convert file to base64 for production-safe transmission
+            const base64Data = reader.result.split(",")[1];
 
-          const certData = await certRes.json();
-
-          if (!certRes.ok) {
-            toast.error(certData?.error || "Certificate upload failed", {
-              id: "profile",
+            const certRes = await fetch("/api/customer/upload-cert", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                fileName: file.name,
+                fileType: file.type,
+                fileBuffer: base64Data,
+              }),
             });
+
+            const certData = await certRes.json();
+
+            if (!certRes.ok) {
+              toast.error(certData?.error || "Certificate upload failed", {
+                id: "profile",
+              });
+              setIsSubmitting(false);
+              return false;
+            }
+
+            certificate_url = certData.url;
+
+            // Only proceed after successful upload
+            await saveProfileData(certificate_url, payload);
+          } catch (err) {
+            console.error("[CERT_UPLOAD_ERROR]", err.message);
+            toast.error("Certificate processing failed", { id: "profile" });
             setIsSubmitting(false);
-            return false;
           }
+        };
 
-          certificate_url = certData.url;
-          
-          // Only proceed after successful upload
-          await saveProfileData(certificate_url, payload);
-        } catch (err) {
-          console.error("[CERT_UPLOAD_ERROR]", err.message);
-          toast.error("Certificate processing failed", { id: "profile" });
-          setIsSubmitting(false);
-        }
-      };
+        reader.onerror = () => {
+          toast.error("Failed to read certificate file", { id: "profile" });
+        };
 
-      reader.onerror = () => {
-        toast.error("Failed to read certificate file", { id: "profile" });
-      };
-
-      reader.readAsDataURL(file);
-    } else {
-      await saveProfileData(certificate_url, payload);
+        reader.readAsDataURL(file);
+      } else {
+        await saveProfileData(certificate_url, payload);
+      }
+      setIsSubmitting(false);
+      return true;
+    } catch (err) {
+      console.error("[PROFILE_SETUP_ERROR]", err.message);
+      toast.error("Unexpected error during profile setup", { id: "profile" });
+      setIsSubmitting(false);
+      return false;
     }
-setIsSubmitting(false);
-    return true;
-  } catch (err) {
-    console.error("[PROFILE_SETUP_ERROR]", err.message);
-    toast.error("Unexpected error during profile setup", { id: "profile" });
-    setIsSubmitting(false);
-    return false;
-  }
-};
+  };
 
-// Extract profile save logic for reusability
-const saveProfileData = async (certificateUrl, payload) => {
-  toast.loading("Saving profile details...", { id: "profile" });
-  const res = await fetch("/api/customer/setprofile", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      advisor_role_id: payload.advisor_role_id, // Use correct field name
-      services: payload.services,
-      certificate_url: certificateUrl,
-      bio: payload.bio,
-    }),
-  });
+  // Extract profile save logic for reusability
+  const saveProfileData = async (certificateUrl, payload) => {
+    toast.loading("Saving profile details...", { id: "profile" });
+    const res = await fetch("/api/customer/setprofile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        advisor_role_id: payload.advisor_role_id, // Use correct field name
+        services: payload.services,
+        certificate_url: certificateUrl,
+        bio: payload.bio,
+      }),
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (!res.ok) {
-    toast.error(data?.message || "Failed to save profile", {
+    if (!res.ok) {
+      toast.error(data?.message || "Failed to save profile", {
+        id: "profile",
+      });
+      return false;
+    }
+
+    toast.success("Profile created successfully 🎉", {
       id: "profile",
     });
-    return false;
-  }
 
-  toast.success("Profile created successfully 🎉", {
-    id: "profile",
-  });
-
-  return true;
-};
+    return true;
+  };
 
   const [roles, setRoles] = useState([]);
 
@@ -170,25 +170,30 @@ const saveProfileData = async (certificateUrl, payload) => {
     <>
       {loading ? (
         <nav className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 md:h-[70px] shadow-sm relative after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-px after:bg-gradient-to-r after:from-[#0D6060] after:to-[#F59E0B]">
-          <div className="mx-auto flex items-center justify-between">
+          <div className="h-full mx-auto flex items-center justify-between">
+            {/* Logo */}
             <div className="flex items-center space-x-2">
               <Skeleton className="w-[90px] h-[40px] rounded-md" />
             </div>
 
+            {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-4 lg:gap-6 xl:gap-8">
+              {/* Home */}
               <div className="flex items-center gap-2">
                 <Skeleton className="w-5 h-5 rounded" />
                 <Skeleton className="w-16 h-4 rounded" />
               </div>
 
-              <div className="flex items-center gap-2">
-                <Skeleton className="w-5 h-5 rounded" />
-                <Skeleton className="w-32 h-4 rounded" />
-              </div>
+              {/* Button */}
+              <Skeleton className="w-32 h-9 rounded-md" />
 
-              <div className="flex items-center space-x-4 pl-4 border-l border-gray-200">
-                <Skeleton className="w-10 h-10 rounded-full" />
-                <Skeleton className="w-10 h-10 rounded-full" />
+              {/* Right Section */}
+              <div className="flex items-center gap-4 pl-4">
+                <div className="hidden md:flex items-center gap-3 lg:gap-4 xl:gap-6">
+                  <Skeleton className="w-10 h-10 rounded-full" />
+                  <Skeleton className="w-10 h-10 rounded-full" />
+                </div>
+
                 <div className="flex items-center gap-2">
                   <Skeleton className="w-5 h-5 rounded" />
                   <Skeleton className="w-16 h-4 rounded" />
@@ -196,13 +201,14 @@ const saveProfileData = async (certificateUrl, payload) => {
               </div>
             </div>
 
+            {/* Mobile */}
             <div className="md:hidden flex items-center">
               <Skeleton className="w-8 h-8 rounded" />
             </div>
           </div>
         </nav>
       ) : (
-        <nav className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 md:h-[70px] shadow-sm relative after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-px after:bg-gradient-to-r after:from-[#0D6060] after:to-[#F59E0B]">
+        <nav className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 md:max-h-[70px] shadow-sm relative after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-px after:bg-gradient-to-r after:from-[#0D6060] after:to-[#F59E0B]">
           <div className="h-full mx-auto flex items-center justify-between ">
             <div className="flex items-center space-x-2">
               <Image
@@ -219,7 +225,9 @@ const saveProfileData = async (certificateUrl, payload) => {
                 <span className="font-medium">Home</span>
               </button>
 
-              {user?.roles?.includes("advisor") ? (
+              {user?.roles?.includes("advisor") &&
+              advisor.profile_status &&
+              advisor.account_status === "active" ? (
                 <button
                   className="flex items-center gap-2 bg-[#0A4A4A] hover:bg-[#083c3c] text-white px-4 py-2 rounded-md text-sm font-semibold transition shadow-sm cursor-pointer"
                   onClick={() => router.push("/advisor/dashboard")}
@@ -227,6 +235,37 @@ const saveProfileData = async (certificateUrl, payload) => {
                   {" "}
                   <span className="font-medium">My Dashboard</span>{" "}
                 </button>
+              ) : !user?.roles?.includes("advisor") &&
+                !advisor.profile_status &&
+                advisor.account_status === "under_review" ? (
+                <div className="flex items-center gap-3 bg-[#E6F4F4] border border-[#0A4A4A]/20 px-4 py-1 rounded-lg shadow-sm">
+                  {/* Animated Shield */}
+                  <motion.div
+                    className="flex items-center justify-center w-8 h-8 rounded-full bg-[#0A4A4A]/10"
+                    animate={{
+                      scale: [1, 1.1, 1],
+                      opacity: [1, 0.7, 1],
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    <FiShield className="text-[#0A4A4A]" size={10} />
+                  </motion.div>
+
+                  {/* Text */}
+                  <div className="flex flex-col leading-tight">
+                    <span className="text-xs font-semibold text-[#0A4A4A]">
+                      Profile Under Review
+                    </span>
+                    <span className="text-[8px] text-gray-600 max-w-[220px]">
+                      Your IRDAI details have been submitted. Verification takes
+                      24–48 hours.
+                    </span>
+                  </div>
+                </div>
               ) : (
                 <button
                   className="flex items-center gap-2  text-[clamp(10px,1vw,14px)] leading-[16px] px-2 py-1 font-medium text-[#111827] cursor-pointer"

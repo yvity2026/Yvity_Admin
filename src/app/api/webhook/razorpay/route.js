@@ -1,6 +1,5 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/server";
 
 const supabase = createAdminClient();
@@ -25,13 +24,13 @@ export async function POST(req) {
 
     const event = JSON.parse(rawBody);
 
-    // ✅ 3. Log webhook (optional but HIGHLY recommended)
-    await supabase.from("payment_webhooks").insert({
-      event_type: event.event,
-      payload: event,
-      signature,
-      is_verified: true,
-    });
+    // // ✅ 3. Log webhook (optional but HIGHLY recommended)
+    // await supabase.from("payment_webhooks").insert({
+    //   event_type: event.event,
+    //   payload: event,
+    //   signature,
+    //   is_verified: true,
+    // });
 
     // ==============================
     // 🎯 HANDLE EVENTS
