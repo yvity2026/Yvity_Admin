@@ -57,6 +57,10 @@ const page = () => {
   const qrRef = React.useRef(null);
   const { user, advisor, loading: authLoading } = useAuth();
   const [activeModal, setActiveModal] = useState(null);
+  const [advisorScore, setAdvisorScore] = useState({
+    total: 0,
+    max: 100,
+  });
   const introVideoUrl = advisor?.intro_url?.trim() || "";
   const introVideoTitle = user?.name
     ? `${user.name} Introduction`
@@ -81,6 +85,38 @@ const page = () => {
     };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchAdvisorScore() {
+      try {
+        const response = await fetch("/api/advisor/yvity-score-summary", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result?.success || !isMounted) {
+          return;
+        }
+
+        setAdvisorScore({
+          total: result.data?.total ?? 0,
+          max: result.data?.max ?? 100,
+        });
+      } catch (error) {
+        console.error("Failed to load advisor score:", error);
+      }
+    }
+
+    fetchAdvisorScore();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleEditClick = (entry) => {
@@ -314,6 +350,9 @@ const page = () => {
     }
   };
 
+
+  
+
   return (
     <div className="bg-[#F8F6F1]">
       {/* Header */}
@@ -478,7 +517,7 @@ const page = () => {
                   <div className="rounded-lg border border-[#E2E2E2] bg-[#F0F8F8] py-[12px] pl-[18px] pr-[34px] mt-[16px] ">
                     <span className="flex items-center gap-[11px] ">
                       <h2 className="text-teal-950 text-2xl font-bold leading-4 font-poppins">
-                        87/100
+                        {advisorScore.total}/{advisorScore.max}
                       </h2>
                       <span>⭐⭐⭐⭐</span>
                       <p className="text-gray-500 text-[10px] sm:text-xs md:text-xs font-semibold leading-normal font-poppins">
@@ -486,7 +525,13 @@ const page = () => {
                       </p>
                     </span>
                     <span>
-                      <ProgressBar value={87} />
+                      <ProgressBar
+                        value={
+                          advisorScore.max
+                            ? (advisorScore.total / advisorScore.max) * 100
+                            : 0
+                        }
+                      />
                     </span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">

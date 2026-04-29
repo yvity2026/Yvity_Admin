@@ -66,7 +66,7 @@ const AdvisorProfileModal = ({ isOpen, onClose, onContinue, form, roles }) => {
 
           <div className="mb-">
             <Image
-              src="/images/Adivisor/Navbar/navlogo.png"
+              src="/images/yvity.png"
               height={100}
               width={100}
               alt="Navbar logo"
@@ -122,12 +122,14 @@ const AdvisorProfileModal = ({ isOpen, onClose, onContinue, form, roles }) => {
           <button
             className="w-full bg-[#0D4D4D] hover:bg-[#0A3D3D] text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all cursor-pointer"
             onClick={() => {
-            if (!validateRoleSelection()) return;
+              if (!validateRoleSelection()) return;
 
-            onContinue(selectedRoleId);
+              onContinue(selectedRoleId);
             }}
           >
-            {!selectedRoleId ? "Select a Role to Continue" : "Continue as Selected Role"}
+            {!selectedRoleId
+              ? "Select a Role to Continue"
+              : "Continue as Selected Role"}
             <HiOutlineArrowRight size={20} />
           </button>
         </div>

@@ -273,10 +273,12 @@ useEffect(() => {
             onClick={() => router.push("/dashboard")}
           >
             <Image
-              src="/images/Adivisor/Navbar/navlogo.png"
+              src="/images/yvity.png"
               height={100}
               width={100}
               alt="Navbar logo"
+              className="h-10 w-auto object-contain"
+              priority
             />
           </div>
           <hr className="mt-5 border-t border-[#107171]" />

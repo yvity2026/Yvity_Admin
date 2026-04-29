@@ -1,6 +1,7 @@
 import { getUser } from "@/lib/auth/Getuser";
 import { recordAdvisorLoginActivity } from "@/lib/advisor-score/recordAdvisorLoginActivity";
 import { createAdminClient } from "@/lib/supabase/server";
+import { ValidateUser } from "../auth/ValidateUser";
 
 const SCORE_LIMITS = {
   total: 100,
@@ -346,8 +347,7 @@ function buildPageData({
     irdaPendingVerification: hasIrdaCertificate && !profile?.profile_status,
   };
 
-  const visibilityPublicProfile =
-    scoreRow?.public_profile_pts ?? calculatedVisibility.publicProfile;
+  const visibilityPublicProfile = calculatedVisibility.publicProfile;
   const visibilitySelfShare =
     scoreRow?.self_share_pts ?? calculatedVisibility.selfShare;
   const visibilityClientShare =
@@ -361,12 +361,11 @@ function buildPageData({
 
   const visibility = {
     total:
-      scoreRow?.visibility_total ??
-      (visibilityPublicProfile +
-        visibilitySelfShare +
-        visibilityClientShare +
-        visibilityProfileStrength +
-        visibilityLoginActivity),
+      visibilityPublicProfile +
+      visibilitySelfShare +
+      visibilityClientShare +
+      visibilityProfileStrength +
+      visibilityLoginActivity,
     max: SCORE_LIMITS.visibility,
     publicProfile: visibilityPublicProfile,
     selfShare: visibilitySelfShare,
@@ -510,9 +509,8 @@ function buildPageData({
 }
 
 export async function getAdvisorScorePageData() {
-  const sessionUser = await getUser();
-
-  if (!sessionUser?.userId && !sessionUser?.token) {
+  const sessionUser = await ValidateUser();
+  if (!sessionUser?.id && !sessionUser.device_tokens[0]?.token) {
     return createEmptyState();
   }
 
@@ -522,13 +520,13 @@ export async function getAdvisorScorePageData() {
     .from("users")
     .select("id,name,roles,mobile_verified,email_verified,selfie_url");
 
-  if (sessionUser?.userId) {
-    advisorQuery = advisorQuery.eq("id", sessionUser.userId);
+  if (sessionUser?.id) {
+    advisorQuery = advisorQuery.eq("id", sessionUser.id);
   } else {
     advisorQuery = advisorQuery.filter(
       "device_tokens",
       "cs",
-      JSON.stringify([{ token: sessionUser.token }])
+      JSON.stringify([{ token: sessionUser.device_tokens[0]?.token }])
     );
   }
 

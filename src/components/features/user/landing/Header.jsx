@@ -212,7 +212,7 @@ const Header = () => {
           <div className="h-full mx-auto flex items-center justify-between ">
             <div className="flex items-center space-x-2">
               <Image
-                src="/images/Adivisor/Navbar/navlogo.png"
+                src="/images/yvity.png"
                 height={90}
                 width={90}
                 alt="Navbarlogo"
