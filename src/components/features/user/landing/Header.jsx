@@ -242,8 +242,8 @@ const Header = () => {
               </button>
 
               {user?.roles?.includes("advisor") &&
-              advisor.profile_status &&
-              advisor.account_status === "active" ? (
+              advisor?.profile_status &&
+              advisor?.account_status === "active" ? (
                 <button
                   className="flex items-center gap-2 bg-[#0A4A4A] hover:bg-[#083c3c] text-white px-4 py-2 rounded-md text-sm font-semibold transition shadow-sm cursor-pointer"
                   onClick={() => router.push("/advisor/dashboard")}
@@ -252,8 +252,8 @@ const Header = () => {
                   <span className="font-medium">My Dashboard</span>{" "}
                 </button>
               ) : !user?.roles?.includes("advisor") &&
-                !advisor.profile_status &&
-                advisor.account_status === "under_review" ? (
+                !advisor?.profile_status &&
+                advisor?.account_status === "under_review" ? (
                 <div className="flex items-center gap-3 bg-[#E6F4F4] border border-[#0A4A4A]/20 px-4 py-1 rounded-lg shadow-sm">
                   {/* Animated Shield */}
                   <motion.div
