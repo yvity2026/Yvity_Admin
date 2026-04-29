@@ -25,6 +25,16 @@ import { useModal } from "@/context/ModalContext";
 import clsx from "clsx";
 import { useAuth } from "@/context/AuthUserContext";
 
+function clearBrowserCookies() {
+  document.cookie.split(";").forEach((cookie) => {
+    const name = cookie.split("=")[0]?.trim();
+    if (!name) return;
+
+    document.cookie = `${name}=; Max-Age=0; path=/`;
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+  });
+}
+
 const menuItems = [
   {
     title: "Main",
@@ -120,6 +130,7 @@ export default function AppShell({ children }) {
   const { openModal } = useModal();
   const [user, setaUser] = useState();
   const {loading, setLoading, setUser } = useAuth();
+  const [logoutLoading, setLogoutLoading] = useState(false);
   // const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -245,6 +256,27 @@ useEffect(() => {
     document.body.style.overflow = "";
   };
 }, [mobileOpen]);
+
+  const handleLogout = async () => {
+    if (logoutLoading) return;
+
+    try {
+      setLogoutLoading(true);
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+
+      clearBrowserCookies();
+      setUser(null);
+      setaUser(null);
+      window.location.href = data.redirect_url || "/";
+    } catch (error) {
+      console.error("Logout failed:", error);
+      clearBrowserCookies();
+      setUser(null);
+      setaUser(null);
+      window.location.href = "/";
+    }
+  };
   
   
   
@@ -418,15 +450,17 @@ useEffect(() => {
               whileTap={{ scale: 0.95 }}
               className="flex items-center gap-4 font-semibold px-10 py-3 text-[#8BBEBE] cursor-pointer border-t border-[#107171]"
             >
-              <Link
-                href="/login"
-                className="flex items-center justify-center space-x-1"
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={logoutLoading}
+                className="flex items-center justify-center space-x-1 cursor-pointer disabled:opacity-60 disabled:cursor-wait"
               >
                 <span className="">
                   <MdOutlineLogout />
                 </span>
-                {!collapsed && <span>Logout</span>}
-              </Link>
+                {!collapsed && <span>{logoutLoading ? "Logging out..." : "Logout"}</span>}
+              </button>
             </motion.div>
           </div>
         </div>
@@ -576,14 +610,18 @@ useEffect(() => {
 
                 {/* LOGOUT */}
                 <div className="mt-4 border-t border-[#107171]">
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 px-6 py-3 text-[#8BBEBE]"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      handleLogout();
+                    }}
+                    disabled={logoutLoading}
+                    className="flex items-center gap-3 px-6 py-3 text-[#8BBEBE] disabled:opacity-60 disabled:cursor-wait"
                   >
                     <MdOutlineLogout />
-                    <span>Logout</span>
-                  </Link>
+                    <span>{logoutLoading ? "Logging out..." : "Logout"}</span>
+                  </button>
                 </div>
               </div>
             </motion.aside>

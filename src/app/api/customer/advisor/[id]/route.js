@@ -2,14 +2,15 @@ import { NextResponse } from "next/server";
 import { resolveAdvisorProfileSlug } from "@/lib/advisor/profileSlug";
 import { createAdminClient } from "@/lib/supabase/server";
 
-export async function GET(req,  context) {
+export async function GET(req, context) {
   try {
     const { id } = await context.params;
     const supabase = createAdminClient();
 
     const { data: advisors, error } = await supabase
       .from("users")
-      .select(`
+      .select(
+        `
         id,
         name,
         mobile,
@@ -32,6 +33,7 @@ export async function GET(req,  context) {
           advisor_id,
           services,
           short_bio,
+          current_plan,
           iridai_certificate_url,
           profile_status,
           created_at,
@@ -70,6 +72,7 @@ export async function GET(req,  context) {
     if (!data) {
       return NextResponse.json({ error: "Advisor not found" }, { status: 404 });
     }
+    console.log(data);
 
     const profile = Array.isArray(data.advisor_profiles)
       ? data.advisor_profiles[0]
@@ -82,27 +85,19 @@ export async function GET(req,  context) {
     return NextResponse.json({
       success: true,
       data: {
-        id: data.id,
-        name: data.name,
-        mobile: data.mobile,
-        email: data.email,
-        dob: data.dob,
-        gender: data.gender,
-        city: data.city,
-        profession: data.profession,
-        selfie_url: data.selfie_url,
-        mobile_verified: data.mobile_verified,
-        email_verified: data.email_verified,
-        advisor_profile: {
-          ...profile,
-          is_verified: profile?.profile_status || false,
-        },
+        ...data,
+        advisor_profiles: profile
+          ? {
+              ...profile,
+              is_verified: profile.profile_status || false,
+            }
+          : null,
       },
     });
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message || "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
