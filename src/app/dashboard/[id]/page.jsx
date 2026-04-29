@@ -57,7 +57,6 @@ import Skeleton from "@/app/components/skeleton/Skeleton";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import GiveTestimonialModal from "@/components/features/user/landing/modals/public-profile/GiveTestimonialModal";
-import { resolveAdvisorProfileSlug } from "@/lib/advisor/profileSlug";
 import { useAdvisorAuth } from "@/context/AuthAdvisorContext";
 
 const getServiceLabels = (services = []) => {
@@ -104,8 +103,32 @@ const page = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeModal, setActiveModal] = useState(null);
-  const [appOrigin, setAppOrigin] = useState("");
-  const galleryData = [];
+
+  // Get context functions for fetching public advisor data
+  const {
+    fetchPublicAdvisorServices,
+    fetchPublicAdvisorTestimonials,
+    fetchPublicAdvisorAchievements,
+    fetchPublicAdvisorGallery,
+    fetchPublicAdvisorJourney,
+  } = useAdvisorAuth();
+
+  // Public advisor data states
+  const [publicServices, setPublicServices] = useState([]);
+  const [publicTestimonials, setPublicTestimonials] = useState([]);
+  const [publicAchievements, setPublicAchievements] = useState([]);
+  const [publicGallery, setPublicGallery] = useState([]);
+  const [publicJourney, setPublicJourney] = useState([]);
+
+  // Loading state for public data
+  const [publicDataLoading, setPublicDataLoading] = useState({
+    services: false,
+    testimonials: false,
+    achievements: false,
+    gallery: false,
+    journey: false,
+  });
+
   const MODALS = {
     TESTIMONIAL: "testimonial",
     RECOMMEND: "recommend",
@@ -177,12 +200,6 @@ const page = () => {
     return () => window.removeEventListener("keydown", handleEsc);
   }, []);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setAppOrigin(window.location.origin);
-    }
-  }, []);
-
   const handleEditClick = (entry) => {
     setEditingEntry(entry);
     setIsEntryModalOpen(true);
@@ -201,85 +218,10 @@ const page = () => {
 
     const link = document.createElement("a");
     link.href = pngUrl;
-    link.download = qrDownloadFileName;
+    link.download = `${user?.name || "advisor"}-qr.png`;
     link.click();
   };
 
-  const advisorProfileSlug = resolveAdvisorProfileSlug(
-    advisor?.profile_slug,
-    user?.name,
-  );
-  const publicProfilePath = advisorProfileSlug
-    ? `/dashboard/${advisorProfileSlug}`
-    : advisorId
-      ? `/dashboard/${advisorId}`
-      : "";
-  const publicBaseUrl =
-    process.env.NEXT_PUBLIC_APP_URL ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    appOrigin;
-  const normalizedBaseUrl = publicBaseUrl
-    ? publicBaseUrl.replace(/\/+$/, "")
-    : "";
-  const publicProfileUrl =
-    normalizedBaseUrl && publicProfilePath
-      ? `${normalizedBaseUrl}${publicProfilePath}`
-      : publicProfilePath;
-  const publicProfileLabel = publicProfileUrl
-    .replace(/^https?:\/\//, "")
-    .replace(/\/+$/, "");
-  const qrDownloadFileName = `${advisorProfileSlug || "advisor"}-qr.png`;
-  const publicAdvisorId = advisor?.advisor_id || user?.id || advisorId;
-
-  // const serviceLabels = getServiceLabels(
-  //   Array.isArray(advisor?.services) ? advisor.services : [],
-  // );
-
-  // const stats = [
-  //   {
-  //     icon: <MdLocationPin />,
-  //     data: user?.city || "Nellore, Andhra Pradesh",
-  //   },
-  //   {
-  //     icon: <MdLocationPin />,
-  //     data: "Member since January 2019",
-  //   },
-  //   {
-  //     icon: <MdLocationPin />,
-  //     data: "IRDAI License verified",
-  //   },
-  //   {
-  //     icon: <MdLocationPin />,
-  //     data: "Last updated 2 days ago",
-  //   },
-  // ];
-  // const aboutData =
-  //   serviceLabels.length > 0
-  //     ? [
-  //         ...serviceLabels.slice(0, 2),
-  //         advisor?.is_verified ? "Licence verified" : "Verified Advisor",
-  //       ]
-  //     : ["Founding Advisor", "Licence verifiled", "MDRT Advisor"];
-  // const summaryData = [
-  //   {
-  //     count: advisor?.services?.[0]?.experience
-  //       ? `${advisor.services[0].experience}+`
-  //       : "14+",
-  //     label: "Exp",
-  //   },
-  //   {
-  //     count: "50",
-  //     label: "Reviews",
-  //   },
-  //   {
-  //     count: "32",
-  //     label: "Recs",
-  //   },
-  //   {
-  //     count: "500",
-  //     label: "Clients",
-  //   },
-  // ];
   // const actions = [
   //   { label: "Recommendations" },
   //   { label: "Testimonials" },
@@ -366,6 +308,26 @@ const page = () => {
   const [verificationToken, setVerificationToken] = useState(null);
   const [otp, setOtp] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [baseUrl, setBaseUrl] = useState("");
+
+  useEffect(() => {
+    const fetchBaseUrl = async () => {
+      try {
+        const res = await fetch("/api/config/public-base-url");
+        const data = await res.json();
+
+        if (data?.baseUrl) {
+          setBaseUrl(data.baseUrl);
+        }
+      } catch (error) {
+        console.error("Failed to load base URL", error);
+      }
+    };
+
+    fetchBaseUrl();
+  }, []);
+
+  const profileUrl = `${baseUrl}/dashboard/${advisor?.slug || advisorId}`;
 
   const reasonsList = [
     "Helpful & Honest",
@@ -406,7 +368,7 @@ const page = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          advisor_id: publicAdvisorId,
+          advisor_id: advisorId,
           mobile_number: mobile,
           recommendations: selectedReasons,
         }),
@@ -535,9 +497,9 @@ const page = () => {
   const aboutData =
     serviceLabels.length > 0
       ? [
-          ...serviceLabels.slice(0, 2),
-          advisor?.is_verified ? "Licence verified" : "Verified Advisor",
-        ]
+        ...serviceLabels.slice(0, 2),
+        advisor?.is_verified ? "Licence verified" : "Verified Advisor",
+      ]
       : [];
 
   useEffect(() => {
@@ -1124,43 +1086,42 @@ const page = () => {
           <div className="border-b border-[#E8F4F4] border-highlights rounded-t-2xl flex overflow-x-auto no-scrollbar md:pl-10">
             {loading
               ? [1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="p-[10px]">
-                    <Skeleton className="h-4 w-20 rounded-md" />
-                  </div>
-                ))
+                <div key={i} className="p-[10px]">
+                  <Skeleton className="h-4 w-20 rounded-md" />
+                </div>
+              ))
               : footerheadings.map(
-                  (heading, index) =>
-                    heading.isvisible && (
-                      <button
-                        key={index}
-                        onClick={() => setActiveTab(heading.name)}
-                        className="relative font-poppins p-[10px] text-center text-[clamp(10px,1vw,14px)] cursor-pointer text-sm font-bold"
-                      >
-                        <span
-                          className={`${
-                            activeTab === heading.name
-                              ? "text-primary-900"
-                              : "text-gray-400"
+                (heading, index) =>
+                  heading.isvisible && (
+                    <button
+                      key={index}
+                      onClick={() => setActiveTab(heading.name)}
+                      className="relative font-poppins p-[10px] text-center text-[clamp(10px,1vw,14px)] cursor-pointer text-sm font-bold"
+                    >
+                      <span
+                        className={`${activeTab === heading.name
+                          ? "text-primary-900"
+                          : "text-gray-400"
                           }`}
-                        >
-                          {heading.name}
-                        </span>
+                      >
+                        {heading.name}
+                      </span>
 
-                        {/* Animated underline */}
-                        {activeTab === heading.name && (
-                          <motion.div
-                            layoutId="footerTabUnderline"
-                            className="absolute left-0 right-0 -bottom-[1px] h-[2px] bg-primary-900 rounded-full"
-                            transition={{
-                              type: "spring",
-                              stiffness: 500,
-                              damping: 35,
-                            }}
-                          />
-                        )}
-                      </button>
-                    ),
-                )}
+                      {/* Animated underline */}
+                      {activeTab === heading.name && (
+                        <motion.div
+                          layoutId="footerTabUnderline"
+                          className="absolute left-0 right-0 -bottom-[1px] h-[2px] bg-primary-900 rounded-full"
+                          transition={{
+                            type: "spring",
+                            stiffness: 500,
+                            damping: 35,
+                          }}
+                        />
+                      )}
+                    </button>
+                  ),
+              )}
           </div>
 
           {/* Dynamic content */}
@@ -1368,7 +1329,7 @@ const page = () => {
                 className="bg-gray-100 p-4 rounded-2xl w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] flex items-center justify-center"
               >
                 <QRCodeCanvas
-                  value={`https://yvity.in/${advisor?.slug || advisorId}`}
+                  value={profileUrl}
                   size={180}
                 />
               </div>
@@ -1379,7 +1340,7 @@ const page = () => {
                   {user?.name}
                 </h2>
                 <p className="text-sm text-gray-500 break-all">
-                  {`https://yvity.in/${advisor?.slug || advisorId}`}
+                  {profileUrl}
                 </p>
               </div>
 
@@ -1428,11 +1389,10 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Helpful & Honest")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${
-      selectedReasons.includes("Helpful & Honest")
-        ? "border-emerald-500 bg-emerald-50"
-        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-    }
+    ${selectedReasons.includes("Helpful & Honest")
+                      ? "border-emerald-500 bg-emerald-50"
+                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+                    }
   `}
                 >
                   <span className="text-xl">🤝</span>
@@ -1444,11 +1404,10 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Expert Knowledge")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${
-      selectedReasons.includes("Expert Knowledge")
-        ? "border-emerald-500 bg-emerald-50"
-        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-    }
+    ${selectedReasons.includes("Expert Knowledge")
+                      ? "border-emerald-500 bg-emerald-50"
+                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+                    }
   `}
                 >
                   <span className="text-xl">🏆</span>
@@ -1460,11 +1419,10 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Quick Response")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${
-      selectedReasons.includes("Quick Response")
-        ? "border-emerald-500 bg-emerald-50"
-        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-    }`}
+    ${selectedReasons.includes("Quick Response")
+                      ? "border-emerald-500 bg-emerald-50"
+                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+                    }`}
                 >
                   <span className="text-xl text-orange-500">⚡</span>
                   <span className="text-slate-600 font-bold text-[0.8rem] group-hover:text-emerald-800">
@@ -1475,11 +1433,10 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Best Policy Advice")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${
-      selectedReasons.includes("Best Policy Advice")
-        ? "border-emerald-500 bg-emerald-50"
-        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-    }`}
+    ${selectedReasons.includes("Best Policy Advice")
+                      ? "border-emerald-500 bg-emerald-50"
+                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+                    }`}
                 >
                   <span className="text-xl">💯</span>
                   <span className="text-slate-600 font-bold text-[0.8rem] group-hover:text-emerald-800">
@@ -1490,11 +1447,10 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Trustworthy")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${
-      selectedReasons.includes("Trustworthy")
-        ? "border-emerald-500 bg-emerald-50"
-        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-    }`}
+    ${selectedReasons.includes("Trustworthy")
+                      ? "border-emerald-500 bg-emerald-50"
+                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+                    }`}
                 >
                   <span className="text-xl text-blue-400">🛡️</span>
                   <span className="text-slate-600 font-bold text-[0.8rem] group-hover:text-emerald-800">
@@ -1505,11 +1461,10 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Great Experience")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${
-      selectedReasons.includes("Great Experience")
-        ? "border-emerald-500 bg-emerald-50"
-        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-    }`}
+    ${selectedReasons.includes("Great Experience")
+                      ? "border-emerald-500 bg-emerald-50"
+                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+                    }`}
                 >
                   <span className="text-xl">😊</span>
                   <span className="text-slate-600 font-bold text-[0.8rem] group-hover:text-emerald-800">
@@ -1648,7 +1603,7 @@ const page = () => {
                       Copy Profile Link
                     </h3>
                     <p className="text-sm text-slate-500 font-medium">
-                      {publicProfileLabel || publicProfilePath || "Profile link unavailable"}
+                      yvity.in/krishna
                     </p>
                   </div>
                 </button>
