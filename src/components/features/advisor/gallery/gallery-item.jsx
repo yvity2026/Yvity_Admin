@@ -1,6 +1,11 @@
 import { Eye, Pencil } from "lucide-react";
 
-export default function GalleryItem({ data, onEdit, onView }) {
+export default function GalleryItem({
+  data,
+  onEdit,
+  onView,
+  showActions = true,
+}) {
   return (
     <div className="flex flex-col gap-3 group cursor-pointer">
       <div
@@ -14,34 +19,42 @@ export default function GalleryItem({ data, onEdit, onView }) {
         transition-all duration-300 ease-out`}
       >
         {data.image_url ? (
-          <img 
-            src={data.image_url} 
-            alt={data.caption || "Gallery item"} 
-            className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110" 
+          <img
+            src={data.image_url}
+            alt={data.caption || "Gallery item"}
+            className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
           />
         ) : (
           <span className="transform group-hover:scale-125 transition-transform duration-500 ease-out drop-shadow-md">
-            {data.icon || '🖼️'}
+            {data.icon || "🖼️"}
           </span>
         )}
 
         {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-4">
-          <button
-            onClick={(e) => { e.stopPropagation(); onView?.(data); }}
-            className="w-12 h-12 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 hover:text-blue-600 hover:scale-110 active:scale-95 transition-all duration-200 shadow-[0_4px_14px_0_rgba(0,0,0,0.3)] cursor-pointer"
-            title="View full image"
-          >
-            <Eye className="w-[22px] h-[22px]" />
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onEdit?.(data); }}
-            className="w-12 h-12 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 hover:text-green-600 hover:scale-110 active:scale-95 transition-all duration-200 shadow-[0_4px_14px_0_rgba(0,0,0,0.3)] cursor-pointer"
-            title="Edit image details"
-          >
-            <Pencil className="w-[22px] h-[22px]" />
-          </button>
-        </div>
+        {showActions && (
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-4">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onView?.(data);
+              }}
+              className="w-12 h-12 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 hover:text-blue-600 hover:scale-110 active:scale-95 transition-all duration-200 shadow-[0_4px_14px_0_rgba(0,0,0,0.3)] cursor-pointer"
+              title="View full image"
+            >
+              <Eye className="w-[22px] h-[22px]" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.(data);
+              }}
+              className="w-12 h-12 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 hover:text-green-600 hover:scale-110 active:scale-95 transition-all duration-200 shadow-[0_4px_14px_0_rgba(0,0,0,0.3)] cursor-pointer"
+              title="Edit image details"
+            >
+              <Pencil className="w-[22px] h-[22px]" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Caption Display */}

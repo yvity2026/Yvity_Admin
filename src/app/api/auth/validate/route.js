@@ -3,8 +3,6 @@ import { NextResponse } from "next/server";
 import { generateToken } from "@/lib/auth/jwt/GenerateToken";
 import { verifyCode } from "@/lib/auth/validate";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
