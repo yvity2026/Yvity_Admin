@@ -580,15 +580,82 @@
 import { ModalWrapper } from "@/app/components/layout/ModalWrapper";
 import ServiceSection from "@/components/features/advisor/services/ServiceSection";
 import { useModal } from "@/context/ModalContext";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { FaCross, FaMehBlank, FaPlus } from "react-icons/fa";
 import { FaPencil, FaShield } from "react-icons/fa6";
 import { HiPlus } from "react-icons/hi";
 import { HiOutlineBuildingLibrary } from "react-icons/hi2";
 import { LuClockAlert } from "react-icons/lu";
-import { MdClose } from "react-icons/md";
+import { MdClose, MdKeyboardArrowDown } from "react-icons/md";
 const API = "/api/advisor/services";
+
+const SERVICE_TYPE_OPTIONS = [
+  "Life Insurance",
+  "Health Insurance",
+  "General Insurance",
+  "Other",
+];
+
+const COMPANY_OPTIONS = {
+  "Life Insurance": [
+    "Life Insurance Corporation of India (LIC)",
+    "HDFC Life Insurance",
+    "SBI Life Insurance",
+    "ICICI Prudential Life Insurance",
+    "Max Life Insurance",
+    "Tata AIA Life Insurance",
+    "Bajaj Allianz Life Insurance",
+    "Kotak Mahindra Life Insurance",
+    "Aditya Birla Sun Life Insurance",
+    "PNB MetLife India Insurance",
+    "Canara HSBC Life Insurance",
+    "IndiaFirst Life Insurance",
+    "Edelweiss Tokio Life Insurance",
+    "Ageas Federal Life Insurance",
+    "Aviva Life Insurance",
+    "Bharti AXA Life Insurance",
+    "Bandhan Life Insurance",
+  ],
+  "Health Insurance": [
+    "Star Health and Allied Insurance",
+    "Niva Bupa Health Insurance",
+    "Care Health Insurance",
+    "Aditya Birla Health Insurance",
+    "ManipalCigna Health Insurance",
+    "Galaxy Health Insurance",
+  ],
+  "General Insurance": [
+    "New India Assurance",
+    "United India Insurance",
+    "Oriental Insurance Company",
+    "National Insurance Company",
+    "ICICI Lombard General Insurance",
+    "Bajaj Allianz General Insurance",
+    "Tata AIG General Insurance",
+    "HDFC ERGO General Insurance",
+    "Reliance General Insurance",
+    "IFFCO Tokio General Insurance",
+    "Cholamandalam MS General Insurance",
+    "Future Generali India Insurance",
+    "Go Digit General Insurance",
+    "ACKO General Insurance",
+    "Universal Sompo General Insurance",
+    "Raheja QBE General Insurance",
+    "SBI General Insurance",
+    "Shriram General Insurance",
+    "Magma HDI General Insurance",
+    "Navi General Insurance",
+    "Zuno General Insurance",
+  ],
+};
+
+const getEmptyForm = () => ({
+  serviceType: "",
+  company: "",
+  experience: "",
+  services: [""],
+});
 
 const initialServices = [
   {
@@ -615,12 +682,15 @@ export default function Page() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const [form, setForm] = useState({
-    serviceType: "",
-    company: "",
-    experience: "",
-    services: [""],
-  });
+  const [form, setForm] = useState(getEmptyForm());
+  const [isCompanyDropdownOpen, setIsCompanyDropdownOpen] = useState(false);
+  const [companySearchTerm, setCompanySearchTerm] = useState("");
+  const companyDropdownRef = useRef(null);
+  const companyOptions = COMPANY_OPTIONS[form.serviceType] || [];
+  const isOtherServiceType = form.serviceType === "Other";
+  const filteredCompanyOptions = companyOptions.filter((option) =>
+    option.toLowerCase().includes(companySearchTerm.trim().toLowerCase())
+  );
 
   const validateForm = () => {
     if (!form.serviceType.trim()) {
@@ -662,6 +732,23 @@ export default function Page() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleServiceTypeChange = (value) => {
+    setIsCompanyDropdownOpen(false);
+    setCompanySearchTerm("");
+
+    setForm((prev) => {
+      const nextCompanies = COMPANY_OPTIONS[value] || [];
+      const keepCompany =
+        value !== "Other" && nextCompanies.includes(prev.company);
+
+      return {
+        ...prev,
+        serviceType: value,
+        company: keepCompany ? prev.company : "",
+      };
+    });
+  };
+
   const handleServiceChange = (index, value) => {
     const updated = [...form.services];
     updated[index] = value;
@@ -671,12 +758,40 @@ export default function Page() {
   const { trigger, clearTrigger } = useModal();
 
   const [isService, setIsService] = useState(false);
+  const closeAddServiceModal = () => {
+    setIsCompanyDropdownOpen(false);
+    setCompanySearchTerm("");
+    setIsService(false);
+    setForm(getEmptyForm());
+  };
+
   useEffect(() => {
     if (trigger === "ADD_SERVICE") {
+      setIsCompanyDropdownOpen(false);
+      setCompanySearchTerm("");
+      setForm(getEmptyForm());
       setIsService(true);
       clearTrigger(); // IMPORTANT
     }
-  }, [trigger]);
+  }, [trigger, clearTrigger]);
+
+  useEffect(() => {
+    if (!isCompanyDropdownOpen) return;
+
+    const handleClickOutside = (event) => {
+      if (
+        companyDropdownRef.current &&
+        !companyDropdownRef.current.contains(event.target)
+      ) {
+        setIsCompanyDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isCompanyDropdownOpen]);
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
@@ -700,15 +815,7 @@ export default function Page() {
 
       toast.success("Service added successfully!");
 
-      setIsService(false);
-
-      // NEW: Clear the form completely after successful submission
-      setForm({
-        serviceType: "",
-        company: "",
-        experience: "",
-        services: [""],
-      });
+      closeAddServiceModal();
 
       // refresh list
       fetchServices();
@@ -916,7 +1023,7 @@ export default function Page() {
       {/* Edit popup */}
 
       {isService && (
-        <ModalWrapper onClose={() => setIsService(false)}>
+        <ModalWrapper onClose={closeAddServiceModal}>
           {/* 1. Added h-auto and removed scroll constraints.
         2. Set bg-white and overflow-hidden for the clean card look.
         3. Match the specific max-w-lg from your designs.
@@ -931,7 +1038,7 @@ export default function Page() {
                 </h2>
               </div>
               <button
-                onClick={() => setIsService(false)}
+                onClick={closeAddServiceModal}
                 className="bg-slate-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <MdClose size={22} />
@@ -945,12 +1052,25 @@ export default function Page() {
                 <label className="font-bold text-slate-800 text-[0.95rem]">
                   Service Type <span className="text-red-500">*</span>
                 </label>
-                <input
-                  value={form.serviceType}
-                  onChange={(e) => handleChange("serviceType", e.target.value)}
-                  className="w-full py-3.5 px-5 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all placeholder:text-gray-400"
-                  placeholder="Life Insurance"
-                />
+                <div className="relative">
+                  <select
+                    value={form.serviceType}
+                    onChange={(e) => handleServiceTypeChange(e.target.value)}
+                    className={`w-full appearance-none py-3.5 pl-5 pr-14 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all ${
+                      form.serviceType ? "text-slate-900" : "text-gray-400"
+                    }`}
+                  >
+                    <option value="">Select service type</option>
+                    {SERVICE_TYPE_OPTIONS.map((option) => (
+                      <option key={option} value={option} className="text-slate-900">
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="pointer-events-none absolute inset-y-0 right-5 flex items-center text-gray-400">
+                    <MdKeyboardArrowDown size={22} />
+                  </span>
+                </div>
               </div>
 
               {/* Company */}
@@ -958,12 +1078,84 @@ export default function Page() {
                 <label className="font-bold text-slate-800 text-[0.95rem]">
                   Company <span className="text-red-500">*</span>
                 </label>
-                <input
-                  value={form.company}
-                  onChange={(e) => handleChange("company", e.target.value)}
-                  className="w-full py-3.5 px-5 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all"
-                  placeholder="LIC of India"
-                />
+                {isOtherServiceType ? (
+                  <input
+                    value={form.company}
+                    onChange={(e) => handleChange("company", e.target.value)}
+                    className="w-full py-3.5 px-5 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all"
+                    placeholder="Enter company name"
+                  />
+                ) : (
+                  <div className="relative" ref={companyDropdownRef}>
+                    <input
+                      value={isCompanyDropdownOpen ? companySearchTerm : form.company}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setCompanySearchTerm(value);
+                        handleChange("company", value);
+                        setIsCompanyDropdownOpen(true);
+                      }}
+                      onFocus={() => {
+                        if (!form.serviceType) return;
+                        setCompanySearchTerm(form.company);
+                        setIsCompanyDropdownOpen(true);
+                      }}
+                      disabled={!form.serviceType}
+                      className={`w-full py-3.5 pl-5 pr-12 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all ${
+                        form.company ? "text-slate-900" : "text-gray-400"
+                      } ${!form.serviceType ? "cursor-not-allowed opacity-60" : ""}`}
+                      placeholder={
+                        form.serviceType
+                          ? "Search or select company"
+                          : "Select service type first"
+                      }
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!form.serviceType) return;
+                        if (!isCompanyDropdownOpen) {
+                          setCompanySearchTerm("");
+                        }
+                        setIsCompanyDropdownOpen((prev) => !prev);
+                      }}
+                      disabled={!form.serviceType}
+                      className="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 cursor-pointer disabled:cursor-not-allowed"
+                    >
+                      <MdKeyboardArrowDown
+                        size={22}
+                        className={`transition-transform ${
+                          isCompanyDropdownOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {isCompanyDropdownOpen && form.serviceType && (
+                      <div className="absolute z-20 mt-2 max-h-56 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg">
+                        {filteredCompanyOptions.length ? (
+                          filteredCompanyOptions.map((option) => (
+                            <button
+                              key={option}
+                              type="button"
+                              onClick={() => {
+                                handleChange("company", option);
+                                setCompanySearchTerm(option);
+                                setIsCompanyDropdownOpen(false);
+                              }}
+                              className="w-full px-5 py-3 text-left text-sm text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                            >
+                              {option}
+                            </button>
+                          ))
+                        ) : (
+                          <p className="px-5 py-3 text-sm text-gray-400">
+                            No companies found
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Experience */}
@@ -1067,7 +1259,7 @@ export default function Page() {
                   value={form.serviceType}
                   onChange={(e) => handleChange("serviceType", e.target.value)}
                   className="w-full py-3 px-5 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all placeholder:text-gray-400"
-                  placeholder="Life Insurance"
+                  placeholder="Life Insurance "
                 />
               </div>
 
