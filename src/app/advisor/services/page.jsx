@@ -932,7 +932,7 @@ export default function Page() {
               </div>
               <button
                 onClick={() => setIsService(false)}
-                className="bg-slate-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+                className="bg-slate-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <MdClose size={22} />
               </button>
@@ -999,7 +999,7 @@ export default function Page() {
                       <button
                         type="button"
                         onClick={() => removeServicePoint(index)}
-                        className="p-2 rounded-lg border border-red-100 bg-red-50 text-red-400 hover:text-red-600 transition-all shrink-0"
+                        className="p-2 rounded-lg border border-red-100 bg-red-50 text-red-400 hover:text-red-600 transition-all shrink-0 cursor-pointer"
                       >
                         <MdClose size={18} />
                       </button>
@@ -1010,7 +1010,7 @@ export default function Page() {
                 <button
                   type="button"
                   onClick={addServicePoint}
-                  className="flex items-center gap-2 text-[#0D6060] font-bold text-base mt-1 w-fit hover:opacity-80 transition-opacity"
+                  className="flex items-center gap-2 text-[#0D6060] font-bold text-base mt-1 w-fit hover:opacity-80 transition-opacity cursor-pointer"
                 >
                   <FaPlus size={14} />
                   Add Point
@@ -1020,7 +1020,7 @@ export default function Page() {
               {/* Submit Button - NEW: dynamic state and disabled property */}
               <button
                 disabled={isSubmitting}
-                className={`w-full mt-2 bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4 rounded-2xl font-bold text-lg transition-transform shadow-lg shadow-emerald-900/10 ${
+                className={`w-full mt-2 bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4 rounded-2xl font-bold text-lg transition-transform shadow-lg shadow-emerald-900/10 cursor-pointer ${
                   isSubmitting ? "opacity-70 cursor-not-allowed" : "active:scale-[0.98]"
                 }`}
                 onClick={() => {
@@ -1050,7 +1050,7 @@ export default function Page() {
               </div>
               <button
                 onClick={() => setEdit(false)}
-                className="bg-slate-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+                className="bg-slate-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <MdClose size={22} />
               </button>
@@ -1117,7 +1117,7 @@ export default function Page() {
                       <button
                         type="button"
                         onClick={() => removeServicePoint(index)}
-                        className="p-1.5 rounded-lg border border-red-100 bg-red-50 text-red-400 hover:text-red-600 transition-all shrink-0"
+                        className="p-1.5 rounded-lg border border-red-100 bg-red-50 text-red-400 hover:text-red-600 transition-all shrink-0 cursor-pointer"
                       >
                         <MdClose size={16} />
                       </button>
@@ -1128,7 +1128,7 @@ export default function Page() {
                 <button
                   type="button"
                   onClick={addServicePoint}
-                  className="flex items-center gap-2 text-[#0D6060] font-bold text-sm mt-1 w-fit hover:opacity-80 transition-opacity"
+                  className="flex items-center gap-2 text-[#0D6060] font-bold text-sm mt-1 w-fit hover:opacity-80 transition-opacity cursor-pointer"
                 >
                   <FaPlus size={12} />
                   Add Point
@@ -1138,7 +1138,7 @@ export default function Page() {
               {/* Submit Button - NEW: dynamic state and disabled property */}
               <button
                 disabled={isUpdating}
-                className={`w-full mt-2 bg-[#0a4d4a] hover:bg-[#073a38] text-white py-3.5 rounded-2xl font-bold text-lg transition-transform shadow-lg shadow-emerald-900/10 ${
+                className={`w-full mt-2 bg-[#0a4d4a] hover:bg-[#073a38] text-white py-3.5 rounded-2xl font-bold text-lg transition-transform shadow-lg shadow-emerald-900/10 cursor-pointer ${
                   isUpdating ? "opacity-70 cursor-not-allowed" : "active:scale-[0.98]"
                 }`}
                 onClick={() => handleEditSubmit()}
@@ -1163,7 +1163,7 @@ export default function Page() {
               </h2>
               <button
                 onClick={() => setIsDelete(false)}
-                className="bg-slate-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+                className="bg-slate-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <MdClose size={22} />
               </button>
@@ -1182,14 +1182,14 @@ export default function Page() {
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="flex-1 py-4 rounded-2xl border border-red-200 bg-red-50 text-red-500 font-bold text-base transition-all active:scale-[0.98] hover:bg-red-100 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="flex-1 py-4 rounded-2xl border border-red-200 bg-red-50 text-red-500 font-bold text-base transition-all active:scale-[0.98] hover:bg-red-100 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {isDeleting ? "Deleting..." : "Yes, Delete"}
                 </button>
 
                 <button
                   onClick={() => setIsDelete(false)}
-                  className="flex-1 py-4 rounded-2xl bg-[#0a4d4a] text-white font-bold text-base transition-all active:scale-[0.98] hover:bg-[#073a38]"
+                  className="flex-1 py-4 rounded-2xl bg-[#0a4d4a] text-white font-bold text-base transition-all active:scale-[0.98] hover:bg-[#073a38] cursor-pointer"
                 >
                   Cancel
                 </button>
