@@ -31,6 +31,7 @@ const tagConfig = {
 
 export const AdvisorCard = ({
   id,
+  profile_slug,
   name,
   title,
   location,
@@ -301,7 +302,9 @@ export const AdvisorCard = ({
         {/* Button */}
         <button
           className="cursor-pointer font-poppins w-full py-2.5 sm:py-3 text-[13px] sm:text-[14px] md:text-[15px] rounded-full border-[1.5px] border-[#115e59] text-[#115e59] font-extrabold  hover:bg-[#076868] hover:text-[#F59E0B] transition-colors flex items-center justify-center gap-2 mt-auto mb-2"
-          onClick={() => id && router.push(`/dashboard/${id}`)}
+          onClick={() =>
+            (profile_slug || id) && router.push(`/dashboard/${profile_slug || id}`)
+          }
         >
           View Profile
           <svg

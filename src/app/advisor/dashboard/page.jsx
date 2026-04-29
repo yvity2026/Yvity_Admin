@@ -25,8 +25,25 @@ import ImproveScore from "@/components/features/advisor/dashboard/improve-score"
 import RecentActivity from "@/components/features/advisor/dashboard/recent-activity";
 
 export default function AdvisorDashboardPage() {
-  const [isLoading, setIsLoading] = useState(true);
+const [isLoading, setIsLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState(null);
 
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const res = await fetch("/api/advisor/dashboard");
+      const data = await res.json();
+
+      setDashboardData(data);
+    } catch (error) {
+      console.error("Failed to fetch dashboard:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <div className="bg-[#F8F6F1] min-h-screen w-full flex flex-col">
       {/* <DashboardHeader /> */}
@@ -35,30 +52,30 @@ export default function AdvisorDashboardPage() {
       {/* 2. Main Content Area */}
       <div className="p-6">
         <div className="mx-auto space-y-6">
-          <WelcomeCard />
+          {/* <WelcomeCard />
           <ProfileProgress />
-          <StatsCards />
-          {/* {isLoading ? <WelcomeCardShimmer /> : <WelcomeCard />}
-          {isLoading ? <ProfileProgressShimmer /> : <ProfileProgress />}
-          {isLoading ? <StatsCardsShimmer /> : <StatsCards />} */}
+          <StatsCards /> */}
+          {isLoading ? <WelcomeCardShimmer /> : <WelcomeCard data={dashboardData}/>}
+          {isLoading ? <ProfileProgressShimmer /> : <ProfileProgress data={dashboardData}/>}
+          {isLoading ? <StatsCardsShimmer /> : <StatsCards data={dashboardData}/>}
 
           {/* Score + Analytics */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ScoreSection />
-            <Analytics />
-            {/* {isLoading ? <ScoreSectionShimmer /> : <ScoreSection />}
-            {isLoading ? <AnalyticsShimmer /> : <Analytics />} */}
+            {/* <ScoreSection />
+            <Analytics /> */}
+            {isLoading ? <ScoreSectionShimmer /> : <ScoreSection data={dashboardData}/>}
+            {isLoading ? <AnalyticsShimmer /> : <Analytics data={dashboardData}/>}
           </div>
-          <QuickActions />
+          {/* <QuickActions /> */}
 
-          {/* {isLoading ? <QuickActionsShimmer /> : <QuickActions />} */}
+          {isLoading ? <QuickActionsShimmer /> : <QuickActions data={dashboardData}/>}
 
           {/* Bottom Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-10">
-            <ImproveScore />
-            <RecentActivity />
-            {/* {isLoading ? <ImproveScoreShimmer /> : <ImproveScore />}
-            {isLoading ? <RecentActivityShimmer /> : <RecentActivity />} */}
+            {/* <ImproveScore />
+            <RecentActivity /> */}
+            {isLoading ? <ImproveScoreShimmer /> : <ImproveScore data={dashboardData}/>}
+            {isLoading ? <RecentActivityShimmer /> : <RecentActivity data={dashboardData}/>}
           </div>
         </div>
       </div>

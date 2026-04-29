@@ -1,5 +1,6 @@
 import { apiResponse } from "@/lib/apiResponse";
 import { ValidateUser } from "@/lib/auth/ValidateUser";
+import { buildUniqueAdvisorProfileSlug } from "@/lib/advisor/profileSlug";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function POST(req) {
@@ -38,6 +39,11 @@ export async function POST(req) {
     }
 
     const supabase = createAdminClient();
+    const profileSlug = await buildUniqueAdvisorProfileSlug(
+      supabase,
+      user.name,
+      user.id,
+    );
 
 
     // 5. Insert profile
@@ -49,6 +55,7 @@ export async function POST(req) {
           advisor_role_id,
           short_bio: bio,
           iridai_certificate_url: certificate_url,
+          profile_slug: profileSlug,
           services: services.map((s) => ({
             service: s.service,
             company: s.company,

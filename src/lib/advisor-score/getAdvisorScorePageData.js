@@ -117,7 +117,7 @@ function getAchievementType(achievement) {
 
 function getAchievementPointsByType(type) {
   if (type === "TOT") return 10;
-  if (type === "COT") return 8;
+  if (type === "COT") return 6;
   if (type === "MDRT") return 2;
   return 0;
 }
@@ -125,6 +125,11 @@ function getAchievementPointsByType(type) {
 function getAchievementSummary(achievements) {
   if (!Array.isArray(achievements) || achievements.length === 0) {
     return {
+      availableTypes: {
+        MDRT: false,
+        COT: false,
+        TOT: false,
+      },
       points: 0,
       latest: null,
     };
@@ -145,10 +150,21 @@ function getAchievementSummary(achievements) {
 
   if (parsed.length === 0) {
     return {
+      availableTypes: {
+        MDRT: false,
+        COT: false,
+        TOT: false,
+      },
       points: 0,
       latest: null,
     };
   }
+
+  const availableTypes = {
+    MDRT: parsed.some((item) => item.type === "MDRT"),
+    COT: parsed.some((item) => item.type === "COT"),
+    TOT: parsed.some((item) => item.type === "TOT"),
+  };
 
   const hasTot = parsed.some((item) => item.type === "TOT");
   const latest = [...parsed].sort((left, right) => {
@@ -168,6 +184,7 @@ function getAchievementSummary(achievements) {
         .sort((left, right) => right.latestYear - left.latestYear)[0] ?? latest;
 
     return {
+      availableTypes,
       points: SCORE_LIMITS.achievements,
       latest: {
         type: latestTot.type,
@@ -190,6 +207,7 @@ function getAchievementSummary(achievements) {
   }
 
   return {
+    availableTypes,
     points: Math.min(points, SCORE_LIMITS.achievements),
     latest: {
       type: latest.type,
@@ -250,6 +268,7 @@ function buildPageData({
   const achievementSummary = getAchievementSummary(achievements);
   const latestAchievement = achievementSummary.latest;
   const achievementPoints = achievementSummary.points;
+  const achievementTypes = achievementSummary.availableTypes;
   const galleryPhotoCount = galleryItems.length;
 
   const profileStrengthChecks = [
@@ -399,6 +418,7 @@ function buildPageData({
     recommendationBasePoints,
     recommendationBonusPoints,
     hasContinuityBonus: recommendationBonusPoints > 0,
+    achievementTypes,
     latestAchievement: latestAchievement
       ? {
           type: latestAchievement.type,

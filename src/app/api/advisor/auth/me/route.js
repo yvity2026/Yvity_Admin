@@ -2,13 +2,12 @@ import { getUser } from "@/lib/auth/Getuser";
 import { recordAdvisorLoginActivity } from "@/lib/advisor-score/recordAdvisorLoginActivity";
 import { createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import { ValidateUser } from "@/lib/auth/ValidateUser";
 
 export async function GET() {
   try {
-    const user = await ValidateUser();
-    console.log(user);
-    if (!user || !user.id) {
+    const sessionUser = await getUser();
+
+    if (!sessionUser?.id) {
       return NextResponse.json(
         {
           success: false,
@@ -23,9 +22,9 @@ export async function GET() {
     const supabase = createAdminClient();
 
     const { data: userData, error: userError } = await supabase
-      .from("advisor_profiles")
-      .select("*")
-      .eq("advisor_id", user.id)
+      .from("users")
+      .select("id, roles")
+      .eq("id", sessionUser.id)
       .maybeSingle();
 
     if (userError || !userData) {
@@ -34,7 +33,7 @@ export async function GET() {
           success: false,
           code: 2,
           message: "User Not Found",
-          error: userError?.message || "User not found based on the token",
+          error: userError?.message || "User not found based on the session",
         },
         { status: 404 },
       );

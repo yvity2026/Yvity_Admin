@@ -121,24 +121,27 @@ export default function TrustSection({ trust }) {
             <p className="font-bold text-[#124B48]">Current : {achievementLabel}</p>
           </div>
         </InfoBox>
-        <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
           <AchievementBox
             icon="🏆"
             title="MDRT"
             points="2 pts / year"
             sub="Million Dollar Round Table"
+            isActive={trust.achievementTypes?.MDRT}
           />
           <AchievementBox
             icon="🏅"
             title="COT"
             points="6 pts"
             sub="Court of the Table"
+            isActive={trust.achievementTypes?.COT}
           />
           <AchievementBox
             icon="💎"
             title="TOT"
             points="10 pts"
             sub="Top of the Table"
+            isActive={trust.achievementTypes?.TOT}
           />
         </div>
       </div>
@@ -166,15 +169,61 @@ function TestimonialBox({ icon, title, score, max, status, isFull, sub }) {
   );
 }
 
-function AchievementBox({ icon, title, points, sub }) {
+function AchievementBox({ icon, title, points, sub, isActive = false }) {
   return (
-    <div className="bg-[#F0F8F8] border border-[#DADEDE] rounded-xl p-4 text-center flex flex-col items-center justify-center">
-      <span className="mb-1">{icon}</span>
-      <span className="text-[clamp(14px,2vw,18px)] font-bold text-[#374151]">{title}</span>
-      <span className="text-[clamp(16px,2.5vw,20px)] font-bold text-[#F59E0B]">{points}</span>
-      <span className="text-[clamp(10px,1vw,14px)] text-[#6B7280] mt-1 leading-tight">
+    <div
+      className={`rounded-2xl p-4 text-center flex flex-col items-center justify-center border transition-all duration-300 ${
+        isActive
+          ? "bg-gradient-to-br from-[#ECFDF5] to-[#D1FAE5] border-[#10B981] shadow-md scale-[1.02]"
+          : "bg-[#F9FAFB] border-[#E5E7EB] opacity-90"
+      }`}
+    >
+      {/* Icon */}
+      <div
+        className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 text-xl ${
+          isActive
+            ? "bg-[#10B981] text-white"
+            : "bg-[#E5E7EB] text-[#9CA3AF]"
+        }`}
+      >
+        {icon}
+      </div>
+
+      {/* Title */}
+      <span
+        className={`text-[16px] font-bold ${
+          isActive ? "text-[#065F46]" : "text-[#6B7280]"
+        }`}
+      >
+        {title}
+      </span>
+
+      {/* Points */}
+      <span
+        className={`text-[18px] font-bold mt-1 ${
+          isActive ? "text-[#F59E0B]" : "text-[#9CA3AF]"
+        }`}
+      >
+        {points}
+      </span>
+
+      {/* Description */}
+      <span className="text-[12px] text-[#6B7280] mt-1 leading-tight">
         {sub}
       </span>
+
+      {/* Status */}
+      <div className="mt-3">
+        {isActive ? (
+          <span className="text-xs font-semibold text-green-600 bg-green-100 px-3 py-1 rounded-full">
+            Active
+          </span>
+        ) : (
+          <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+            Not Uploaded
+          </span>
+        )}
+      </div>
     </div>
   );
 }

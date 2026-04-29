@@ -1,19 +1,13 @@
 import { NextResponse } from "next/server";
-import { ValidateUser } from "@/lib/auth/ValidateUser";
+import { resolveAdvisorProfileSlug } from "@/lib/advisor/profileSlug";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function GET(req, context) {
   try {
-    const currentUser = await ValidateUser();
-
-    if (!currentUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { id } = await context.params;
     const supabase = createAdminClient();
 
-    const { data, error } = await supabase
+    const { data: advisors, error } = await supabase
       .from("users")
       .select(
         `
@@ -51,15 +45,31 @@ export async function GET(req, context) {
           ispublic_gallery,
           ispublic_testimonials,
           ispublic_profile,
-          score_last_recalculated_at
+          score_last_recalculated_at,
+          profile_slug
         )
-      `,
-      )
-      .eq("id", id)
+      `)
       .filter("roles", "cs", JSON.stringify(["advisor"]))
-      .single();
+      .limit(1000);
 
-    if (error || !data) {
+    if (error || !Array.isArray(advisors)) {
+      return NextResponse.json({ error: "Advisor not found" }, { status: 404 });
+    }
+
+    const requestedKey = String(id || "").trim().toLowerCase();
+    const data = advisors.find((advisor) => {
+      const profile = Array.isArray(advisor.advisor_profiles)
+        ? advisor.advisor_profiles[0]
+        : advisor.advisor_profiles;
+      const resolvedSlug = resolveAdvisorProfileSlug(
+        profile?.profile_slug,
+        advisor.name,
+      );
+
+      return advisor.id === id || resolvedSlug === requestedKey;
+    });
+
+    if (!data) {
       return NextResponse.json({ error: "Advisor not found" }, { status: 404 });
     }
     console.log(data);
@@ -67,6 +77,10 @@ export async function GET(req, context) {
     const profile = Array.isArray(data.advisor_profiles)
       ? data.advisor_profiles[0]
       : data.advisor_profiles;
+
+    if (!profile?.ispublic_profile) {
+      return NextResponse.json({ error: "Advisor profile is private" }, { status: 403 });
+    }
 
     return NextResponse.json({
       success: true,

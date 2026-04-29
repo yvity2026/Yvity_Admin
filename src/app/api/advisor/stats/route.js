@@ -53,9 +53,17 @@ export async function GET() {
           1,
         )}%`,
         type: "percent",
+      },{
+
+          label: "Testimonials",
+        value: currentMap.view || 0,
+        growth: `${growth(currentMap.view || 0, previousMap.view || 0).toFixed(
+          1,
+        )}%`,
+        type: "percent",
       },
       {
-        label: "Profile Shares",
+        label: "Recommendations",
         value: currentMap.share || 0,
         growth: `${growth(
           currentMap.share || 0,
@@ -64,7 +72,7 @@ export async function GET() {
         type: "percent",
       },
       {
-        label: "Profile Contacts",
+        label: "Profile Shares",
         value: currentMap.contact || 0,
         growth: `${growth(
           currentMap.contact || 0,

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Skeleton from "@/app/components/skeleton/Skeleton";
 import AchievementCard from "@/components/features/advisor/achievements/achievement-card";
 import AchievementDeleteModal from "@/components/features/advisor/achievements/achievement-delete-modal";
 import AchievementFormModal from "@/components/features/advisor/achievements/achievement-form-modal";
@@ -59,6 +60,25 @@ export const achievementsData = [
     highlightText: "2015",
   },
 ];
+
+function AchievementCardSkeleton() {
+  return (
+    <div className="bg-white border-t-[5px] border-[#00796B] rounded-[16px] p-3 sm:p-5 lg:p-7 flex items-start gap-2 lg:gap-3 shadow-sm">
+      <Skeleton className="h-10 w-10 rounded-[12px] flex-shrink-0" />
+      <div className="flex-1">
+        <Skeleton className="h-5 w-40 rounded-md" />
+        <div className="mt-2 space-y-2">
+          <Skeleton className="h-3 w-full rounded-md" />
+          <Skeleton className="h-3 w-[85%] rounded-md" />
+        </div>
+        <Skeleton className="h-4 w-24 rounded-md mt-4" />
+        <div className="flex items-center gap-3 mt-3">
+          <Skeleton className="h-8 w-20 rounded-lg" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function AchievementsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -164,8 +184,11 @@ export default function AchievementsPage() {
         <InfoBanner />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {!loading &&
-            achievements.map((achievement) => (
+          {loading
+            ? Array.from({ length: 6 }).map((_, index) => (
+                <AchievementCardSkeleton key={`achievement-skeleton-${index}`} />
+              ))
+            : achievements.map((achievement) => (
               <AchievementCard
                 key={achievement.id}
                 data={{

@@ -3,6 +3,8 @@ import { Eye, MessageSquare, ThumbsUp, Share } from "lucide-react";
 import { FaThumbsUp, FaShareSquare, FaRegEye } from "react-icons/fa";
 import { AiFillMessage } from "react-icons/ai";
 import { useEffect, useState } from "react";
+import { FaRocketchat } from "react-icons/fa6";
+
 import toast from "react-hot-toast";
 
 const stats1 = [
@@ -17,7 +19,7 @@ const stats1 = [
     label: "Testimonials",
     value: "50",
     growth: "3",
-    icon: AiFillMessage,
+    icon: FaRocketchat,
     type: "number",
   },
   {
@@ -38,8 +40,10 @@ const stats1 = [
 
 export const IconMap = {
   "Profile Views": FaRegEye,
+  "Testimonials":FaRocketchat ,
   "Recommendations": FaThumbsUp,
   "Profile Shares": FaShareSquare,
+
 };
 
 export default function StatsCards() {

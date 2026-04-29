@@ -57,6 +57,7 @@ import Skeleton from "@/app/components/skeleton/Skeleton";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import GiveTestimonialModal from "@/components/features/user/landing/modals/public-profile/GiveTestimonialModal";
+import { resolveAdvisorProfileSlug } from "@/lib/advisor/profileSlug";
 import { useAdvisorAuth } from "@/context/AuthAdvisorContext";
 
 const getServiceLabels = (services = []) => {
@@ -103,32 +104,8 @@ const page = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeModal, setActiveModal] = useState(null);
-  
-  // Get context functions for fetching public advisor data
-  const {
-    fetchPublicAdvisorServices,
-    fetchPublicAdvisorTestimonials,
-    fetchPublicAdvisorAchievements,
-    fetchPublicAdvisorGallery,
-    fetchPublicAdvisorJourney,
-  } = useAdvisorAuth();
-
-  // Public advisor data states
-  const [publicServices, setPublicServices] = useState([]);
-  const [publicTestimonials, setPublicTestimonials] = useState([]);
-  const [publicAchievements, setPublicAchievements] = useState([]);
-  const [publicGallery, setPublicGallery] = useState([]);
-  const [publicJourney, setPublicJourney] = useState([]);
-  
-  // Loading state for public data
-  const [publicDataLoading, setPublicDataLoading] = useState({
-    services: false,
-    testimonials: false,
-    achievements: false,
-    gallery: false,
-    journey: false,
-  });
-  
+  const [appOrigin, setAppOrigin] = useState("");
+  const galleryData = [];
   const MODALS = {
     TESTIMONIAL: "testimonial",
     RECOMMEND: "recommend",
@@ -200,6 +177,12 @@ const page = () => {
     return () => window.removeEventListener("keydown", handleEsc);
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setAppOrigin(window.location.origin);
+    }
+  }, []);
+
   const handleEditClick = (entry) => {
     setEditingEntry(entry);
     setIsEntryModalOpen(true);
@@ -218,10 +201,85 @@ const page = () => {
 
     const link = document.createElement("a");
     link.href = pngUrl;
-    link.download = `${user?.name || "advisor"}-qr.png`;
+    link.download = qrDownloadFileName;
     link.click();
   };
 
+  const advisorProfileSlug = resolveAdvisorProfileSlug(
+    advisor?.profile_slug,
+    user?.name,
+  );
+  const publicProfilePath = advisorProfileSlug
+    ? `/dashboard/${advisorProfileSlug}`
+    : advisorId
+      ? `/dashboard/${advisorId}`
+      : "";
+  const publicBaseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    appOrigin;
+  const normalizedBaseUrl = publicBaseUrl
+    ? publicBaseUrl.replace(/\/+$/, "")
+    : "";
+  const publicProfileUrl =
+    normalizedBaseUrl && publicProfilePath
+      ? `${normalizedBaseUrl}${publicProfilePath}`
+      : publicProfilePath;
+  const publicProfileLabel = publicProfileUrl
+    .replace(/^https?:\/\//, "")
+    .replace(/\/+$/, "");
+  const qrDownloadFileName = `${advisorProfileSlug || "advisor"}-qr.png`;
+  const publicAdvisorId = advisor?.advisor_id || user?.id || advisorId;
+
+  const serviceLabels = getServiceLabels(
+    Array.isArray(advisor?.services) ? advisor.services : [],
+  );
+
+  const stats = [
+    {
+      icon: <MdLocationPin />,
+      data: user?.city || "Nellore, Andhra Pradesh",
+    },
+    {
+      icon: <MdLocationPin />,
+      data: "Member since January 2019",
+    },
+    {
+      icon: <MdLocationPin />,
+      data: "IRDAI License verified",
+    },
+    {
+      icon: <MdLocationPin />,
+      data: "Last updated 2 days ago",
+    },
+  ];
+  const aboutData =
+    serviceLabels.length > 0
+      ? [
+          ...serviceLabels.slice(0, 2),
+          advisor?.is_verified ? "Licence verified" : "Verified Advisor",
+        ]
+      : ["Founding Advisor", "Licence verifiled", "MDRT Advisor"];
+  const summaryData = [
+    {
+      count: advisor?.services?.[0]?.experience
+        ? `${advisor.services[0].experience}+`
+        : "14+",
+      label: "Exp",
+    },
+    {
+      count: "50",
+      label: "Reviews",
+    },
+    {
+      count: "32",
+      label: "Recs",
+    },
+    {
+      count: "500",
+      label: "Clients",
+    },
+  ];
   // const actions = [
   //   { label: "Recommendations" },
   //   { label: "Testimonials" },
@@ -348,7 +406,7 @@ const page = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          advisor_id: advisorId,
+          advisor_id: publicAdvisorId,
           mobile_number: mobile,
           recommendations: selectedReasons,
         }),
@@ -1590,7 +1648,7 @@ const page = () => {
                       Copy Profile Link
                     </h3>
                     <p className="text-sm text-slate-500 font-medium">
-                      yvity.in/krishna
+                      {publicProfileLabel || publicProfilePath || "Profile link unavailable"}
                     </p>
                   </div>
                 </button>

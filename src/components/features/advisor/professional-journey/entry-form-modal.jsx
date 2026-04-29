@@ -785,7 +785,7 @@ export default function EntryFormModal({
             {isCertificate && (
               <div>
                 <label className="block text-[14px] font-bold text-[#111827] mb-1.5">
-                  Date <span className="text-red-500">*</span>
+                  Year <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"

@@ -53,10 +53,13 @@ import Skeleton from "@/app/components/skeleton/Skeleton";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthUserContext";
 import GiveTestimonialModal from "@/components/features/user/landing/modals/public-profile/GiveTestimonialModal";
+import { resolveAdvisorProfileSlug } from "@/lib/advisor/profileSlug";
 const page = () => {
   const qrRef = React.useRef(null);
   const { user, advisor, loading: authLoading } = useAuth();
   const [activeModal, setActiveModal] = useState(null);
+  const [appOrigin, setAppOrigin] = useState("");
+  const [serverBaseUrl, setServerBaseUrl] = useState("");
   const [advisorScore, setAdvisorScore] = useState({
     total: 0,
     max: 100,
@@ -85,6 +88,41 @@ const page = () => {
     };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setAppOrigin(window.location.origin);
+    }
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchPublicBaseUrl() {
+      try {
+        const response = await fetch("/api/config/public-base-url", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result?.baseUrl || !isMounted) {
+          return;
+        }
+
+        setServerBaseUrl(result.baseUrl);
+      } catch (error) {
+        console.error("Failed to load public base URL:", error);
+      }
+    }
+
+    fetchPublicBaseUrl();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -146,9 +184,32 @@ const page = () => {
 
     const link = document.createElement("a");
     link.href = pngUrl;
-    link.download = "krishna-qr.png";
+    link.download = qrDownloadFileName;
     link.click();
   };
+
+  const advisorProfileSlug = resolveAdvisorProfileSlug(
+    advisor?.profile_slug,
+    user?.name,
+  );
+  const advisorProfileId = advisor?.advisor_id || user?.id || "";
+  const publicProfilePath = advisorProfileSlug
+    ? `/dashboard/${advisorProfileSlug}`
+    : advisorProfileId
+      ? `/dashboard/${advisorProfileId}`
+      : "";
+  const publicBaseUrl = serverBaseUrl || appOrigin;
+  const normalizedBaseUrl = publicBaseUrl
+    ? publicBaseUrl.replace(/\/+$/, "")
+    : "";
+  const publicProfileUrl =
+    normalizedBaseUrl && publicProfilePath
+      ? `${normalizedBaseUrl}${publicProfilePath}`
+      : publicProfilePath;
+  const publicProfileLabel = publicProfileUrl
+    .replace(/^https?:\/\//, "")
+    .replace(/\/+$/, "");
+  const qrDownloadFileName = `${advisorProfileSlug || "advisor"}-qr.png`;
 
   const stats = [
     {
@@ -951,16 +1012,16 @@ const page = () => {
                 ref={qrRef}
                 className="bg-gray-100 p-4 rounded-2xl w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] flex items-center justify-center"
               >
-                <QRCodeCanvas value="https://yvity.in/krishna" size={180} />
+                <QRCodeCanvas value={publicProfileUrl || publicProfilePath} size={180} />
               </div>
 
               {/* Info */}
               <div className="text-center">
                 <h2 className="text-lg sm:text-xl font-bold text-gray-900">
-                  Krishna Mohan
+                  {user?.name || "Advisor"}
                 </h2>
                 <p className="text-sm text-gray-500 break-all">
-                  yvity.in/krishna
+                  {publicProfileLabel || publicProfilePath || "Profile link unavailable"}
                 </p>
               </div>
 
@@ -1194,7 +1255,7 @@ const page = () => {
                       Copy Profile Link
                     </h3>
                     <p className="text-sm text-slate-500 font-medium">
-                      yvity.in/krishna
+                      {publicProfileLabel || publicProfilePath || "Profile link unavailable"}
                     </p>
                   </div>
                 </button>

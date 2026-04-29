@@ -580,15 +580,82 @@
 import { ModalWrapper } from "@/app/components/layout/ModalWrapper";
 import ServiceSection from "@/components/features/advisor/services/ServiceSection";
 import { useModal } from "@/context/ModalContext";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { FaCross, FaMehBlank, FaPlus } from "react-icons/fa";
 import { FaPencil, FaShield } from "react-icons/fa6";
 import { HiPlus } from "react-icons/hi";
 import { HiOutlineBuildingLibrary } from "react-icons/hi2";
 import { LuClockAlert } from "react-icons/lu";
-import { MdClose } from "react-icons/md";
+import { MdClose, MdKeyboardArrowDown } from "react-icons/md";
 const API = "/api/advisor/services";
+
+const SERVICE_TYPE_OPTIONS = [
+  "Life Insurance",
+  "Health Insurance",
+  "General Insurance",
+  "Other",
+];
+
+const COMPANY_OPTIONS = {
+  "Life Insurance": [
+    "Life Insurance Corporation of India (LIC)",
+    "HDFC Life Insurance",
+    "SBI Life Insurance",
+    "ICICI Prudential Life Insurance",
+    "Max Life Insurance",
+    "Tata AIA Life Insurance",
+    "Bajaj Allianz Life Insurance",
+    "Kotak Mahindra Life Insurance",
+    "Aditya Birla Sun Life Insurance",
+    "PNB MetLife India Insurance",
+    "Canara HSBC Life Insurance",
+    "IndiaFirst Life Insurance",
+    "Edelweiss Tokio Life Insurance",
+    "Ageas Federal Life Insurance",
+    "Aviva Life Insurance",
+    "Bharti AXA Life Insurance",
+    "Bandhan Life Insurance",
+  ],
+  "Health Insurance": [
+    "Star Health and Allied Insurance",
+    "Niva Bupa Health Insurance",
+    "Care Health Insurance",
+    "Aditya Birla Health Insurance",
+    "ManipalCigna Health Insurance",
+    "Galaxy Health Insurance",
+  ],
+  "General Insurance": [
+    "New India Assurance",
+    "United India Insurance",
+    "Oriental Insurance Company",
+    "National Insurance Company",
+    "ICICI Lombard General Insurance",
+    "Bajaj Allianz General Insurance",
+    "Tata AIG General Insurance",
+    "HDFC ERGO General Insurance",
+    "Reliance General Insurance",
+    "IFFCO Tokio General Insurance",
+    "Cholamandalam MS General Insurance",
+    "Future Generali India Insurance",
+    "Go Digit General Insurance",
+    "ACKO General Insurance",
+    "Universal Sompo General Insurance",
+    "Raheja QBE General Insurance",
+    "SBI General Insurance",
+    "Shriram General Insurance",
+    "Magma HDI General Insurance",
+    "Navi General Insurance",
+    "Zuno General Insurance",
+  ],
+};
+
+const getEmptyForm = () => ({
+  serviceType: "",
+  company: "",
+  experience: "",
+  services: [""],
+});
 
 const initialServices = [
   {
@@ -615,12 +682,15 @@ export default function Page() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const [form, setForm] = useState({
-    serviceType: "",
-    company: "",
-    experience: "",
-    services: [""],
-  });
+  const [form, setForm] = useState(getEmptyForm());
+  const [isCompanyDropdownOpen, setIsCompanyDropdownOpen] = useState(false);
+  const [companySearchTerm, setCompanySearchTerm] = useState("");
+  const companyDropdownRef = useRef(null);
+  const companyOptions = COMPANY_OPTIONS[form.serviceType] || [];
+  const isOtherServiceType = form.serviceType === "Other";
+  const filteredCompanyOptions = companyOptions.filter((option) =>
+    option.toLowerCase().includes(companySearchTerm.trim().toLowerCase())
+  );
 
   const validateForm = () => {
     if (!form.serviceType.trim()) {
@@ -662,6 +732,23 @@ export default function Page() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleServiceTypeChange = (value) => {
+    setIsCompanyDropdownOpen(false);
+    setCompanySearchTerm("");
+
+    setForm((prev) => {
+      const nextCompanies = COMPANY_OPTIONS[value] || [];
+      const keepCompany =
+        value !== "Other" && nextCompanies.includes(prev.company);
+
+      return {
+        ...prev,
+        serviceType: value,
+        company: keepCompany ? prev.company : "",
+      };
+    });
+  };
+
   const handleServiceChange = (index, value) => {
     const updated = [...form.services];
     updated[index] = value;
@@ -671,12 +758,40 @@ export default function Page() {
   const { trigger, clearTrigger } = useModal();
 
   const [isService, setIsService] = useState(false);
+  const closeAddServiceModal = () => {
+    setIsCompanyDropdownOpen(false);
+    setCompanySearchTerm("");
+    setIsService(false);
+    setForm(getEmptyForm());
+  };
+
   useEffect(() => {
     if (trigger === "ADD_SERVICE") {
+      setIsCompanyDropdownOpen(false);
+      setCompanySearchTerm("");
+      setForm(getEmptyForm());
       setIsService(true);
       clearTrigger(); // IMPORTANT
     }
-  }, [trigger]);
+  }, [trigger, clearTrigger]);
+
+  useEffect(() => {
+    if (!isCompanyDropdownOpen) return;
+
+    const handleClickOutside = (event) => {
+      if (
+        companyDropdownRef.current &&
+        !companyDropdownRef.current.contains(event.target)
+      ) {
+        setIsCompanyDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isCompanyDropdownOpen]);
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
@@ -700,15 +815,7 @@ export default function Page() {
 
       toast.success("Service added successfully!");
 
-      setIsService(false);
-
-      // NEW: Clear the form completely after successful submission
-      setForm({
-        serviceType: "",
-        company: "",
-        experience: "",
-        services: [""],
-      });
+      closeAddServiceModal();
 
       // refresh list
       fetchServices();
@@ -722,10 +829,12 @@ export default function Page() {
 
   //Fetch Services from the DB :
   const [servicesList, setServicesList] = useState([]);
+  const [loadingServices, setLoadingServices] = useState(true);
 
   //fetch the users :
   const fetchServices = async () => {
     try {
+      setLoadingServices(true);
       const res = await fetch(API);
       const data = await res.json();
 
@@ -734,6 +843,8 @@ export default function Page() {
       setServicesList(data.services);
     } catch (err) {
       toast.error("Failed to load services");
+    } finally {
+      setLoadingServices(false);
     }
   };
 
@@ -885,6 +996,7 @@ export default function Page() {
           data={servicesList}
           setEdit={setEdit}
           setIsDelete={setIsDelete}
+          loading={loadingServices}
           setEditData={(service) => {
             setEditId(service.id);
             setForm({
@@ -911,7 +1023,7 @@ export default function Page() {
       {/* Edit popup */}
 
       {isService && (
-        <ModalWrapper onClose={() => setIsService(false)}>
+        <ModalWrapper onClose={closeAddServiceModal}>
           {/* 1. Added h-auto and removed scroll constraints.
         2. Set bg-white and overflow-hidden for the clean card look.
         3. Match the specific max-w-lg from your designs.
@@ -926,8 +1038,8 @@ export default function Page() {
                 </h2>
               </div>
               <button
-                onClick={() => setIsService(false)}
-                className="bg-slate-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+                onClick={closeAddServiceModal}
+                className="bg-slate-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <MdClose size={22} />
               </button>
@@ -940,12 +1052,25 @@ export default function Page() {
                 <label className="font-bold text-slate-800 text-[0.95rem]">
                   Service Type <span className="text-red-500">*</span>
                 </label>
-                <input
-                  value={form.serviceType}
-                  onChange={(e) => handleChange("serviceType", e.target.value)}
-                  className="w-full py-3.5 px-5 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all placeholder:text-gray-400"
-                  placeholder="Life Insurance"
-                />
+                <div className="relative">
+                  <select
+                    value={form.serviceType}
+                    onChange={(e) => handleServiceTypeChange(e.target.value)}
+                    className={`w-full appearance-none py-3.5 pl-5 pr-14 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all ${
+                      form.serviceType ? "text-slate-900" : "text-gray-400"
+                    }`}
+                  >
+                    <option value="">Select service type</option>
+                    {SERVICE_TYPE_OPTIONS.map((option) => (
+                      <option key={option} value={option} className="text-slate-900">
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="pointer-events-none absolute inset-y-0 right-5 flex items-center text-gray-400">
+                    <MdKeyboardArrowDown size={22} />
+                  </span>
+                </div>
               </div>
 
               {/* Company */}
@@ -953,12 +1078,84 @@ export default function Page() {
                 <label className="font-bold text-slate-800 text-[0.95rem]">
                   Company <span className="text-red-500">*</span>
                 </label>
-                <input
-                  value={form.company}
-                  onChange={(e) => handleChange("company", e.target.value)}
-                  className="w-full py-3.5 px-5 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all"
-                  placeholder="LIC of India"
-                />
+                {isOtherServiceType ? (
+                  <input
+                    value={form.company}
+                    onChange={(e) => handleChange("company", e.target.value)}
+                    className="w-full py-3.5 px-5 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all"
+                    placeholder="Enter company name"
+                  />
+                ) : (
+                  <div className="relative" ref={companyDropdownRef}>
+                    <input
+                      value={isCompanyDropdownOpen ? companySearchTerm : form.company}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setCompanySearchTerm(value);
+                        handleChange("company", value);
+                        setIsCompanyDropdownOpen(true);
+                      }}
+                      onFocus={() => {
+                        if (!form.serviceType) return;
+                        setCompanySearchTerm(form.company);
+                        setIsCompanyDropdownOpen(true);
+                      }}
+                      disabled={!form.serviceType}
+                      className={`w-full py-3.5 pl-5 pr-12 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all ${
+                        form.company ? "text-slate-900" : "text-gray-400"
+                      } ${!form.serviceType ? "cursor-not-allowed opacity-60" : ""}`}
+                      placeholder={
+                        form.serviceType
+                          ? "Search or select company"
+                          : "Select service type first"
+                      }
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!form.serviceType) return;
+                        if (!isCompanyDropdownOpen) {
+                          setCompanySearchTerm("");
+                        }
+                        setIsCompanyDropdownOpen((prev) => !prev);
+                      }}
+                      disabled={!form.serviceType}
+                      className="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 cursor-pointer disabled:cursor-not-allowed"
+                    >
+                      <MdKeyboardArrowDown
+                        size={22}
+                        className={`transition-transform ${
+                          isCompanyDropdownOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {isCompanyDropdownOpen && form.serviceType && (
+                      <div className="absolute z-20 mt-2 max-h-56 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg">
+                        {filteredCompanyOptions.length ? (
+                          filteredCompanyOptions.map((option) => (
+                            <button
+                              key={option}
+                              type="button"
+                              onClick={() => {
+                                handleChange("company", option);
+                                setCompanySearchTerm(option);
+                                setIsCompanyDropdownOpen(false);
+                              }}
+                              className="w-full px-5 py-3 text-left text-sm text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                            >
+                              {option}
+                            </button>
+                          ))
+                        ) : (
+                          <p className="px-5 py-3 text-sm text-gray-400">
+                            No companies found
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Experience */}
@@ -994,7 +1191,7 @@ export default function Page() {
                       <button
                         type="button"
                         onClick={() => removeServicePoint(index)}
-                        className="p-2 rounded-lg border border-red-100 bg-red-50 text-red-400 hover:text-red-600 transition-all shrink-0"
+                        className="p-2 rounded-lg border border-red-100 bg-red-50 text-red-400 hover:text-red-600 transition-all shrink-0 cursor-pointer"
                       >
                         <MdClose size={18} />
                       </button>
@@ -1005,7 +1202,7 @@ export default function Page() {
                 <button
                   type="button"
                   onClick={addServicePoint}
-                  className="flex items-center gap-2 text-[#0D6060] font-bold text-base mt-1 w-fit hover:opacity-80 transition-opacity"
+                  className="flex items-center gap-2 text-[#0D6060] font-bold text-base mt-1 w-fit hover:opacity-80 transition-opacity cursor-pointer"
                 >
                   <FaPlus size={14} />
                   Add Point
@@ -1015,7 +1212,7 @@ export default function Page() {
               {/* Submit Button - NEW: dynamic state and disabled property */}
               <button
                 disabled={isSubmitting}
-                className={`w-full mt-2 bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4 rounded-2xl font-bold text-lg transition-transform shadow-lg shadow-emerald-900/10 ${
+                className={`w-full mt-2 bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4 rounded-2xl font-bold text-lg transition-transform shadow-lg shadow-emerald-900/10 cursor-pointer ${
                   isSubmitting ? "opacity-70 cursor-not-allowed" : "active:scale-[0.98]"
                 }`}
                 onClick={() => {
@@ -1045,7 +1242,7 @@ export default function Page() {
               </div>
               <button
                 onClick={() => setEdit(false)}
-                className="bg-slate-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+                className="bg-slate-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <MdClose size={22} />
               </button>
@@ -1062,7 +1259,7 @@ export default function Page() {
                   value={form.serviceType}
                   onChange={(e) => handleChange("serviceType", e.target.value)}
                   className="w-full py-3 px-5 rounded-xl border border-gray-200 bg-[#FAFCFB] focus:border-[#0D6060] outline-none transition-all placeholder:text-gray-400"
-                  placeholder="Life Insurance"
+                  placeholder="Life Insurance "
                 />
               </div>
 
@@ -1112,7 +1309,7 @@ export default function Page() {
                       <button
                         type="button"
                         onClick={() => removeServicePoint(index)}
-                        className="p-1.5 rounded-lg border border-red-100 bg-red-50 text-red-400 hover:text-red-600 transition-all shrink-0"
+                        className="p-1.5 rounded-lg border border-red-100 bg-red-50 text-red-400 hover:text-red-600 transition-all shrink-0 cursor-pointer"
                       >
                         <MdClose size={16} />
                       </button>
@@ -1123,7 +1320,7 @@ export default function Page() {
                 <button
                   type="button"
                   onClick={addServicePoint}
-                  className="flex items-center gap-2 text-[#0D6060] font-bold text-sm mt-1 w-fit hover:opacity-80 transition-opacity"
+                  className="flex items-center gap-2 text-[#0D6060] font-bold text-sm mt-1 w-fit hover:opacity-80 transition-opacity cursor-pointer"
                 >
                   <FaPlus size={12} />
                   Add Point
@@ -1133,7 +1330,7 @@ export default function Page() {
               {/* Submit Button - NEW: dynamic state and disabled property */}
               <button
                 disabled={isUpdating}
-                className={`w-full mt-2 bg-[#0a4d4a] hover:bg-[#073a38] text-white py-3.5 rounded-2xl font-bold text-lg transition-transform shadow-lg shadow-emerald-900/10 ${
+                className={`w-full mt-2 bg-[#0a4d4a] hover:bg-[#073a38] text-white py-3.5 rounded-2xl font-bold text-lg transition-transform shadow-lg shadow-emerald-900/10 cursor-pointer ${
                   isUpdating ? "opacity-70 cursor-not-allowed" : "active:scale-[0.98]"
                 }`}
                 onClick={() => handleEditSubmit()}
@@ -1158,7 +1355,7 @@ export default function Page() {
               </h2>
               <button
                 onClick={() => setIsDelete(false)}
-                className="bg-slate-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+                className="bg-slate-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <MdClose size={22} />
               </button>
@@ -1177,14 +1374,14 @@ export default function Page() {
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="flex-1 py-4 rounded-2xl border border-red-200 bg-red-50 text-red-500 font-bold text-base transition-all active:scale-[0.98] hover:bg-red-100 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="flex-1 py-4 rounded-2xl border border-red-200 bg-red-50 text-red-500 font-bold text-base transition-all active:scale-[0.98] hover:bg-red-100 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {isDeleting ? "Deleting..." : "Yes, Delete"}
                 </button>
 
                 <button
                   onClick={() => setIsDelete(false)}
-                  className="flex-1 py-4 rounded-2xl bg-[#0a4d4a] text-white font-bold text-base transition-all active:scale-[0.98] hover:bg-[#073a38]"
+                  className="flex-1 py-4 rounded-2xl bg-[#0a4d4a] text-white font-bold text-base transition-all active:scale-[0.98] hover:bg-[#073a38] cursor-pointer"
                 >
                   Cancel
                 </button>
