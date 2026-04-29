@@ -51,6 +51,7 @@ import Skeleton from "@/app/components/skeleton/Skeleton";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import GiveTestimonialModal from "@/components/features/user/landing/modals/public-profile/GiveTestimonialModal";
+import { resolveAdvisorProfileSlug } from "@/lib/advisor/profileSlug";
 
 const getServiceLabels = (services = []) => {
   return [
@@ -78,6 +79,7 @@ const page = () => {
   const [advisor, setAdvisor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeModal, setActiveModal] = useState(null);
+  const [appOrigin, setAppOrigin] = useState("");
   const galleryData = [];
   const MODALS = {
     TESTIMONIAL: "testimonial",
@@ -93,6 +95,12 @@ const page = () => {
     };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setAppOrigin(window.location.origin);
+    }
   }, []);
 
   const handleEditClick = (entry) => {
@@ -113,9 +121,35 @@ const page = () => {
 
     const link = document.createElement("a");
     link.href = pngUrl;
-    link.download = "krishna-qr.png";
+    link.download = qrDownloadFileName;
     link.click();
   };
+
+  const advisorProfileSlug = resolveAdvisorProfileSlug(
+    advisor?.profile_slug,
+    user?.name,
+  );
+  const publicProfilePath = advisorProfileSlug
+    ? `/dashboard/${advisorProfileSlug}`
+    : advisorId
+      ? `/dashboard/${advisorId}`
+      : "";
+  const publicBaseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    appOrigin;
+  const normalizedBaseUrl = publicBaseUrl
+    ? publicBaseUrl.replace(/\/+$/, "")
+    : "";
+  const publicProfileUrl =
+    normalizedBaseUrl && publicProfilePath
+      ? `${normalizedBaseUrl}${publicProfilePath}`
+      : publicProfilePath;
+  const publicProfileLabel = publicProfileUrl
+    .replace(/^https?:\/\//, "")
+    .replace(/\/+$/, "");
+  const qrDownloadFileName = `${advisorProfileSlug || "advisor"}-qr.png`;
+  const publicAdvisorId = advisor?.advisor_id || user?.id || advisorId;
 
   const serviceLabels = getServiceLabels(
     Array.isArray(advisor?.services) ? advisor.services : [],
@@ -314,7 +348,7 @@ const page = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          advisor_id: advisorId,
+          advisor_id: publicAdvisorId,
           mobile_number: mobile,
           recommendations: selectedReasons,
         }),
@@ -1038,16 +1072,16 @@ const page = () => {
                 ref={qrRef}
                 className="bg-gray-100 p-4 rounded-2xl w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] flex items-center justify-center"
               >
-                <QRCodeCanvas value="https://yvity.in/krishna" size={180} />
+                <QRCodeCanvas value={publicProfileUrl || publicProfilePath} size={180} />
               </div>
 
               {/* Info */}
               <div className="text-center">
                 <h2 className="text-lg sm:text-xl font-bold text-gray-900">
-                  Krishna Mohan
+                  {user?.name || "Advisor"}
                 </h2>
                 <p className="text-sm text-gray-500 break-all">
-                  yvity.in/krishna
+                  {publicProfileLabel || publicProfilePath || "Profile link unavailable"}
                 </p>
               </div>
 
@@ -1316,7 +1350,7 @@ const page = () => {
                       Copy Profile Link
                     </h3>
                     <p className="text-sm text-slate-500 font-medium">
-                      yvity.in/krishna
+                      {publicProfileLabel || publicProfilePath || "Profile link unavailable"}
                     </p>
                   </div>
                 </button>

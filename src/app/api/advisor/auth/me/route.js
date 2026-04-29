@@ -2,14 +2,12 @@ import { getUser } from "@/lib/auth/Getuser";
 import { recordAdvisorLoginActivity } from "@/lib/advisor-score/recordAdvisorLoginActivity";
 import { createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import { ValidateUser } from "@/lib/auth/ValidateUser";
 
 export async function GET() {
   try {
-    const user = await ValidateUser();
-          // console.log("harsha123",user);
+    const sessionUser = await getUser();
 
-    if (!user) {
+    if (!sessionUser?.id) {
       return NextResponse.json(
         {
           success: false,
@@ -26,7 +24,7 @@ export async function GET() {
     const { data: userData, error: userError } = await supabase
       .from("users")
       .select("id, roles")
-      .filter("device_tokens", "cs", JSON.stringify([{ token: user.device_tokens[0].token }]))
+      .eq("id", sessionUser.id)
       .maybeSingle();
 
     if (userError || !userData) {
@@ -35,7 +33,7 @@ export async function GET() {
           success: false,
           code: 2,
           message: "User Not Found",
-          error: userError?.message || "User not found based on the token",
+          error: userError?.message || "User not found based on the session",
         },
         { status: 404 }
       );

@@ -47,6 +47,7 @@ const normalizeAdvisor = (advisor, index) => {
 
   return {
     id: advisor?.id || `advisor-${index}`,
+    profile_slug: advisor?.profile_slug || "",
     name: advisor?.name || "Advisor",
     title: advisor?.title || advisor?.profession || "Insurance Advisor",
     location: advisor?.location || advisor?.city || "",
