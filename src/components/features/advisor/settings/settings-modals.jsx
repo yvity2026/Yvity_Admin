@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { X, ArrowRight, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
+import { useAdvisorAuth } from "@/context/AuthAdvisorContext";
 
 export function SettingsModal({ isOpen, onClose, title, icon, children }) {
   if (!isOpen) return null;
@@ -221,59 +222,98 @@ export function PasswordModal({ isOpen, onClose }) {
     </SettingsModal>
   );
 }
-function OtpForm({ onBack, onSubmit, backText }) {
-  const [otp, setOtp] = useState(["", "", "", ""]);
-  const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
+function OtpForm({ onBack, onSubmit, backText, length = 4, loading = false, title = `Enter ${length}-digit OTP` }) {
+  const [otp, setOtp] = useState(Array.from({ length }, () => ""));
+  const inputRefs = useRef([]);
 
   const handleChange = (index, value) => {
+    if (loading) return;
     if (isNaN(value)) return;
+    const digits = value.replace(/\D/g, "").slice(0, length - index);
+
+    if (digits.length > 1) {
+      const newOtp = [...otp];
+      digits.split("").forEach((digit, offset) => {
+        newOtp[index + offset] = digit;
+      });
+      setOtp(newOtp);
+      inputRefs.current[Math.min(index + digits.length, length - 1)]?.focus();
+      return;
+    }
+
     const newOtp = [...otp];
-    newOtp[index] = value;
+    newOtp[index] = digits;
     setOtp(newOtp);
 
     // Auto focus next input
-    if (value !== "" && index < 3) {
-      inputRefs[index + 1].current?.focus();
+    if (digits !== "" && index < length - 1) {
+      inputRefs.current[index + 1]?.focus();
     }
+  };
+
+  const handlePaste = (index, event) => {
+    event.preventDefault();
+    if (loading) return;
+
+    const pastedDigits = event.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, length - index);
+
+    if (!pastedDigits) return;
+
+    const newOtp = [...otp];
+    pastedDigits.split("").forEach((digit, offset) => {
+      newOtp[index + offset] = digit;
+    });
+    setOtp(newOtp);
+    inputRefs.current[Math.min(index + pastedDigits.length, length - 1)]?.focus();
   };
 
   const handleKeyDown = (index, e) => {
     // Auto focus previous input on backspace
     if (e.key === "Backspace" && otp[index] === "" && index > 0) {
-      inputRefs[index - 1].current?.focus();
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (loading) return;
+
     if (otp.every(digit => digit !== "")) {
       onSubmit(otp.join(""));
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
+    <form onSubmit={handleSubmit} aria-busy={loading} className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
       <button 
         type="button" 
         onClick={onBack}
-        className="flex items-center gap-2 text-gray-500 hover:text-gray-900 text-sm font-medium mb-6 transition-colors w-fit"
+        disabled={loading}
+        className="flex items-center gap-2 text-gray-500 hover:text-gray-900 text-sm font-medium mb-6 transition-colors w-fit disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <ArrowLeft className="w-4 h-4" /> {backText}
       </button>
 
       <div className="mb-8 mt-2">
-        <h3 className="text-[#0A4A4A] text-base font-medium text-center mb-6">Enter 4-digit OTP</h3>
-        <div className="flex justify-center gap-3 sm:gap-4">
+        <h3 className="text-[#0A4A4A] text-base font-medium text-center mb-6">{title}</h3>
+        <div className="flex justify-center gap-2 sm:gap-3">
           {otp.map((digit, index) => (
             <input
               key={index}
-              ref={inputRefs[index]}
+              ref={(element) => {
+                inputRefs.current[index] = element;
+              }}
               type="text"
               maxLength={1}
               value={digit}
+              disabled={loading}
               onChange={(e) => handleChange(index, e.target.value)}
+              onPaste={(e) => handlePaste(index, e)}
               onKeyDown={(e) => handleKeyDown(index, e)}
-              className="w-12 h-12 sm:w-14 sm:h-14 bg-[#F8F6F1] border border-gray-200 rounded-xl text-center text-xl font-bold focus:outline-none focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A] focus:bg-white transition-all"
+              className="w-10 h-11 sm:w-12 sm:h-12 bg-[#F8F6F1] border border-gray-200 rounded-xl text-center text-xl font-bold focus:outline-none focus:border-[#0A4A4A] focus:ring-1 focus:ring-[#0A4A4A] focus:bg-white transition-all disabled:opacity-70 disabled:cursor-wait"
             />
           ))}
         </div>
@@ -281,96 +321,266 @@ function OtpForm({ onBack, onSubmit, backText }) {
 
       <button 
         type="submit" 
-        className="w-full bg-[#0A4A4A] text-white rounded-lg py-3 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-[#083a3a] transition-colors mt-auto cursor-pointer"
-        disabled={otp.some(digit => digit === "")}
+        className="w-full bg-[#0A4A4A] text-white rounded-lg py-3 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-[#083a3a] transition-colors mt-auto cursor-pointer disabled:opacity-70 disabled:cursor-wait"
+        disabled={loading || otp.some(digit => digit === "")}
       >
-        Submit <ArrowRight className="w-4 h-4" />
+        {loading ? "Verifying..." : "Submit"} <ArrowRight className="w-4 h-4" />
       </button>
     </form>
   );
 }
 
+function clearBrowserCookies() {
+  document.cookie.split(";").forEach((cookie) => {
+    const name = cookie.split("=")[0]?.trim();
+    if (!name) return;
+
+    document.cookie = `${name}=; Max-Age=0; path=/`;
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+  });
+}
+
 export function DeactivateModal({ isOpen, onClose }) {
-  const handleDeactivate = () => {
-    // Logic to deactivate account
+  const { user } = useAdvisorAuth();
+  const [step, setStep] = useState("confirm");
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const actionInFlightRef = useRef(false);
+
+  const handleClose = () => {
+    actionInFlightRef.current = false;
+    setStep("confirm");
+    setLoading(false);
+    setEmail("");
     onClose();
   };
 
+  const requestOtp = async () => {
+    if (actionInFlightRef.current) return;
+    actionInFlightRef.current = true;
+
+    try {
+      setLoading(true);
+      const res = await fetch("/api/advisor/account/danger-zone", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "deactivate" }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Unable to send OTP");
+
+      setEmail(data.email || user?.email || "");
+      setStep("otp");
+      toast.success(data.message || "OTP sent");
+    } catch (error) {
+      toast.error(error.message || "Unable to send OTP");
+    } finally {
+      actionInFlightRef.current = false;
+      setLoading(false);
+    }
+  };
+
+  const verifyOtp = async (otp) => {
+    if (actionInFlightRef.current) return;
+    actionInFlightRef.current = true;
+
+    try {
+      setLoading(true);
+      const res = await fetch("/api/advisor/account/danger-zone", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "deactivate", otp }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Unable to deactivate account");
+
+      toast.success(data.message || "Account deactivated");
+      handleClose();
+      if (data.redirect_url) {
+        clearBrowserCookies();
+        window.location.href = data.redirect_url;
+      }
+    } catch (error) {
+      toast.error(error.message || "Unable to deactivate account");
+    } finally {
+      actionInFlightRef.current = false;
+      setLoading(false);
+    }
+  };
+
   return (
-    <SettingsModal isOpen={isOpen} onClose={onClose} title="Deactivate Account?">
-      <p className="text-gray-500 text-[clamp(12px,1.2vw,15px)] leading-relaxed mb-6 font-medium">
-        Your profile will be hidden from Public view. You can reactivate anytime by logging in. Your data will be preserved.
-      </p>
-      
-      <div className="flex gap-4">
-        <button 
-          onClick={handleDeactivate}
-          className="flex-1 py-3 bg-[#FEF2F2] border border-[#FECACA] text-[#D32323] rounded-lg font-bold text-sm hover:bg-[#FEE2E2] transition-colors cursor-pointer"
-        >
-          Deactivate
-        </button>
-        <button 
-          onClick={onClose}
-          className="flex-1 py-3 bg-[#0A4A4A] text-white rounded-lg font-bold text-sm hover:bg-[#083a3a] transition-colors cursor-pointer"
-        >
-          Cancel
-        </button>
-      </div>
+    <SettingsModal isOpen={isOpen} onClose={handleClose} title="Deactivate Account?">
+      {step === "confirm" ? (
+        <>
+          <p className="text-gray-500 text-[clamp(12px,1.2vw,15px)] leading-relaxed mb-6 font-medium">
+            Your profile will be hidden temporarily. You can activate your profile again within 30 days.
+          </p>
+          
+          <div className="flex gap-4">
+            <button 
+              onClick={requestOtp}
+              disabled={loading}
+              className="flex-1 py-3 bg-[#FEF2F2] border border-[#FECACA] text-[#D32323] rounded-lg font-bold text-sm hover:bg-[#FEE2E2] transition-colors cursor-pointer disabled:opacity-60"
+            >
+              {loading ? "Sending OTP..." : "Deactivate"}
+            </button>
+            <button 
+              onClick={handleClose}
+              disabled={loading}
+              className="flex-1 py-3 bg-[#0A4A4A] text-white rounded-lg font-bold text-sm hover:bg-[#083a3a] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="text-gray-500 text-sm leading-relaxed mb-5 font-medium">
+            We sent a 6-digit OTP to {email || "your registered email"}.
+          </p>
+          <OtpForm
+            length={6}
+            loading={loading}
+            onBack={() => setStep("confirm")}
+            onSubmit={verifyOtp}
+            backText="Back"
+          />
+        </>
+      )}
     </SettingsModal>
   );
 }
 
 export function DeleteModal({ isOpen, onClose }) {
+  const { user } = useAdvisorAuth();
   const [confirmText, setConfirmText] = useState("");
+  const [step, setStep] = useState("confirm");
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const actionInFlightRef = useRef(false);
 
   const handleClose = () => {
+    actionInFlightRef.current = false;
     setConfirmText("");
+    setStep("confirm");
+    setLoading(false);
+    setEmail("");
     onClose();
   };
 
-  const handleDelete = (e) => {
+  const requestOtp = async (e) => {
     e.preventDefault();
-    if (confirmText === "DELETE") {
-      // Logic to delete account
+    if (actionInFlightRef.current) return;
+    if (confirmText !== "DELETE") return;
+
+    actionInFlightRef.current = true;
+
+    try {
+      setLoading(true);
+      const res = await fetch("/api/advisor/account/danger-zone", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete" }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Unable to send OTP");
+
+      setEmail(data.email || user?.email || "");
+      setStep("otp");
+      toast.success(data.message || "OTP sent");
+    } catch (error) {
+      toast.error(error.message || "Unable to send OTP");
+    } finally {
+      actionInFlightRef.current = false;
+      setLoading(false);
+    }
+  };
+
+  const verifyOtp = async (otp) => {
+    if (actionInFlightRef.current) return;
+    actionInFlightRef.current = true;
+
+    try {
+      setLoading(true);
+      const res = await fetch("/api/advisor/account/danger-zone", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", otp }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Unable to delete account");
+
+      toast.success(data.message || "Account deleted");
       handleClose();
+      if (data.redirect_url) {
+        clearBrowserCookies();
+        window.location.href = data.redirect_url;
+      }
+    } catch (error) {
+      toast.error(error.message || "Unable to delete account");
+    } finally {
+      actionInFlightRef.current = false;
+      setLoading(false);
     }
   };
 
   return (
     <SettingsModal isOpen={isOpen} onClose={handleClose} title="Delete Account" icon="⚠️">
-      <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-xl p-4 mb-6">
-        <p className="text-[clamp(12px,1.2vw,14px)] text-[#D32323] leading-relaxed">
-          <span className="font-bold">This is permanent and cannot be undone.</span> All your profile data, testimonials, achievements and subscription will be deleted.
-        </p>
-      </div>
+      {step === "confirm" ? (
+        <>
+          <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-xl p-4 mb-6">
+            <p className="text-[clamp(12px,1.2vw,14px)] text-[#D32323] leading-relaxed">
+              <span className="font-bold">This is permanent and cannot be undone.</span> All your profile data, testimonials, achievements and subscription will be deleted.
+            </p>
+          </div>
 
-      <form onSubmit={handleDelete}>
-        <div className="mb-6">
-          <label className="block text-[clamp(13px,1.3vw,15px)] font-bold text-gray-900 mb-2">
-            Type "DELETE" to confirm
-          </label>
-          <input 
-            type="text"
-            required
-            value={confirmText}
-            onChange={(e) => setConfirmText(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-[#D32323] focus:ring-1 focus:ring-[#D32323]" 
-            placeholder="Type DELETE" 
+          <form onSubmit={requestOtp}>
+            <div className="mb-6">
+              <label className="block text-[clamp(13px,1.3vw,15px)] font-bold text-gray-900 mb-2">
+                Type DELETE to confirm
+              </label>
+              <input 
+                type="text"
+                required
+                value={confirmText}
+                disabled={loading}
+                onChange={(e) => setConfirmText(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-[#D32323] focus:ring-1 focus:ring-[#D32323] disabled:opacity-70 disabled:cursor-wait" 
+                placeholder="Type DELETE" 
+              />
+            </div>
+            
+            <button 
+              type="submit" 
+              disabled={loading || confirmText !== "DELETE"}
+              className={`w-full py-3 rounded-lg font-bold text-sm transition-colors cursor-pointer ${
+                confirmText === "DELETE" && !loading
+                  ? "bg-[#DF3737] hover:bg-[#c72f2f] text-white" 
+                  : "bg-[#F3F4F6] text-gray-400 cursor-not-allowed"
+              }`}
+            >
+              {loading ? "Sending OTP..." : "Send OTP to Delete Account"}
+            </button>
+          </form>
+        </>
+      ) : (
+        <>
+          <p className="text-gray-500 text-sm leading-relaxed mb-5 font-medium">
+            We sent a 6-digit OTP to {email || "your registered email"}.
+          </p>
+          <OtpForm
+            length={6}
+            loading={loading}
+            onBack={() => setStep("confirm")}
+            onSubmit={verifyOtp}
+            backText="Back"
           />
-        </div>
-        
-        <button 
-          type="submit" 
-          disabled={confirmText !== "DELETE"}
-          className={`w-full py-3 rounded-lg font-bold text-sm transition-colors cursor-pointer ${
-            confirmText === "DELETE" 
-              ? "bg-[#DF3737] hover:bg-[#c72f2f] text-white" 
-              : "bg-[#F3F4F6] text-gray-400 cursor-not-allowed"
-          }`}
-        >
-          Permanently Delete Account
-        </button>
-      </form>
+        </>
+      )}
     </SettingsModal>
   );
 }
