@@ -14,7 +14,7 @@ export async function POST(req) {
       razorpay_payment_id,
       razorpay_signature,
     } = body;
-
+ 
     // 🔒 1. Validate input
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return NextResponse.json(
@@ -36,7 +36,7 @@ export async function POST(req) {
       );
     }
 
-    // 🔍 3. Fetch payment from DB
+    //  3. Fetch payment from DB
     const { data: existingPayment, error: fetchError } = await supabase
       .from("advisor_payments")
       .select("*")
@@ -50,7 +50,7 @@ export async function POST(req) {
       );
     }
 
-    // 🔁 4. Idempotency check
+    //  4. Idempotency check
     if (existingPayment.status === "paid") {
       return NextResponse.json({
         success: true,
@@ -58,7 +58,7 @@ export async function POST(req) {
       });
     }
 
-    // ⚠️ If already processing, avoid duplicate updates
+    // If already processing, avoid duplicate updates
     if (existingPayment.status === "processing") {
       return NextResponse.json({
         success: true,
@@ -87,7 +87,7 @@ export async function POST(req) {
     // ✅ 6. Return success (temporary)
     return NextResponse.json({
       success: true,
-      status: "processing",
+      status: "success",
     });
 
   } catch (err) {

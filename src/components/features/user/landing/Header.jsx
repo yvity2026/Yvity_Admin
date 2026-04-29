@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import { AnimatePresence, motion } from "framer-motion";
 import PricingSelectionPlan from "./modals/PricingSelectionPlan";
 import PricingModal from "./modals/PricingSelectionPlan";
+import PaymentProcessingModal from "./modals/PaymentProcessingModal";
 
 const Header = () => {
   const router = useRouter();
@@ -21,6 +22,8 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState(null);
 
   const MODALS = {
     PROFILE: "profile",
@@ -140,6 +143,19 @@ const Header = () => {
 
   const [roles, setRoles] = useState([]);
 
+  // Handle plan submission
+  const handleSubmit = async (formdata) => {
+    try {
+      // The payment and plan activation is handled by the PricingModal component
+      // This function just confirms the flow is complete
+      return true;
+    } catch (err) {
+      console.error("Error in handleSubmit:", err);
+      toast.error("An error occurred");
+      return false;
+    }
+  };
+
   // Fetch roles from API
   useEffect(() => {
     const fetchRoles = async () => {
@@ -169,7 +185,7 @@ const Header = () => {
   return (
     <>
       {loading ? (
-        <nav className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 md:h-[70px] shadow-sm relative after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-px after:bg-gradient-to-r after:from-[#0D6060] after:to-[#F59E0B]">
+        <nav className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 shadow-sm relative after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-px after:bg-gradient-to-r after:from-[#0D6060] after:to-[#F59E0B]">
           <div className="h-full mx-auto flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center space-x-2">
@@ -208,7 +224,7 @@ const Header = () => {
           </div>
         </nav>
       ) : (
-        <nav className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 md:max-h-[70px] shadow-sm relative after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-px after:bg-gradient-to-r after:from-[#0D6060] after:to-[#F59E0B]">
+        <nav className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 shadow-sm relative after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-px after:bg-gradient-to-r after:from-[#0D6060] after:to-[#F59E0B]">
           <div className="h-full mx-auto flex items-center justify-between ">
             <div className="flex items-center space-x-2">
               <Image
@@ -393,27 +409,55 @@ const Header = () => {
           )}
 
           {activeModal === MODALS.PLAN && (
-            <PricingModal
-              isOpen={true}
-              onClose={() => setActiveModal(null)}
-              form={profileFormData}
-              onContinue={async (formdata) => {
-                setProfileFormData((prev) => {
-                  const updated = {
-                    ...prev,
-                    ...formdata,
-                  };
+            <>
+              <PricingModal
+                isOpen={true}
+                onClose={() => {
+                  if (!paymentStatus) {
+                    setActiveModal(null);
+                    setSelectedPlan(null);
+                  }
+                }}
+                form={profileFormData}
+                onPlanSelected={(planName) => setSelectedPlan(planName)}
+                onPaymentStart={() => setPaymentStatus("processing")}
+                onPaymentSuccess={() => {
+                  setPaymentStatus("activating");
+                  setActiveModal(MODALS.SUCCESS);
+                  setTimeout(() => {
+                    setPaymentStatus(null);
+                    setSelectedPlan(null);
+                  }, 2000);
+                }}
+                onPaymentError={() => {
+                  setPaymentStatus(null);
+                  toast.error("Payment failed. Please try again.");
+                }}
+                onContinue={async (formdata) => {
+                  setProfileFormData((prev) => {
+                    const updated = {
+                      ...prev,
+                      ...formdata,
+                    };
 
-                  handleSubmit(updated).then((success) => {
-                    if (success) {
-                      setActiveModal(MODALS.SUCCESS);
-                    }
+                    handleSubmit(updated).then((success) => {
+                      if (success) {
+                        // Modal will stay open and show success after payment
+                      }
+                    });
+
+                    return updated;
                   });
-
-                  return updated;
-                });
-              }}
-            />
+                }}
+              />
+              {paymentStatus && (
+                <PaymentProcessingModal
+                  isOpen={!!paymentStatus}
+                  paymentStatus={paymentStatus}
+                  planName={selectedPlan}
+                />
+              )}
+            </>
           )}
 
           {activeModal === MODALS.SUCCESS && (

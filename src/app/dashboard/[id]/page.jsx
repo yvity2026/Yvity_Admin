@@ -59,6 +59,7 @@ import { useParams } from "next/navigation";
 import GiveTestimonialModal from "@/components/features/user/landing/modals/public-profile/GiveTestimonialModal";
 import { resolveAdvisorProfileSlug } from "@/lib/advisor/profileSlug";
 import { useAdvisorAuth } from "@/context/AuthAdvisorContext";
+import  FloatingSaveButton  from "@/components/ui/FloatingSaveButton"
 
 const getServiceLabels = (services = []) => {
   return [
@@ -338,6 +339,12 @@ const page = () => {
       data: "Great Experience",
     },
   ];
+
+  const safePublicJourney = Array.isArray(publicJourney)
+  ? publicJourney
+  : [];
+
+  console.log(safePublicJourney)
   const router = useRouter();
 
   const actions = [
@@ -574,9 +581,33 @@ const page = () => {
   console.log(advisor);
   console.log(user);
   const isLocked =
-    advisor?.current_plan === "free" && advisor?.current_plan === "free";
+    advisor?.subscription_plan === "free" && advisor?.subscription_plan === "free";
+
+    function ProfilePage({ profile }) {
+  const handleSaveComplete = (savedProfile) => {
+    console.log('Profile saved:', savedProfile);
+    // Update UI or show custom message
+  };
+}
+  
+  const handleRemoveComplete = (removedProfile) => {
+    console.log('Profile removed:', removedProfile);
+    // Update UI
+  };
+
+    if(!advisor?.ispublic_services){
+      return null;
+    }
   return (
     <div className="bg-[#F8F6F1]">
+      <FloatingSaveButton
+        profileId={profile.id}
+        profileName={profile.name}
+        profileImage={profile.avatar}
+        initialSaved={profile.isAlreadySaved || false}
+        // onSaveComplete={handleSaveComplete}
+        onRemoveComplete={handleRemoveComplete}
+      />
       {/* Header */}
       <header className="h-[60px] bg-[#0A4A4A] w-full shadow-md">
         <span
@@ -680,12 +711,9 @@ const page = () => {
                       <p className="">Identity Verified</p>
                     </span>
                     <p className="text-gray-700 text-[10px] sm:text-xs md:text-xs font-normal leading-4 font-poppins">
-                      {[
-                        advisor?.services?.map((s) => s.service).join(", "),
-                        user?.city,
-                      ]
-                        .filter(Boolean)
-                        .join(" • ")}
+                      {[serviceLabels, user?.city]
+  .filter(Boolean)
+  .join(" • ")}
                     </p>
 
                     {/* <p className="text-teal-950 text-[clamp(8px,1vw,12px)] font-medium leading-4 font-poppins">
@@ -748,7 +776,7 @@ const page = () => {
                               />
                             </svg>
                             <span className="text-white text-xs sm:text-sm font-medium font-poppins">
-                              Upgrade to unlock
+                              Intro video not available
                             </span>
                           </div>
                         </div>
@@ -836,13 +864,13 @@ const page = () => {
                       const getLockStatus = () => {
                         switch (item.label) {
                           case "Recommendations":
-                            return advisor?.current_plan === "free";
+                            return advisor?.subscription_plan === "free";
                           case "Testimonials":
                             return true;
                           case "Share":
                             return true;
                           case "QR Code":
-                            return advisor?.current_plan === "free" && advisor?.current_plan === "silver";
+                            return advisor?.subscription_plan === "free" && advisor?.subscription_plan === "silver";
                           default:
                             return false;
                         }
@@ -880,7 +908,7 @@ const page = () => {
                                     />
                                   </svg>
                                   <span className="text-white text-[10px] font-medium whitespace-nowrap">
-                                    Upgrade
+                                    {`No ${item.label} yet`}
                                   </span>
                                 </div>
                               </div>
@@ -907,13 +935,13 @@ const page = () => {
   text-xs sm:text-sm font-semibold 
   hover:bg-gray-800 transition mb-[19px] xl:mb-[39px] cursor-pointer w-full"
                         onClick={() => {
-                          const isPdfLocked = advisor.current_plan === "free";
+                          const isPdfLocked = advisor.subscription_plan === "free";
                           if (!isPdfLocked) {
                             // Your download logic
                           }
                         }}
                       >
-                        {advisor.current_plan === "888" && (
+                        {advisor.subscription_plan === "888" && (
                           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
                             <div className="bg-black/80 rounded-full p-1.5 flex items-center gap-1.5 transform scale-90 group-hover:scale-100 transition-transform duration-300">
                               <svg
@@ -1203,11 +1231,7 @@ const page = () => {
                   {activeTab === "Home" ? (
                     <>
                       <p className="text-[#6B7280] font-nunito text-sm font-normal leading-6 text-[clamp(10px,1vw,14px)]">
-                        I am Krishna Mohan, a Senior LIC Advisor based in
-                        Nellore, AP with over 14 years of experience. I am an
-                        MDRT qualifier and YVITY Verified Professional. My
-                        mission is to provide trusted, transparent advice that
-                        genuinely protects my clients' financial future.
+                        {user?.bio}
                       </p>
 
                       <div className="flex flex-col gap-2">
@@ -1251,9 +1275,9 @@ const page = () => {
                       </div>
                     ) : publicServices.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {publicServices.map((service) => (
-                          <div key={service.id} className="p-4 border rounded-lg bg-[#F0F8F8]">
-                            <h3 className="font-bold text-[#111827] mb-2">{service.service_type}</h3>
+                        {/* {publicServices.map((service) => ( */}
+                          {/* <div key={service.id} className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6"> */}
+                            {/* <h3 className="font-bold text-[#111827] mb-2">{service.service_type}</h3>
                             <p className="text-sm text-[#6B7280] mb-2">{service.company}</p>
                             <p className="text-xs text-[#6B7280] mb-3">{service.experience_years}+ years experience</p>
                             {Array.isArray(service.key_services) && service.key_services.length > 0 && (
@@ -1264,9 +1288,13 @@ const page = () => {
                                   </span>
                                 ))}
                               </div>
-                            )}
-                          </div>
-                        ))}
+                            )} */}
+                          {/* </div> */}
+                        {/* // ))} */}
+                        <ServiceSection
+                        data={publicServices}
+                        ShowActions = {false}
+                        />
                       </div>
                     ) : (
                       <p className="text-gray-400 text-sm font-medium">No services available</p>
@@ -1298,7 +1326,7 @@ const page = () => {
                     ) : publicGallery.length > 0 ? (
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
                         {publicGallery.map((item) => (
-                          <GalleryItem key={item.id} data={item} />
+                          <GalleryItem showActions={false} key={item.id} data={item} />
                         ))}
                       </div>
                     ) : (
@@ -1313,8 +1341,8 @@ const page = () => {
                       <div className="flex items-center justify-center py-8">
                         <Skeleton className="h-40 w-full" />
                       </div>
-                    ) : publicJourney?.length > 0 ? (
-                      publicJourney.map((section) => (
+                    ) : safePublicJourney?.length > 0 ? (
+                      safePublicJourney.map((section) => (
                         <JourneySection
                           key={section.id}
                           data={section}
