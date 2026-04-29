@@ -6,51 +6,36 @@ export async function GET(req, context) {
   try {
     const { id } = await context.params;
     const supabase = createAdminClient();
-
-    const { data: advisors, error } = await supabase
+    const { data: users, error } = await supabase
       .from("users")
-      .select(
-        `
-        id,
-        name,
-        mobile,
-        email,
-        dob,
-        gender,
-        city,
-        selfie_url,
-        mobile_verified,
-        email_verified,
-        roles,
-        created_at,
-        updated_at,
-        advisor_profiles (
-          id,
-          advisor_role_id,
-          advisor_roles (
-        title
-        ),
-          advisor_id,
-          services,
-          short_bio,
-          current_plan,
-          iridai_certificate_url,
-          profile_status,
-          created_at,
-          updated_at,
-          intro_url,
-          ispublic_professional,
-          ispublic_services,
-          ispublic_achievements,
-          ispublic_gallery,
-          ispublic_testimonials,
-          ispublic_profile,
-          score_last_recalculated_at,
-          profile_slug
-        )
-      `)
-      .filter("roles", "cs", JSON.stringify(["advisor"]))
+      .select(`
+    *,
+    advisor_profiles (
+      *,
+      advisor_roles (*)
+    )
+  `)
       .limit(1000);
+
+    if (error || !Array.isArray(users)) {
+      return NextResponse.json(
+        { error: "Advisor data not found" },
+        { status: 404 }
+      );
+    }
+
+    const advisors = users.filter((user) => {
+      try {
+        const roles =
+          typeof user.roles === "string"
+            ? JSON.parse(user.roles)
+            : user.roles;
+
+        return Array.isArray(roles) && roles.includes("advisor");
+      } catch {
+        return false;
+      }
+    });
 
     if (error || !Array.isArray(advisors)) {
       return NextResponse.json({ error: "Advisor not found" }, { status: 404 });
@@ -88,9 +73,9 @@ export async function GET(req, context) {
         ...data,
         advisor_profiles: profile
           ? {
-              ...profile,
-              is_verified: profile.profile_status || false,
-            }
+            ...profile,
+            is_verified: profile.profile_status || false,
+          }
           : null,
       },
     });
