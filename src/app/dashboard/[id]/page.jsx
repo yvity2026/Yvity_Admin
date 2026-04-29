@@ -319,13 +319,18 @@ const page = () => {
 
   useEffect(() => {
     const fetchBaseUrl = async () => {
-      try {
-        const res = await fetch("/api/config/public-base-url");
-        const data = await res.json();
+       try {
+        const response = await fetch("/api/config/public-base-url", {
+          method: "GET",
+          cache: "no-store",
+        });
+        const result = await response.json();
 
-        if (data?.baseUrl) {
-          setBaseUrl(data.baseUrl);
+        if (!response.ok || !result?.baseUrl) {
+          return;
         }
+
+        setBaseUrl(result.baseUrl);
       } catch (error) {
         console.error("Failed to load base URL", error);
       }
