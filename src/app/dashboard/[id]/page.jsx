@@ -231,55 +231,55 @@ const page = () => {
   const qrDownloadFileName = `${advisorProfileSlug || "advisor"}-qr.png`;
   const publicAdvisorId = advisor?.advisor_id || user?.id || advisorId;
 
-  const serviceLabels = getServiceLabels(
-    Array.isArray(advisor?.services) ? advisor.services : [],
-  );
+  // const serviceLabels = getServiceLabels(
+  //   Array.isArray(advisor?.services) ? advisor.services : [],
+  // );
 
-  const stats = [
-    {
-      icon: <MdLocationPin />,
-      data: user?.city || "Nellore, Andhra Pradesh",
-    },
-    {
-      icon: <MdLocationPin />,
-      data: "Member since January 2019",
-    },
-    {
-      icon: <MdLocationPin />,
-      data: "IRDAI License verified",
-    },
-    {
-      icon: <MdLocationPin />,
-      data: "Last updated 2 days ago",
-    },
-  ];
-  const aboutData =
-    serviceLabels.length > 0
-      ? [
-          ...serviceLabels.slice(0, 2),
-          advisor?.is_verified ? "Licence verified" : "Verified Advisor",
-        ]
-      : ["Founding Advisor", "Licence verifiled", "MDRT Advisor"];
-  const summaryData = [
-    {
-      count: advisor?.services?.[0]?.experience
-        ? `${advisor.services[0].experience}+`
-        : "14+",
-      label: "Exp",
-    },
-    {
-      count: "50",
-      label: "Reviews",
-    },
-    {
-      count: "32",
-      label: "Recs",
-    },
-    {
-      count: "500",
-      label: "Clients",
-    },
-  ];
+  // const stats = [
+  //   {
+  //     icon: <MdLocationPin />,
+  //     data: user?.city || "Nellore, Andhra Pradesh",
+  //   },
+  //   {
+  //     icon: <MdLocationPin />,
+  //     data: "Member since January 2019",
+  //   },
+  //   {
+  //     icon: <MdLocationPin />,
+  //     data: "IRDAI License verified",
+  //   },
+  //   {
+  //     icon: <MdLocationPin />,
+  //     data: "Last updated 2 days ago",
+  //   },
+  // ];
+  // const aboutData =
+  //   serviceLabels.length > 0
+  //     ? [
+  //         ...serviceLabels.slice(0, 2),
+  //         advisor?.is_verified ? "Licence verified" : "Verified Advisor",
+  //       ]
+  //     : ["Founding Advisor", "Licence verifiled", "MDRT Advisor"];
+  // const summaryData = [
+  //   {
+  //     count: advisor?.services?.[0]?.experience
+  //       ? `${advisor.services[0].experience}+`
+  //       : "14+",
+  //     label: "Exp",
+  //   },
+  //   {
+  //     count: "50",
+  //     label: "Reviews",
+  //   },
+  //   {
+  //     count: "32",
+  //     label: "Recs",
+  //   },
+  //   {
+  //     count: "500",
+  //     label: "Clients",
+  //   },
+  // ];
   // const actions = [
   //   { label: "Recommendations" },
   //   { label: "Testimonials" },
