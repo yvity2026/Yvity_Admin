@@ -19,14 +19,20 @@ export function AuthProvider({ children }) {
         const currentUser = result.data;
         setUser(currentUser);
 
-        // if user is an advisor, fetch advisor-specific info
-        if (Array.isArray(currentUser?.roles) && currentUser.roles.includes("advisor")) {
-          const advResponse = await fetch("/api/advisor/auth/me");
-          const advResult = await advResponse.json();
-          setAdvisor(advResult.data);
-        } else {
-          setAdvisor(null);
+        let advisorData = null
+
+        try {
+          const advRes = await fetch("/api/advisor/auth/me");
+          if (advRes.ok) {
+            const advResult = await advRes.json();
+            advisorData = advResult?.data || null;
+          } else {
+            advisorData = null;
+          }
+        } catch (err) {
+          advisorData = null;
         }
+        setAdvisor(advisorData)
 
       } catch (error) {
         console.error("Auth fetch error:", error);

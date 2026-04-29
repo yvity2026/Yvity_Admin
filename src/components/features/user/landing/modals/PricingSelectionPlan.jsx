@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const PricingModal = ({ isOpen, onClose, userEmail, userName, onSuccess }) => {
   const [selectedPlan, setSelectedPlan] = useState(null);
@@ -91,7 +92,7 @@ const PricingModal = ({ isOpen, onClose, userEmail, userName, onSuccess }) => {
 
   // Create order on your backend
   const createOrder = async (plan) => {
-    const response = await fetch("/api/payment/", {
+    const response = await fetch("/api/payment/create-order", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -126,7 +127,7 @@ const PricingModal = ({ isOpen, onClose, userEmail, userName, onSuccess }) => {
       });
 
       if (response.ok) {
-        alert("✨ Free plan activated successfully! ✨");
+        toast.success("Free plan activated successfully");
         if (onSuccess) onSuccess({ plan: "free", success: true });
         onClose();
       } else {
@@ -134,7 +135,7 @@ const PricingModal = ({ isOpen, onClose, userEmail, userName, onSuccess }) => {
       }
     } catch (error) {
       console.error("Free plan activation error:", error);
-      alert("Something went wrong. Please try again.");
+     toast.error("Something went wrong. Please try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -148,7 +149,7 @@ const PricingModal = ({ isOpen, onClose, userEmail, userName, onSuccess }) => {
       // Load Razorpay script
       const isScriptLoaded = await loadRazorpayScript();
       if (!isScriptLoaded) {
-        alert(
+        toast.error(
           "Failed to load payment gateway. Please check your internet connection.",
         );
         setIsProcessing(false);
@@ -182,12 +183,12 @@ const PricingModal = ({ isOpen, onClose, userEmail, userName, onSuccess }) => {
             });
 
             if (!res.ok) {
-              alert("Payment verification failed");
+              toast.error("Payment verification failed");
               return;
             }
 
             // DO NOT mark success here
-            alert("Payment received. Activating your plan...");
+            toast.loading("Payment received. Activating your plan...");
 
             if (onSuccess) {
               onSuccess({
@@ -195,9 +196,10 @@ const PricingModal = ({ isOpen, onClose, userEmail, userName, onSuccess }) => {
                 success: "processing",
               });
             }
+            onClose();
           } catch (err) {
             console.error(err);
-            alert("Verification error");
+            toast.error("Verification error");
           }
         },
 
@@ -223,7 +225,7 @@ const PricingModal = ({ isOpen, onClose, userEmail, userName, onSuccess }) => {
       razorpay.open();
     } catch (error) {
       console.error("Payment initialization error:", error);
-      alert("Failed to initialize payment. Please try again.");
+      toast.error("Failed to initialize payment. Please try again.");
     } finally {
       setIsProcessing(false);
     }

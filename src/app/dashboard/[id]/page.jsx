@@ -2,12 +2,14 @@
 import ProgressBar from "@/app/components/ui/Progressionbar";
 import React, { useEffect, useState } from "react";
 import {
+  BsArrowRepeat,
+  BsCalendarCheck,
   BsChatDots,
   BsChatSquare,
   BsFillInfoSquareFill,
   BsShare,
 } from "react-icons/bs";
-import { CiBank } from "react-icons/ci";
+import { CiBank, CiCalendar } from "react-icons/ci";
 import {
   FaBuilding,
   FaFacebookF,
@@ -18,18 +20,25 @@ import {
 } from "react-icons/fa";
 import { IoIosCall, IoIosPlay, IoMdCheckmarkCircle } from "react-icons/io";
 import {
+  MdAccessTime,
   MdBarChart,
   MdCall,
   MdLocationPin,
   MdOutlineChevronLeft,
   MdOutlineMail,
   MdSms,
+  MdVerified,
 } from "react-icons/md";
 import { TbAlertSquareFilled, TbDownload, TbMail } from "react-icons/tb";
 import { useRouter } from "next/navigation";
 import { ModalWrapper } from "@/app/components/layout/ModalWrapper";
 import { IoClose, IoQrCode } from "react-icons/io5";
-import { FiArrowRight, FiCheckCircle, FiUpload } from "react-icons/fi";
+import {
+  FiArrowRight,
+  FiCheckCircle,
+  FiShield,
+  FiUpload,
+} from "react-icons/fi";
 import { QRCodeCanvas } from "qrcode.react";
 import { AiOutlineLike } from "react-icons/ai";
 import { FaRegCirclePlay } from "react-icons/fa6";
@@ -40,10 +49,7 @@ import { ChevronDown, ShieldCheck } from "lucide-react";
 import JourneySection from "@/components/features/advisor/professional-journey/journey-section";
 // import { journeyData } from "@/app/advisor/professional-journey/page";
 import AchievementCard from "@/components/features/advisor/achievements/achievement-card";
-import { achievementsData } from "@/app/advisor/achievements/page";
 import Testimonials_filters from "@/components/features/advisor/Testimonials/Testimonials_filters";
-// import { galleryData } from "../gallery/page";
-const galleryData = [];
 import GalleryItem from "@/components/features/advisor/gallery/gallery-item";
 import ServiceSection from "@/components/features/advisor/services/ServiceSection";
 import { motion, AnimatePresence } from "framer-motion";
@@ -51,6 +57,7 @@ import Skeleton from "@/app/components/skeleton/Skeleton";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import GiveTestimonialModal from "@/components/features/user/landing/modals/public-profile/GiveTestimonialModal";
+import { useAdvisorAuth } from "@/context/AuthAdvisorContext";
 
 const getServiceLabels = (services = []) => {
   return [
@@ -70,15 +77,58 @@ const getServiceLabels = (services = []) => {
   ];
 };
 
+const formatDate = (date) => {
+  if (!date) return "-";
+  return new Date(date).toLocaleDateString("en-IN", {
+    month: "long",
+    year: "numeric",
+  });
+};
+
+const getDaysAgo = (date) => {
+  if (!date) return "-";
+  const diff = Math.floor(
+    (Date.now() - new Date(date)) / (1000 * 60 * 60 * 24),
+  );
+
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Yesterday";
+  return `${diff} days ago`;
+};
+
 const page = () => {
   const qrRef = React.useRef(null);
   const params = useParams();
   const advisorId = Array.isArray(params?.id) ? params.id[0] : params?.id;
-  const [user, setUser] = useState(null);
-  const [advisor, setAdvisor] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeModal, setActiveModal] = useState(null);
-  const galleryData = [];
+  
+  // Get context functions for fetching public advisor data
+  const {
+    fetchPublicAdvisorServices,
+    fetchPublicAdvisorTestimonials,
+    fetchPublicAdvisorAchievements,
+    fetchPublicAdvisorGallery,
+    fetchPublicAdvisorJourney,
+  } = useAdvisorAuth();
+
+  // Public advisor data states
+  const [publicServices, setPublicServices] = useState([]);
+  const [publicTestimonials, setPublicTestimonials] = useState([]);
+  const [publicAchievements, setPublicAchievements] = useState([]);
+  const [publicGallery, setPublicGallery] = useState([]);
+  const [publicJourney, setPublicJourney] = useState([]);
+  
+  // Loading state for public data
+  const [publicDataLoading, setPublicDataLoading] = useState({
+    services: false,
+    testimonials: false,
+    achievements: false,
+    gallery: false,
+    journey: false,
+  });
+  
   const MODALS = {
     TESTIMONIAL: "testimonial",
     RECOMMEND: "recommend",
@@ -86,6 +136,61 @@ const page = () => {
     VIDEO: "video",
     QR: "qr",
   };
+  const user = profile?.user || profile;
+  const advisor = profile?.advisor_profiles;
+
+  /**
+   * Fetch all public advisor data when advisorId changes
+   */
+  useEffect(() => {
+    if (!advisorId) return;
+
+    const fetchAllPublicData = async () => {
+      try {
+        // Fetch all data in parallel
+        setPublicDataLoading({
+          services: true,
+          testimonials: true,
+          achievements: true,
+          gallery: true,
+          journey: true,
+        });
+
+        const [srvcs, tests, achvmts, gllry, jrny] = await Promise.all([
+          fetchPublicAdvisorServices(advisorId),
+          fetchPublicAdvisorTestimonials(advisorId),
+          fetchPublicAdvisorAchievements(advisorId),
+          fetchPublicAdvisorGallery(advisorId),
+          fetchPublicAdvisorJourney(advisorId),
+        ]);
+
+        setPublicServices(srvcs);
+        setPublicTestimonials(tests);
+        setPublicAchievements(achvmts);
+        setPublicGallery(gllry);
+        setPublicJourney(jrny);
+      } catch (error) {
+        console.error("Failed to fetch public advisor data:", error);
+      } finally {
+        setPublicDataLoading({
+          services: false,
+          testimonials: false,
+          achievements: false,
+          gallery: false,
+          journey: false,
+        });
+      }
+    };
+
+    fetchAllPublicData();
+  }, [
+    advisorId,
+    fetchPublicAdvisorServices,
+    fetchPublicAdvisorTestimonials,
+    fetchPublicAdvisorAchievements,
+    fetchPublicAdvisorGallery,
+    fetchPublicAdvisorJourney,
+  ]);
 
   useEffect(() => {
     const handleEsc = (e) => {
@@ -113,59 +218,10 @@ const page = () => {
 
     const link = document.createElement("a");
     link.href = pngUrl;
-    link.download = "krishna-qr.png";
+    link.download = `${user?.name || "advisor"}-qr.png`;
     link.click();
   };
 
-  const serviceLabels = getServiceLabels(
-    Array.isArray(advisor?.services) ? advisor.services : [],
-  );
-
-  const stats = [
-    {
-      icon: <MdLocationPin />,
-      data: user?.city || "Nellore, Andhra Pradesh",
-    },
-    {
-      icon: <MdLocationPin />,
-      data: "Member since January 2019",
-    },
-    {
-      icon: <MdLocationPin />,
-      data: "IRDAI License verified",
-    },
-    {
-      icon: <MdLocationPin />,
-      data: "Last updated 2 days ago",
-    },
-  ];
-  const aboutData =
-    serviceLabels.length > 0
-      ? [
-          ...serviceLabels.slice(0, 2),
-          advisor?.is_verified ? "Licence verified" : "Verified Advisor",
-        ]
-      : ["Founding Advisor", "Licence verifiled", "MDRT Advisor"];
-  const summaryData = [
-    {
-      count: advisor?.services?.[0]?.experience
-        ? `${advisor.services[0].experience}+`
-        : "14+",
-      label: "Exp",
-    },
-    {
-      count: "50",
-      label: "Reviews",
-    },
-    {
-      count: "32",
-      label: "Recs",
-    },
-    {
-      count: "500",
-      label: "Clients",
-    },
-  ];
   // const actions = [
   //   { label: "Recommendations" },
   //   { label: "Testimonials" },
@@ -174,10 +230,10 @@ const page = () => {
   // ];
 
   const statsData = [
-    { label: "Testimonials", value: 12 },
-    { label: "Recommendations", value: 8 },
-    { label: "Profile Views", value: 245 },
-    { label: "Member Since", value: "2023" },
+    { label: "Testimonials", value: advisor?.testimonial_count || 0 },
+    { label: "Recommendations", value: advisor?.recommendation_count || 0 },
+    { label: "Profile Views", value: advisor?.views || 0 },
+    { label: "Member Since", value: user?.created_at?.slice(0, 4) || "-" },
   ];
 
   const [isOpen, setIsOpen] = useState(true);
@@ -209,28 +265,6 @@ const page = () => {
   ];
 
   const [activeTab, setActiveTab] = useState("Home");
-
-  const item = {
-    title: "Life Insurance",
-    subtitle: "LIC of India • 14+ years",
-    icon: <ShieldCheck className="w-5 h-5 text-blue-500" />,
-    timeline: [
-      {
-        year: "2024 - PRESENT",
-        role: "Senior Development Officer",
-        company: "LIC of India • Nellore Branch",
-      },
-      {
-        year: "2019 - 2024",
-        role: "LIC Advisor – MDRT Qualifier",
-        company: "LIC of India",
-      },
-      {
-        year: "2015 - 2019",
-        role: "Insurance Advisor",
-      },
-    ],
-  };
 
   const companies = [
     {
@@ -384,9 +418,11 @@ const page = () => {
     }
   };
 
-  if (otp.length === 6) {
-  handleVerifyOtp();
-}
+  useEffect(() => {
+    if (otp.length === 6 && !submitLoading) {
+      handleVerifyOtp();
+    }
+  }, [otp]);
 
   useEffect(() => {
     if (!advisorId) return;
@@ -404,24 +440,10 @@ const page = () => {
           throw new Error(result?.error || "Failed to load advisor profile");
         }
 
-        setUser({
-          id: result?.data?.id,
-          name: result?.data?.name,
-          mobile: result?.data?.mobile,
-          email: result?.data?.email,
-          dob: result?.data?.dob,
-          gender: result?.data?.gender,
-          city: result?.data?.city,
-          profession: result?.data?.profession,
-          selfie_url: result?.data?.selfie_url,
-          mobile_verified: result?.data?.mobile_verified,
-          email_verified: result?.data?.email_verified,
-        });
-        setAdvisor(result?.data?.advisor_profile || null);
+        setProfile(result.data);
       } catch (error) {
         console.error("Advisor fetch failed:", error);
-        setUser(null);
-        setAdvisor(null);
+        setProfile(null);
       } finally {
         setLoading(false);
       }
@@ -430,16 +452,71 @@ const page = () => {
     fetchAdvisor();
   }, [advisorId]);
 
-  useEffect(() => {
-  if (!activeModal) {
-    setStep("form");
-    setOtp("");
-    setVerificationToken(null);
-    setSelectedReasons([]);
-    setMobile("");
-  }
-}, [activeModal]);
+  const summaryData = [
+    {
+      count: advisor?.experience ? `${advisor.experience}+` : "0",
+      label: "Exp",
+    },
+    {
+      count: advisor?.experience ? `${advisor.experience}+` : "0",
+      label: "Reviews",
+    },
+    {
+      count: advisor?.experience ? `${advisor.experience}+` : "0",
+      label: "Recs",
+    },
+    {
+      count: advisor?.experience ? `${advisor.experience}+` : "0",
+      label: "Clients",
+    },
+  ];
 
+  const serviceLabels = getServiceLabels(
+    Array.isArray(advisor?.services) ? advisor.services : [],
+  );
+  const aboutData =
+    serviceLabels.length > 0
+      ? [
+          ...serviceLabels.slice(0, 2),
+          advisor?.is_verified ? "Licence verified" : "Verified Advisor",
+        ]
+      : [];
+
+  useEffect(() => {
+    if (!activeModal) {
+      setStep("form");
+      setOtp("");
+      setVerificationToken(null);
+      setSelectedReasons([]);
+      setMobile("");
+    }
+  }, [activeModal]);
+
+  const stats = [
+    {
+      icon: <MdLocationPin />,
+      data: profile?.city || "Nellore, Andhra Pradesh",
+    },
+    {
+      icon: <CiCalendar />,
+      data: `Member since ${formatDate(profile?.created_at)}`,
+    },
+    {
+      icon: <FiShield />,
+      data: advisor?.is_verified
+        ? "IRDAI License Verified"
+        : "Verification Pending",
+    },
+    {
+      icon: <BsArrowRepeat />,
+      data: `Last updated ${getDaysAgo(profile?.updated_at)}`,
+    },
+  ];
+
+  console.log(advisor);
+  console.log(user);
+  const isLocked =
+    advisor?.current_plan === "free" && advisor?.current_plan === "free";
   return (
     <div className="bg-[#F8F6F1]">
       {/* Header */}
@@ -475,7 +552,7 @@ const page = () => {
                 ) : (
                   <span className="flex items-center justify-center w-full h-full text-2xl">
                     {/* fallback (initial or icon) */}
-                    {user?.name?.charAt(0) || "U"}
+                    {user?.name?.charAt(0)}
                   </span>
                 )}
               </span>
@@ -545,7 +622,12 @@ const page = () => {
                       <p className="">Identity Verified</p>
                     </span>
                     <p className="text-gray-700 text-[10px] sm:text-xs md:text-xs font-normal leading-4 font-poppins">
-                      {`${user?.profession} • ${user?.city}`}
+                      {[
+                        advisor?.services?.map((s) => s.service).join(", "),
+                        user?.city,
+                      ]
+                        .filter(Boolean)
+                        .join(" • ")}
                     </p>
 
                     {/* <p className="text-teal-950 text-[clamp(8px,1vw,12px)] font-medium leading-4 font-poppins">
@@ -567,24 +649,80 @@ const page = () => {
                 </div>
                 {/* intro video */}
                 <div className="pr-[30px] pl-[29px]">
-                  <div className="bg-amber-200 w-full  pl-[20px] pr-[23px] py-[9px] mt-[24px] bg-gradient-to-r from-[#022927] to-[#053F40] rounded-lg">
+                  <div
+                    className={`
+    bg-amber-200 w-full pl-[20px] pr-[23px] py-[9px] mt-[24px] 
+    bg-gradient-to-r from-[#022927] to-[#053F40] rounded-lg
+    transition-all duration-300 ease-in-out
+    ${isLocked ? "cursor-not-allowed relative group" : ""}
+  `}
+                  >
                     <span
-                      className="flex gap-5 h-full cursor-pointer"
-                      onClick={() => setActiveModal(MODALS.VIDEO)}
+                      className={`
+      flex gap-5 h-full
+      ${isLocked ? "cursor-not-allowed" : "cursor-pointer"}
+      transition-all duration-300
+    `}
+                      onClick={() => !isLocked && setActiveModal(MODALS.VIDEO)}
+                      onKeyDown={(e) =>
+                        !isLocked &&
+                        e.key === "Enter" &&
+                        setActiveModal(MODALS.VIDEO)
+                      }
+                      role={!isLocked ? "button" : "presentation"}
+                      tabIndex={!isLocked ? 0 : -1}
                     >
-                      <FaRegCirclePlay
-                        size={40}
-                        className="flex justify-center text-white items-center"
-                      />
-                      <span className="flex flex-col justify-between w-full">
-                        <span className="flex gap-1 text-[#F8F6F1] text-[10px] text-xs sm:text-sm font-medium leading-4 font-poppins">
-                          <IoIosPlay />
-                          Watch Intro Video
+                      {/* Lock overlay - appears on hover when locked */}
+                      {isLocked && (
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+                          <div className="bg-black/80 rounded-full p-3 flex items-center gap-2 transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                            <svg
+                              className="w-5 h-5 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                              />
+                            </svg>
+                            <span className="text-white text-xs sm:text-sm font-medium font-poppins">
+                              Upgrade to unlock
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Blur effect on content when locked */}
+                      <div
+                        className={`
+      flex gap-5 w-full transition-all duration-300
+      ${isLocked ? "blur-[2px] group-hover:blur-[4px]" : ""}
+    `}
+                      >
+                        <FaRegCirclePlay
+                          size={40}
+                          className={`
+          flex justify-center text-white items-center
+          ${isLocked ? "opacity-50" : ""}
+          transition-all duration-300
+        `}
+                        />
+                        <span className="flex flex-col justify-between w-full">
+                          <span className="flex gap-1 text-[#F8F6F1] text-[10px] text-xs sm:text-sm font-medium leading-4 font-poppins">
+                            <IoIosPlay />
+                            Watch Intro Video
+                          </span>
+                          <p className="text-[#82ADAD] text-[10px] sm:text-xs font-normal leading-4 font-poppins">
+                            {isLocked
+                              ? "Upgrade to watch the introduction video"
+                              : `${profile?.name} introduces himself`}
+                          </p>
                         </span>
-                        <p className="text-[#82ADAD] text-[10px] sm:text-xs font-normal leading-4 font-poppins">
-                          Krishna Mohan introduces himself
-                        </p>
-                      </span>
+                      </div>
                     </span>
                   </div>
                 </div>
@@ -635,32 +773,119 @@ const page = () => {
                     ))}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
-                    {actions.map((item, index) => (
-                      <button
-                        key={index}
-                        className="px-3 py-2 rounded-md 
-      flex items-center justify-center 
-      text-xs sm:text-sm font-medium 
-      hover:bg-teal-950 hover:text-white transition flex items-center gap-2 cursor-pointer rounded-lg border border-[#E2E2E2] bg-[#F0F8F8]"
-                        onClick={() => item.modal && setActiveModal(item.modal)}
-                      >
-                        <span>{item.icon}</span>
-                        {item.label}
-                      </button>
-                    ))}
+                    {actions.map((item, index) => {
+                      // Different conditions for each action
+                      const getLockStatus = () => {
+                        switch (item.label) {
+                          case "Recommendations":
+                            return advisor?.current_plan === "free";
+                          case "Testimonials":
+                            return true;
+                          case "Share":
+                            return true;
+                          case "QR Code":
+                            return advisor?.current_plan === "free" && advisor?.current_plan === "silver";
+                          default:
+                            return false;
+                        }
+                      };
+
+                      const isLocked = getLockStatus();
+
+                      return (
+                        <div key={index} className="relative group">
+                          <button
+                            className="px-3 py-2 rounded-md 
+  flex items-center justify-center 
+  text-xs sm:text-sm font-medium 
+  hover:bg-teal-950 hover:text-white transition flex items-center gap-2 cursor-pointer rounded-lg border border-[#E2E2E2] bg-[#F0F8F8] w-full"
+                            onClick={() =>
+                              !isLocked &&
+                              item.modal &&
+                              setActiveModal(item.modal)
+                            }
+                          >
+                            {isLocked && (
+                              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+                                <div className="bg-black/80 rounded-full p-1.5 flex items-center gap-1.5 transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                                  <svg
+                                    className="w-3.5 h-3.5 text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                    />
+                                  </svg>
+                                  <span className="text-white text-[10px] font-medium whitespace-nowrap">
+                                    Upgrade
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+
+                            <span
+                              className={`flex items-center gap-2 transition-all duration-300 ${isLocked ? "blur-[1.5px] group-hover:blur-[2.5px]" : ""}`}
+                            >
+                              <span>{item.icon}</span>
+                              {item.label}
+                            </span>
+                          </button>
+                        </div>
+                      );
+                    })}
 
                     {/* Full width button */}
-                    <button
-                      className="min-h-[45px] sm:min-h-[50px] 
-    col-span-1 sm:col-span-2 
-    bg-black text-white rounded-md 
-    flex items-center gap-2 justify-center 
-    text-xs sm:text-sm font-semibold 
-    hover:bg-gray-800 transition mb-[19px] xl:mb-[39px] cursor-pointer"
-                    >
-                      <TbDownload />
-                      Download PDF Profile
-                    </button>
+                    <div className="relative group col-span-1 sm:col-span-2">
+                      <button
+                        className="min-h-[45px] sm:min-h-[50px] 
+  col-span-1 sm:col-span-2 
+  bg-black text-white rounded-md 
+  flex items-center gap-2 justify-center 
+  text-xs sm:text-sm font-semibold 
+  hover:bg-gray-800 transition mb-[19px] xl:mb-[39px] cursor-pointer w-full"
+                        onClick={() => {
+                          const isPdfLocked = advisor.current_plan === "free";
+                          if (!isPdfLocked) {
+                            // Your download logic
+                          }
+                        }}
+                      >
+                        {advisor.current_plan === "888" && (
+                          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+                            <div className="bg-black/80 rounded-full p-1.5 flex items-center gap-1.5 transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                              <svg
+                                className="w-3.5 h-3.5 text-white"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                />
+                              </svg>
+                              <span className="text-white text-[10px] font-medium whitespace-nowrap">
+                                Upgrade
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        <span
+                          className={`flex items-center gap-2 transition-all duration-300`}
+                        >
+                          <TbDownload />
+                          Download PDF Profile
+                        </span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </>
@@ -698,7 +923,7 @@ const page = () => {
                 <div className="flex flex-col gap-2 flex-1">
                   <button
                     onClick={() => {
-                      window.location.href = "tel:+919876543210"; // replace with dynamic number
+                      window.location.href = `tel:${user?.mobile_number}`; // replace with dynamic number
                     }}
                     className="w-full text-[clamp(8px,1vw,12px)] px-[23px] py-[14px] font-medium rounded-lg bg-[#0A4A4A] flex gap-2 items-center justify-center text-white cursor-pointer"
                   >
@@ -708,7 +933,7 @@ const page = () => {
 
                   <button
                     onClick={() => {
-                      const phone = "919876543210"; // no +, include country code
+                      const phone = user?.mobile_number?.replace("+", ""); // no +, include country code
                       const message = encodeURIComponent(
                         "Hi, I want to connect with you.",
                       );
@@ -725,7 +950,7 @@ const page = () => {
 
                   <button
                     onClick={() => {
-                      const email = "example@gmail.com"; // replace
+                      const email = user?.email;
                       const subject = encodeURIComponent("Inquiry");
                       const body = encodeURIComponent(
                         "Hello, I would like to connect.",
@@ -850,12 +1075,12 @@ const page = () => {
                     heading.isvisible && (
                       <button
                         key={index}
-                        onClick={() => setActiveTab(heading)}
+                        onClick={() => setActiveTab(heading.name)}
                         className="relative font-poppins p-[10px] text-center text-[clamp(10px,1vw,14px)] cursor-pointer text-sm font-bold"
                       >
                         <span
                           className={`${
-                            activeTab?.name === heading.name
+                            activeTab === heading.name
                               ? "text-primary-900"
                               : "text-gray-400"
                           }`}
@@ -864,7 +1089,7 @@ const page = () => {
                         </span>
 
                         {/* Animated underline */}
-                        {activeTab === heading && (
+                        {activeTab === heading.name && (
                           <motion.div
                             layoutId="footerTabUnderline"
                             className="absolute left-0 right-0 -bottom-[1px] h-[2px] bg-primary-900 rounded-full"
@@ -962,39 +1187,85 @@ const page = () => {
                       </div>
                     </>
                   ) : activeTab === "Service" && advisor?.ispublic_services ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Life Insurance Card */}
-                      <ServiceSection ShowActions={false} />
-                    </div>
+                    publicDataLoading.services ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Skeleton className="h-40 w-full" />
+                      </div>
+                    ) : publicServices.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {publicServices.map((service) => (
+                          <div key={service.id} className="p-4 border rounded-lg bg-[#F0F8F8]">
+                            <h3 className="font-bold text-[#111827] mb-2">{service.service_type}</h3>
+                            <p className="text-sm text-[#6B7280] mb-2">{service.company}</p>
+                            <p className="text-xs text-[#6B7280] mb-3">{service.experience_years}+ years experience</p>
+                            {Array.isArray(service.key_services) && service.key_services.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {service.key_services.map((svc, idx) => (
+                                  <span key={idx} className="text-xs px-2 py-1 bg-[#E0F4F3] rounded-full text-[#0A4A4A]">
+                                    {svc}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-400 text-sm font-medium">No services available</p>
+                    )
                   ) : activeTab === "Achievements" &&
                     advisor?.ispublic_achievements ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {achievementsData.map((achievement) => (
-                        <AchievementCard
-                          key={achievement.id}
-                          data={achievement}
-                          ShowActions={false}
-                        />
-                      ))}
-                    </div>
+                    publicDataLoading.achievements ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Skeleton className="h-40 w-full" />
+                      </div>
+                    ) : publicAchievements.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {publicAchievements.map((achievement) => (
+                          <AchievementCard
+                            key={achievement.id}
+                            data={achievement}
+                            ShowActions={false}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-400 text-sm font-medium">No achievements available</p>
+                    )
                   ) : activeTab === "Gallery" && advisor?.ispublic_gallery ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
-                      {galleryData.map((item) => (
-                        <GalleryItem key={item.id} data={item} />
-                      ))}
-                    </div>
+                    publicDataLoading.gallery ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Skeleton className="h-40 w-full" />
+                      </div>
+                    ) : publicGallery.length > 0 ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
+                        {publicGallery.map((item) => (
+                          <GalleryItem key={item.id} data={item} />
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-400 text-sm font-medium">No gallery items available</p>
+                    )
                   ) : activeTab === "Testimonials" &&
                     advisor?.ispublic_testimonials ? (
                     <Testimonials_filters showActions={false} />
                   ) : activeTab === "Journey" &&
                     advisor?.ispublic_professional ? (
-                    journeyData.map((section) => (
-                      <JourneySection
-                        key={section.id}
-                        data={section}
-                        showActions={false}
-                      />
-                    ))
+                    publicDataLoading.journey ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Skeleton className="h-40 w-full" />
+                      </div>
+                    ) : publicJourney?.length > 0 ? (
+                      publicJourney.map((section) => (
+                        <JourneySection
+                          key={section.id}
+                          data={section}
+                          showActions={false}
+                        />
+                      ))
+                    ) : (
+                      <p className="text-gray-400 text-sm font-medium">No journey data available</p>
+                    )
                   ) : (
                     <p className="text-gray-400 text-sm font-medium">
                       No data available
@@ -1038,16 +1309,19 @@ const page = () => {
                 ref={qrRef}
                 className="bg-gray-100 p-4 rounded-2xl w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] flex items-center justify-center"
               >
-                <QRCodeCanvas value="https://yvity.in/krishna" size={180} />
+                <QRCodeCanvas
+                  value={`https://yvity.in/${advisor?.slug || advisorId}`}
+                  size={180}
+                />
               </div>
 
               {/* Info */}
               <div className="text-center">
                 <h2 className="text-lg sm:text-xl font-bold text-gray-900">
-                  Krishna Mohan
+                  {user?.name}
                 </h2>
                 <p className="text-sm text-gray-500 break-all">
-                  yvity.in/krishna
+                  {`https://yvity.in/${advisor?.slug || advisorId}`}
                 </p>
               </div>
 
@@ -1088,7 +1362,7 @@ const page = () => {
             {/* Body - Adjusted gap and padding for vertical efficiency */}
             <div className="p-7 space-y-5">
               <p className="text-slate-500 text-[1.05rem]">
-                Why do you recommend Krishna Mohan?
+                {` Why do you recommend ${advisor.name}?`}
               </p>
 
               {/* Grid remains responsive but compact */}

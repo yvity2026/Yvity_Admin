@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { ValidateUser } from "@/lib/auth/ValidateUser";
 import { createAdminClient } from "@/lib/supabase/server";
 
-export async function GET(req,  context) {
+export async function GET(req, context) {
   try {
     const currentUser = await ValidateUser();
 
@@ -15,7 +15,8 @@ export async function GET(req,  context) {
 
     const { data, error } = await supabase
       .from("users")
-      .select(`
+      .select(
+        `
         id,
         name,
         mobile,
@@ -38,6 +39,7 @@ export async function GET(req,  context) {
           advisor_id,
           services,
           short_bio,
+          current_plan,
           iridai_certificate_url,
           profile_status,
           created_at,
@@ -51,7 +53,8 @@ export async function GET(req,  context) {
           ispublic_profile,
           score_last_recalculated_at
         )
-      `)
+      `,
+      )
       .eq("id", id)
       .filter("roles", "cs", JSON.stringify(["advisor"]))
       .single();
@@ -59,39 +62,28 @@ export async function GET(req,  context) {
     if (error || !data) {
       return NextResponse.json({ error: "Advisor not found" }, { status: 404 });
     }
+    console.log(data);
 
     const profile = Array.isArray(data.advisor_profiles)
       ? data.advisor_profiles[0]
       : data.advisor_profiles;
 
-    // if (!profile?.ispublic_profile) {
-    //   return NextResponse.json({ error: "Advisor profile is private" }, { status: 403 });
-    // }
-
     return NextResponse.json({
       success: true,
       data: {
-        id: data.id,
-        name: data.name,
-        mobile: data.mobile,
-        email: data.email,
-        dob: data.dob,
-        gender: data.gender,
-        city: data.city,
-        profession: data.profession,
-        selfie_url: data.selfie_url,
-        mobile_verified: data.mobile_verified,
-        email_verified: data.email_verified,
-        advisor_profile: {
-          ...profile,
-          is_verified: profile?.profile_status || false,
-        },
+        ...data,
+        advisor_profiles: profile
+          ? {
+              ...profile,
+              is_verified: profile.profile_status || false,
+            }
+          : null,
       },
     });
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message || "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

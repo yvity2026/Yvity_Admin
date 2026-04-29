@@ -11,6 +11,7 @@ import { SidebarProvider } from "@/context/SidebarContext";
 import { ModalProvider } from "@/context/ModalContext";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/context/AuthUserContext";
+import { AuthadvisorProvider } from "@/context/AuthAdvisorContext";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -52,25 +53,27 @@ export default function RootLayout({ children }) {
     >
       <body className="min-h-full max-w-384 mx-auto flex flex-col font-poppins">
         <AuthProvider>
-          <ModalProvider>
-            <SidebarProvider>
-               <AppShell>
-                <main className="flex-1 flex flex-col">
-                  <Toaster
-                    position="top-right"
-                    toastOptions={{
-                      duration: 3000,
-                      style: {
-                        zIndex: 99999,
-                      },
-                    }}
-                  />
-                  {children}
-                </main>
-              </AppShell>
-            </SidebarProvider>
-          </ModalProvider>
-        </AuthProvider>
+          <AuthadvisorProvider>
+            <ModalProvider>
+              <SidebarProvider>
+                <AppShell>
+                  <main className="flex-1 flex flex-col">
+                    <Toaster
+                      position="top-right"
+                      toastOptions={{
+                        duration: 3000,
+                        style: {
+                          zIndex: 99999,
+                        },
+                      }}
+                    />
+                    {children}
+                  </main>
+                </AppShell>
+              </SidebarProvider>
+            </ModalProvider>
+        </AuthadvisorProvider>
+          </AuthProvider>
       </body>
     </html>
   );
