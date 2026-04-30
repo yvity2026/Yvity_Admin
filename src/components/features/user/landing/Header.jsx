@@ -356,7 +356,7 @@ const Header = () => {
                     <HiOutlineHome size={20} /> Home
                   </a>
 
-                  <a className="flex items-center gap-3 px-2 py-2 text-gray-700 border-b">
+                  <a className="flex items-center gap-3 px-2 py-2 text-gray-700 border-b" onClick={() => setActiveModal(MODALS.PROFILE)}>
                     <FiUser size={20} /> Setup My Profile
                   </a>
 

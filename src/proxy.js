@@ -3,6 +3,10 @@ import { verifyJwt } from "./lib/auth/jwt/VerifyJwt";
 
 
 const PUBLIC_PATHS = ["/api/auth/validate"];
+const REDIRECTION_LINK =
+  process.env.NODE_ENV === "production"
+    ? process.env.DASHBOARD_PRODUCTION_FALLBACK
+    : process.env.DASHBOARD_LOCAL_FALLBACK;
 
 export async function proxy(req) {
   const { pathname } = req.nextUrl;
@@ -41,8 +45,8 @@ export async function proxy(req) {
 }
 
 function redirectToLogin(req, error) {
-  const loginUrl = new URL("/login", req.url);
-  loginUrl.searchParams.set("error", error);
+  const loginUrl = new URL(REDIRECTION_LINK);
+  // loginUrl.searchParams.set("error", error);
 
   const response = NextResponse.redirect(loginUrl);
 

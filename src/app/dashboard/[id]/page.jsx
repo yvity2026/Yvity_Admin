@@ -793,7 +793,7 @@ const page = () => {
       {/* Header */}
       <header className="h-[60px] bg-[#0A4A4A] w-full shadow-md">
         <span
-          className="flex items-center px-4 sm:px-6 md:pl-10 md:py-[18px] cursor-pointer"
+          className="flex items-center px-4 sm:px-6 md:pl-10 md:py-[18px] cursor-pointer text-gray-200 hover:text-white"
           onClick={() => router.back()}
         >
           <MdOutlineChevronLeft />
