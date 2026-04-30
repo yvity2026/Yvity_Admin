@@ -93,6 +93,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
     company: "",
     license: "",
     experience: "",
+    designation: "",
   });
 
   // Filter dropdown to hide already added services
@@ -103,7 +104,10 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
   const handleAddService = () => {
     if (!serviceData.service) return toast.error("Select a service");
     if (!serviceData.company) return toast.error("Select a company");
-    if (!serviceData.license) return toast.error("License required");
+    if (!serviceData.designation) return toast.error("Designation required");
+    if (!serviceData.license || serviceData.license.length !== 7) {
+  return toast.error("IRDAI License NO must be exactly 7 digits");
+}
     if (!serviceData.experience) return toast.error("Experience required");
 
     const newService = {
@@ -122,6 +126,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
       company: "",
       license: "",
       experience: "",
+      designation: "",
     });
 
     toast.success("Service added");
@@ -153,7 +158,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
       const sound = sounds.current[type];
       if (sound) {
         sound.currentTime = 0;
-        sound.volume = 0.5; // 
+        sound.volume = 0.5; //
         sound.play().catch(() => {});
       }
     };
@@ -171,7 +176,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
       file,
     });
 
-    play('success');
+    play("success");
 
     const cleanServices = formData.services.map(({ id, ...rest }) => rest);
 
@@ -186,6 +191,8 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
   useEffect(() => {
     if (!isOpen) resetForm();
   }, [isOpen]);
+
+  const isValid = /^\d{7}$/.test(serviceData.license);
 
   if (!isOpen) return null;
 
@@ -220,7 +227,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
         </div>
 
         {/* Scrollable Content */}
-        <div className="p-6 overflow-y-auto flex-1 bg-[#F9F8F6] no-scrollbar">
+        <div className=" overflow-y-auto pl-[45px] pt-[21px] pr-[55px] flex-1 bg-[#F9F8F6] no-scrollbar">
           <button
             className="flex items-center gap-2 text-gray-500 text-sm mb-4 cursor-pointer"
             onClick={() => onBack()}
@@ -228,18 +235,16 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
             <HiOutlineArrowLeft /> Change role
           </button>
 
-          <div className="px-6">
-            <div className="bg-[#EBF3F3] border-l-4 border-[#0D4D4D] py-4 pl-[20px] pr-[104px] rounded-lg mb-6 text-xs text-[#0D4D4D]">
-              Insurance Advisor profile. This will be your public credibility
-              profile on YVITY.
-            </div>
+          <div className="bg-[#EBF3F3] border-l-4 border-[#0D4D4D] py-4 pl-[20px] pr-[104px] rounded-lg mb-4 text-xs text-[#0D4D4D]">
+            Insurance Advisor profile. This will be your public credibility
+            profile on YVITY.
           </div>
 
           {/* Render Added Services (Summary View) */}
           {formData.services.map((item) => (
             <div
               key={item.id}
-              className="bg-white border border-gray-200 rounded-xl p-4 mb-4 shadow-sm relative"
+              className="bg-white border border-gray-200 rounded-xl mb-4 shadow-sm relative p-2"
             >
               <span className="text-[10px] font-bold text-[#0D4D4D] uppercase bg-gray-100 px-2 py-1 rounded mb-2 inline-block">
                 Added Service
@@ -258,7 +263,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
           ))}
 
           {/* The Active Form */}
-          <div className="bg-white  p-6 space-y-4">
+          <div className=" space-y-4">
             <div className="bg-[#E8F4F4] px-[16px] py-[24px] rounded-2xl space-y-4">
               <div className="flex justify-between items-center">
                 <label className="text-sm font-bold text-gray-700">
@@ -266,7 +271,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                 </label>
                 <button
                   onClick={handleAddService}
-                  className="flex items-center gap-1 text-[#0D4D4D] text-xs font-bold border border-[#0D4D4D] px-3 py-1 rounded-md hover:bg-[#0D4D4D] hover:text-white transition-all cursor-pointer"
+                  className="flex items-center gap-1 text-[#0D4D4D] text-xs font-bold px-3 py-1 rounded-md border border-[#C4C4C4] hover:bg-[#0D4D4D] hover:text-white transition-all cursor-pointer"
                 >
                   <LuPlus /> Add
                 </button>
@@ -277,7 +282,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                 onChange={(e) =>
                   setServiceData({ ...serviceData, service: e.target.value })
                 }
-                className="w-full p-3 rounded-xl border border-gray-200 bg-white appearance-none outline-none focus:ring-2 ring-[#0D4D4D]/20"
+                className="w-full p-3 rounded-xl border border-gray-200 bg-white outline-none focus:ring-2 ring-[#0D4D4D]/20"
               >
                 <option value="">Select Service</option>
                 {availableServices.map((s) => (
@@ -296,7 +301,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                   onChange={(e) =>
                     setServiceData({ ...serviceData, company: e.target.value })
                   }
-                  className="w-full p-3 rounded-xl border border-gray-200 bg-[#F8F6F1]"
+                  className="w-full p-3 rounded-xl border border-gray-200  bg-[#F8F6F1] outline-none focus:ring-2 ring-[#0D4D4D]/20"
                 >
                   <option value="" className="">
                     Select Company
@@ -309,31 +314,81 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                 </select>
               </div>
 
+              <div className="space-y-1 ">
+                <label className="text-sm font-bold text-gray-700">
+                  Designation / Title <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Senior LIC Advisor, Chief Life Planner"
+                  value={serviceData.designation}
+                  onChange={(e) =>
+                    setServiceData({
+                      ...serviceData,
+                      designation: e.target.value,
+                    })
+                  }
+                  className="w-full p-3 rounded-xl border border-gray-200 bg-[#F8F6F1] outline-none focus:ring-2 ring-[#0D4D4D]/20"
+                ></input>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-1">
                   <label className="text-sm font-bold text-gray-700">
                     IRDAI License No.
                   </label>
-                  <input
-                    value={serviceData.license}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/[^0-9]/g, "");
-                      setServiceData({
-                        ...serviceData,
-                        license: value,
-                      });
-                    }}
-                    onKeyPress={(e) => {
-                      if (!/[0-9]/.test(e.key)) {
-                        e.preventDefault();
-                      }
-                    }}
-                    type="text"
-                    placeholder="e.g. 1234567"
-                    inputMode="numeric"
-                    maxLength="7"
-                    className="w-full p-3 rounded-xl border bg-white border-gray-200"
-                  />
+
+                  <div className="relative">
+                    <input
+                      value={serviceData.license}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^0-9]/g, "");
+                        setServiceData({
+                          ...serviceData,
+                          license: value,
+                        });
+                      }}
+                      onKeyPress={(e) => {
+                        if (!/[0-9]/.test(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
+                      type="text"
+                      placeholder="e.g. 1234567"
+                      inputMode="numeric"
+                      maxLength="7"
+                      className={`
+        w-full p-3 pr-10 rounded-xl border bg-white outline-none
+        transition-all duration-300 ease-in-out
+        ${isValid ? "border-green-500" : serviceData.license ? "border-red-400" : "border-gray-200"}
+        focus:ring-2 focus:ring-green-400/20
+      `}
+                    />
+
+                    {/* ✅ Smooth Tick */}
+                    <div
+                      className={`
+        pointer-events-none absolute right-3 top-1/2 -translate-y-1/2
+        transform transition-all duration-300 ease-in-out
+        ${isValid ? "opacity-100 scale-100" : "opacity-0 scale-75"}
+      `}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-green-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={3}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-sm font-bold text-gray-700">
@@ -341,29 +396,37 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                   </label>
                   <input
                     value={serviceData.experience}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      let value = e.target.value.replace(/\D/g, ""); // allow only digits
+                      if (value !== "") {
+                        let num = parseInt(value, 10);
+                        if (num > 100) num = 100;
+                        if (num < 0) num = 0;
+                        value = num.toString();
+                      }
+
                       setServiceData({
                         ...serviceData,
-                        experience: e.target.value,
-                      })
-                    }
+                        experience: value,
+                      });
+                    }}
                     type="text"
-                    className="w-full p-3 rounded-xl border border-gray-200 bg-white"
                     inputMode="numeric"
                     placeholder="e.g. 1"
+                    className="w-full p-3 rounded-xl border border-gray-200 bg-white outline-none focus:ring-2 ring-[#0D4D4D]/20"
                   />
                 </div>
               </div>
             </div>
-            <p className="text-[#374151] text-base sm:text-[16px] font-medium font-poppins leading-normal">
+            <p className="text-[#374151] text-base text-[clamp(12px,1.5vw,16px)] font-normal font-poppins leading-normal">
               Upload IRDAI Certificate
             </p>
             <div className="px-3 sm:px-5 pt-6 sm:pt-[29px] pb-6 sm:pb-[23px] flex flex-col gap-4 rounded-lg border border-[#E6E6E6] bg-[#F8F6F1]">
-              <p className="text-[#6B7280] text-[12px] font-normal font-poppins leading-[20px]">
+              <p className="text-[#6B7280] text-[clamp(8px,1vw,12px)] font-normal font-poppins leading-[20px]">
                 Upload a single screenshot or image of your IRDAI license. It
                 should show all your registered companies and details.
               </p>
-              <p className="py-[10px] pr-[14px] pl-[20px] text-[#6B7280] text-[12px] font-normal font-poppins leading-[20px] rounded-lg border-l-[3px] border-l-[#0D6060] bg-[#E8F4F4]">
+              <p className="py-[10px] pr-[14px] pl-[20px] text-[#6B7280] text-[clamp(8px,1vw,12px)] font-normal font-poppins leading-[20px] rounded-lg border-l-[3px] border-l-[#0D6060] bg-[#E8F4F4]">
                 Take a screenshot from the IRDAI website showing your license
                 details. One image is sufficient - it will show all companies
                 registered under your license.
@@ -427,7 +490,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                       Tap to upload certificate
                     </p>
                     <p className="text-xs text-gray-400 mt-1">
-                      JPG, PNG, PDF • Max 5MB • Single file
+                      IRDAI license screenshot • JPG, PNG • Max 5MB
                     </p>
                   </>
                 ) : (
@@ -435,12 +498,12 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                     <div className="flex items-center gap-2 text-green-600 font-semibold">
                       ✅ Certificate Uploaded Successfully
                     </div>
-                    <p className="text-[#6B7280] text-center text-xs sm:text-[14px] font-normal font-poppins leading-[20px] sm:leading-[24px]">
-                      Click to simulate upload
-                    </p>
                   </>
                 )}
               </div>
+                    <p className="text-[#6B7280] text-center text-xs sm:text-[14px] font-normal font-poppins leading-[20px] sm:leading-[24px]">
+                      Click to simulate upload
+                    </p>
               {file && (
                 <div className="mt-4 p-4 bg-white border rounded-xl flex items-center justify-between">
                   <div>
@@ -458,7 +521,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                       setPreview(null);
                       document.getElementById("fileUpload").value = null;
                     }}
-                    className="text-red-500 text-sm font-semibold hover:underline"
+                    className="text-red-500 text-sm font-semibold hover:underline cursor-pointer"
                   >
                     Remove
                   </button>
@@ -467,7 +530,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
             </div>
 
             <div className="space-y-1">
-              <label className="text-[#374151] text-[16px] font-medium font-poppins leading-normal mb-2">
+              <label className="text-[#374151] text-[clamp(12px,1.5vw,16px)]  font-medium bg-[#F7F4ED] font-poppins leading-normal mb-2">
                 Short Bio
               </label>
               <textarea
@@ -476,7 +539,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                   setFormData({ ...formData, bio: e.target.value })
                 }
                 placeholder="e.g. 10+ years helping families secure their future with life and health insurance..."
-                className="w-full p-3 rounded-xl border border-gray-200 min-h-[100px] bg-[#FDFCFB] text-[#6B7280] text-[14px] font-normal font-poppins leading-[24px]"
+                className="w-full p-3 rounded-xl border border-[#E6E6E6] min-h-[100px] bg-[#FDFCFB] text-[#6B7280] text-[clamp(10px,1vw,14px)] font-normal font-poppins leading-[24px] outline-none focus:ring-2 ring-[#0D4D4D]/20"
               />
             </div>
           </div>

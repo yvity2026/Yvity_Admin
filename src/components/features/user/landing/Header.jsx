@@ -224,18 +224,18 @@ const Header = () => {
           </div>
         </nav>
       ) : (
-        <nav className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 shadow-sm relative after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-px after:bg-gradient-to-r after:from-[#0D6060] after:to-[#F59E0B]">
+        <nav className="bg-white border-b border-gray-200 pt-1 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 md:min-h-[56px] shadow-sm relative after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-px after:bg-gradient-to-r after:from-[#0D6060] after:to-[#F59E0B]">
           <div className="h-full mx-auto flex items-center justify-between ">
             <div className="flex items-center space-x-2">
               <Image
                 src="/images/yvity.png"
-                height={90}
-                width={90}
+                height={100}
+                width={100}
                 alt="Navbarlogo"
               />
             </div>
 
-            <div className="hidden md:flex items-center gap-4 lg:gap-6 xl:gap-8">
+            <div className="hidden md:flex items-center gap-4">
               <button className="flex items-center px-4 py-1 gap-2 hover:text-black transition text-[clamp(10px,1vw,14px)] leading-[16px] font-medium text-[var(--headings-important-text,#111827)] cursor-pointer">
                 <HiOutlineHome size={20} />
                 <span className="font-medium">Home</span>
