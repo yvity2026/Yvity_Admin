@@ -122,6 +122,7 @@ const Header = () => {
         services: payload.services,
         certificate_url: certificateUrl,
         bio: payload.bio,
+        designation: payload.designation
       }),
     });
 
