@@ -204,7 +204,7 @@ const AdvisorSearchFilter = ({ onSearchChange, advisors }) => {
             <IoIosArrowRoundForward />
           </button>
         </span>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6 xl:px-16">
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 gap-y-12 ">   
           {filteredAdvisors.map((advisor, index) => (
             <AdvisorCard
               key={advisor.id || index}

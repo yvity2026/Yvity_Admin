@@ -18,7 +18,8 @@ export async function GET(req, context) {
       advisor_roles (*)
     )
   `)
-      .limit(1000);
+  .filter("roles", "cs", JSON.stringify(["advisor"]))
+  .limit(1000);
 
     if (error || !Array.isArray(users)) {
       return NextResponse.json(
