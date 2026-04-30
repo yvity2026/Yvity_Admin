@@ -142,7 +142,7 @@ const AdvisorSearchFilter = ({ onSearchChange, advisors }) => {
             <button
               key={tag}
               onClick={() => setActiveFilter(tag)}
-              className={`px-4 py-1.5 rounded-full text-sm transition-all duration-200 cursor-pointer border border-transparent whitespace-nowrap
+              className={`px-4 py-1.5 rounded-full text-sm transition-all duration-200 cursor-pointer border border-transparent whitespace-nowrap outline-none
         ${
           activeFilter === tag
             ? "bg-orange-400 text-[#0D4D4D] shadow-md shadow-orange-400/20 ring-2 ring-orange-300"

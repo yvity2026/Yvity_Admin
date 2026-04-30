@@ -220,7 +220,6 @@ export default function AppShell({ children }) {
         setLoading(false);
         return;
       }
-
       try {
         const res = await fetch("/api/auth/me");
 
@@ -242,7 +241,7 @@ export default function AppShell({ children }) {
     };
 
     fetchUser();
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     if (mobileOpen) {
@@ -604,12 +603,37 @@ export default function AppShell({ children }) {
 
               {/* PROFILE */}
               <div className="px-6 py-4">
-                <div className="w-[50px] h-[50px] rounded-full bg-white mb-2"></div>
-                <p className="text-[#F8F6F1] font-semibold">Krishna Mohan</p>
-                <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(245,158,11,0.2)] text-xs">
-                  <FaCrown />
-                  Gold Member
+                <div className=" relative w-[50px] h-[50px] rounded-full bg-white mb-2 overflow-hidden">
+                  {user?.selfie_url ? (
+                    <Image
+                      src={user.selfie_url}
+                      alt="User Image"
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <span className="text-white font-semibold">
+                      {user?.name?.charAt(0).toUpperCase()}
+                    </span>
+                  )}
                 </div>
+                <p className="text-[#F8F6F1] font-semibold">{user?.name}</p>
+                {advisor?.subscription_plan === "gold" ? (
+                  <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(245,158,11,0.2)] text-[#F59E0B] text-xs font-semibold">
+                    <FaCrown className="text-xs" />
+                    Gold Member
+                  </div>
+                ) : advisor?.subscription_plan === "silver" ? (
+                  <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(148,163,184,0.2)] text-[#94A3B8] text-xs font-semibold">
+                    <FaMedal className="text-xs" />
+                    Silver Member
+                  </div>
+                ) : (
+                  <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(100,116,139,0.15)] text-[#64748B] text-xs font-semibold">
+                    <FaRegUser className="text-xs" />
+                    Free Member
+                  </div>
+                )}
               </div>
 
               <hr className="mt-5 h-[1px] bg-[#107171] border-0" />

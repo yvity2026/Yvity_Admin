@@ -150,13 +150,16 @@ export default function QuickActions() {
 
           if (action.action === "intro-video") {
             return (
+              <>
               <AddIntroVideoButton
                 key={action.label}
                 className={actionCardClassName}
+                plan = {advisor?.subscription_plan.toLowerCase() === "gold"}
                 uploadingLabel="Uploading..."
               >
                 <ActionContent action={action} />
               </AddIntroVideoButton>
+              </>
             );
           }
 
