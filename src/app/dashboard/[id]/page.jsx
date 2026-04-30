@@ -57,6 +57,10 @@ import Skeleton from "@/app/components/skeleton/Skeleton";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import GiveTestimonialModal from "@/components/features/user/landing/modals/public-profile/GiveTestimonialModal";
+import {
+  advisorQrCodeImageSettings,
+  advisorQrCodeLevel,
+} from "@/lib/advisor/qrBranding";
 import { useAdvisorAuth } from "@/context/AuthAdvisorContext";
 import  FloatingSaveButton  from "@/components/ui/FloatingSaveButton"
 
@@ -76,6 +80,34 @@ const getServiceLabels = (services = []) => {
         .filter(Boolean),
     ),
   ];
+};
+
+const getNumberValue = (value) => {
+  const match = String(value ?? "").match(/\d+/);
+  return match ? Number(match[0]) : 0;
+};
+
+const getServiceExperienceYears = (services = [], advisorServices = []) => {
+  const serviceYears = services
+    .map((service) => getNumberValue(service?.experience_years))
+    .filter((value) => Number.isFinite(value));
+  const profileYears = advisorServices
+    .map((service) => getNumberValue(service?.experience))
+    .filter((value) => Number.isFinite(value));
+
+  return Math.max(0, ...serviceYears, ...profileYears);
+};
+
+const isMeaningfulProfileText = (value) => {
+  const text = String(value || "").trim();
+  const normalized = text.toLowerCase();
+
+  if (!text) return false;
+  if (["test", "testing", "testingg", "demo", "sample", "na", "n/a"].includes(normalized)) {
+    return false;
+  }
+
+  return text.length >= 20 || text.split(/\s+/).length >= 4;
 };
 
 const formatDate = (date) => {
@@ -139,6 +171,26 @@ const page = () => {
   };
   const user = profile?.user || profile;
   const advisor = profile?.advisor_profiles;
+  const advisorScore = profile?.advisor_score || { total: 0, max: 100 };
+  const profileSummary = profile?.profile_summary || {
+    testimonials: 0,
+    recommendations: 0,
+    profile_views: 0,
+    clients: 0,
+    member_since_year: "",
+  };
+  const advisorPhone = String(user?.mobile || user?.mobile_number || "")
+    .replace(/\D/g, "");
+  const advisorWhatsappPhone =
+    advisorPhone.length === 10 ? `91${advisorPhone}` : advisorPhone;
+  const advisorEmail = String(user?.email || "").trim();
+  const introVideoUrl = advisor?.intro_url?.trim() || "";
+  const introVideoTitle = user?.name
+    ? `${user.name} Introduction`
+    : "Advisor Introduction";
+  const introVideoSubtitle = [user?.profession, user?.city]
+    .filter(Boolean)
+    .join(" - ");
 
   /**
    * Fetch all public advisor data when advisorId changes
@@ -223,6 +275,48 @@ const page = () => {
     link.click();
   };
 
+  const handleCallAdvisor = () => {
+    if (!advisorPhone) {
+      toast.error("Advisor mobile number is not available");
+      return;
+    }
+
+    window.location.href = `tel:${advisorPhone}`;
+  };
+
+  const handleWhatsappAdvisor = () => {
+    if (!advisorWhatsappPhone) {
+      toast.error("Advisor WhatsApp number is not available");
+      return;
+    }
+
+    const message = encodeURIComponent("Hi, I want to connect with you.");
+    window.open(
+      `https://wa.me/${advisorWhatsappPhone}?text=${message}`,
+      "_blank",
+    );
+  };
+
+  const handleEmailAdvisor = () => {
+    if (!advisorEmail) {
+      toast.error("Advisor email is not available");
+      return;
+    }
+
+    const subject = encodeURIComponent("Inquiry");
+    const body = encodeURIComponent("Hello, I would like to connect.");
+    window.location.href = `mailto:${advisorEmail}?subject=${subject}&body=${body}`;
+  };
+
+  const handleOpenIntroVideo = () => {
+    if (!introVideoUrl) {
+      toast.error("Intro video is not available");
+      return;
+    }
+
+    setActiveModal(MODALS.VIDEO);
+  };
+
   // const actions = [
   //   { label: "Recommendations" },
   //   { label: "Testimonials" },
@@ -231,10 +325,13 @@ const page = () => {
   // ];
 
   const statsData = [
-    { label: "Testimonials", value: advisor?.testimonial_count || 0 },
-    { label: "Recommendations", value: advisor?.recommendation_count || 0 },
-    { label: "Profile Views", value: advisor?.views || 0 },
-    { label: "Member Since", value: user?.created_at?.slice(0, 4) || "-" },
+    { label: "Testimonials", value: profileSummary.testimonials || 0 },
+    { label: "Recommendations", value: profileSummary.recommendations || 0 },
+    { label: "Profile Views", value: profileSummary.profile_views || 0 },
+    {
+      label: "Member Since",
+      value: profileSummary.member_since_year || user?.created_at?.slice(0, 4) || "-",
+    },
   ];
 
   const [isOpen, setIsOpen] = useState(true);
@@ -286,7 +383,6 @@ const page = () => {
   ? publicJourney
   : [];
 
-  console.log(safePublicJourney)
   const router = useRouter();
 
   const actions = [
@@ -339,7 +435,72 @@ const page = () => {
     fetchBaseUrl();
   }, []);
 
-  const profileUrl = `${baseUrl}/dashboard/${advisor?.slug || advisorId}`;
+  const normalizedBaseUrl = (
+    baseUrl || (typeof window !== "undefined" ? window.location.origin : "")
+  ).replace(/\/+$/, "");
+  const publicProfilePath = `/dashboard/${advisor?.profile_slug || advisorId}`;
+  const profileUrl =
+    normalizedBaseUrl && publicProfilePath
+      ? `${normalizedBaseUrl}${publicProfilePath}`
+      : publicProfilePath;
+  const profileUrlLabel = profileUrl
+    .replace(/^https?:\/\//, "")
+    .replace(/\/+$/, "");
+
+  const handleShareOnWhatsApp = () => {
+    if (!profileUrl) {
+      toast.error("Profile link is not available");
+      return;
+    }
+
+    window.open(`https://wa.me/?text=${encodeURIComponent(profileUrl)}`, "_blank");
+  };
+
+  const handleShareByEmail = () => {
+    if (!profileUrl) {
+      toast.error("Profile link is not available");
+      return;
+    }
+
+    const subject = encodeURIComponent("Advisor Profile");
+    const body = encodeURIComponent(profileUrl);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
+
+  const handleShareBySms = () => {
+    if (!profileUrl) {
+      toast.error("Profile link is not available");
+      return;
+    }
+
+    window.location.href = `sms:?&body=${encodeURIComponent(profileUrl)}`;
+  };
+
+  const handleShareOnFacebook = () => {
+    if (!profileUrl) {
+      toast.error("Profile link is not available");
+      return;
+    }
+
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(profileUrl)}`,
+      "_blank",
+    );
+  };
+
+  const handleCopyProfileLink = async () => {
+    if (!profileUrl) {
+      toast.error("Profile link is not available");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(profileUrl);
+      toast.success("Profile link copied");
+    } catch (error) {
+      window.prompt("Copy this link:", profileUrl);
+    }
+  };
 
   const reasonsList = [
     "Helpful & Honest",
@@ -484,35 +645,77 @@ const page = () => {
     fetchAdvisor();
   }, [advisorId]);
 
+  const profileServices = publicServices.length
+    ? publicServices
+    : Array.isArray(advisor?.services)
+      ? advisor.services
+      : [];
+  const serviceLabels = getServiceLabels(profileServices);
+  const serviceLabelText = serviceLabels.join(", ");
+  const serviceExperienceYears = getServiceExperienceYears(
+    publicServices,
+    Array.isArray(advisor?.services) ? advisor.services : [],
+  );
+  const companyNames = [
+    ...new Set(profileServices.map((service) => service?.company).filter(Boolean)),
+  ];
+  const specializationNames = [
+    ...new Set(
+      profileServices
+        .flatMap((service) => {
+          const values = [
+            ...(Array.isArray(service?.key_services) ? service.key_services : []),
+            ...(Array.isArray(service?.services) ? service.services : []),
+          ];
+
+          if (values.length > 0) {
+            return values;
+          }
+
+          const fallback =
+            service?.service || service?.service_type || service?.name || service?.category;
+
+          return Array.isArray(fallback) ? fallback : [fallback];
+        })
+        .filter(Boolean),
+    ),
+  ];
+  const displayCompanyItems = companyNames.length
+    ? companyNames
+    : companies.map((company) => company.data);
+  const displaySpecializationItems = specializationNames.length
+    ? specializationNames
+    : serviceLabels.length
+      ? serviceLabels
+      : companies.map((company) => company.data);
+  const topServiceItems = serviceLabels.length
+    ? serviceLabels.slice(0, 2)
+    : ["Life Insurance", "Health Insurance"];
+  const homeDescription = isMeaningfulProfileText(advisor?.short_bio)
+    ? advisor.short_bio.trim()
+    : String(user?.bio || "").trim();
+  const aboutData = [
+    ...serviceLabels.slice(0, 2),
+    advisor?.is_verified ? "Licence verified" : "Verified Advisor",
+  ].filter(Boolean);
   const summaryData = [
     {
-      count: advisor?.experience ? `${advisor.experience}+` : "0",
+      count: serviceExperienceYears ? `${serviceExperienceYears}+` : "0",
       label: "Exp",
     },
     {
-      count: advisor?.experience ? `${advisor.experience}+` : "0",
+      count: `${profileSummary.testimonials || 0}`,
       label: "Reviews",
     },
     {
-      count: advisor?.experience ? `${advisor.experience}+` : "0",
+      count: `${profileSummary.recommendations || 0}`,
       label: "Recs",
     },
     {
-      count: advisor?.experience ? `${advisor.experience}+` : "0",
+      count: `${profileSummary.clients || 0}`,
       label: "Clients",
     },
   ];
-
-  const serviceLabels = getServiceLabels(
-    Array.isArray(advisor?.services) ? advisor.services : [],
-  );
-  const aboutData =
-    serviceLabels.length > 0
-      ? [
-        ...serviceLabels.slice(0, 2),
-        advisor?.is_verified ? "Licence verified" : "Verified Advisor",
-      ]
-      : [];
 
   useEffect(() => {
     if (!activeModal) {
@@ -544,11 +747,6 @@ const page = () => {
       data: `Last updated ${getDaysAgo(profile?.updated_at)}`,
     },
   ];
-
-  console.log(advisor);
-  console.log(user);
-  const isLocked =
-    advisor?.subscription_plan === "free" && advisor?.subscription_plan === "free";
 
     function ProfilePage({ profile }) {
   const handleSaveComplete = (savedProfile) => {
@@ -678,7 +876,7 @@ const page = () => {
                       <p className="">Identity Verified</p>
                     </span>
                     <p className="text-gray-700 text-[10px] sm:text-xs md:text-xs font-normal leading-4 font-poppins">
-                      {[serviceLabels, user?.city]
+                      {[serviceLabelText, user?.city]
   .filter(Boolean)
   .join(" • ")}
                     </p>
@@ -688,7 +886,7 @@ const page = () => {
                 </p> */}
                   </span>
                   <span className="text-teal-950 text-[clamp(8px,1vw,12px)] font-medium leading-4 font-poppins pr-6 flex flex-col gap-3">
-                    {[" Life Insurance", "Health Insurance"].map(
+                    {topServiceItems.map(
                       (item, index) => (
                         <p
                           key={index}
@@ -707,60 +905,31 @@ const page = () => {
     bg-amber-200 w-full pl-[20px] pr-[23px] py-[9px] mt-[24px] 
     bg-gradient-to-r from-[#022927] to-[#053F40] rounded-lg
     transition-all duration-300 ease-in-out
-    ${isLocked ? "cursor-not-allowed relative group" : ""}
   `}
                   >
                     <span
                       className={`
       flex gap-5 h-full
-      ${isLocked ? "cursor-not-allowed" : "cursor-pointer"}
+      cursor-pointer
       transition-all duration-300
     `}
-                      onClick={() => !isLocked && setActiveModal(MODALS.VIDEO)}
+                      onClick={handleOpenIntroVideo}
                       onKeyDown={(e) =>
-                        !isLocked &&
                         e.key === "Enter" &&
-                        setActiveModal(MODALS.VIDEO)
+                        handleOpenIntroVideo()
                       }
-                      role={!isLocked ? "button" : "presentation"}
-                      tabIndex={!isLocked ? 0 : -1}
+                      role="button"
+                      tabIndex={0}
                     >
-                      {/* Lock overlay - appears on hover when locked */}
-                      {isLocked && (
-                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
-                          <div className="bg-black/80 rounded-full p-3 flex items-center gap-2 transform scale-90 group-hover:scale-100 transition-transform duration-300">
-                            <svg
-                              className="w-5 h-5 text-white"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                              />
-                            </svg>
-                            <span className="text-white text-xs sm:text-sm font-medium font-poppins">
-                              Intro video not available
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Blur effect on content when locked */}
                       <div
                         className={`
       flex gap-5 w-full transition-all duration-300
-      ${isLocked ? "blur-[2px] group-hover:blur-[4px]" : ""}
     `}
                       >
                         <FaRegCirclePlay
                           size={40}
                           className={`
           flex justify-center text-white items-center
-          ${isLocked ? "opacity-50" : ""}
           transition-all duration-300
         `}
                         />
@@ -770,9 +939,9 @@ const page = () => {
                             Watch Intro Video
                           </span>
                           <p className="text-[#82ADAD] text-[10px] sm:text-xs font-normal leading-4 font-poppins">
-                            {isLocked
-                              ? "Upgrade to watch the introduction video"
-                              : `${profile?.name} introduces himself`}
+                            {introVideoUrl
+                              ? `${user?.name || "Advisor"} introduces themselves`
+                              : "Intro video not available"}
                           </p>
                         </span>
                       </div>
@@ -795,7 +964,7 @@ const page = () => {
                   <div className="rounded-lg border border-[#E2E2E2] bg-[#F0F8F8] py-[12px] pl-[18px] pr-[34px] mt-[16px] ">
                     <span className="flex items-center gap-[11px] ">
                       <h2 className="text-teal-950 text-2xl font-bold leading-4 font-poppins">
-                        87/100
+                        {advisorScore.total}/{advisorScore.max}
                       </h2>
                       <span>⭐⭐⭐⭐</span>
                       <p className="text-gray-500 text-[10px] sm:text-xs md:text-xs font-semibold leading-normal font-poppins">
@@ -803,7 +972,13 @@ const page = () => {
                       </p>
                     </span>
                     <span>
-                      <ProgressBar value={87} />
+                      <ProgressBar
+                        value={
+                          advisorScore.max
+                            ? (advisorScore.total / advisorScore.max) * 100
+                            : 0
+                        }
+                      />
                     </span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
@@ -835,7 +1010,7 @@ const page = () => {
                           case "Testimonials":
                             return true;
                           case "Share":
-                            return true;
+                            return false;
                           case "QR Code":
                             return advisor?.subscription_plan === "free" && advisor?.subscription_plan === "silver";
                           default:
@@ -975,9 +1150,7 @@ const page = () => {
                 {/* Buttons container */}
                 <div className="flex flex-col gap-2 flex-1">
                   <button
-                    onClick={() => {
-                      window.location.href = `tel:${user?.mobile_number}`; // replace with dynamic number
-                    }}
+                    onClick={handleCallAdvisor}
                     className="w-full text-[clamp(8px,1vw,12px)] px-[23px] py-[14px] font-medium rounded-lg bg-[#0A4A4A] flex gap-2 items-center justify-center text-white cursor-pointer"
                   >
                     <IoIosCall size={18} />
@@ -985,16 +1158,7 @@ const page = () => {
                   </button>
 
                   <button
-                    onClick={() => {
-                      const phone = user?.mobile_number?.replace("+", ""); // no +, include country code
-                      const message = encodeURIComponent(
-                        "Hi, I want to connect with you.",
-                      );
-                      window.open(
-                        `https://wa.me/${phone}?text=${message}`,
-                        "_blank",
-                      );
-                    }}
+                    onClick={handleWhatsappAdvisor}
                     className="w-full text-[clamp(8px,1vw,12px)] px-[23px] py-[14px] font-medium rounded-lg bg-[#26D367] flex gap-2 items-center justify-center text-white cursor-pointer"
                   >
                     <BsChatDots size={18} />
@@ -1002,14 +1166,7 @@ const page = () => {
                   </button>
 
                   <button
-                    onClick={() => {
-                      const email = user?.email;
-                      const subject = encodeURIComponent("Inquiry");
-                      const body = encodeURIComponent(
-                        "Hello, I would like to connect.",
-                      );
-                      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-                    }}
+                    onClick={handleEmailAdvisor}
                     className="w-full text-[clamp(8px,1vw,12px)] px-[23px] py-[14px] bg-white flex gap-2 items-center justify-center rounded-lg border border-[#E8F4F4] text-primary-900 font-poppins text-xs font-semibold cursor-pointer"
                   >
                     <TbMail size={18} />
@@ -1197,7 +1354,7 @@ const page = () => {
                   {activeTab === "Home" ? (
                     <>
                       <p className="text-[#6B7280] font-nunito text-sm font-normal leading-6 text-[clamp(10px,1vw,14px)]">
-                        {user?.bio}
+                        {homeDescription || "-"}
                       </p>
 
                       <div className="flex flex-col gap-2">
@@ -1205,13 +1362,13 @@ const page = () => {
                           Companies Associated
                         </p>
                         <div className="flex flex-wrap items-center gap-2">
-                          {companies.map((comp, index) => (
+                          {displayCompanyItems.map((company, index) => (
                             <span
                               key={index}
                               className="p-[10px] flex gap-2 items-center text-[clamp(8px,1vw,12px)] font-semibold font-poppins leading-normal rounded-2xl bg-[#E8F4F4]"
                             >
-                              <span>{comp.icon}</span>
-                              {comp.data}
+                              <span>{companies[index % companies.length]?.icon}</span>
+                              {company}
                             </span>
                           ))}
                         </div>
@@ -1223,12 +1380,12 @@ const page = () => {
                         </p>
 
                         <div className="flex flex-wrap gap-2">
-                          {companies.map((comp, index) => (
+                          {displaySpecializationItems.map((specialization, index) => (
                             <span
                               key={index}
                               className="px-3 py-1 w-full sm:w-auto flex items-center justify-center sm:justify-start sm:text-[12px] font-semibold rounded-2xl bg-[#E0F4F3] text-[clamp(8px,1vw,12px)]"
                             >
-                              {comp.data}
+                              {specialization}
                             </span>
                           ))}
                         </div>
@@ -1300,7 +1457,11 @@ const page = () => {
                     )
                   ) : activeTab === "Testimonials" &&
                     advisor?.ispublic_testimonials ? (
-                    <Testimonials_filters showActions={false} />
+                    <Testimonials_filters
+                      showActions={false}
+                      testimonials={publicTestimonials}
+                      allTestimonials={publicTestimonials}
+                    />
                   ) : activeTab === "Journey" &&
                     advisor?.ispublic_professional ? (
                     publicDataLoading.journey ? (
@@ -1364,6 +1525,8 @@ const page = () => {
                 <QRCodeCanvas
                   value={profileUrl}
                   size={180}
+                  level={advisorQrCodeLevel}
+                  imageSettings={advisorQrCodeImageSettings}
                 />
               </div>
 
@@ -1583,18 +1746,24 @@ const page = () => {
               {/* Body */}
               <div className="p-6 space-y-4">
                 {/* WhatsApp */}
-                <button className="w-full flex items-center gap-4 p-4 bg-[#e9f7ef] rounded-2xl border border-transparent hover:border-emerald-200 transition-all text-left">
+                <button
+                  onClick={handleShareOnWhatsApp}
+                  className="w-full flex items-center gap-4 p-4 bg-[#e9f7ef] rounded-2xl border border-transparent hover:border-emerald-200 transition-all text-left"
+                >
                   <div className="bg-black text-white p-2 rounded-full">
                     <FaWhatsapp size={18} />
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-800">Whatsapp</h3>
-                    <p className="text-sm text-slate-500">Helpful & Honest</p>
+                    <p className="text-sm text-slate-500">Share via WhatsApp</p>
                   </div>
                 </button>
 
                 {/* Email */}
-                <button className="w-full flex items-center gap-4 p-4 bg-[#eff4ff] rounded-2xl border border-transparent hover:border-blue-200 transition-all text-left">
+                <button
+                  onClick={handleShareByEmail}
+                  className="w-full flex items-center gap-4 p-4 bg-[#eff4ff] rounded-2xl border border-transparent hover:border-blue-200 transition-all text-left"
+                >
                   <div className="bg-white border border-gray-200 p-2 rounded-lg text-slate-700">
                     <MdOutlineMail size={18} />
                   </div>
@@ -1605,7 +1774,10 @@ const page = () => {
                 </button>
 
                 {/* SMS */}
-                <button className="w-full flex items-center gap-4 p-4 bg-[#e9f7ef] rounded-2xl border border-transparent hover:border-emerald-200 transition-all text-left">
+                <button
+                  onClick={handleShareBySms}
+                  className="w-full flex items-center gap-4 p-4 bg-[#e9f7ef] rounded-2xl border border-transparent hover:border-emerald-200 transition-all text-left"
+                >
                   <div className="bg-black text-white p-2 rounded-full">
                     <MdSms size={18} />
                   </div>
@@ -1616,7 +1788,10 @@ const page = () => {
                 </button>
 
                 {/* Facebook */}
-                <button className="w-full flex items-center gap-4 p-4 bg-[#eff4ff] rounded-2xl border border-transparent hover:border-blue-200 transition-all text-left">
+                <button
+                  onClick={handleShareOnFacebook}
+                  className="w-full flex items-center gap-4 p-4 bg-[#eff4ff] rounded-2xl border border-transparent hover:border-blue-200 transition-all text-left"
+                >
                   <div className="bg-white border border-gray-200 p-2 rounded-lg text-slate-700">
                     <FaFacebookF size={16} />
                   </div>
@@ -1627,7 +1802,10 @@ const page = () => {
                 </button>
 
                 {/* Copy Link */}
-                <button className="w-full flex items-center gap-4 p-4 bg-[#e9f7ef] rounded-2xl border border-transparent hover:border-emerald-200 transition-all text-left">
+                <button
+                  onClick={handleCopyProfileLink}
+                  className="w-full flex items-center gap-4 p-4 bg-[#e9f7ef] rounded-2xl border border-transparent hover:border-emerald-200 transition-all text-left"
+                >
                   <div className="bg-white border border-gray-200 p-2 rounded-lg text-slate-400 rotate-45">
                     <FaLink size={16} />
                   </div>
@@ -1636,7 +1814,7 @@ const page = () => {
                       Copy Profile Link
                     </h3>
                     <p className="text-sm text-slate-500 font-medium">
-                      yvity.in/krishna
+                      {profileUrlLabel || "Profile link unavailable"}
                     </p>
                   </div>
                 </button>
@@ -1669,19 +1847,33 @@ const page = () => {
               </div>
 
               {/* Video Preview */}
-              <div className="w-full aspect-video bg-[#f2f8f8] flex items-center justify-center relative group cursor-pointer">
-                <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                  <FaPlay size={28} className="text-[#0a4d4a]" />
-                </div>
+              <div className="w-full aspect-video bg-[#f2f8f8] flex items-center justify-center relative overflow-hidden">
+                {introVideoUrl ? (
+                  <video
+                    key={introVideoUrl}
+                    className="h-full w-full bg-black object-cover"
+                    controls
+                    autoPlay
+                    playsInline
+                    preload="metadata"
+                  >
+                    <source src={introVideoUrl} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+                    <FaPlay size={28} className="text-[#0a4d4a]" />
+                  </div>
+                )}
               </div>
 
               {/* Footer */}
               <div className="p-8 space-y-1">
                 <h3 className="text-2xl font-bold text-slate-900 leading-tight">
-                  Krishna Mohan – Introduction
+                  {introVideoTitle}
                 </h3>
                 <p className="text-slate-500 font-medium text-lg">
-                  Senior LIC Advisor • Nellore, AP
+                  {introVideoSubtitle || "Advisor intro video"}
                 </p>
               </div>
             </div>

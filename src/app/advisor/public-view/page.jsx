@@ -53,7 +53,175 @@ import Skeleton from "@/app/components/skeleton/Skeleton";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthUserContext";
 import GiveTestimonialModal from "@/components/features/user/landing/modals/public-profile/GiveTestimonialModal";
+import {
+  advisorQrCodeImageSettings,
+  advisorQrCodeLevel,
+} from "@/lib/advisor/qrBranding";
 import { resolveAdvisorProfileSlug } from "@/lib/advisor/profileSlug";
+
+const getServiceLabels = (services = []) =>
+  [
+    ...new Set(
+      services
+        .flatMap((service) => [
+          service?.service,
+          service?.serviceType,
+          service?.service_type,
+          service?.title,
+          service?.name,
+          service?.category,
+        ])
+        .filter(Boolean),
+    ),
+  ];
+
+const getNumberValue = (value) => {
+  const match = String(value ?? "").match(/\d+/);
+  return match ? Number(match[0]) : 0;
+};
+
+const getServiceExperienceYears = (services = [], advisorServices = []) => {
+  const serviceYears = services
+    .map((service) => getNumberValue(service?.experience_years))
+    .filter((value) => Number.isFinite(value));
+  const profileYears = advisorServices
+    .map((service) => getNumberValue(service?.experience))
+    .filter((value) => Number.isFinite(value));
+
+  return Math.max(0, ...serviceYears, ...profileYears);
+};
+
+const isMeaningfulProfileText = (value) => {
+  const text = String(value || "").trim();
+  const normalized = text.toLowerCase();
+
+  if (!text) return false;
+  if (["test", "testing", "testingg", "demo", "sample", "na", "n/a"].includes(normalized)) {
+    return false;
+  }
+
+  return text.length >= 20 || text.split(/\s+/).length >= 4;
+};
+
+const formatAdvisorLocation = (city) => {
+  const value = String(city || "").trim();
+  if (!value) return "";
+
+  if (/^nellore$/i.test(value)) {
+    return "Nellore, AP";
+  }
+
+  return value;
+};
+
+const joinWithAnd = (items = []) => {
+  const cleanItems = items.filter(Boolean);
+  if (cleanItems.length <= 1) return cleanItems[0] || "";
+
+  return `${cleanItems.slice(0, -1).join(", ")} and ${cleanItems.at(-1)}`;
+};
+
+const formatMonthYear = (value) => {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.toLocaleString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+};
+
+const getDaysAgoLabel = (value) => {
+  if (!value) return "Recently updated";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Recently updated";
+
+  const diffMs = Date.now() - date.getTime();
+  const diffDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+
+  if (diffDays === 0) return "Updated today";
+  if (diffDays === 1) return "Last updated 1 day ago";
+
+  return `Last updated ${diffDays} days ago`;
+};
+
+const buildJourneySections = (entries = []) => {
+  const sectionMeta = {
+    Education: {
+      icon: BsFillInfoSquareFill,
+      themeColor: "bg-[#0A4A4A]",
+      textColor: "text-[#0A4A4A]",
+    },
+    Profession: {
+      icon: FaBuilding,
+      themeColor: "bg-[#0A4A4A]",
+      textColor: "text-[#0A4A4A]",
+    },
+    Certificate: {
+      icon: IoMdCheckmarkCircle,
+      themeColor: "bg-[#0A4A4A]",
+      textColor: "text-[#0A4A4A]",
+    },
+  };
+
+  return Object.entries(
+    (entries || []).reduce((acc, entry) => {
+      const key = entry?.entry_type || "Journey";
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(entry);
+      return acc;
+    }, {}),
+  ).map(([category, groupedEntries]) => {
+    const meta = sectionMeta[category] || sectionMeta.Profession;
+
+    return {
+      id: category,
+      category,
+      icon: meta.icon,
+      themeColor: meta.themeColor,
+      textColor: meta.textColor,
+      count: `${groupedEntries.length} entries`,
+      entries: groupedEntries.map((entry) => {
+        const startYear = entry?.from_year;
+        const endYear = entry?.is_ongoing
+          ? "Present"
+          : entry?.to_year || entry?.date || "";
+        const period =
+          category === "Certificate"
+            ? String(entry?.date || "")
+            : startYear && endYear
+              ? `${startYear} - ${endYear}`
+              : startYear
+                ? `${startYear}`
+                : endYear
+                  ? `${endYear}`
+                  : "Details";
+
+        return {
+          id: entry?.id,
+          period,
+          title:
+            entry?.title ||
+            entry?.certificate_name ||
+            entry?.degree_or_certificate ||
+            "Journey Entry",
+          subtitle:
+            entry?.organisation ||
+            entry?.institution ||
+            entry?.service_category ||
+            entry?.custom_service_category ||
+            "",
+          description: entry?.description || "",
+        };
+      }),
+    };
+  });
+};
 const page = () => {
   const qrRef = React.useRef(null);
   const { user, advisor, loading: authLoading } = useAuth();
@@ -64,6 +232,18 @@ const page = () => {
     total: 0,
     max: 100,
   });
+  const [profileSummary, setProfileSummary] = useState({
+    testimonials: 0,
+    recommendations: 0,
+    profile_views: 0,
+    clients: 0,
+    member_since_year: "",
+  });
+  const [publicServices, setPublicServices] = useState([]);
+  const [publicTestimonials, setPublicTestimonials] = useState([]);
+  const [publicAchievements, setPublicAchievements] = useState([]);
+  const [publicGallery, setPublicGallery] = useState([]);
+  const [publicJourney, setPublicJourney] = useState([]);
   const introVideoUrl = advisor?.intro_url?.trim() || "";
   const introVideoTitle = user?.name
     ? `${user.name} Introduction`
@@ -71,6 +251,28 @@ const page = () => {
   const introVideoSubtitle = [user?.profession, user?.city]
     .filter(Boolean)
     .join(" • ");
+  const advisorProfileSlug = resolveAdvisorProfileSlug(
+    advisor?.profile_slug,
+    user?.name,
+  );
+  const advisorProfileId = advisor?.advisor_id || user?.id || "";
+  const publicProfilePath = advisorProfileSlug
+    ? `/dashboard/${advisorProfileSlug}`
+    : advisorProfileId
+      ? `/dashboard/${advisorProfileId}`
+      : "";
+  const publicBaseUrl = serverBaseUrl || appOrigin;
+  const normalizedBaseUrl = publicBaseUrl
+    ? publicBaseUrl.replace(/\/+$/, "")
+    : "";
+  const publicProfileUrl =
+    normalizedBaseUrl && publicProfilePath
+      ? `${normalizedBaseUrl}${publicProfilePath}`
+      : publicProfilePath;
+  const publicProfileLabel = publicProfileUrl
+    .replace(/^https?:\/\//, "")
+    .replace(/\/+$/, "");
+  const qrDownloadFileName = `${advisorProfileSlug || "advisor"}-qr.png`;
   const galleryData = [
 
   ]
@@ -157,6 +359,130 @@ const page = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const profileKey = advisorProfileSlug || advisorProfileId;
+    if (!profileKey) return;
+
+    let isMounted = true;
+
+    async function fetchProfileSummary() {
+      try {
+        const response = await fetch(`/api/customer/advisor/${profileKey}`, {
+          method: "GET",
+          cache: "no-store",
+        });
+        const result = await response.json();
+
+        if (!response.ok || !result?.success || !isMounted) {
+          return;
+        }
+
+        setProfileSummary({
+          testimonials: result.data?.profile_summary?.testimonials ?? 0,
+          recommendations: result.data?.profile_summary?.recommendations ?? 0,
+          profile_views: result.data?.profile_summary?.profile_views ?? 0,
+          clients: result.data?.profile_summary?.clients ?? 0,
+          member_since_year:
+            result.data?.profile_summary?.member_since_year ?? "",
+        });
+      } catch (error) {
+        console.error("Failed to load profile summary:", error);
+      }
+    }
+
+    fetchProfileSummary();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [advisorProfileId, advisorProfileSlug]);
+
+  useEffect(() => {
+    if (!advisorProfileId) return;
+
+    let isMounted = true;
+
+    async function fetchPublicSections() {
+      try {
+        const [
+          servicesResponse,
+          testimonialsResponse,
+          achievementsResponse,
+          galleryResponse,
+          journeyResponse,
+        ] = await Promise.all([
+          fetch(`/api/public/advisor/${advisorProfileId}/services`, {
+            cache: "no-store",
+          }),
+          fetch(`/api/public/advisor/${advisorProfileId}/testimonials`, {
+            cache: "no-store",
+          }),
+          fetch(`/api/public/advisor/${advisorProfileId}/achievements`, {
+            cache: "no-store",
+          }),
+          fetch(`/api/public/advisor/${advisorProfileId}/gallery`, {
+            cache: "no-store",
+          }),
+          fetch(`/api/public/advisor/${advisorProfileId}/journey`, {
+            cache: "no-store",
+          }),
+        ]);
+
+        const [
+          servicesResult,
+          testimonialsResult,
+          achievementsResult,
+          galleryResult,
+          journeyResult,
+        ] = await Promise.all([
+          servicesResponse.json(),
+          testimonialsResponse.json(),
+          achievementsResponse.json(),
+          galleryResponse.json(),
+          journeyResponse.json(),
+        ]);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setPublicServices(
+          servicesResponse.ok && Array.isArray(servicesResult?.data)
+            ? servicesResult.data
+            : [],
+        );
+        setPublicTestimonials(
+          testimonialsResponse.ok && Array.isArray(testimonialsResult?.data)
+            ? testimonialsResult.data
+            : [],
+        );
+        setPublicAchievements(
+          achievementsResponse.ok && Array.isArray(achievementsResult?.data)
+            ? achievementsResult.data
+            : [],
+        );
+        setPublicGallery(
+          galleryResponse.ok && Array.isArray(galleryResult?.data)
+            ? galleryResult.data
+            : [],
+        );
+        setPublicJourney(
+          journeyResponse.ok && Array.isArray(journeyResult?.data)
+            ? journeyResult.data
+            : [],
+        );
+      } catch (error) {
+        console.error("Failed to load public profile sections:", error);
+      }
+    }
+
+    fetchPublicSections();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [advisorProfileId]);
+
   const handleEditClick = (entry) => {
     setEditingEntry(entry);
     setIsEntryModalOpen(true);
@@ -188,73 +514,227 @@ const page = () => {
     link.click();
   };
 
-  const advisorProfileSlug = resolveAdvisorProfileSlug(
-    advisor?.profile_slug,
-    user?.name,
-  );
-  const advisorProfileId = advisor?.advisor_id || user?.id || "";
-  const publicProfilePath = advisorProfileSlug
-    ? `/dashboard/${advisorProfileSlug}`
-    : advisorProfileId
-      ? `/dashboard/${advisorProfileId}`
-      : "";
-  const publicBaseUrl = serverBaseUrl || appOrigin;
-  const normalizedBaseUrl = publicBaseUrl
-    ? publicBaseUrl.replace(/\/+$/, "")
-    : "";
-  const publicProfileUrl =
-    normalizedBaseUrl && publicProfilePath
-      ? `${normalizedBaseUrl}${publicProfilePath}`
-      : publicProfilePath;
-  const publicProfileLabel = publicProfileUrl
-    .replace(/^https?:\/\//, "")
-    .replace(/\/+$/, "");
-  const qrDownloadFileName = `${advisorProfileSlug || "advisor"}-qr.png`;
+  const handleCallAdvisor = () => {
+    if (!advisorPhone) {
+      toast.error("Advisor mobile number is not available");
+      return;
+    }
 
-  const stats = [
-    {
-      icon: <MdLocationPin />,
-      data: "Nellore, Andhra Pradesh",
-    },
-    {
-      icon: <MdLocationPin />,
-      data: "Member since January 2019",
-    },
-    {
-      icon: <MdLocationPin />,
-      data: "IRDAI License verified",
-    },
-    {
-      icon: <MdLocationPin />,
-      data: "Last updated 2 days ago",
-    },
+    window.location.href = `tel:${advisorPhone}`;
+  };
+
+  const handleWhatsappAdvisor = () => {
+    if (!advisorWhatsappPhone) {
+      toast.error("Advisor WhatsApp number is not available");
+      return;
+    }
+
+    const message = encodeURIComponent("Hi, I want to connect with you.");
+    window.open(
+      `https://wa.me/${advisorWhatsappPhone}?text=${message}`,
+      "_blank",
+    );
+  };
+
+  const handleEmailAdvisor = () => {
+    if (!advisorEmail) {
+      toast.error("Advisor email is not available");
+      return;
+    }
+
+    const subject = encodeURIComponent("Inquiry");
+    const body = encodeURIComponent("Hello, I would like to connect.");
+    window.location.href = `mailto:${advisorEmail}?subject=${subject}&body=${body}`;
+  };
+
+  const handleShareOnWhatsApp = () => {
+    if (!publicProfileUrl) {
+      toast.error("Profile link is not available");
+      return;
+    }
+
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(publicProfileUrl)}`,
+      "_blank",
+    );
+  };
+
+  const handleShareByEmail = () => {
+    if (!publicProfileUrl) {
+      toast.error("Profile link is not available");
+      return;
+    }
+
+    const subject = encodeURIComponent("Advisor Profile");
+    const body = encodeURIComponent(publicProfileUrl);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
+
+  const handleShareBySms = () => {
+    if (!publicProfileUrl) {
+      toast.error("Profile link is not available");
+      return;
+    }
+
+    window.location.href = `sms:?&body=${encodeURIComponent(publicProfileUrl)}`;
+  };
+
+  const handleShareOnFacebook = () => {
+    if (!publicProfileUrl) {
+      toast.error("Profile link is not available");
+      return;
+    }
+
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(publicProfileUrl)}`,
+      "_blank",
+    );
+  };
+
+  const handleCopyProfileLink = async () => {
+    if (!publicProfileUrl) {
+      toast.error("Profile link is not available");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(publicProfileUrl);
+      toast.success("Profile link copied");
+    } catch (error) {
+      window.prompt("Copy this link:", publicProfileUrl);
+    }
+  };
+
+  const advisorPhone = String(user?.mobile || user?.mobile_number || "").replace(
+    /\D/g,
+    "",
+  );
+  const advisorWhatsappPhone =
+    advisorPhone.length === 10 ? `91${advisorPhone}` : advisorPhone;
+  const advisorEmail = String(user?.email || "").trim();
+  const profileServices = publicServices.length
+    ? publicServices
+    : Array.isArray(advisor?.services)
+      ? advisor.services
+      : [];
+  const serviceLabels = getServiceLabels(profileServices);
+  const maxExperienceYears = getServiceExperienceYears(
+    publicServices,
+    advisor?.services || [],
+  );
+  const companyNames = [
+    ...new Set(profileServices.map((service) => service?.company).filter(Boolean)),
   ];
-  const aboutData = ["Founding Advisor", "Licence verifiled", "MDRT Advisor"];
+  const specializationNames = [
+    ...new Set(
+      profileServices
+        .flatMap((service) =>
+          Array.isArray(service?.key_services)
+            ? service.key_services
+            : Array.isArray(service?.services)
+              ? service.services
+              : [],
+        )
+        .filter(Boolean),
+    ),
+  ];
+  const advisorName = String(user?.name || "Advisor").trim();
+  const advisorLocation = formatAdvisorLocation(user?.city);
+  const advisorProfession =
+    String(user?.profession || "").trim() ||
+    (companyNames.some((company) => /lic/i.test(company))
+      ? "LIC Advisor"
+      : serviceLabels[0]
+        ? `${serviceLabels[0]} Advisor`
+        : "financial advisor");
+  const aboutData = [
+    advisorProfession,
+    advisorLocation,
+    advisor?.profile_status ? "Licence verified" : "Verified Advisor",
+  ].filter(Boolean);
   const summaryData = [
     {
-      count: "14+",
+      count: maxExperienceYears ? `${maxExperienceYears}+` : "0",
       label: "Exp",
     },
     {
-      count: "50",
+      count: `${profileSummary.testimonials || 0}`,
       label: "Reviews",
     },
     {
-      count: "32",
+      count: `${profileSummary.recommendations || 0}`,
       label: "Recs",
     },
     {
-      count: "500",
+      count: `${profileSummary.clients || 0}`,
       label: "Clients",
     },
   ];
 
   const statsData = [
-    { label: "Testimonials", value: 12 },
-    { label: "Recommendations", value: 8 },
-    { label: "Profile Views", value: 245 },
-    { label: "Member Since", value: "2023" },
+    { label: "Testimonials", value: profileSummary.testimonials || 0 },
+    { label: "Recommendations", value: profileSummary.recommendations || 0 },
+    { label: "Profile Views", value: profileSummary.profile_views || 0 },
+    {
+      label: "Member Since",
+      value:
+        profileSummary.member_since_year || user?.created_at?.slice(0, 4) || "-",
+    },
   ];
+
+  const stats = [
+    {
+      icon: <MdLocationPin />,
+      data: user?.city || "Location unavailable",
+    },
+    {
+      icon: <MdLocationPin />,
+      data: `Member since ${formatMonthYear(user?.created_at) || "-"}`,
+    },
+    {
+      icon: <MdLocationPin />,
+      data: advisor?.profile_status
+        ? "IRDAI License verified"
+        : "IRDAI License pending verification",
+    },
+    {
+      icon: <MdLocationPin />,
+      data: getDaysAgoLabel(advisor?.updated_at || user?.updated_at),
+    },
+  ];
+  const achievementText = publicAchievements
+    .map((achievement) =>
+      [achievement?.title, achievement?.description, achievement?.organisation]
+        .filter(Boolean)
+        .join(" "),
+    )
+    .join(" ");
+  const credentialHighlights = [
+    /mdrt/i.test(achievementText) ? "an MDRT qualifier" : "",
+    advisor?.profile_status ? "a YVITY Verified Professional" : "",
+  ];
+  const credentialSentence = joinWithAnd(credentialHighlights)
+    ? ` I am ${joinWithAnd(credentialHighlights)}.`
+    : "";
+  const generatedHomeDescription = `I am ${advisorName}, a ${advisorProfession}${
+    advisorLocation ? ` based in ${advisorLocation}` : ""
+  }${
+    maxExperienceYears ? ` with over ${maxExperienceYears} years of experience` : ""
+  }.${credentialSentence} My mission is to provide trusted, transparent advice that genuinely protects my clients' financial future.`;
+  const homeDescription = isMeaningfulProfileText(advisor?.short_bio)
+    ? advisor.short_bio.trim()
+    : generatedHomeDescription;
+  const achievementCards = publicAchievements.map((achievement) => ({
+    id: achievement.id,
+    icon: achievement.icon || "🏆",
+    title: achievement.title,
+    description:
+      achievement.description ||
+      achievement.organisation ||
+      "Achievement added",
+    highlightText: achievement.achievement_year || "",
+  }));
+  const journeySections = buildJourneySections(publicJourney);
 
   const [isOpen, setIsOpen] = useState(true);
   const footerheadings = [
@@ -373,6 +853,11 @@ const page = () => {
 
   // ✅ submit
   const handleRecommend = async () => {
+    if (!advisorProfileId) {
+      toast.error("Advisor profile is not available");
+      return;
+    }
+
     if (selectedReasons.length === 0) {
       toast.error("Please select at least one reason");
       return;
@@ -387,26 +872,32 @@ const page = () => {
       setRecommendLoading(true);
 
       // 🔥 replace with real API
-      await fetch("/api/recommend", {
+      const response = await fetch("/api/customer/recommendation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          reasons: selectedReasons,
-          mobile,
+          advisor_id: advisorProfileId,
+          mobile_number: mobile,
+          recommendations: selectedReasons,
         }),
       });
 
-      toast.success("Recommendation submitted & OTP sent");
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Something went wrong");
+      }
+
+      toast.success(result?.message || "Recommendation submitted");
 
       // reset
       setSelectedReasons([]);
       setMobile("");
     } catch (err) {
-      toast.error("Something went wrong");
+      toast.error(err.message || "Something went wrong");
     } finally {
-      await new Promise((res) => setTimeout(res, 1500)); // simulate delay
       setRecommendLoading(false);
     }
   };
@@ -527,7 +1018,7 @@ const page = () => {
                 </p> */}
                   </span>
                   <span className="text-teal-950 text-[clamp(8px,1vw,12px)] font-medium leading-4 font-poppins pr-6 flex flex-col gap-3">
-                    {[" Life Insurance", "Health Insurance"].map(
+                    {(serviceLabels.length ? serviceLabels.slice(0, 2) : ["Insurance"]).map(
                       (item, index) => (
                         <p
                           key={index}
@@ -677,9 +1168,7 @@ const page = () => {
                 {/* Buttons container */}
                 <div className="flex flex-col gap-2 flex-1">
                   <button
-                    onClick={() => {
-                      window.location.href = "tel:+919876543210"; // replace with dynamic number
-                    }}
+                    onClick={handleCallAdvisor}
                     className="w-full text-[clamp(8px,1vw,12px)] px-[23px] py-[14px] font-medium rounded-lg bg-[#0A4A4A] flex gap-2 items-center justify-center text-white cursor-pointer"
                   >
                     <IoIosCall size={18} />
@@ -687,16 +1176,7 @@ const page = () => {
                   </button>
 
                   <button
-                    onClick={() => {
-                      const phone = "919876543210"; // no +, include country code
-                      const message = encodeURIComponent(
-                        "Hi, I want to connect with you.",
-                      );
-                      window.open(
-                        `https://wa.me/${phone}?text=${message}`,
-                        "_blank",
-                      );
-                    }}
+                    onClick={handleWhatsappAdvisor}
                     className="w-full text-[clamp(8px,1vw,12px)] px-[23px] py-[14px] font-medium rounded-lg bg-[#26D367] flex gap-2 items-center justify-center text-white cursor-pointer"
                   >
                     <BsChatDots size={18} />
@@ -704,14 +1184,7 @@ const page = () => {
                   </button>
 
                   <button
-                    onClick={() => {
-                      const email = "example@gmail.com"; // replace
-                      const subject = encodeURIComponent("Inquiry");
-                      const body = encodeURIComponent(
-                        "Hello, I would like to connect.",
-                      );
-                      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-                    }}
+                    onClick={handleEmailAdvisor}
                     className="w-full text-[clamp(8px,1vw,12px)] px-[23px] py-[14px] bg-white flex gap-2 items-center justify-center rounded-lg border border-[#E8F4F4] text-primary-900 font-poppins text-xs font-semibold cursor-pointer"
                   >
                     <TbMail size={18} />
@@ -829,11 +1302,11 @@ const page = () => {
                 heading.isvisible && (
                   <button
                     key={index}
-                    onClick={() => setActiveTab(heading)}
+                    onClick={() => setActiveTab(heading.name)}
                     className="relative font-poppins p-[10px] text-center text-[clamp(10px,1vw,14px)] cursor-pointer text-sm font-bold"
                   >
                     <span
-                      className={`${activeTab?.name === heading.name
+                      className={`${activeTab === heading.name
                         ? "text-primary-900"
                         : "text-gray-400"
                         }`}
@@ -842,7 +1315,7 @@ const page = () => {
                     </span>
 
                     {/* Animated underline */}
-                    {activeTab === heading && (
+                    {activeTab === heading.name && (
                       <motion.div
                         layoutId="footerTabUnderline"
                         className="absolute left-0 right-0 -bottom-[1px] h-[2px] bg-primary-900 rounded-full"
@@ -898,11 +1371,7 @@ const page = () => {
                   {activeTab === "Home" ? (
                     <>
                       <p className="text-[#6B7280] font-nunito text-sm font-normal leading-6 text-[clamp(10px,1vw,14px)]">
-                        I am Krishna Mohan, a Senior LIC Advisor based in
-                        Nellore, AP with over 14 years of experience. I am an
-                        MDRT qualifier and YVITY Verified Professional. My
-                        mission is to provide trusted, transparent advice that
-                        genuinely protects my clients' financial future.
+                        {homeDescription}
                       </p>
 
                       <div className="flex flex-col gap-2">
@@ -910,13 +1379,13 @@ const page = () => {
                           Companies Associated
                         </p>
                         <div className="flex flex-wrap items-center gap-2">
-                          {companies.map((comp, index) => (
+                          {(companyNames.length ? companyNames : ["No companies added"]).map((company, index) => (
                             <span
                               key={index}
                               className="p-[10px] flex gap-2 items-center text-[clamp(8px,1vw,12px)] font-semibold font-poppins leading-normal rounded-2xl bg-[#E8F4F4]"
                             >
-                              <span>{comp.icon}</span>
-                              {comp.data}
+                              <span>{companies[index % companies.length]?.icon || <CiBank />}</span>
+                              {company}
                             </span>
                           ))}
                         </div>
@@ -928,12 +1397,12 @@ const page = () => {
                         </p>
 
                         <div className="flex flex-wrap gap-2">
-                          {companies.map((comp, index) => (
+                          {(specializationNames.length ? specializationNames : serviceLabels).map((specialization, index) => (
                             <span
                               key={index}
                               className="px-3 py-1 w-full sm:w-auto flex items-center justify-center sm:justify-start sm:text-[12px] font-semibold rounded-2xl bg-[#E0F4F3] text-[clamp(8px,1vw,12px)]"
                             >
-                              {comp.data}
+                              {specialization}
                             </span>
                           ))}
                         </div>
@@ -942,11 +1411,11 @@ const page = () => {
                   ) : activeTab === "Service" && advisor?.ispublic_services ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Life Insurance Card */}
-                      <ServiceSection ShowActions={false} />
+                      <ServiceSection data={publicServices} ShowActions={false} />
                     </div>
                   ) : activeTab === "Achievements" && advisor?.ispublic_achievements ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {achievementsData.map((achievement) => (
+                      {achievementCards.map((achievement) => (
                         <AchievementCard
                           key={achievement.id}
                           data={achievement}
@@ -956,14 +1425,22 @@ const page = () => {
                     </div>
                   ) : activeTab === "Gallery" && advisor?.ispublic_gallery ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
-                      {galleryData.map((item) => (
-                        <GalleryItem key={item.id} data={item} />
+                      {publicGallery.map((item) => (
+                        <GalleryItem
+                          key={item.id}
+                          data={item}
+                          showActions={false}
+                        />
                       ))}
                     </div>
                   ) : activeTab === "Testimonials" && advisor?.ispublic_testimonials ? (
-                    <Testimonials_filters showActions={false} />
+                    <Testimonials_filters
+                      showActions={false}
+                      testimonials={publicTestimonials}
+                      allTestimonials={publicTestimonials}
+                    />
                   ) : activeTab === "Journey" && advisor?.ispublic_professional ? (
-                    journeyData.map((section) => (
+                    journeySections.map((section) => (
                       <JourneySection
                         key={section.id}
                         data={section}
@@ -1012,7 +1489,12 @@ const page = () => {
                 ref={qrRef}
                 className="bg-gray-100 p-4 rounded-2xl w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] flex items-center justify-center"
               >
-                <QRCodeCanvas value={publicProfileUrl || publicProfilePath} size={180} />
+                <QRCodeCanvas
+                  value={publicProfileUrl || publicProfilePath}
+                  size={180}
+                  level={advisorQrCodeLevel}
+                  imageSettings={advisorQrCodeImageSettings}
+                />
               </div>
 
               {/* Info */}
@@ -1059,10 +1541,10 @@ const page = () => {
               </button>
             </div>
 
-            {/* Body - Adjusted gap and padding for vertical efficiency */}
+              {/* Body - Adjusted gap and padding for vertical efficiency */}
             <div className="p-7 space-y-5">
               <p className="text-slate-500 text-[1.05rem]">
-                Why do you recommend Krishna Mohan?
+                Why do you recommend {user?.name || "this advisor"}?
               </p>
 
               {/* Grid remains responsive but compact */}
@@ -1163,13 +1645,19 @@ const page = () => {
                 <input
                   type="tel"
                   placeholder="10 digit mobile number"
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value)}
                   className="w-full px-5 py-3.5 bg-slate-50 border border-gray-100 rounded-2xl text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-slate-400"
                 />
               </div>
 
               {/* Action Button */}
-              <button className="w-full bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-transform active:scale-[0.98]">
-                Submit
+              <button
+                onClick={handleRecommend}
+                disabled={recommendLoading}
+                className="w-full bg-[#0a4d4a] hover:bg-[#073a38] text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-transform active:scale-[0.98]"
+              >
+                {recommendLoading ? "Submitting..." : "Submit"}
                 <FiArrowRight size={18} />
               </button>
             </div>
@@ -1202,18 +1690,24 @@ const page = () => {
               {/* Body */}
               <div className="p-6 space-y-4">
                 {/* WhatsApp */}
-                <button className="w-full flex items-center gap-4 p-4 bg-[#e9f7ef] rounded-2xl border border-transparent hover:border-emerald-200 transition-all text-left">
+                <button
+                  onClick={handleShareOnWhatsApp}
+                  className="w-full flex items-center gap-4 p-4 bg-[#e9f7ef] rounded-2xl border border-transparent hover:border-emerald-200 transition-all text-left"
+                >
                   <div className="bg-black text-white p-2 rounded-full">
                     <FaWhatsapp size={18} />
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-800">Whatsapp</h3>
-                    <p className="text-sm text-slate-500">Helpful & Honest</p>
+                    <p className="text-sm text-slate-500">Share via WhatsApp</p>
                   </div>
                 </button>
 
                 {/* Email */}
-                <button className="w-full flex items-center gap-4 p-4 bg-[#eff4ff] rounded-2xl border border-transparent hover:border-blue-200 transition-all text-left">
+                <button
+                  onClick={handleShareByEmail}
+                  className="w-full flex items-center gap-4 p-4 bg-[#eff4ff] rounded-2xl border border-transparent hover:border-blue-200 transition-all text-left"
+                >
                   <div className="bg-white border border-gray-200 p-2 rounded-lg text-slate-700">
                     <MdOutlineMail size={18} />
                   </div>
@@ -1224,7 +1718,10 @@ const page = () => {
                 </button>
 
                 {/* SMS */}
-                <button className="w-full flex items-center gap-4 p-4 bg-[#e9f7ef] rounded-2xl border border-transparent hover:border-emerald-200 transition-all text-left">
+                <button
+                  onClick={handleShareBySms}
+                  className="w-full flex items-center gap-4 p-4 bg-[#e9f7ef] rounded-2xl border border-transparent hover:border-emerald-200 transition-all text-left"
+                >
                   <div className="bg-black text-white p-2 rounded-full">
                     <MdSms size={18} />
                   </div>
@@ -1235,7 +1732,10 @@ const page = () => {
                 </button>
 
                 {/* Facebook */}
-                <button className="w-full flex items-center gap-4 p-4 bg-[#eff4ff] rounded-2xl border border-transparent hover:border-blue-200 transition-all text-left">
+                <button
+                  onClick={handleShareOnFacebook}
+                  className="w-full flex items-center gap-4 p-4 bg-[#eff4ff] rounded-2xl border border-transparent hover:border-blue-200 transition-all text-left"
+                >
                   <div className="bg-white border border-gray-200 p-2 rounded-lg text-slate-700">
                     <FaFacebookF size={16} />
                   </div>
@@ -1246,7 +1746,10 @@ const page = () => {
                 </button>
 
                 {/* Copy Link */}
-                <button className="w-full flex items-center gap-4 p-4 bg-[#e9f7ef] rounded-2xl border border-transparent hover:border-emerald-200 transition-all text-left">
+                <button
+                  onClick={handleCopyProfileLink}
+                  className="w-full flex items-center gap-4 p-4 bg-[#e9f7ef] rounded-2xl border border-transparent hover:border-emerald-200 transition-all text-left"
+                >
                   <div className="bg-white border border-gray-200 p-2 rounded-lg text-slate-400 rotate-45">
                     <FaLink size={16} />
                   </div>
