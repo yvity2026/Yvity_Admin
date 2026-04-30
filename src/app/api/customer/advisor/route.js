@@ -93,7 +93,10 @@ export async function GET(request) {
         `
       )
       .filter("roles", "cs", JSON.stringify(["advisor"]))
+      .eq("advisor_profiles.ispublic_profile", true)
       .order("created_at", { ascending: false });
+
+      console.log(data)
 
     if (error) {
       console.error("Dashboard API: Supabase error:", error);
@@ -112,7 +115,7 @@ export async function GET(request) {
           : item.advisor_profiles;
 
         // Uncomment if you want to filter by public profile
-        // if (!profile?.ispublic_profile) return null;
+        if (!profile?.ispublic_profile) return null;
 
         return mapAdvisorCard(item, profile);
       })

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FaHeart, FaRegHeart, FaSpinner } from 'react-icons/fa';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
+import { useSavedProfiles } from '@/hooks/useSavedProfiles';
 
 // Toast notification component
 const Toast = ({ message, type, onClose }) => {
@@ -38,19 +39,30 @@ const FloatingSaveButton = ({
   className = '',
   initialPosition = { x: 0, y: 0 }
 }) => {
-  const [isSaved, setIsSaved] = useState(initialSaved);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isSaved, isLoading, checkSaveStatus, toggleSaveProfile } = useSavedProfiles();
   const [showTooltip, setShowTooltip] = useState(false);
   const [toast, setToast] = useState(null);
-  const [saveCount, setSaveCount] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartTime, setDragStartTime] = useState(0);
+  const [hasCheckedStatus, setHasCheckedStatus] = useState(false);
   const hasInitialized = useRef(false);
   const constraintsRef = useRef(null);
   
   // Motion values for drag position
   const x = useMotionValue(initialPosition.x);
   const y = useMotionValue(initialPosition.y);
+  
+  // Check initial save status when component mounts
+  useEffect(() => {
+    if (!hasInitialized.current && profileId) {
+      const checkStatus = async () => {
+        await checkSaveStatus(profileId);
+        setHasCheckedStatus(true);
+      };
+      checkStatus();
+      hasInitialized.current = true;
+    }
+  }, [profileId, checkSaveStatus]);
   
   // Load saved position from localStorage
   useEffect(() => {
@@ -83,38 +95,6 @@ const FloatingSaveButton = ({
     }
   };
   
-  // Load saved state from localStorage on mount
-  useEffect(() => {
-    if (!hasInitialized.current && profileId) {
-      try {
-        const savedData = localStorage.getItem(`profile_saved_${profileId}`);
-        if (savedData) {
-          const data = JSON.parse(savedData);
-          setIsSaved(data.isSaved);
-          setSaveCount(data.saveCount || 0);
-        } else {
-          fetchSaveCount();
-        }
-      } catch (error) {
-        console.error('Failed to load saved state:', error);
-      }
-      hasInitialized.current = true;
-    }
-  }, [profileId]);
-  
-  // Fetch save count from API
-  const fetchSaveCount = useCallback(async () => {
-    try {
-      const response = await fetch(`/api/profile/${profileId}/saves`);
-      if (response.ok) {
-        const data = await response.json();
-        setSaveCount(data.count || 0);
-      }
-    } catch (error) {
-      console.error('Failed to fetch save count:', error);
-    }
-  }, [profileId]);
-  
   // Show toast message
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -133,43 +113,20 @@ const FloatingSaveButton = ({
   const performSaveAction = async () => {
     if (isLoading) return;
     
-    setIsLoading(true);
     const previousState = isSaved;
-    const previousCount = saveCount;
-    
-    setIsSaved(!isSaved);
-    setSaveCount(prev => prev + (isSaved ? -1 : 1));
     
     try {
-      const response = await fetch(`/api/profile/${profileId}/save`, {
-        method: isSaved ? 'DELETE' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          profileId,
-          profileName,
-          profileImage,
-          timestamp: new Date().toISOString(),
-        }),
-      });
+      const result = await toggleSaveProfile(profileId);
       
-      if (!response.ok) {
-        throw new Error('Failed to save profile');
+      if (!result.success) {
+        showToast(`Failed to ${previousState ? 'remove' : 'save'} profile. Please try again.`, 'error');
+        return;
       }
       
-      const data = await response.json();
-      
-      setSaveCount(data.totalSaves || saveCount + (isSaved ? -1 : 1));
-      
-      localStorage.setItem(`profile_saved_${profileId}`, JSON.stringify({
-        isSaved: !isSaved,
-        saveCount: data.totalSaves,
-        savedAt: new Date().toISOString(),
-      }));
-      
       showToast(
-        isSaved ? `Removed ${profileName || 'profile'} from saves` : `Saved ${profileName || 'profile'} successfully!`,
+        isSaved 
+          ? `Removed ${profileName || 'profile'} from saves` 
+          : `Saved ${profileName || 'profile'} successfully!`,
         'success'
       );
       
@@ -179,6 +136,7 @@ const FloatingSaveButton = ({
         onRemoveComplete({ profileId });
       }
       
+      // Google Analytics tracking
       if (window.gtag) {
         window.gtag('event', isSaved ? 'unsave_profile' : 'save_profile', {
           profile_id: profileId,
@@ -188,12 +146,8 @@ const FloatingSaveButton = ({
       }
       
     } catch (error) {
-      setIsSaved(previousState);
-      setSaveCount(previousCount);
       showToast(`Failed to ${previousState ? 'remove' : 'save'} profile. Please try again.`, 'error');
       console.error('Save operation failed:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
   
@@ -307,17 +261,8 @@ const FloatingSaveButton = ({
               </AnimatePresence>
             )}
             
-            {/* Save count badge */}
-            {saveCount > 0 && !isLoading && (
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                whileHover={{ scale: 1.1 }}
-                className="absolute -top-1 -right-1 bg-gradient-to-r from-pink-500 to-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center shadow-md ring-2 ring-white"
-              >
-                {saveCount > 99 ? '99+' : saveCount}
-              </motion.span>
-            )}
+            {/* Save count badge - removed as new API only tracks save status */}
+            
           </div>
           
           {/* Ripple effect on click */}

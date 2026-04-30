@@ -62,7 +62,7 @@ import {
   advisorQrCodeLevel,
 } from "@/lib/advisor/qrBranding";
 import { useAdvisorAuth } from "@/context/AuthAdvisorContext";
-import  FloatingSaveButton  from "@/components/ui/FloatingSaveButton"
+import FloatingSaveButton from "@/components/ui/FloatingSaveButton";
 
 const getServiceLabels = (services = []) => {
   return [
@@ -103,7 +103,11 @@ const isMeaningfulProfileText = (value) => {
   const normalized = text.toLowerCase();
 
   if (!text) return false;
-  if (["test", "testing", "testingg", "demo", "sample", "na", "n/a"].includes(normalized)) {
+  if (
+    ["test", "testing", "testingg", "demo", "sample", "na", "n/a"].includes(
+      normalized,
+    )
+  ) {
     return false;
   }
 
@@ -179,8 +183,9 @@ const page = () => {
     clients: 0,
     member_since_year: "",
   };
-  const advisorPhone = String(user?.mobile || user?.mobile_number || "")
-    .replace(/\D/g, "");
+  const advisorPhone = String(
+    user?.mobile || user?.mobile_number || "",
+  ).replace(/\D/g, "");
   const advisorWhatsappPhone =
     advisorPhone.length === 10 ? `91${advisorPhone}` : advisorPhone;
   const advisorEmail = String(user?.email || "").trim();
@@ -330,7 +335,10 @@ const page = () => {
     { label: "Profile Views", value: profileSummary.profile_views || 0 },
     {
       label: "Member Since",
-      value: profileSummary.member_since_year || user?.created_at?.slice(0, 4) || "-",
+      value:
+        profileSummary.member_since_year ||
+        user?.created_at?.slice(0, 4) ||
+        "-",
     },
   ];
 
@@ -379,9 +387,7 @@ const page = () => {
     },
   ];
 
-  const safePublicJourney = Array.isArray(publicJourney)
-  ? publicJourney
-  : [];
+  const safePublicJourney = Array.isArray(publicJourney) ? publicJourney : [];
 
   const router = useRouter();
 
@@ -415,7 +421,7 @@ const page = () => {
 
   useEffect(() => {
     const fetchBaseUrl = async () => {
-       try {
+      try {
         const response = await fetch("/api/config/public-base-url", {
           method: "GET",
           cache: "no-store",
@@ -453,7 +459,10 @@ const page = () => {
       return;
     }
 
-    window.open(`https://wa.me/?text=${encodeURIComponent(profileUrl)}`, "_blank");
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(profileUrl)}`,
+      "_blank",
+    );
   };
 
   const handleShareByEmail = () => {
@@ -657,14 +666,18 @@ const page = () => {
     Array.isArray(advisor?.services) ? advisor.services : [],
   );
   const companyNames = [
-    ...new Set(profileServices.map((service) => service?.company).filter(Boolean)),
+    ...new Set(
+      profileServices.map((service) => service?.company).filter(Boolean),
+    ),
   ];
   const specializationNames = [
     ...new Set(
       profileServices
         .flatMap((service) => {
           const values = [
-            ...(Array.isArray(service?.key_services) ? service.key_services : []),
+            ...(Array.isArray(service?.key_services)
+              ? service.key_services
+              : []),
             ...(Array.isArray(service?.services) ? service.services : []),
           ];
 
@@ -673,7 +686,10 @@ const page = () => {
           }
 
           const fallback =
-            service?.service || service?.service_type || service?.name || service?.category;
+            service?.service ||
+            service?.service_type ||
+            service?.name ||
+            service?.category;
 
           return Array.isArray(fallback) ? fallback : [fallback];
         })
@@ -748,31 +764,32 @@ const page = () => {
     },
   ];
 
-    function ProfilePage({ profile }) {
-  const handleSaveComplete = (savedProfile) => {
-    console.log('Profile saved:', savedProfile);
-    // Update UI or show custom message
-  };
-}
-  
+  function ProfilePage({ profile }) {
+    const handleSaveComplete = (savedProfile) => {
+      console.log("Profile saved:", savedProfile);
+      // Update UI or show custom message
+    };
+  }
+
   const handleRemoveComplete = (removedProfile) => {
-    console.log('Profile removed:', removedProfile);
+    console.log("Profile removed:", removedProfile);
     // Update UI
   };
 
-    if(!advisor?.ispublic_services){
-      return null;
-    }
+  // if(!advisor?.ispublic_services){
+  //   return null;
+  // }
   return (
     <div className="bg-[#F8F6F1]">
-      <FloatingSaveButton
-        profileId={profile.id}
-        profileName={profile.name}
-        profileImage={profile.avatar}
-        initialSaved={profile.isAlreadySaved || false}
-        // onSaveComplete={handleSaveComplete}
-        onRemoveComplete={handleRemoveComplete}
-      />
+      {profile && (
+        <FloatingSaveButton
+          profileId={profile.id}
+          profileName={profile.name}
+          profileImage={profile.profile_url}
+          // initialSaved={profile.isAlreadySaved || false}
+          onRemoveComplete={handleRemoveComplete}
+        />
+      )}
       {/* Header */}
       <header className="h-[60px] bg-[#0A4A4A] w-full shadow-md">
         <span
@@ -877,8 +894,8 @@ const page = () => {
                     </span>
                     <p className="text-gray-700 text-[10px] sm:text-xs md:text-xs font-normal leading-4 font-poppins">
                       {[serviceLabelText, user?.city]
-  .filter(Boolean)
-  .join(" • ")}
+                        .filter(Boolean)
+                        .join(" • ")}
                     </p>
 
                     {/* <p className="text-teal-950 text-[clamp(8px,1vw,12px)] font-medium leading-4 font-poppins">
@@ -886,16 +903,14 @@ const page = () => {
                 </p> */}
                   </span>
                   <span className="text-teal-950 text-[clamp(8px,1vw,12px)] font-medium leading-4 font-poppins pr-6 flex flex-col gap-3">
-                    {topServiceItems.map(
-                      (item, index) => (
-                        <p
-                          key={index}
-                          className="flex p-[10px] gap-1 bg-[#E0F4F3] rounded-full gap-2"
-                        >
-                          <FaBuilding /> {item}
-                        </p>
-                      ),
-                    )}
+                    {topServiceItems.map((item, index) => (
+                      <p
+                        key={index}
+                        className="flex p-[10px] gap-1 bg-[#E0F4F3] rounded-full gap-2"
+                      >
+                        <FaBuilding /> {item}
+                      </p>
+                    ))}
                   </span>
                 </div>
                 {/* intro video */}
@@ -915,8 +930,7 @@ const page = () => {
     `}
                       onClick={handleOpenIntroVideo}
                       onKeyDown={(e) =>
-                        e.key === "Enter" &&
-                        handleOpenIntroVideo()
+                        e.key === "Enter" && handleOpenIntroVideo()
                       }
                       role="button"
                       tabIndex={0}
@@ -1012,7 +1026,10 @@ const page = () => {
                           case "Share":
                             return false;
                           case "QR Code":
-                            return advisor?.subscription_plan === "free" && advisor?.subscription_plan === "silver";
+                            return (
+                              advisor?.subscription_plan === "free" &&
+                              advisor?.subscription_plan === "silver"
+                            );
                           default:
                             return false;
                         }
@@ -1077,7 +1094,8 @@ const page = () => {
   text-xs sm:text-sm font-semibold 
   hover:bg-gray-800 transition mb-[19px] xl:mb-[39px] cursor-pointer w-full"
                         onClick={() => {
-                          const isPdfLocked = advisor.subscription_plan === "free";
+                          const isPdfLocked =
+                            advisor.subscription_plan === "free";
                           if (!isPdfLocked) {
                             // Your download logic
                           }
@@ -1276,42 +1294,43 @@ const page = () => {
           <div className="border-b border-[#E8F4F4] border-highlights rounded-t-2xl flex overflow-x-auto no-scrollbar md:pl-10">
             {loading
               ? [1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="p-[10px]">
-                  <Skeleton className="h-4 w-20 rounded-md" />
-                </div>
-              ))
+                  <div key={i} className="p-[10px]">
+                    <Skeleton className="h-4 w-20 rounded-md" />
+                  </div>
+                ))
               : footerheadings.map(
-                (heading, index) =>
-                  heading.isvisible && (
-                    <button
-                      key={index}
-                      onClick={() => setActiveTab(heading.name)}
-                      className="relative font-poppins p-[10px] text-center text-[clamp(10px,1vw,14px)] cursor-pointer text-sm font-bold"
-                    >
-                      <span
-                        className={`${activeTab === heading.name
-                          ? "text-primary-900"
-                          : "text-gray-400"
-                          }`}
+                  (heading, index) =>
+                    heading.isvisible && (
+                      <button
+                        key={index}
+                        onClick={() => setActiveTab(heading.name)}
+                        className="relative font-poppins p-[10px] text-center text-[clamp(10px,1vw,14px)] cursor-pointer text-sm font-bold"
                       >
-                        {heading.name}
-                      </span>
+                        <span
+                          className={`${
+                            activeTab === heading.name
+                              ? "text-primary-900"
+                              : "text-gray-400"
+                          }`}
+                        >
+                          {heading.name}
+                        </span>
 
-                      {/* Animated underline */}
-                      {activeTab === heading.name && (
-                        <motion.div
-                          layoutId="footerTabUnderline"
-                          className="absolute left-0 right-0 -bottom-[1px] h-[2px] bg-primary-900 rounded-full"
-                          transition={{
-                            type: "spring",
-                            stiffness: 500,
-                            damping: 35,
-                          }}
-                        />
-                      )}
-                    </button>
-                  ),
-              )}
+                        {/* Animated underline */}
+                        {activeTab === heading.name && (
+                          <motion.div
+                            layoutId="footerTabUnderline"
+                            className="absolute left-0 right-0 -bottom-[1px] h-[2px] bg-primary-900 rounded-full"
+                            transition={{
+                              type: "spring",
+                              stiffness: 500,
+                              damping: 35,
+                            }}
+                          />
+                        )}
+                      </button>
+                    ),
+                )}
           </div>
 
           {/* Dynamic content */}
@@ -1367,7 +1386,9 @@ const page = () => {
                               key={index}
                               className="p-[10px] flex gap-2 items-center text-[clamp(8px,1vw,12px)] font-semibold font-poppins leading-normal rounded-2xl bg-[#E8F4F4]"
                             >
-                              <span>{companies[index % companies.length]?.icon}</span>
+                              <span>
+                                {companies[index % companies.length]?.icon}
+                              </span>
                               {company}
                             </span>
                           ))}
@@ -1380,14 +1401,16 @@ const page = () => {
                         </p>
 
                         <div className="flex flex-wrap gap-2">
-                          {displaySpecializationItems.map((specialization, index) => (
-                            <span
-                              key={index}
-                              className="px-3 py-1 w-full sm:w-auto flex items-center justify-center sm:justify-start sm:text-[12px] font-semibold rounded-2xl bg-[#E0F4F3] text-[clamp(8px,1vw,12px)]"
-                            >
-                              {specialization}
-                            </span>
-                          ))}
+                          {displaySpecializationItems.map(
+                            (specialization, index) => (
+                              <span
+                                key={index}
+                                className="px-3 py-1 w-full sm:w-auto flex items-center justify-center sm:justify-start sm:text-[12px] font-semibold rounded-2xl bg-[#E0F4F3] text-[clamp(8px,1vw,12px)]"
+                              >
+                                {specialization}
+                              </span>
+                            ),
+                          )}
                         </div>
                       </div>
                     </>
@@ -1399,8 +1422,8 @@ const page = () => {
                     ) : publicServices.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* {publicServices.map((service) => ( */}
-                          {/* <div key={service.id} className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6"> */}
-                            {/* <h3 className="font-bold text-[#111827] mb-2">{service.service_type}</h3>
+                        {/* <div key={service.id} className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6"> */}
+                        {/* <h3 className="font-bold text-[#111827] mb-2">{service.service_type}</h3>
                             <p className="text-sm text-[#6B7280] mb-2">{service.company}</p>
                             <p className="text-xs text-[#6B7280] mb-3">{service.experience_years}+ years experience</p>
                             {Array.isArray(service.key_services) && service.key_services.length > 0 && (
@@ -1412,15 +1435,17 @@ const page = () => {
                                 ))}
                               </div>
                             )} */}
-                          {/* </div> */}
+                        {/* </div> */}
                         {/* // ))} */}
                         <ServiceSection
-                        data={publicServices}
-                        ShowActions = {false}
+                          data={publicServices}
+                          ShowActions={false}
                         />
                       </div>
                     ) : (
-                      <p className="text-gray-400 text-sm font-medium">No services available</p>
+                      <p className="text-gray-400 text-sm font-medium">
+                        No services available
+                      </p>
                     )
                   ) : activeTab === "Achievements" &&
                     advisor?.ispublic_achievements ? (
@@ -1439,7 +1464,9 @@ const page = () => {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-400 text-sm font-medium">No achievements available</p>
+                      <p className="text-gray-400 text-sm font-medium">
+                        No achievements available
+                      </p>
                     )
                   ) : activeTab === "Gallery" && advisor?.ispublic_gallery ? (
                     publicDataLoading.gallery ? (
@@ -1449,11 +1476,17 @@ const page = () => {
                     ) : publicGallery.length > 0 ? (
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
                         {publicGallery.map((item) => (
-                          <GalleryItem showActions={false} key={item.id} data={item} />
+                          <GalleryItem
+                            showActions={false}
+                            key={item.id}
+                            data={item}
+                          />
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-400 text-sm font-medium">No gallery items available</p>
+                      <p className="text-gray-400 text-sm font-medium">
+                        No gallery items available
+                      </p>
                     )
                   ) : activeTab === "Testimonials" &&
                     advisor?.ispublic_testimonials ? (
@@ -1477,7 +1510,9 @@ const page = () => {
                         />
                       ))
                     ) : (
-                      <p className="text-gray-400 text-sm font-medium">No journey data available</p>
+                      <p className="text-gray-400 text-sm font-medium">
+                        No journey data available
+                      </p>
                     )
                   ) : (
                     <p className="text-gray-400 text-sm font-medium">
@@ -1535,9 +1570,7 @@ const page = () => {
                 <h2 className="text-lg sm:text-xl font-bold text-gray-900">
                   {user?.name}
                 </h2>
-                <p className="text-sm text-gray-500 break-all">
-                  {profileUrl}
-                </p>
+                <p className="text-sm text-gray-500 break-all">{profileUrl}</p>
               </div>
 
               {/* Button */}
@@ -1585,10 +1618,11 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Helpful & Honest")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${selectedReasons.includes("Helpful & Honest")
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-                    }
+    ${
+      selectedReasons.includes("Helpful & Honest")
+        ? "border-emerald-500 bg-emerald-50"
+        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+    }
   `}
                 >
                   <span className="text-xl">🤝</span>
@@ -1600,10 +1634,11 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Expert Knowledge")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${selectedReasons.includes("Expert Knowledge")
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-                    }
+    ${
+      selectedReasons.includes("Expert Knowledge")
+        ? "border-emerald-500 bg-emerald-50"
+        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+    }
   `}
                 >
                   <span className="text-xl">🏆</span>
@@ -1615,10 +1650,11 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Quick Response")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${selectedReasons.includes("Quick Response")
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-                    }`}
+    ${
+      selectedReasons.includes("Quick Response")
+        ? "border-emerald-500 bg-emerald-50"
+        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+    }`}
                 >
                   <span className="text-xl text-orange-500">⚡</span>
                   <span className="text-slate-600 font-bold text-[0.8rem] group-hover:text-emerald-800">
@@ -1629,10 +1665,11 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Best Policy Advice")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${selectedReasons.includes("Best Policy Advice")
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-                    }`}
+    ${
+      selectedReasons.includes("Best Policy Advice")
+        ? "border-emerald-500 bg-emerald-50"
+        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+    }`}
                 >
                   <span className="text-xl">💯</span>
                   <span className="text-slate-600 font-bold text-[0.8rem] group-hover:text-emerald-800">
@@ -1643,10 +1680,11 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Trustworthy")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${selectedReasons.includes("Trustworthy")
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-                    }`}
+    ${
+      selectedReasons.includes("Trustworthy")
+        ? "border-emerald-500 bg-emerald-50"
+        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+    }`}
                 >
                   <span className="text-xl text-blue-400">🛡️</span>
                   <span className="text-slate-600 font-bold text-[0.8rem] group-hover:text-emerald-800">
@@ -1657,10 +1695,11 @@ const page = () => {
                 <button
                   onClick={() => toggleReason("Great Experience")}
                   className={`flex flex-col items-center justify-center gap-2 p-4 bg-slate-50 border rounded-3xl transition-all group
-    ${selectedReasons.includes("Great Experience")
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
-                    }`}
+    ${
+      selectedReasons.includes("Great Experience")
+        ? "border-emerald-500 bg-emerald-50"
+        : "border-slate-100 hover:border-emerald-500 hover:bg-emerald-50"
+    }`}
                 >
                   <span className="text-xl">😊</span>
                   <span className="text-slate-600 font-bold text-[0.8rem] group-hover:text-emerald-800">
