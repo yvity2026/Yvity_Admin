@@ -2,6 +2,7 @@
 import Skeleton from "@/app/components/skeleton/Skeleton";
 import Toggle from "@/app/components/ui/ToggleButton";
 import { useAuth } from "@/context/AuthUserContext";
+import { CheckCircle } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -46,9 +47,17 @@ const page = () => {
   const startCamera = async () => {
     setIsCameraOpen(true);
 
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-    });
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+      });
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      toast.error("Camera access denied");
+    }
 
     if (videoRef.current) {
       videoRef.current.srcObject = stream;
@@ -134,7 +143,13 @@ const page = () => {
         }),
       });
 
-      const data = await res.json();
+      let data;
+
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error("Invalid JSON response");
+      }
 
       if (!res.ok || !data.success) {
         toast.dismiss(toastId);
@@ -509,19 +524,24 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
                 </p>
               </label>
               <input
-        type="text"
-        name="irdaiLicenseNumber"
-        value={formdata.irdai_number}
-        onChange={handleInputChange}
-        placeholder="CM123456789"
-        className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito focus:border-blue-500 focus:outline-none transition-all"
-        required
-      />
+                type="text"
+                name="irdai_number"
+                value={formdata.irdai_number}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    irdai_number: e.target.value,
+                  }))
+                }
+                placeholder="CM123456789"
+                className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito focus:border-blue-500 focus:outline-none transition-all"
+                required
+              />
 
-      {/* Green checkmark */}
-      {formdata.irdai_number.length === 7 && (
-        <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" />
-      )}
+              {/* Green checkmark */}
+              {formdata.irdai_number.length === 7 && (
+                <CheckCircle className="absolute right-3 top-1/2 transform translate-y-1/4 text-green-500" />
+              )}
             </div>
           </div>
         </div>
