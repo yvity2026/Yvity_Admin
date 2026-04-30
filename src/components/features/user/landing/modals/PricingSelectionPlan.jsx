@@ -110,36 +110,30 @@ const PricingModal = ({ isOpen, onClose, userEmail, userName, onSuccess }) => {
   };
 
   // Handle free plan
-  const handleFreePlan = async () => {
-    setIsProcessing(true);
-    try {
-      // Call your backend to activate free plan
-      const response = await fetch("/api/activate-free-plan", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          planId: "free",
-          userEmail: userEmail,
-          userName: userName,
-        }),
-      });
+const handleFreePlan = async () => {
+  setIsProcessing(true);
 
-      if (response.ok) {
-        toast.success("Free plan activated successfully");
-        if (onSuccess) onSuccess({ plan: "free", success: true });
-        onClose();
-      } else {
-        throw new Error("Failed to activate free plan");
-      }
-    } catch (error) {
-      console.error("Free plan activation error:", error);
-     toast.error("Something went wrong. Please try again.");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  try {
+    const res = await fetch("/api/plan/activate-free", {
+      method: "POST",
+    });
+
+    if (!res.ok) throw new Error();
+
+    toast.success("Free plan activated successfully");
+
+    onSuccess?.({
+      plan: "free",
+      success: true,
+    });
+
+    onClose();
+  } catch (err) {
+    toast.error("Failed to activate free plan");
+  } finally {
+    setIsProcessing(false);
+  }
+};
 
   // Handle paid plan with Razorpay
   const handlePaidPlan = async (plan) => {
@@ -184,6 +178,7 @@ const PricingModal = ({ isOpen, onClose, userEmail, userName, onSuccess }) => {
 
             if (!res.ok) {
               toast.error("Payment verification failed");
+              setIsProcessing(false);
               return;
             }
 
@@ -197,9 +192,11 @@ const PricingModal = ({ isOpen, onClose, userEmail, userName, onSuccess }) => {
               });
             }
             onClose();
+            setIsProcessing(false);
           } catch (err) {
             console.error(err);
             toast.error("Verification error");
+            setIsProcessing(false);
           }
         },
 
@@ -226,7 +223,6 @@ const PricingModal = ({ isOpen, onClose, userEmail, userName, onSuccess }) => {
     } catch (error) {
       console.error("Payment initialization error:", error);
       toast.error("Failed to initialize payment. Please try again.");
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -259,7 +255,10 @@ const PricingModal = ({ isOpen, onClose, userEmail, userName, onSuccess }) => {
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-gradient-to-br from-[#0D4D4D]/40 via-black/60 to-[#F39C12]/30 backdrop-blur-md transition-all"
-        onClick={onClose}
+        onClick={() => {
+          setIsProcessing(false);
+          onClose();
+        }}
       />
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_60%)] pointer-events-none" />
 
@@ -268,7 +267,10 @@ const PricingModal = ({ isOpen, onClose, userEmail, userName, onSuccess }) => {
         <div className="relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.35)] w-full max-w-[600px] mx-auto transition-all border border-white/20">
           {/* Close button */}
           <button
-            onClick={onClose}
+            onClick={() => {
+              setIsProcessing(false);
+              onClose();
+            }}
             disabled={isProcessing}
             className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
           >

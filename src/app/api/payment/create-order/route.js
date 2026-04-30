@@ -16,26 +16,32 @@ const PLANS = {
   gold: { amount: 299900, name: "GOLD" },
 };
 
+const PLAN_ORDER = {
+  gold: 0,
+  silver: 1,
+  gold: 2,
+};
+
 export async function POST(req) {
   try {
     const body = await req.json();
     const { planId } = body;
 
-    // ✅ 1. AUTH (source of truth)
+    //  1. AUTH (source of truth)
     const user = await ValidateUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = user.id; // 🔥 use from auth ONLY
+    const userId = user.id;
 
-    // ✅ 2. Validate plan
+    // 2. Validate plan
     const plan = PLANS[planId];
     if (!plan) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
 
-    // ✅ 3. Prevent duplicate pending orders
+    // 3. Prevent duplicate pending orders
     const { data: existing } = await supabase
       .from("advisor_payments")
       .select("id, status")
@@ -46,8 +52,30 @@ export async function POST(req) {
     if (existing) {
       return NextResponse.json(
         { error: "Payment already in progress" },
-        { status: 409 }
+        { status: 409 },
       );
+    }
+
+    // plan upgrade only to the higher hirarchy
+    const { data: lastPayment } = await supabase
+      .from("advisor_payments")
+      .select("plan_id, status")
+      .eq("user_id", userId)
+      .eq("status", "paid")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (lastPayment) {
+      const currentLevel = PLAN_ORDER[lastPayment.plan_id] || 0;
+      const newLevel = PLAN_ORDER[planId] || 0;
+
+      if (newLevel <= currentLevel) {
+        return NextResponse.json(
+          { error: "Only upgrades allowed" },
+          { status: 400 },
+        );
+      }
     }
 
     // ✅ 4. Create Razorpay order
@@ -81,7 +109,7 @@ export async function POST(req) {
       // ⚠️ optional: cancel order (Razorpay doesn't support true cancel, but log it)
       return NextResponse.json(
         { error: "Failed to store payment" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -91,13 +119,12 @@ export async function POST(req) {
       amount: order.amount,
       currency: order.currency,
     });
-
   } catch (err) {
     console.error("Create order error:", err);
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

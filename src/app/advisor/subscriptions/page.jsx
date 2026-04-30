@@ -11,6 +11,7 @@ import {
   FaCrown,
   FaMedal,
   FaPlus,
+  FaRegUser,
 } from "react-icons/fa";
 import { FiArrowRight } from "react-icons/fi";
 import { HiOutlineDownload } from "react-icons/hi";
@@ -19,110 +20,113 @@ import { IoClose } from "react-icons/io5";
 import { MdAutorenew, MdClose, MdOutlineVerifiedUser } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
 import { SiInfinityfree } from "react-icons/si";
-import { motion } from "framer-motion"
+import { motion } from "framer-motion";
+import { useAuth } from "@/context/AuthUserContext";
+import { InfinityIcon } from "lucide-react";
 
-  export const paymentHistory = [
-    {
-      date: "Jan 5, 2025",
-      plan: "Gold Plan",
-      amount: "₹2,999",
-      method: "UPI",
-      status: "Paid",
-      invoice: "Download",
-    },
-    {
-      date: "Jan 5, 2024",
-      plan: "Gold Plan",
-      amount: "₹2,999",
-      method: "UPI",
-      status: "Paid",
-      invoice: "Download",
-    },
-    {
-      date: "Jan 5, 2023",
-      plan: "Silver Plan",
-      amount: "₹999",
-      method: "Net Banking",
-      status: "Paid",
-      invoice: "Download",
-    },
-  ];
+export const paymentHistory = [
+  {
+    date: "Jan 5, 2025",
+    plan: "Gold Plan",
+    amount: "₹2,999",
+    method: "UPI",
+    status: "Paid",
+    invoice: "Download",
+  },
+  {
+    date: "Jan 5, 2024",
+    plan: "Gold Plan",
+    amount: "₹2,999",
+    method: "UPI",
+    status: "Paid",
+    invoice: "Download",
+  },
+  {
+    date: "Jan 5, 2023",
+    plan: "Silver Plan",
+    amount: "₹999",
+    method: "Net Banking",
+    status: "Paid",
+    invoice: "Download",
+  },
+];
 
-    export const pricingData = [
-    {
-      title: "Free",
-      price: "0",
-      period: "",
-      message: "Free forever, no credit card required",
-      features: ["Basic Profile", "3 Achievements", "5 Text Testimonials"],
-      medal : <SiInfinityfree />,
-      nonFeatures: [
-        "Identify Verified Badge",
-        "Audio/video Reviews",
-        "QR Code Download",
-        "Priority Directory",
-      ],
-      cardStyle:
-        "hover:rounded-[16px] hover:border border-transparent hover:border-[#0D6060] bg-white hover:shadow-[0_0_4px_2px_rgba(13,96,96,0.25)]",
-      buttonText: "Free",
-      buttonStyle:
-        "flex items-center justify-center gap-2  md:min-w-0 lg:min-h-[44px] rounded-full text-sm md:text-base px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 border-2 border-transparent bg-[#F8F6F1] hover:border-[#0D6060] hover:bg-[#F8F6F1] transition-all duration-500 active:scale-[0.98] cursor-pointer text-[var(--labels-secondary-info,#6B7280)]",
-    },
-    {
-      title: "Silver",
-      price: "999",
-      period: "/year",
-      features: [
-        "Full Profile",
-        "Unlimited Achievements",
-        "Unlimited Text Reviews",
-        "Identify Verified Badge",
-        "Audio Reviews",
-      ],
-      medal : <FaMedal />,
-      nonFeatures: ["Vedio Testimonials", "QR Code Download"],
-      cardStyle:
-        "hover:rounded-[16px] hover:border border-transparent  hover:border-[#0D6060] bg-white hover:shadow-[0_0_4px_2px_rgba(13,96,96,0.25)]",
-      buttonText: "Silver",
-      buttonStyle:
-        "flex items-center justify-center gap-2  md:min-w-0 xl:min-h-[44px] rounded-full text-sm  md:text-base px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 bg-(--primary-900,#0A4A4A) text-(--ct-as-badges-accents,#F59E0B) hover:bg-(--Primary-800,#076868) hover:text-(--ct-as-badges-accents,#F59E0B) hover:shadow-[0_4px_12px_rgba(13,96,96,0.25)] transition-all duration-500 active:scale-[0.98] cursor-pointer text-[ var(--ct-as-badges-accents,#F59E0B)]",
-    },
-    {
-      title: "Gold",
-      price: "2999",
-      period: "/year",
-      features: [
-        "Everything in Silver",
-        "Video Testimonials",
-        "QR Code Download",
-        "Recomendations",
-        "Priority Directory Listing",
-        "Intro Video Upload",
-        "Finding Advisors Badge",
-      ],
-      medal : <FaCrown />,
-      // nonFeatures?: [
-      //   "No access to premium features",
-      //   "Limited profile customization",
-      //   "No priority support",
-      // ],
-      cardStyle:
-        "hover:rounded-[16px] border border-[#F59E0B] bg-white hover:shadow-[0_0_4px_2px_rgba(217,119,6,0.25)]",
-      buttonText: "Active Plan",
-      buttonStyle:
-        "flex items-center justify-center gap-2  md:min-w-0 xl:min-h-[44px] rounded-full text-xs sm:text-sm md:text-base px-4 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-3 bg-gradient-to-r from-[rgba(217,119,6,0.9)] to-[rgba(255,169,70,0.9)] hover:shadow-[0_4px_12px_rgba(217,119,6,0.25)] transition-all duration-500 active:scale-[0.98] cursor-pointer text-[var(--Pearl-Whitepage-background,#F8F6F1)]",
-      cover: "Your Plan",
-      coverStyle:
-        "absolute top-0  left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-(--primary-900,#0A4A4A) text-[var(--Pearl-Whitepage-background,#F8F6F1)] rounded-[16px] bg-gradient-to-r from-[#D97706] to-[#FF8900] xl:text-[13px]  text-xs px-1 xl:px-3 py-1 rounded-full",
-    },
-  ];
+export const pricingData = [
+  {
+    title: "Free",
+    price: "0",
+    period: "",
+    message: "Free forever, no credit card required",
+    features: ["Basic Profile", "3 Achievements", "5 Text Testimonials"],
+    medal: <SiInfinityfree />,
+    nonFeatures: [
+      "Identify Verified Badge",
+      "Audio/video Reviews",
+      "QR Code Download",
+      "Priority Directory",
+    ],
+    cardStyle:
+      "hover:rounded-[16px] hover:border border-transparent hover:border-[#0D6060] bg-white hover:shadow-[0_0_4px_2px_rgba(13,96,96,0.25)]",
+    buttonText: "Free",
+    buttonStyle:
+      "flex items-center justify-center gap-2  md:min-w-0 lg:min-h-[44px] rounded-full text-sm md:text-base px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 border-2 border-transparent bg-[#F8F6F1] hover:border-[#0D6060] hover:bg-[#F8F6F1] transition-all duration-500 active:scale-[0.98] cursor-pointer text-[var(--labels-secondary-info,#6B7280)]",
+  },
+  {
+    title: "Silver",
+    price: "999",
+    period: "/year",
+    features: [
+      "Full Profile",
+      "Unlimited Achievements",
+      "Unlimited Text Reviews",
+      "Identify Verified Badge",
+      "Audio Reviews",
+    ],
+    medal: <FaMedal />,
+    nonFeatures: ["Vedio Testimonials", "QR Code Download"],
+    cardStyle:
+      "hover:rounded-[16px] hover:border border-transparent  hover:border-[#0D6060] bg-white hover:shadow-[0_0_4px_2px_rgba(13,96,96,0.25)]",
+    buttonText: "Silver",
+    buttonStyle:
+      "flex items-center justify-center gap-2  md:min-w-0 xl:min-h-[44px] rounded-full text-sm  md:text-base px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 bg-(--primary-900,#0A4A4A) text-(--ct-as-badges-accents,#F59E0B) hover:bg-(--Primary-800,#076868) hover:text-(--ct-as-badges-accents,#F59E0B) hover:shadow-[0_4px_12px_rgba(13,96,96,0.25)] transition-all duration-500 active:scale-[0.98] cursor-pointer text-[ var(--ct-as-badges-accents,#F59E0B)]",
+  },
+  {
+    title: "Gold",
+    price: "2999",
+    period: "/year",
+    features: [
+      "Everything in Silver",
+      "Video Testimonials",
+      "QR Code Download",
+      "Recomendations",
+      "Priority Directory Listing",
+      "Intro Video Upload",
+      "Finding Advisors Badge",
+    ],
+    medal: <FaCrown />,
+    // nonFeatures?: [
+    //   "No access to premium features",
+    //   "Limited profile customization",
+    //   "No priority support",
+    // ],
+    cardStyle:
+      "hover:rounded-[16px] border border-[#F59E0B] bg-white hover:shadow-[0_0_4px_2px_rgba(217,119,6,0.25)]",
+    buttonText: "Active Plan",
+    buttonStyle:
+      "flex items-center justify-center gap-2  md:min-w-0 xl:min-h-[44px] rounded-full text-xs sm:text-sm md:text-base px-4 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-3 bg-gradient-to-r from-[rgba(217,119,6,0.9)] to-[rgba(255,169,70,0.9)] hover:shadow-[0_4px_12px_rgba(217,119,6,0.25)] transition-all duration-500 active:scale-[0.98] cursor-pointer text-[var(--Pearl-Whitepage-background,#F8F6F1)]",
+    cover: "Your Plan",
+    coverStyle:
+      "absolute top-0  left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-(--primary-900,#0A4A4A) text-[var(--Pearl-Whitepage-background,#F8F6F1)] rounded-[16px] bg-gradient-to-r from-[#D97706] to-[#FF8900] xl:text-[13px]  text-xs px-1 xl:px-3 py-1 rounded-full",
+  },
+];
 
 const page = () => {
   const [isRenew, setIsRenew] = useState(false);
   const [isAutoRenew, setIsAutoRenew] = useState(false);
   const [isUpgrade, setIsUpgrade] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("UPI");
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
+  const { advisor, loading, setLoading } = useAuth();
 
   const validatePayment = () => {
     if (!paymentMethod) {
@@ -175,6 +179,44 @@ const page = () => {
     return true;
   };
 
+  const handlePlanPayment = async (plan) => {
+  try {
+    setLoading(true);
+
+    const res = await fetch("/api/payment/create-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        plan_id: plan.title.toLowerCase(),
+        amount: plan.price * 100,
+      }),
+    });
+
+    const data = await res.json();
+
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      amount: data.amount,
+      currency: "INR",
+      order_id: data.orderId,
+
+      handler: async function () {
+        toast.success("Payment processing...");
+
+        // DO NOT update DB here
+        // webhook will handle it
+      },
+    };
+
+    const razor = new window.Razorpay(options);
+    razor.open();
+  } catch (err) {
+    toast.error("Payment failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
   const handleAutoRenew = async () => {
     if (!validateAutoRenew()) return;
 
@@ -194,23 +236,70 @@ const page = () => {
       setLoading(false);
     }
   };
-  const [isOn, setIsOn] = useState(false)
+  const [isOn, setIsOn] = useState(false);
+  const formatRemaining = (expiresAt) => {
+    if (!expiresAt) return "No active plan";
+
+    const diff = new Date(expiresAt) - new Date();
+
+    if (diff <= 0) return "Expired";
+
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+    if (days === 1) return "1 day remaining";
+    if (days < 30) return `${days} days remaining`;
+
+    const months = Math.floor(days / 30);
+    return `${months} month${months > 1 ? "s" : ""} remaining`;
+  };
+
+  const getExpiryWithDays = (dateString) => {
+    if (!dateString) return "No expiry";
+
+    const now = new Date();
+    const expiry = new Date(dateString);
+
+    const diff = expiry - now;
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(expiry);
+
+    if (days <= 0) {
+      return `Expired on ${formattedDate}`;
+    }
+
+    return `Expires: ${formattedDate} · ${days} days remaining`;
+  };
+
+const getDaysRemaining = (expiresAt) => {
+  if (!expiresAt) return 0;
+
+  const diff = new Date(expiresAt) - new Date();
+
+  if (diff <= 0) return 0;
+
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+};
   return (
     <div className="p-4 md:p-6 lg:p-10 xl:px-15 pt-[24px] pb-[81px] flex flex-col gap-[26px]">
       <div className="w-full  h-auto  bg-white px-4 md:pl-[40px] md:pr-[44px] py-6 md:py-[33px] flex flex-col md:grid md:grid-cols-2 gap-6 md:gap-0 rounded-2xl bg-gradient-to-r from-[#094C4B] to-[#0A6A69] shadow-[0_0_2px_0_rgba(0,0,0,0.2)]">
         <div className="flex flex-col gap-4">
           <span>
             <h3 className="text-xl sm:text-2xl md:text-[32px] font-bold text-[#F8F6F1]">
-              Gold Plan
+              {advisor?.subscription_plan}
             </h3>
 
             {/* Mobile only */}
             <p className="md:hidden text-sm  text-[#F8F6F1]">
-              288 days remaining
+              {formatRemaining(advisor?.subscription_expires_at) || "Unlimited"}
             </p>
 
             <p className="text-[clamp(10px,1vw,14px)] text-[#F8F6F1]">
-              Expires: December 31, 2025 · Auto-renewal OFF
+              {`Expires: ${getExpiryWithDays(advisor?.subscription_expires_at)} · Auto-renewal OFF`}
             </p>
           </span>
 
@@ -241,15 +330,27 @@ const page = () => {
             </button>
           </span>
 
-          <span className="flex items-center gap-2 text-xs text-[#F59E0B] rounded-2xl bg-[rgba(245,158,11,0.2)] py-[6px] px-4 w-fit">
-            <FaCrown />
-            current plan
-          </span>
+          {advisor?.subscription_plan === "gold" ? (
+            <span className="flex items-center gap-2 text-xs text-[#F59E0B] rounded-2xl bg-[rgba(245,158,11,0.2)] py-[6px] px-4 w-fit">
+              <FaCrown />
+              current plan
+            </span>
+          ) : advisor?.subscription_plan === "silver" ? (
+            <span className="flex items-center gap-2 text-xs text-slate-400 rounded-2xl bg-[rgba(148,163,184,0.2)] py-[6px] px-4 w-fit">
+              <FaMedal />
+              current plan
+            </span>
+          ) : (
+            <span className="flex items-center gap-2 text-xs text-slate-500 rounded-2xl bg-[rgba(100,116,139,0.15)] py-[6px] px-4 w-fit">
+              <FaRegUser />
+              current plan
+            </span>
+          )}
         </div>
         <div className="hidden md:flex justify-end ">
           <span>
             <h3 className="text-[36px] font-bold text-right text-[#F8F6F1]">
-              285
+              {getDaysRemaining(advisor?.subscription_expires_at) ===0 && advisor?.subscription_plan === "plan" ? (<InfinityIcon/>) : getDaysRemaining(advisor?.subscription_expires_at)}
             </h3>
             <p className="text-[14px] text-right text-[#F8F6F1] ">
               Days Remaining
@@ -259,41 +360,35 @@ const page = () => {
       </div>
 
       <div
-      onClick={() => setIsOn(!isOn)}
-      className="w-48 h-12 bg-gray-200 rounded-full p-1 flex items-center cursor-pointer relative"
-    >
-      {/* Sliding background */}
-      <motion.div
-        className="absolute top-1 bottom-1 w-1/2 bg-[#0A6A69] rounded-full"
-        animate={{
-          x: isOn ? 0 : "100%",
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 500,
-          damping: 30,
-        }}
-      />
+        onClick={() => setIsOn(!isOn)}
+        className="w-48 h-12 bg-gray-200 rounded-full p-1 flex items-center cursor-pointer relative"
+      >
+        {/* Sliding background */}
+        <motion.div
+          className="absolute top-1 bottom-1 w-1/2 bg-[#0A6A69] rounded-full"
+          animate={{
+            x: isOn ? 0 : "100%",
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 500,
+            damping: 30,
+          }}
+        />
 
-      {/* Labels */}
-      <div className="w-1/2 text-center z-10 text-sm font-medium">
-        <span className={isOn ? "text-white" : "text-[#0A6A69"}>
-          Pricing
-        </span>
+        {/* Labels */}
+        <div className="w-1/2 text-center z-10 text-sm font-medium">
+          <span className={isOn ? "text-white" : "text-[#0A6A69"}>Pricing</span>
+        </div>
+
+        <div className="w-1/2 text-center z-10 text-sm font-medium">
+          <span className={!isOn ? "text-white" : "text-[#0A6A69]"}>
+            History
+          </span>
+        </div>
       </div>
 
-      <div className="w-1/2 text-center z-10 text-sm font-medium">
-        <span className={!isOn ? "text-white" : "text-[#0A6A69]"}>
-          History
-        </span>
-      </div>
-    </div>
-
-{
-  isOn ? ( <Plans />) : (<Pricing_History />)
-}
-    
-     
+      {isOn ? <Plans setIsUpgrade={setIsUpgrade}/> : <Pricing_History />}
 
       {/* Modals */}
       {false && (

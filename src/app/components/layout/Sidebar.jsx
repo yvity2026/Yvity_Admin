@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AiOutlineUser } from "react-icons/ai";
 import { BiPulse } from "react-icons/bi";
-import { FaBell, FaCrown, FaRegStar } from "react-icons/fa";
+import { FaBell, FaCrown, FaMedal, FaRegStar, FaRegUser } from "react-icons/fa";
 import { FiShield } from "react-icons/fi";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { GrGallery } from "react-icons/gr";
@@ -129,7 +129,7 @@ export default function AppShell({ children }) {
   const { collapsed } = useSidebar();
   const { openModal } = useModal();
   const [user, setaUser] = useState();
-  const {loading, setLoading, setUser } = useAuth();
+  const { loading, setLoading, setUser, advisor } = useAuth();
   const [logoutLoading, setLogoutLoading] = useState(false);
   // const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -192,20 +192,19 @@ export default function AppShell({ children }) {
   };
 
   // const hideSidebarRoutes = ["/advisor/public-view"];
-  
-  
+
   const sidebarWidth = collapsed ? 80 : 260;
-  
+
   const name = "Krishna Mohan";
   const initials = name
-  .split(" ")
-  .map((n) => n[0])
-  .join("");
+    .split(" ")
+    .map((n) => n[0])
+    .join("");
   const SIDEBAR_TRANSITION = {
     duration: 0.35,
     ease: [0.4, 0, 0.2, 1], // smoother than easeInOut
   };
-  
+
   const [hoveredItem, setHoveredItem] = useState(null);
   const [tooltip, setTooltip] = useState({
     visible: false,
@@ -213,49 +212,49 @@ export default function AppShell({ children }) {
     x: 0,
     y: 0,
   });
-  
- useEffect(() => {
-  const fetchUser = async () => {
-    // Only fetch user data if we're on an advisor page
-    if (!pathname.includes("/advisor")) {
-      setLoading(false);
-      return;
-    }
 
-    try {
-      const res = await fetch("/api/auth/me");
-
-      const data = await res.json();
-      console.log("API response:", data);
-
-      if (!res.ok || !data.success) {
-        console.error("API Error:", data.error);
+  useEffect(() => {
+    const fetchUser = async () => {
+      // Only fetch user data if we're on an advisor page
+      if (!pathname.includes("/advisor")) {
+        setLoading(false);
         return;
       }
 
-      setUser(data.data); // ✅ correct
-      setaUser(data.data)
-    } catch (err) {
-      console.error("Fetch error:", err);
-    } finally {
-      setLoading(false);
+      try {
+        const res = await fetch("/api/auth/me");
+
+        const data = await res.json();
+        console.log("API response:", data);
+
+        if (!res.ok || !data.success) {
+          console.error("API Error:", data.error);
+          return;
+        }
+
+        setUser(data.data);
+        setaUser(data.data);
+      } catch (err) {
+        console.error("Fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
     }
-  };
 
-  fetchUser();
-}, []);
-
-useEffect(() => {
-  if (mobileOpen) {
-    document.body.style.overflow = "hidden";
-  } else {
-    document.body.style.overflow = "";
-  }
-
-  return () => {
-    document.body.style.overflow = "";
-  };
-}, [mobileOpen]);
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   const handleLogout = async () => {
     if (logoutLoading) return;
@@ -277,13 +276,11 @@ useEffect(() => {
       window.location.href = "/";
     }
   };
-  
-  
-  
+
   const isDefaultActions =
-  currentHeader.actions.includes("notifications") ||
-  currentHeader.actions.includes("profile");
-  
+    currentHeader.actions.includes("notifications") ||
+    currentHeader.actions.includes("profile");
+
   if (!pathname.includes("/advisor")) {
     return <>{children}</>;
   }
@@ -352,19 +349,55 @@ useEffect(() => {
             )}
 
             {/* Badge */}
-            <div
-              className={`
+            {advisor?.subscription_plan === "gold" ? (
+              <div
+                className={`
       flex items-center justify-center
       rounded-2xl bg-[rgba(245,158,11,0.2)]
       ${collapsed ? "p-2 mt-2 text-[#F59E0B]" : "px-4 py-[6px] gap-2 text-[#F59E0B]"}
     `}
-            >
-              <FaCrown className={collapsed ? "text-base" : "text-sm"} />
+              >
+                <FaCrown className={collapsed ? "text-base" : "text-sm"} />
 
-              {!collapsed && (
-                <p className="text-accent text-xs font-semibold">Gold Member</p>
-              )}
-            </div>
+                {!collapsed && (
+                  <p className="text-accent text-xs font-semibold">
+                    Gold Member
+                  </p>
+                )}
+              </div>
+            ) : advisor?.subscription_plan === "silver" ? (
+              <div
+                className={`
+    flex items-center justify-center
+    rounded-2xl bg-[rgba(148,163,184,0.2)]
+    ${collapsed ? "p-2 mt-2 text-[#94A3B8]" : "px-4 py-[6px] gap-2 text-[#94A3B8]"}
+  `}
+              >
+                <FaMedal className={collapsed ? "text-base" : "text-sm"} />
+
+                {!collapsed && (
+                  <p className="text-xs font-semibold text-slate-400">
+                    Silver Member
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div
+                className={`
+    flex items-center justify-center
+    rounded-2xl bg-[rgba(100,116,139,0.15)]
+    ${collapsed ? "p-2 mt-2 text-[#64748B]" : "px-4 py-[6px] gap-2 text-[#64748B]"}
+  `}
+              >
+                <FaRegUser className={collapsed ? "text-base" : "text-sm"} />
+
+                {!collapsed && (
+                  <p className="text-xs font-semibold text-slate-500">
+                    Free Member
+                  </p>
+                )}
+              </div>
+            )}
           </div>
           <hr className="mt-5 border-t border-[#107171]" />
           {/* sidebar content */}
@@ -459,7 +492,9 @@ useEffect(() => {
                 <span className="">
                   <MdOutlineLogout />
                 </span>
-                {!collapsed && <span>{logoutLoading ? "Logging out..." : "Logout"}</span>}
+                {!collapsed && (
+                  <span>{logoutLoading ? "Logging out..." : "Logout"}</span>
+                )}
               </button>
             </motion.div>
           </div>
