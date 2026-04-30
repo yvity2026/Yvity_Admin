@@ -185,7 +185,7 @@ const Header = () => {
   return (
     <>
       {loading ? (
-        <nav className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 shadow-sm relative after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-px after:bg-gradient-to-r after:from-[#0D6060] after:to-[#F59E0B]">
+        <nav className="bg-white border-b border-gray-200 pt-2 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 shadow-sm md:min-h-[70px] relative after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-px after:bg-gradient-to-r after:from-[#0D6060] after:to-[#F59E0B]">
           <div className="h-full mx-auto flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center space-x-2">
@@ -224,15 +224,18 @@ const Header = () => {
           </div>
         </nav>
       ) : (
-        <nav className="bg-white border-b border-gray-200 pt-1 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 md:min-h-[56px] shadow-sm relative after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-px after:bg-gradient-to-r after:from-[#0D6060] after:to-[#F59E0B]">
+        <nav className=" w-full bg-white border-b border-gray-200 pt-2 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 md:min-h-[70px] shadow-sm relative after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-px after:bg-gradient-to-r after:from-[#0D6060] after:to-[#F59E0B]">
           <div className="h-full mx-auto flex items-center justify-between ">
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col items-center space-x-2">
               <Image
                 src="/images/yvity.png"
                 height={100}
                 width={100}
                 alt="Navbarlogo"
               />
+              <p className="text-[10px] text-[#F59E0B] font-bold font-cormorant">
+                Credibility that connects
+              </p>
             </div>
 
             <div className="hidden md:flex items-center gap-4">
@@ -251,38 +254,39 @@ const Header = () => {
                   {" "}
                   <span className="font-medium">My Dashboard</span>{" "}
                 </button>
-              ) : !user?.roles?.includes("advisor") &&
-                !advisor?.profile_status &&
-                advisor?.account_status === "under_review" ? (
-                <div className="flex items-center gap-3 bg-[#E6F4F4] border border-[#0A4A4A]/20 px-4 py-1 rounded-lg shadow-sm">
-                  {/* Animated Shield */}
-                  <motion.div
-                    className="flex items-center justify-center w-8 h-8 rounded-full bg-[#0A4A4A]/10"
-                    animate={{
-                      scale: [1, 1.1, 1],
-                      opacity: [1, 0.7, 1],
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                  >
-                    <FiShield className="text-[#0A4A4A]" size={10} />
-                  </motion.div>
-
-                  {/* Text */}
-                  <div className="flex flex-col leading-tight">
-                    <span className="text-xs font-semibold text-[#0A4A4A]">
-                      Profile Under Review
-                    </span>
-                    <span className="text-[8px] text-gray-600 max-w-[220px]">
-                      Your IRDAI details have been submitted. Verification takes
-                      24–48 hours.
-                    </span>
-                  </div>
-                </div>
               ) : (
+                //  !user?.roles?.includes("advisor") &&
+                //   !advisor?.profile_status &&
+                //   advisor?.account_status === "under_review" ? (
+                //   <div className="flex items-center gap-3 bg-[#E6F4F4] border border-[#0A4A4A]/20 px-4 py-1 rounded-lg shadow-sm">
+                //     {/* Animated Shield */}
+                //     <motion.div
+                //       className="flex items-center justify-center w-8 h-8 rounded-full bg-[#0A4A4A]/10"
+                //       animate={{
+                //         scale: [1, 1.1, 1],
+                //         opacity: [1, 0.7, 1],
+                //       }}
+                //       transition={{
+                //         duration: 1.5,
+                //         repeat: Infinity,
+                //         ease: "easeInOut",
+                //       }}
+                //     >
+                //       <FiShield className="text-[#0A4A4A]" size={10} />
+                //     </motion.div>
+
+                //     {/* Text */}
+                //     <div className="flex flex-col leading-tight">
+                //       <span className="text-xs font-semibold text-[#0A4A4A]">
+                //         Profile Under Review
+                //       </span>
+                //       <span className="text-[8px] text-gray-600 max-w-[220px]">
+                //         Your IRDAI details have been submitted. Verification takes
+                //         24–48 hours.
+                //       </span>
+                //     </div>
+                //   </div>
+                // ) :
                 <button
                   className="flex items-center gap-2  text-[clamp(10px,1vw,14px)] leading-[16px] px-2 py-1 font-medium text-[#111827] cursor-pointer"
                   onClick={() => setActiveModal(MODALS.PROFILE)}

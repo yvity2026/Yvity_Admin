@@ -28,6 +28,7 @@ function isAcceptedVideo(file) {
 export default function AddIntroVideoButton({
   children,
   className = "",
+  plan = false,
   uploadingLabel = "Uploading...",
 }) {
   const router = useRouter();
@@ -71,7 +72,9 @@ export default function AddIntroVideoButton({
       const result = await response.json();
 
       if (!response.ok || !result?.success) {
-        throw new Error(result?.error || result?.message || "Failed to upload intro video");
+        throw new Error(
+          result?.error || result?.message || "Failed to upload intro video",
+        );
       }
 
       if (result?.data?.profile) {
@@ -81,7 +84,7 @@ export default function AddIntroVideoButton({
       toast.success(
         hadIntroVideo
           ? "Intro video reuploaded and score refreshed"
-          : "Intro video uploaded and score updated"
+          : "Intro video uploaded and score updated",
       );
       startTransition(() => {
         router.refresh();

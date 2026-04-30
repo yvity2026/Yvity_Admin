@@ -12,8 +12,8 @@ const supabase = createAdminClient();
 
 // 🔒 Backend-controlled plans
 const PLANS = {
-  silver: { amount: 99900, name: "SILVER" },
-  gold: { amount: 299900, name: "GOLD" },
+  silver: { amount: 100, name: "SILVER" },
+  gold: { amount: 10, name: "GOLD" },
 };
 
 const PLAN_ORDER = {
