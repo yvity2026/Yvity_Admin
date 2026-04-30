@@ -501,7 +501,7 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
                 className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
               />
             </div>
-            <div className="flex flex-col gap-2 lg:col-span-2">
+            <div className="flex flex-col gap-2 lg:col-span-2 relative">
               <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">
                 IRDAI License Number <p className="text-[#D11717]">*</p>
                 <p className="text-primary-900 font-nunito text-xs font-semiboldame hover:underline cursor-pointer">
@@ -509,19 +509,19 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
                 </p>
               </label>
               <input
-                type="text"
-                name="irdaiLicenseNumber"
-                value={formdata.irdai_number}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    irdai_number: e.target.value,
-                  }))
-                }
-                placeholder="CM123456789"
-                className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
-                required
-              />
+        type="text"
+        name="irdaiLicenseNumber"
+        value={formdata.irdai_number}
+        onChange={handleInputChange}
+        placeholder="CM123456789"
+        className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito focus:border-blue-500 focus:outline-none transition-all"
+        required
+      />
+
+      {/* Green checkmark */}
+      {formdata.irdai_number.length === 7 && (
+        <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" />
+      )}
             </div>
           </div>
         </div>

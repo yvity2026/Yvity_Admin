@@ -68,7 +68,7 @@ const [isLoading, setIsLoading] = useState(true);
           </div>
           {/* <QuickActions /> */}
 
-          {isLoading ? <QuickActionsShimmer /> : <QuickActions data={dashboardData}/>}
+          {isLoading ? <QuickActionsShimmer /> : <QuickActions data={dashboardData} />}
 
           {/* Bottom Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-10">

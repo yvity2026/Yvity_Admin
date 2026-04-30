@@ -25,6 +25,6 @@ export const uploadToS3 = async ({ file, fileName, mimeType, folder }) => {
 
   return {
     key,
-    url: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
+    url: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
   };
 };

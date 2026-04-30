@@ -108,12 +108,36 @@ export default function AddIntroVideoButton({
       />
       <button
         type="button"
-        className={className}
+        className={` relative overflow-hidden group ${className}`}
         onClick={handleClick}
         disabled={isUploading}
         aria-busy={isUploading}
       >
         {isUploading ? uploadingLabel : children}
+
+        {/* Hover updrade overlay */}
+
+        {!plan && (
+          <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/0 backdrop-blur-sm opacity-0 group-hover:opacity-100 group-hover:bg-black/40 group-hover:backdrop-blur-sm transition-all duration-300 rounded-xl">
+              {/* Lock icon */}
+              <svg
+                className="w-6 h-6 text-white"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5 8a5 5 0 0110 0v2h1a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4a2 2 0 012-2h1V8zm2 2h6V8a3 3 0 10-6 0v2z"
+                  clipRule="evenodd"
+                />
+              </svg>
+
+              {/* Lock text */}
+              <span className="text-white text-xs font-medium tracking-wide">
+                Upgrade plan
+              </span>
+            </div>
+        )}
       </button>
     </>
   );
