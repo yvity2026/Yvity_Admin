@@ -28,6 +28,7 @@ import { TfiGallery } from "react-icons/tfi";
 const page = () => {
   const { user, setUser, advisor, setAdvisor, loading } = useAuth();
   const [file, setFile] = useState(null);
+  const [errors, setErrors] = useState({});
   const [preview, setPreview] = useState(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const videoRef = useRef(null);
@@ -119,7 +120,54 @@ const page = () => {
   const [isProfile, setIsProfile] = useState(false);
   const hasShownLoadError = useRef(false);
 
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formdata.name.trim()) {
+      newErrors.name = "Full name is required";
+    }
+
+    if (!formdata.email) {
+      newErrors.email = "Email is required";
+    } else if (!/^\S+@\S+\.\S+$/.test(formdata.email)) {
+      newErrors.email = "Invalid email format";
+    }
+
+    if (!formdata.dob) {
+      newErrors.dob = "Date of birth is required";
+    }
+
+    if (!formdata.gender) {
+      newErrors.gender = "Please select gender";
+    }
+
+    if (!formdata.city.trim()) {
+      newErrors.city = "City is required";
+    }
+
+    if (!formdata.mobile) {
+      newErrors.mobile = "Phone number is required";
+    } else if (!/^[6-9]\d{9}$/.test(formdata.mobile)) {
+      newErrors.mobile = "Invalid phone number";
+    }
+
+    // IRDAI - exactly 7 digits
+    if (!formdata.irdai_number.trim()) {
+      newErrors.irdai_number = "License number is required";
+    } else if (!/^\d{7}$/.test(formdata.irdai_number.trim())) {
+      newErrors.irdai_number = "License number must be exactly 7 digits";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      toast.error("Please fill all the details");
+      return;
+    }
     const toastId = toast.loading("Saving profile changes...");
     try {
       const res = await fetch("/api/advisor/profile/update", {
@@ -366,6 +414,9 @@ const page = () => {
                 placeholder="Krishna Mohan"
                 className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
               />
+              {errors.name && (
+                <p className="text-red-500 text-xs">{errors.name}</p>
+              )}
             </div>
             {/* DOB */}
             <div className="flex flex-col gap-2">
@@ -384,6 +435,9 @@ const page = () => {
                 }
                 className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
               />
+              {errors.dob && (
+                <p className="text-red-500 text-xs">{errors.dob}</p>
+              )}
             </div>
             {/* Gender */}
             <div className="flex flex-col gap-2">
@@ -479,6 +533,9 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
                 placeholder="Nellore, AP"
                 className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
               />
+              {errors.city && (
+                <p className="text-red-500 text-xs">{errors.city}</p>
+              )}
             </div>
             {/* email */}
             <div className="flex flex-col gap-2">
@@ -497,6 +554,9 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
                 placeholder="Krishna@email.com"
                 className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
               />
+              {errors.email && (
+                <p className="text-red-500 text-xs">{errors.emain}</p>
+              )}
             </div>
             {/* mobile */}
             <div className="flex flex-col gap-2">
@@ -515,8 +575,11 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
                 placeholder="+91  9876543210"
                 className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito"
               />
+              {errors.mobile && (
+                <p className="text-red-500 text-xs">{errors.mobile}</p>
+              )}
             </div>
-            <div className="flex flex-col gap-2 lg:col-span-2 relative">
+            <div className="flex flex-col gap-2 lg:col-span-2">
               <label className="font-poppins flex items-center gap-1 text-[#111827] text-sm font-semibold leading-normal">
                 IRDAI License Number <p className="text-[#D11717]">*</p>
                 <p className="text-primary-900 font-nunito text-xs font-semiboldame hover:underline cursor-pointer">
@@ -537,10 +600,8 @@ hover:bg-gray-100 has-[:checked]:bg-[#0A4A4A] has-[:checked]:text-white"
                 className="w-full rounded-lg border border-[#DBE1E0] bg-[#FAFCFB] py-3 md:py-[13px] px-4 sm:px-5 text-sm md:text-base font-nunito focus:border-blue-500 focus:outline-none transition-all"
                 required
               />
-
-              {/* Green checkmark */}
-              {formdata.irdai_number.length === 7 && (
-                <CheckCircle className="absolute right-3 top-1/2 transform translate-y-1/4 text-green-500" />
+              {errors.irdai_number && (
+                <p className="text-red-500 text-xs">{errors.irdai_number}</p>
               )}
             </div>
           </div>
