@@ -1,7 +1,4 @@
-import { useRouter } from "next/navigation";
-
 export default function ProfileProgress() {
-  const router = useRouter();
   return (
     <div className="bg-white rounded-2xl p-4 lg:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm border border-gray-100 font-poppins">
       <div className="flex items-center gap-4">
@@ -26,7 +23,7 @@ export default function ProfileProgress() {
             <div className="w-[87%] h-full bg-[#124B48] rounded-full" />
           </div>
         </div>
-        <button className="bg-[#0A4A4A] hover:bg-[#076868] hover:shadow-[0_0_8px_2px_rgba(13,96,96,0.25)] transition-colors text-[#F59E0B] px-6 py-2.5 rounded-lg font-medium whitespace-nowrap text-[clamp(10px,1vw,14px)] cursor-pointer" onClick={() => router.push("/advisor/profile")}>
+        <button className="bg-[#0A4A4A] hover:bg-[#076868] hover:shadow-[0_0_8px_2px_rgba(13,96,96,0.25)] transition-colors text-[#F59E0B] px-6 py-2.5 rounded-lg font-medium whitespace-nowrap text-[clamp(10px,1vw,14px)] cursor-pointer">
           Complete Now
         </button>
       </div>

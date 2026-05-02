@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoClose, IoChevronDown, IoCloudUploadOutline } from "react-icons/io5";
 import { HiOutlineArrowLeft, HiOutlineArrowRight } from "react-icons/hi";
 import { LuPlus } from "react-icons/lu";
@@ -14,11 +14,12 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
     "Mutual Funds",
   ];
 
-  const resetForm = () => {
+  useEffect(() => {
+  if (!isOpen) {
     setFormData({
       services: [],
-      bio: "",
       certificate_url: "",
+      bio: "",
     });
 
     setServiceData({
@@ -30,27 +31,8 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
 
     setFile(null);
     setPreview(null);
-  };
-
-  useEffect(() => {
-    if (!isOpen) {
-      setFormData({
-        services: [],
-        certificate_url: "",
-        bio: "",
-      });
-
-      setServiceData({
-        service: "",
-        company: "",
-        license: "",
-        experience: "",
-      });
-
-      setFile(null);
-      setPreview(null);
-    }
-  }, [isOpen]);
+  }
+}, [isOpen]);
 
   useEffect(() => {
     if (form) {
@@ -60,7 +42,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
         bio: form?.bio || "",
       });
 
-      setFile(form?.certificate_file || null);
+      setFile(form?.license_file || null);
     }
   }, [form]);
 
@@ -84,8 +66,8 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
 
   const [formData, setFormData] = useState({
     services: [],
-    bio: "",
     certificate_url: "",
+    bio: "",
   });
 
   const [serviceData, setServiceData] = useState({
@@ -93,8 +75,22 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
     company: "",
     license: "",
     experience: "",
-    designation: "",
   });
+
+  const handleSubmit = () => {
+    if (!validateForm()) return;
+
+    console.log("MODAL DATA:", {
+      ...formData,
+      file,
+    });
+
+    onContinue({
+      ...formData,
+      file,
+    });
+    toast.success("Profile submitted");
+  };
 
   // Filter dropdown to hide already added services
   const availableServices = initialServices.filter(
@@ -104,10 +100,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
   const handleAddService = () => {
     if (!serviceData.service) return toast.error("Select a service");
     if (!serviceData.company) return toast.error("Select a company");
-    if (!serviceData.designation) return toast.error("Designation required");
-    if (!serviceData.license || serviceData.license.length !== 7) {
-  return toast.error("IRDAI License NO must be exactly 7 digits");
-}
+    if (!serviceData.license) return toast.error("License required");
     if (!serviceData.experience) return toast.error("Experience required");
 
     const newService = {
@@ -126,7 +119,6 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
       company: "",
       license: "",
       experience: "",
-      designation: "",
     });
 
     toast.success("Service added");
@@ -144,56 +136,6 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
       <p className="text-red-500 text-xs mt-1">{errors.service}</p>
     );
   }
-
-  const useSounds = () => {
-    const sounds = useRef({});
-
-    useEffect(() => {
-      sounds.current = {
-        success: new Audio("/sounds/success.mp3"),
-      };
-    }, []);
-
-    const play = (type) => {
-      const sound = sounds.current[type];
-      if (sound) {
-        sound.currentTime = 0;
-        sound.volume = 0.5; //
-        sound.play().catch(() => {});
-      }
-    };
-
-    return { play };
-  };
-
-  const { play } = useSounds();
-
-  const handleSubmit = () => {
-    if (!validateForm()) return;
-
-    console.log("MODAL DATA:", {
-      ...formData,
-      file,
-    });
-
-    play("success");
-
-    const cleanServices = formData.services.map(({ id, ...rest }) => rest);
-
-    onContinue({
-      ...formData,
-      services: cleanServices,
-      certificate_file: file,
-    });
-    // toast.success("Profile submitted");
-  };
-
-  useEffect(() => {
-    if (!isOpen) resetForm();
-  }, [isOpen]);
-
-  const isValid = /^\d{7}$/.test(serviceData.license);
-
   if (!isOpen) return null;
 
   return (
@@ -202,17 +144,14 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
         {/* Header */}
         <div className="bg-[#0D4D4D] p-6 text-white shrink-0 cursor-pointer">
           <button
-            onClick={() => {
-              resetForm();
-              onClose();
-            }}
+            onClick={onClose}
             className="absolute top-6 right-6 p-2 bg-white/10 rounded-full hover:bg-white/20 cursor-pointer"
           >
             <IoClose size={20} />
           </button>
           <div className="">
             <Image
-              src="/images/yvity.png"
+              src="/images/Adivisor/Navbar/navlogo.png"
               height={100}
               width={100}
               alt="Navbar logo"
@@ -227,7 +166,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
         </div>
 
         {/* Scrollable Content */}
-        <div className=" overflow-y-auto pl-[45px] pt-[21px] pr-[55px] flex-1 bg-[#F9F8F6] no-scrollbar">
+        <div className="p-6 overflow-y-auto flex-1 bg-[#F9F8F6] no-scrollbar">
           <button
             className="flex items-center gap-2 text-gray-500 text-sm mb-4 cursor-pointer"
             onClick={() => onBack()}
@@ -235,16 +174,18 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
             <HiOutlineArrowLeft /> Change role
           </button>
 
-          <div className="bg-[#EBF3F3] border-l-4 border-[#0D4D4D] py-4 pl-[20px] pr-[104px] rounded-lg mb-4 text-xs text-[#0D4D4D]">
-            Insurance Advisor profile. This will be your public credibility
-            profile on YVITY.
+          <div className="px-6">
+            <div className="bg-[#EBF3F3] border-l-4 border-[#0D4D4D] py-4 pl-[20px] pr-[104px] rounded-lg mb-6 text-xs text-[#0D4D4D]">
+              Insurance Advisor profile. This will be your public credibility
+              profile on YVITY.
+            </div>
           </div>
 
           {/* Render Added Services (Summary View) */}
           {formData.services.map((item) => (
             <div
               key={item.id}
-              className="bg-white border border-gray-200 rounded-xl mb-4 shadow-sm relative p-2"
+              className="bg-white border border-gray-200 rounded-xl p-4 mb-4 shadow-sm relative"
             >
               <span className="text-[10px] font-bold text-[#0D4D4D] uppercase bg-gray-100 px-2 py-1 rounded mb-2 inline-block">
                 Added Service
@@ -263,7 +204,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
           ))}
 
           {/* The Active Form */}
-          <div className=" space-y-4">
+          <div className="bg-white  p-6 space-y-4">
             <div className="bg-[#E8F4F4] px-[16px] py-[24px] rounded-2xl space-y-4">
               <div className="flex justify-between items-center">
                 <label className="text-sm font-bold text-gray-700">
@@ -271,7 +212,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                 </label>
                 <button
                   onClick={handleAddService}
-                  className="flex items-center gap-1 text-[#0D4D4D] text-xs font-bold px-3 py-1 rounded-md border border-[#C4C4C4] hover:bg-[#0D4D4D] hover:text-white transition-all cursor-pointer"
+                  className="flex items-center gap-1 text-[#0D4D4D] text-xs font-bold border border-[#0D4D4D] px-3 py-1 rounded-md hover:bg-[#0D4D4D] hover:text-white transition-all cursor-pointer"
                 >
                   <LuPlus /> Add
                 </button>
@@ -282,7 +223,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                 onChange={(e) =>
                   setServiceData({ ...serviceData, service: e.target.value })
                 }
-                className="w-full p-3 rounded-xl border border-gray-200 bg-white outline-none focus:ring-2 ring-[#0D4D4D]/20"
+                className="w-full p-3 rounded-xl border border-gray-200 bg-white appearance-none outline-none focus:ring-2 ring-[#0D4D4D]/20"
               >
                 <option value="">Select Service</option>
                 {availableServices.map((s) => (
@@ -301,7 +242,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                   onChange={(e) =>
                     setServiceData({ ...serviceData, company: e.target.value })
                   }
-                  className="w-full p-3 rounded-xl border border-gray-200  bg-[#F8F6F1] outline-none focus:ring-2 ring-[#0D4D4D]/20"
+                  className="w-full p-3 rounded-xl border border-gray-200 bg-[#F8F6F1]"
                 >
                   <option value="" className="">
                     Select Company
@@ -314,81 +255,23 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                 </select>
               </div>
 
-              <div className="space-y-1 ">
-                <label className="text-sm font-bold text-gray-700">
-                  Designation / Title <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Senior LIC Advisor, Chief Life Planner"
-                  value={serviceData.designation}
-                  onChange={(e) =>
-                    setServiceData({
-                      ...serviceData,
-                      designation: e.target.value,
-                    })
-                  }
-                  className="w-full p-3 rounded-xl border border-gray-200 bg-[#F8F6F1] outline-none focus:ring-2 ring-[#0D4D4D]/20"
-                ></input>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-sm font-bold text-gray-700">
                     IRDAI License No.
                   </label>
-
-                  <div className="relative">
-                    <input
-                      value={serviceData.license}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/[^0-9]/g, "");
-                        setServiceData({
-                          ...serviceData,
-                          license: value,
-                        });
-                      }}
-                      onKeyPress={(e) => {
-                        if (!/[0-9]/.test(e.key)) {
-                          e.preventDefault();
-                        }
-                      }}
-                      type="text"
-                      placeholder="e.g. 1234567"
-                      inputMode="numeric"
-                      maxLength="7"
-                      className={`
-        w-full p-3 pr-10 rounded-xl border bg-white outline-none
-        transition-all duration-300 ease-in-out
-        ${isValid ? "border-green-500" : serviceData.license ? "border-red-400" : "border-gray-200"}
-        focus:ring-2 focus:ring-green-400/20
-      `}
-                    />
-
-                    {/* ✅ Smooth Tick */}
-                    <div
-                      className={`
-        pointer-events-none absolute right-3 top-1/2 -translate-y-1/2
-        transform transition-all duration-300 ease-in-out
-        ${isValid ? "opacity-100 scale-100" : "opacity-0 scale-75"}
-      `}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-green-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={3}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                  </div>
+                  <input
+                    value={serviceData.license}
+                    onChange={(e) =>
+                      setServiceData({
+                        ...serviceData,
+                        license: e.target.value,
+                      })
+                    }
+                    type="text"
+                    placeholder="e.g. 1234567"
+                    className="w-full p-3 rounded-xl border bg-white border-gray-200"
+                  />
                 </div>
                 <div className="space-y-1">
                   <label className="text-sm font-bold text-gray-700">
@@ -396,37 +279,28 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                   </label>
                   <input
                     value={serviceData.experience}
-                    onChange={(e) => {
-                      let value = e.target.value.replace(/\D/g, ""); // allow only digits
-                      if (value !== "") {
-                        let num = parseInt(value, 10);
-                        if (num > 100) num = 100;
-                        if (num < 0) num = 0;
-                        value = num.toString();
-                      }
-
+                    onChange={(e) =>
                       setServiceData({
                         ...serviceData,
-                        experience: value,
-                      });
-                    }}
+                        experience: e.target.value,
+                      })
+                    }
                     type="text"
-                    inputMode="numeric"
+                    className="w-full p-3 rounded-xl border border-gray-200 bg-white"
                     placeholder="e.g. 1"
-                    className="w-full p-3 rounded-xl border border-gray-200 bg-white outline-none focus:ring-2 ring-[#0D4D4D]/20"
                   />
                 </div>
               </div>
             </div>
-            <p className="text-[#374151] text-base text-[clamp(12px,1.5vw,16px)] font-normal font-poppins leading-normal">
+            <p className="text-[#374151] text-[16px] font-medium font-poppins leading-normal">
               Upload IRDAI Certificate
             </p>
-            <div className="px-3 sm:px-5 pt-6 sm:pt-[29px] pb-6 sm:pb-[23px] flex flex-col gap-4 rounded-lg border border-[#E6E6E6] bg-[#F8F6F1]">
-              <p className="text-[#6B7280] text-[clamp(8px,1vw,12px)] font-normal font-poppins leading-[20px]">
+            <div className="px-5 pt-[29px] pb-[23px] flex flex-col gap-4 rounded-lg border border-[#E6E6E6] bg-[#F8F6F1]">
+              <p className="text-[#6B7280] text-[12px] font-normal font-poppins leading-[20px]">
                 Upload a single screenshot or image of your IRDAI license. It
                 should show all your registered companies and details.
               </p>
-              <p className="py-[10px] pr-[14px] pl-[20px] text-[#6B7280] text-[clamp(8px,1vw,12px)] font-normal font-poppins leading-[20px] rounded-lg border-l-[3px] border-l-[#0D6060] bg-[#E8F4F4]">
+              <p className="py-[10px] pr-[14px] pl-[20px] text-[#6B7280] text-[12px] font-normal font-poppins leading-[20px] rounded-lg border-l-[3px] border-l-[#0D6060] bg-[#E8F4F4]">
                 Take a screenshot from the IRDAI website showing your license
                 details. One image is sufficient - it will show all companies
                 registered under your license.
@@ -434,27 +308,22 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
 
               {/* Upload Box */}
               <div
-                className={`border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition
-  ${file ? "border-green-400 bg-green-50" : "border-gray-300 bg-white"}`}
+                className="border-2 border-dashed border-gray-300 rounded-2xl p-8 bg-white flex flex-col items-center justify-center text-center cursor-pointer"
                 onClick={() => document.getElementById("fileUpload").click()}
               >
                 <input
                   type="file"
-                  id="fileUpload"
+                  accept="image/png, image/jpeg"
                   className="hidden"
-                  accept=".png,.jpg,.jpeg,.pdf"
+                  id="fileUpload"
                   onChange={(e) => {
                     const selectedFile = e.target.files[0];
                     if (!selectedFile) return;
 
-                    const validTypes = [
-                      "image/jpeg",
-                      "image/png",
-                      "application/pdf",
-                    ];
+                    const validTypes = ["image/jpeg", "image/png"];
 
                     if (!validTypes.includes(selectedFile.type)) {
-                      toast.error("Only JPG, PNG, or PDF files are allowed");
+                      toast.error("Only JPG and PNG files are allowed");
                       return;
                     }
 
@@ -464,73 +333,40 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                     }
 
                     setFile(selectedFile);
+                    setErrors((prev) => ({ ...prev, file: null }));
 
-                    // Preview only for images
-                    if (selectedFile.type.startsWith("image/")) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setPreview(reader.result);
-                      };
-                      reader.readAsDataURL(selectedFile);
-                    } else {
-                      setPreview(null);
-                    }
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setPreview(reader.result);
 
-                    toast.success("Certificate Uploaded Successfully");
+                      setFormData((prev) => ({
+                        ...prev,
+                        certificate_url: reader.result, // ✅ store base64 or later replace with Supabase URL
+                      }));
+                    };
+                    reader.readAsDataURL(selectedFile);
+
+                    toast.success("File uploaded successfully");
                   }}
                 />
-
-                {!file ? (
-                  <>
-                    <IoCloudUploadOutline
-                      size={36}
-                      className="text-gray-400 mb-2"
-                    />
-                    <p className="font-semibold text-gray-700">
-                      Tap to upload certificate
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      IRDAI license screenshot • JPG, PNG • Max 5MB
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex items-center gap-2 text-green-600 font-semibold">
-                      ✅ Certificate Uploaded Successfully
-                    </div>
-                  </>
-                )}
+                <IoCloudUploadOutline
+                  size={40}
+                  className="text-gray-400 mb-2"
+                />
+                <p className="font-bold text-gray-700">
+                  Tap to Upload Certificate
+                </p>
+                <p className="text-[10px] text-gray-400">
+                  IRDAI license screenshot • JPG, PNG • Max 5MB
+                </p>
               </div>
-                    <p className="text-[#6B7280] text-center text-xs sm:text-[14px] font-normal font-poppins leading-[20px] sm:leading-[24px]">
-                      Click to simulate upload
-                    </p>
-              {file && (
-                <div className="mt-4 p-4 bg-white border rounded-xl flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-gray-700 truncate">
-                      {file.name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {(file.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      setFile(null);
-                      setPreview(null);
-                      document.getElementById("fileUpload").value = null;
-                    }}
-                    className="text-red-500 text-sm font-semibold hover:underline cursor-pointer"
-                  >
-                    Remove
-                  </button>
-                </div>
-              )}
+              <p className="text-[#6B7280] text-center text-[14px] font-normal font-poppins leading-[24px]">
+                Click to simulate upload
+              </p>
             </div>
 
             <div className="space-y-1">
-              <label className="text-[#374151] text-[clamp(12px,1.5vw,16px)]  font-medium bg-[#F7F4ED] font-poppins leading-normal mb-2">
+              <label className="text-[#374151] text-[16px] font-medium font-poppins leading-normal mb-2">
                 Short Bio
               </label>
               <textarea
@@ -539,7 +375,7 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
                   setFormData({ ...formData, bio: e.target.value })
                 }
                 placeholder="e.g. 10+ years helping families secure their future with life and health insurance..."
-                className="w-full p-3 rounded-xl border border-[#E6E6E6] min-h-[100px] bg-[#FDFCFB] text-[#6B7280] text-[clamp(10px,1vw,14px)] font-normal font-poppins leading-[24px] outline-none focus:ring-2 ring-[#0D4D4D]/20"
+                className="w-full p-3 rounded-xl border border-gray-200 min-h-[100px] bg-[#FDFCFB] text-[#6B7280] text-[14px] font-normal font-poppins leading-[24px]"
               />
             </div>
           </div>
@@ -548,16 +384,10 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
         {/* Footer */}
         <div className="p-6 bg-white shrink-0 border-t">
           <button
-            disabled={!validateForm}
-            className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all
-    ${
-      file
-        ? "bg-[#F39C12] hover:bg-[#E67E22] text-white cursor-pointer"
-        : "bg-gray-300 text-gray-500 cursor-not-allowed"
-    }`}
+            className="w-full bg-[#F39C12] hover:bg-[#E67E22] text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all font-poppins cursor-pointer"
             onClick={handleSubmit}
           >
-            Submit for Review <HiOutlineArrowRight />
+            Save & Submit Profile <HiOutlineArrowRight />
           </button>
         </div>
       </div>

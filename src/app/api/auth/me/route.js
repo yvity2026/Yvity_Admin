@@ -1,43 +1,46 @@
-import { ValidateUser } from "@/lib/auth/ValidateUser";
-import { NextResponse } from "next/server";
+import { apiResponse } from "@/lib/apiResponse";
+import { getUser } from "@/lib/auth/Getuser";
+import { createAdminClient } from "@/lib/supabase/server";
 
 export async function GET() {
   try {
-    const user = await ValidateUser();
-    console.log(user);
+    const user = await getUser();
 
-    if (!user) {
-      return NextResponse.json(
-        {
-          success: false,
-          code: 2,
-          message: "User Not Found",
-          error: "user not found based on the userId",
-        },
-        { status: 404 }
+    if (!user?.token) {
+      return apiResponse(
+        "something went wrong please try again",
+        false,
+        1,
+        "",
+        "Unable to get the token from the sessions",
       );
     }
-
-    return NextResponse.json(
-      {
-        success: true,
-        code: 3,
-        message: "user Retrieved successfully",
-        data: user,
-      },
-      { status: 200 }
-    );
+    console.log(user)
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .filter("device_tokens", "cs", JSON.stringify([{ token: user.token }]))
+      .maybeSingle()
+      
+    if (!data && error) {
+      return apiResponse(
+        "User Not Found",
+        false,
+        2,
+        "",
+        "user not found based on the userId",
+      );
+    }
+    return apiResponse("user Retrieved successfully", true, 3, data, "");
   } catch (error) {
     console.log(error);
-
-    return NextResponse.json(
-      {
-        success: false,
-        code: 4,
-        message: "Internal Server Error",
-        error: error.message || error,
-      },
-      { status: 500 }
+    return apiResponse(
+      "Internal Server Error",
+      false,
+      4,
+      "",
+      error.message || error,
     );
   }
 }

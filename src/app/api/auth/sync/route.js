@@ -48,7 +48,6 @@ export async function POST(req) {
     response.cookies.set(
       "security_token",
       JSON.stringify({
-        userId: data.id,
         token: data.device_tokens?.[data.device_tokens.length - 1]?.token
       }),
       {
