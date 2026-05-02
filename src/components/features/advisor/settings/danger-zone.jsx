@@ -20,7 +20,7 @@ export default function DangerZone() {
         <div className="flex items-center justify-between py-4 border-b border-[#FEE2E2] first:pt-0">
           <div>
             <h3 className="text-[clamp(10px,1vw,14px)] font-bold text-[#374151]">Deactivate Account</h3>
-            <p className="text-[clamp(8px,1vw,12px)] text-[#6B7280] font-medium mt-0.5">Temporarily Deactivate your profile until 30days you can Activate your profile</p>
+            <p className="text-[clamp(8px,1vw,12px)] text-[#6B7280] font-medium mt-0.5">Temporarily hide your profile from public view</p>
           </div>
           <button 
             onClick={() => setActiveModal('deactivate')}
