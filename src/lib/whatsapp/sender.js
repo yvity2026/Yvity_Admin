@@ -130,6 +130,7 @@ export async function sendWhatsAppTemplate({ to, templateKey, data }) {
     messaging_product: "whatsapp",
     to: formattedPhone,
     type: "template",
+    
     template: {
       name: template.name,
       language: { code: template.language },
