@@ -1,10 +1,19 @@
 "use client";
 
-export default function IrdaiModal({ onClose }) {
+export default function IrdaiModal({ advisor, onClose, onApprove, onReject }) {
+  const details = [
+    { label: "Advisor", value: advisor?.name || "Rahul Kumar • Vijayawada" },
+    { label: "License No.", value: advisor?.lic || "LIC-AP-2022-48291" },
+    { label: "Type", value: advisor?.type || "Life Insurance Agent" },
+    { label: "Authority", value: advisor?.authority || "IRDAI - Andhra Pradesh" },
+    { label: "Valid Until", value: advisor?.validUntil || "December 2026" },
+    { label: "Submitted", value: advisor?.submitted || "2 days ago" },
+  ];
+
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       
-      <div className="bg-white min-w-[560px] rounded-2xl shadow-xl overflow-hidden font-sans">
+      <div className="bg-white w-[560px] rounded-2xl shadow-xl overflow-hidden font-sans">
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 bg-gray-100 border-b border-gray-200">
@@ -20,20 +29,13 @@ export default function IrdaiModal({ onClose }) {
         </div>
 
         {/* Body */}
-        <div className="px-6 py-4 p-4">
+        <div className="px-6 py-4">
 
           {/* Center vertical dotted line */}
 
           {/* Rows */}
           <div className="space-y-3">
-            {[
-              { label: "Advisor", value: "Rahul Kumar • Vijayawada" },
-              { label: "License No.", value: "LIC-AP-2022-48291" },
-              { label: "Type", value: "Life Insurance Agent" },
-              { label: "Authority", value: "IRDAI - Andhra Pradesh" },
-              { label: "Valid Until", value: "December 2026" },
-              { label: "Submitted", value: "2 days ago" },
-            ].map((row) => (
+            {details.map((row) => (
               <div
                 key={row.label}
                 className="grid grid-cols-2 items-center py-3 border-b border-gray-100 text-sm"
@@ -50,7 +52,7 @@ export default function IrdaiModal({ onClose }) {
               <span className="text-gray-400">Plan Paid</span>
               <div className="flex justify-end">
                 <span className="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full flex items-center gap-1">
-                  🪙 Silver • 999
+                  {advisor?.plan || "🪙 Silver • 999"}
                 </span>
               </div>
             </div>
@@ -63,7 +65,7 @@ export default function IrdaiModal({ onClose }) {
               IRDAI Certificate
             </p>
             <p className="text-xs text-gray-500">
-              LIC-AP-2022-48291 • certificate.jpg
+              {advisor?.lic || "LIC-AP-2022-48291"} • {advisor?.certificateName || "certificate.jpg"}
             </p>
             <button className="text-sm font-medium text-teal-700 mt-2 hover:underline">
               View Document
@@ -74,10 +76,16 @@ export default function IrdaiModal({ onClose }) {
 
         {/* Footer */}
         <div className="flex gap-4 px-6 pb-5 pt-3">
-          <button className="flex-1 py-3 bg-green-100 text-green-700 font-semibold rounded-lg hover:bg-green-200">
+          <button
+            onClick={onApprove}
+            className="flex-1 py-3 bg-green-100 text-green-700 font-semibold rounded-lg hover:bg-green-200"
+          >
             ✔ Approve
           </button>
-          <button className="flex-1 py-3 bg-red-100 text-red-600 font-semibold rounded-lg hover:bg-red-200">
+          <button
+            onClick={onReject}
+            className="flex-1 py-3 bg-red-100 text-red-600 font-semibold rounded-lg hover:bg-red-200"
+          >
             ✖ Reject
           </button>
         </div>

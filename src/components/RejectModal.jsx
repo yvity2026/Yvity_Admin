@@ -1,7 +1,11 @@
 "use client";
+import { useState } from "react";
 import { X } from "lucide-react";
 
-export default function RejectModal({ open, setOpen }) {
+export default function RejectModal({ open, setOpen, onConfirm }) {
+  const [reason, setReason] = useState("");
+  const [note, setNote] = useState("");
+
   if (!open) return null;
 
   return (
@@ -33,6 +37,8 @@ export default function RejectModal({ open, setOpen }) {
           </label>
           <input
             type="text"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
             placeholder="License number mismatch"
             className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-400 focus:outline-none focus:border-gray-400 transition"
           />
@@ -44,6 +50,8 @@ export default function RejectModal({ open, setOpen }) {
             Additional Note (shown to advisor)
           </label>
           <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
             placeholder="Explain what the advisor needs to fix...."
             className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-400 h-28 resize-none focus:outline-none focus:border-gray-400 transition"
           />
@@ -51,7 +59,14 @@ export default function RejectModal({ open, setOpen }) {
 
         {/* Buttons */}
         <div className="flex gap-4">
-          <button className="flex-1 bg-red-500 hover:bg-red-600 text-white py-4 rounded-xl text-base font-semibold transition">
+          <button
+            onClick={() => {
+              if (onConfirm) {
+                onConfirm({ reason, note });
+              }
+            }}
+            className="flex-1 bg-red-500 hover:bg-red-600 text-white py-4 rounded-xl text-base font-semibold transition"
+          >
             Confirm Reject
           </button>
           <button
