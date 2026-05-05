@@ -28,8 +28,7 @@ async function requireAdmin() {
 
 export async function GET() {
   try {
-    const adminSession = requireAdmin();
-    console.log(adminSession);
+    const adminSession = await requireAdmin();
     if (!adminSession) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -38,54 +37,56 @@ export async function GET() {
     const { data, error } = await supabase
       .from("advisor_profiles")
       .select("*, user:users(id, email, name, mobile, city)")
-      .eq("account_status", "under_review")
-      .eq("profile_status", false)
+      .in("account_status", ["under_review", "active", "action_required"])
       .order("created_at", { ascending: false });
-    console.log(data);
+
     if (error) {
       console.error("Admin approvals query failed", error);
       return NextResponse.json(
-        { error: "Unable to load pending approvals" },
+        { error: "Unable to load approvals" },
         { status: 500 },
       );
     }
 
+    const stats = {
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+    };
+
     const output = (data || []).map((item) => {
-      let user = item.user || {};
-      let metadata = user.raw_user_meta_data;
+      const user = item.user || {};
+      const status =
+        item.account_status === "active"
+          ? "approved"
+          : item.account_status === "action_required"
+            ? "rejected"
+            : "pending";
 
-      if (typeof metadata === "string") {
-        try {
-          metadata = JSON.parse(metadata);
-        } catch {
-          metadata = {};
-        }
-      }
-
-      const name =
-        metadata?.full_name ||
-        metadata?.name ||
-        user.email?.split("@")[0] ||
-        "Advisor";
-      const location = metadata?.city || "Unknown, IN";
+      stats[status] += 1;
 
       return {
         id: item.id,
         user_id: item.user_id,
-        name: user.name,
+        name: user.name || "Advisor",
         email: user.email || null,
         phone: user.mobile || null,
-        location: user.city,
+        location: user.city || "Unknown, IN",
         licenseUrl: item.iridai_certificate_url,
         isVerified: item.profile_status,
+        status,
         submittedAt: item.created_at,
         updatedAt: item.updated_at,
       };
     });
 
-    return NextResponse.json({ data: output });
+    return NextResponse.json({ data: output, stats });
   } catch (error) {
-    return NextResponse.json({});
+    console.error("Admin approvals GET failed", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
