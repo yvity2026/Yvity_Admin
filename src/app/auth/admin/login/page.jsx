@@ -1,196 +1,222 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { FaPhone, FaKey, FaArrowRight } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaArrowRight } from "react-icons/fa";
 
 export default function AdminLogin() {
-  const [step, setStep] = useState("phone"); // "phone" or "otp"
+  const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("");
-  const [adminId, setAdminId] = useState(null);
-  const [otp, setOtp] = useState("");
+  const [otpArray, setOtpArray] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
   const [error, setError] = useState("");
+
+  const otpRefs = useRef([]);
   const router = useRouter();
+
+  const otp = otpArray.join("");
+
+  const isValidPhone = (num) => /^[6-9]\d{9}$/.test(num);
+
+  const handlePhoneChange = (e) => {
+    const val = e.target.value.replace(/\D/g, "").replace(/^[0-5]+/, "");
+    if (val.length <= 10) setPhone(val);
+  };
+
+  const handleOtpChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return;
+
+    const newOtp = [...otpArray];
+    newOtp[index] = value.slice(-1);
+    setOtpArray(newOtp);
+
+    if (value && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otpArray[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    const paste = e.clipboardData.getData("text").trim();
+    if (!/^\d{6}$/.test(paste)) return;
+
+    e.preventDefault();
+    const arr = paste.split("");
+    setOtpArray(arr);
+    setTimeout(() => otpRefs.current[5]?.focus(), 0);
+  };
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
 
-    try {
-      const response = await fetch("/api/auth/admin/login/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to send OTP");
-      }
-
-      setStep("otp");
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    if (!isValidPhone(phone)) {
+      setError("Enter valid 10-digit number");
+      return;
     }
+
+    setLoading(true);
+
+    setTimeout(() => {
+      setStep("otp"); // simulate
+      setLoading(false);
+    }, 800);
   };
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
 
-    try {
-      const response = await fetch("/api/auth/admin/login/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, otp }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Invalid OTP");
-      }
-
-      // Redirect to admin dashboard
-      router.push("/admin");
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    if (otp.length !== 6) {
+      setError("Enter complete OTP");
+      return;
     }
+
+    setLoading(true);
+
+    setTimeout(() => {
+      router.push("/admin");
+    }, 800);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* 🌈 Background Bloom */}
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-200 via-blue-100 to-purple-200" />
+
+      <div className="absolute w-[500px] h-[500px] bg-purple-300/30 blur-[120px] rounded-full top-[-100px] left-[-100px]" />
+      <div className="absolute w-[400px] h-[400px] bg-blue-300/30 blur-[120px] rounded-full bottom-[-100px] right-[-100px]" />
+
+      {/* 🧊 Card */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md"
+        initial={{ opacity: 0, scale: 0.95, y: 30 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 120, damping: 18 }}
+        className="relative z-10 backdrop-blur-xl bg-white/70 border border-white/40 shadow-2xl rounded-3xl p-8 w-full max-w-md"
       >
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-center mb-8"
-        >
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Admin Login</h1>
-          <p className="text-gray-600">Secure access to your dashboard</p>
-        </motion.div>
+        <div className="flex justify-center mb-4">
+          <img
+            src="/images/Adivisor/Navbar/navlogo.png"
+            alt="Logo"
+            className="h-10 w-auto object-contain"
+          />
+        </div>
+        <h1 className="text-2xl font-semibold text-center mb-6 text-gray-800">
+          Admin Login
+        </h1>
 
         {error && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6"
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm"
           >
             {error}
           </motion.div>
         )}
 
-        {step === "phone" ? (
-          <motion.form
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            onSubmit={handleSendOtp}
-            className="space-y-6"
-          >
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Mobile Number
-              </label>
-              <div className="relative">
-                <FaPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Enter your mobile number"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  required
-                />
-              </div>
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
+        <AnimatePresence mode="wait">
+          {step === "phone" ? (
+            <motion.form
+              key="phone"
+              onSubmit={handleSendOtp}
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 30 }}
+              transition={{ type: "spring", stiffness: 120 }}
+              className="space-y-6"
             >
-              {loading ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              ) : (
-                <>
-                  <span>Send OTP</span>
-                  <FaArrowRight />
-                </>
-              )}
-            </motion.button>
-          </motion.form>
-        ) : (
-          <motion.form
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            onSubmit={handleVerifyOtp}
-            className="space-y-6"
-          >
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Enter OTP
-              </label>
-              <div className="relative">
-                <FaKey className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <div>
+                <label className="text-sm text-gray-600">Mobile Number</label>
+
                 <input
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="Enter 6-digit OTP"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-center text-lg tracking-widest"
-                  maxLength={6}
-                  required
+                  value={phone}
+                  onChange={handlePhoneChange}
+                  placeholder="9876543210"
+                  className="w-full mt-2 p-3 rounded-xl bg-white/80 border border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
                 />
               </div>
-              <p className="text-sm text-gray-500 mt-2">
-                OTP sent to {phone}
-              </p>
-            </div>
-
-            <div className="flex space-x-3">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                type="button"
-                onClick={() => setStep("phone")}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg transition-colors"
-              >
-                Back
-              </motion.button>
 
               <motion.button
+                whileTap={{ scale: 0.97 }}
                 whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
+                className="w-full bg-blue-600 text-white py-3 rounded-xl flex justify-center items-center gap-2 shadow-md disabled:opacity-50"
               >
-                {loading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                ) : (
-                  "Verify"
-                )}
+                {loading ? "Sending..." : "Send OTP"}
+                <FaArrowRight />
               </motion.button>
-            </div>
-          </motion.form>
-        )}
+            </motion.form>
+          ) : (
+            <motion.form
+              key="otp"
+              onSubmit={handleVerifyOtp}
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ type: "spring", stiffness: 120 }}
+              className="space-y-6"
+            >
+              <p className="text-center text-sm text-gray-600">
+                OTP sent to +91 {phone}
+              </p>
+
+              {/* OTP BOXES */}
+              <div className="flex justify-center gap-3">
+                {otpArray.map((digit, i) => (
+                  <motion.input
+                    key={i}
+                    ref={(el) => (otpRefs.current[i] = el)}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(i, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                    onPaste={handlePaste}
+                    maxLength={1}
+                    whileFocus={{ scale: 1.1 }}
+                    className="w-12 h-14 text-center rounded-xl border bg-white/80 text-lg font-semibold focus:ring-2 focus:ring-blue-300 outline-none transition-all"
+                  />
+                ))}
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setStep("phone")}
+                  className="flex-1 bg-gray-200 py-3 rounded-xl hover:bg-gray-300 transition"
+                >
+                  Back
+                </button>
+
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.02 }}
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 bg-blue-600 text-white py-3 rounded-xl shadow-md disabled:opacity-50"
+                >
+                  {loading ? "Verifying..." : "Verify"}
+                </motion.button>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                disabled={resending}
+                className="text-sm text-center text-gray-500 hover:text-blue-600 transition w-full"
+              >
+                {resending ? "Resending..." : "Resend OTP"}
+              </button>
+            </motion.form>
+          )}
+        </AnimatePresence>
       </motion.div>
     </div>
   );
