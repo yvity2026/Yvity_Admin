@@ -10,6 +10,6 @@ export default function Home() {
   //   </>
   // );
   // redirect("/auth/init");
-  // redirect("/auth/admin");
+  redirect("/auth/admin/login");
 
 }
