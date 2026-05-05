@@ -416,7 +416,7 @@ export default function IRDAIApprovals() {
   const [openReject, setOpenReject]       = useState(false);
   const [isProcessing, setIsProcessing]   = useState(false);
   const [activeFilter, setActiveFilter]   = useState(null);
-   const [stats, setStats] = useState({
+  const [stats, setStats] = useState({
     pending: 0,
     approved: 0,
     rejected: 0,
@@ -424,32 +424,6 @@ export default function IRDAIApprovals() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        // Make a GET request to your backend to fetch the counts
-        const response = await fetch("/api/admin/irdai/stats"); // Adjust this endpoint based on your actual route
-        if (!response.ok) {
-          throw new Error("Failed to fetch stats");
-        }
-        const data = await response.json();
-        setStats({
-          pending: data.data.pending || 0,
-          approved: data.data.approved || 0,
-          rejected: data.data.rejected || 0,
-          pendingPercentage: data.data.pending ? ((data.data.pending / (data.data.pending + data.data.approved + data.data.rejected)) * 100).toFixed(2) : 0,
-        });
-        console.log(stats)
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load data");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats()
-  },[])
 
   useEffect(() => {
     if (showSidebar) {
@@ -461,79 +435,157 @@ export default function IRDAIApprovals() {
   }, [showSidebar]);
 
   useEffect(() => {
-    const loadPendingApprovals = async () => {
+    const loadApprovals = async () => {
       try {
+        setLoading(true);
+        setError("");
+
         const response = await fetch("/api/admin/approvals");
         if (!response.ok) {
-          console.warn("Failed to load pending approvals", response.status);
-          return;
+          throw new Error(`Failed to load approvals: ${response.status}`);
         }
 
         const payload = await response.json();
-        if (!payload?.data) return;
+        const items = payload?.data || [];
+        const nextStats = payload?.stats || {
+          pending: 0,
+          approved: 0,
+          rejected: 0,
+        };
+        const total =
+          nextStats.pending + nextStats.approved + nextStats.rejected;
 
-        const nextRows = payload.data.map((item, index) => {
-          const initials = item.name
-            ? item.name
-                .split(" ")
-                .filter(Boolean)
-                .slice(0, 2)
-                .map((word) => word[0].toUpperCase())
-                .join("")
-            : "AD";
+        setStats({
+          pending: nextStats.pending || 0,
+          approved: nextStats.approved || 0,
+          rejected: nextStats.rejected || 0,
+          pendingPercentage: total
+            ? ((nextStats.pending / total) * 100).toFixed(2)
+            : 0,
+        });
+
+        const nextRows = items.map((item, index) => {
+          const name = item.name || "Advisor";
+          const location = item.location || "Unknown, IN";
+          const status = item.status || "pending";
+          const initials =
+            name
+              .split(" ")
+              .filter(Boolean)
+              .slice(0, 2)
+              .map((word) => word[0].toUpperCase())
+              .join("") || "AD";
 
           const submittedAt = item.submittedAt ? new Date(item.submittedAt) : new Date();
           const diffDays = Math.max(1, Math.floor((Date.now() - submittedAt.getTime()) / 86400000));
           const days = `${diffDays} ${diffDays === 1 ? "day" : "days"}`;
-
           const fileName = item.licenseUrl
             ? item.licenseUrl.split("/").pop()
             : "certificate.jpg";
+          const dayTypeByStatus = {
+            pending: diffDays > 3 ? "day-red" : "day-yellow",
+            approved: "day-green",
+            rejected: "day-orange",
+          };
 
           return {
             id: item.id,
+            status,
             initials,
             bg: index % 2 === 0 ? "#e8a020" : "#1a5a50",
-            name: item.name,
-            location: item.location,
+            name,
+            location,
             lic: item.licenseUrl ? fileName : "LIC-AP-2022-48291",
             type: "Life Insurance",
-            plan: "Pending Review",
+            plan:
+              status === "approved"
+                ? "Approved"
+                : status === "rejected"
+                  ? "Rejected"
+                  : "Pending Review",
             submitted: `Submitted ${days} ago`,
             days,
-            dayType: diffDays > 3 ? "day-red" : "day-yellow",
+            dayType: dayTypeByStatus[status] || "day-yellow",
             certificateName: fileName,
           };
         });
 
-        if (nextRows.length) {
-          setRows(nextRows);
-        }
-      } catch (error) {
-        console.warn("Unable to load advisor approvals", error);
+        setRows(nextRows);
+      } catch (fetchError) {
+        console.warn("Unable to load advisor approvals", fetchError);
+        setError("Failed to load approvals");
+        setRows([]);
+        setStats({
+          pending: 0,
+          approved: 0,
+          rejected: 0,
+          pendingPercentage: 0,
+        });
+      } finally {
+        setLoading(false);
       }
     };
 
-    loadPendingApprovals();
+    loadApprovals();
   }, []);
 
   // ── Updated filtered logic with activeFilter ──
-  const filtered = (rows || []).filter(r => {
+  const updateRowStatus = (id, status) => {
+    setRows((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) {
+          return item;
+        }
+
+        return {
+          ...item,
+          status,
+          plan:
+            status === "approved"
+              ? "Approved"
+              : status === "rejected"
+                ? "Rejected"
+                : "Pending Review",
+          dayType:
+            status === "approved"
+              ? "day-green"
+              : status === "rejected"
+                ? "day-orange"
+                : item.dayType,
+        };
+      }),
+    );
+  };
+
+  const updateStatsForStatusChange = (nextStatus) => {
+    setStats((prev) => {
+      const pending = Math.max(0, prev.pending - 1);
+      const approved =
+        nextStatus === "approved" ? prev.approved + 1 : prev.approved;
+      const rejected =
+        nextStatus === "rejected" ? prev.rejected + 1 : prev.rejected;
+      const total = pending + approved + rejected;
+
+      return {
+        pending,
+        approved,
+        rejected,
+        pendingPercentage: total ? ((pending / total) * 100).toFixed(2) : 0,
+      };
+    });
+  };
+
+  const filtered = (rows || []).filter((r) => {
     const matchSearch =
       r.name.toLowerCase().includes(search.toLowerCase()) ||
       r.location.toLowerCase().includes(search.toLowerCase()) ||
       r.type.toLowerCase().includes(search.toLowerCase());
 
-    const matchFilter =
-      !activeFilter ||
-      (activeFilter === "pending"  && (r.dayType === "day-red" || r.dayType === "day-yellow")) ||
-      (activeFilter === "approved" && r.dayType === "day-green") ||
-      (activeFilter === "rejected" && r.dayType === "day-orange");
+    const matchFilter = !activeFilter || r.status === activeFilter;
 
     return matchSearch && matchFilter;
   });
 
-  const removeSubmission = (id) => setRows((prev) => prev.filter((item) => item.id !== id));
 
   const approveSubmission = async (id) => {
     if (!id || isProcessing) return;
@@ -551,13 +603,18 @@ export default function IRDAIApprovals() {
         return;
       }
 
-      removeSubmission(id);
+      updateRowStatus(id, "approved");
+      updateStatsForStatusChange("approved");
       if (selectedSubmission?.id === id) {
+        setSelectedSubmission((prev) =>
+          prev
+            ? { ...prev, status: "approved", dayType: "day-green", plan: "Approved" }
+            : null,
+        );
         setShowModal(false);
-        setSelectedSubmission(null);
       }
-    } catch (error) {
-      console.error("Approve submission error", error);
+    } catch (approvalError) {
+      console.error("Approve submission error", approvalError);
     } finally {
       setIsProcessing(false);
     }
@@ -584,11 +641,12 @@ export default function IRDAIApprovals() {
         return;
       }
 
-      removeSubmission(selectedSubmission.id);
+      updateRowStatus(selectedSubmission.id, "rejected");
+      updateStatsForStatusChange("rejected");
       setOpenReject(false);
       setSelectedSubmission(null);
-    } catch (error) {
-      console.error("Reject submission error", error);
+    } catch (rejectError) {
+      console.error("Reject submission error", rejectError);
     } finally {
       setIsProcessing(false);
     }
@@ -701,7 +759,7 @@ export default function IRDAIApprovals() {
               <div className="panel-header">
                 <div className="panel-title-row">
                   <div className="panel-icon"><ISubmission /></div>
-                  <span className="panel-title">Pending IRDAI Submissions</span>
+                  <span className="panel-title">IRDAI Submissions</span>
                 </div>
 
                 {/* ── NEW: Pill filter buttons ── */}
@@ -779,26 +837,28 @@ export default function IRDAIApprovals() {
                         </button>
                       </div>
 
-                      <div className="flex items-center gap-2 w-full sm:w-auto">
-                        <button
-                          className="btn-approve flex-1 sm:flex-none justify-center"
-                          onClick={() => approveSubmission(r.id)}
-                        >
-                          <span className="flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white">
-                            <ICheckSm className="w-3 h-3" />
-                          </span>
-                          Approve
-                        </button>
-                        <button
-                          className="btn-reject flex-1 sm:flex-none justify-center"
-                          onClick={() => {
-                            setSelectedSubmission(r);
-                            setOpenReject(true);
-                          }}
-                        >
-                          <IXSm /> Reject
-                        </button>
-                      </div>
+                      {r.status === "pending" && (
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                          <button
+                            className="btn-approve flex-1 sm:flex-none justify-center"
+                            onClick={() => approveSubmission(r.id)}
+                          >
+                            <span className="flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white">
+                              <ICheckSm className="w-3 h-3" />
+                            </span>
+                            Approve
+                          </button>
+                          <button
+                            className="btn-reject flex-1 sm:flex-none justify-center"
+                            onClick={() => {
+                              setSelectedSubmission(r);
+                              setOpenReject(true);
+                            }}
+                          >
+                            <IXSm /> Reject
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

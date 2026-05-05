@@ -11,12 +11,12 @@ export default function IrdaiModal({ advisor, onClose, onApprove, onReject }) {
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4 py-6">
       
-      <div className="bg-white w-[560px] rounded-2xl shadow-xl overflow-hidden font-sans">
+      <div className="bg-white w-full max-w-[560px] rounded-2xl shadow-xl overflow-hidden font-sans">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-gray-100 border-b border-gray-200">
+        <div className="flex items-center justify-between px-7 py-4 bg-gray-100 border-b border-gray-200">
           <div className="flex items-center gap-2 text-[15px] font-semibold text-gray-800">
             <span>👤</span> IRDAI License
           </div>
@@ -29,7 +29,7 @@ export default function IrdaiModal({ advisor, onClose, onApprove, onReject }) {
         </div>
 
         {/* Body */}
-        <div className="px-6 py-4">
+        <div className="px-7 py-5">
 
           {/* Center vertical dotted line */}
 
@@ -38,17 +38,17 @@ export default function IrdaiModal({ advisor, onClose, onApprove, onReject }) {
             {details.map((row) => (
               <div
                 key={row.label}
-                className="grid grid-cols-2 items-center py-3 border-b border-gray-100 text-sm"
+                className="grid grid-cols-2 gap-6 items-center px-1 py-3 border-b border-gray-100 text-sm"
               >
                 <span className="text-gray-400">{row.label}</span>
-                <span className="text-gray-900 font-medium text-right">
+                <span className="text-gray-900 font-medium text-right break-words">
                   {row.value}
                 </span>
               </div>
             ))}
 
             {/* Plan Paid */}
-            <div className="grid grid-cols-2 items-center py-3 border-b border-gray-100 text-sm">
+            <div className="grid grid-cols-2 gap-6 items-center px-1 py-3 border-b border-gray-100 text-sm">
               <span className="text-gray-400">Plan Paid</span>
               <div className="flex justify-end">
                 <span className="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full flex items-center gap-1">
@@ -75,7 +75,7 @@ export default function IrdaiModal({ advisor, onClose, onApprove, onReject }) {
         </div>
 
         {/* Footer */}
-        <div className="flex gap-4 px-6 pb-5 pt-3">
+        <div className="flex gap-4 px-7 pb-6 pt-3">
           <button
             onClick={onApprove}
             className="flex-1 py-3 bg-green-100 text-green-700 font-semibold rounded-lg hover:bg-green-200"
