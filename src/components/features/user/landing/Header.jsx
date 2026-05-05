@@ -55,6 +55,18 @@ const Header = () => {
     }
   };
 
+  const handleLogout = async () => {
+  try {
+    await fetch("/api/auth/admin/logout", {
+      method: "POST",
+    });
+
+    window.location.href = "/auth/admin/login";
+  } catch (err) {
+    console.error("Logout failed", err);
+  }
+};
+
   return (
     <>
       {loading ? (
@@ -150,7 +162,7 @@ const Header = () => {
                   )}
                 </div>
 
-                <button className="flex items-center gap-2 text-[14px] leading-[16px] font-medium text-[#EF5555] font-poppins cursor-pointer px-2 py-1">
+                <button className="flex items-center gap-2 text-[14px] leading-[16px] font-medium text-[#EF5555] font-poppins cursor-pointer px-2 py-1" onClick={handleLogout}>
                   <FiLogOut size={20} />
                   Logout
                 </button>

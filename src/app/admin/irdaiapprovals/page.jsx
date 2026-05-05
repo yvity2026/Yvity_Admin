@@ -283,6 +283,17 @@ function Avatar({ initials, size = 40, bg = COLORS.gold }) {
 }
 
 function Sidebar({ activeNav, setActiveNav, onClose }) {
+    const handleLogout = async () => {
+  try {
+    await fetch("/api/auth/admin/logout", {
+      method: "POST",
+    });
+
+    window.location.href = "/auth/admin/login";
+  } catch (err) {
+    console.error("Logout failed", err);
+  }
+};
   return (
     <div style={{ background: COLORS.primary, minHeight: "100vh", width: 280, flexShrink: 0, display: "flex", flexDirection: "column" }}>
       <div className="h-[60px] bg-[#FAFAFA] flex justify-center items-center border-b border-[#155e5e]">
@@ -320,7 +331,7 @@ function Sidebar({ activeNav, setActiveNav, onClose }) {
         ))}
       </div>
 
-      <div style={{ padding: "16px 0" }}>
+      <div style={{ padding: "16px 0" }} onClick={handleLogout}>
         <div
           style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", color: "#ef4444", fontSize: 13, cursor: "pointer" }}
           onMouseEnter={(e) => { e.currentTarget.style.background = COLORS.primaryHover; }}
