@@ -12,7 +12,6 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [error, setError] = useState("");
-
   const otpRefs = useRef([]);
   const router = useRouter();
 
@@ -64,10 +63,30 @@ export default function AdminLogin() {
 
     setLoading(true);
 
-    setTimeout(() => {
-      setStep("otp"); // simulate
+    try {
+      const response = await fetch("/api/auth/admin/login/send-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ phone }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result?.error || "Failed to send OTP");
+        return;
+      }
+
+      setOtpArray(["", "", "", "", "", ""]);
+      setStep("otp");
+      setTimeout(() => otpRefs.current[0]?.focus(), 0);
+    } catch {
+      setError("Unable to send OTP right now");
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   const handleVerifyOtp = async (e) => {
@@ -81,9 +100,64 @@ export default function AdminLogin() {
 
     setLoading(true);
 
-    setTimeout(() => {
-      router.push("/admin");
-    }, 800);
+    try {
+      const response = await fetch("/api/auth/admin/login/verify-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ phone, otp }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result?.error || "Failed to verify OTP");
+        return;
+      }
+
+      router.replace("/admin");
+      router.refresh();
+    } catch {
+      setError("Unable to verify OTP right now");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setError("");
+
+    if (!isValidPhone(phone)) {
+      setError("Enter valid 10-digit number");
+      return;
+    }
+
+    setResending(true);
+
+    try {
+      const response = await fetch("/api/auth/admin/login/send-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ phone }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result?.error || "Failed to resend OTP");
+        return;
+      }
+
+      setOtpArray(["", "", "", "", "", ""]);
+      setTimeout(() => otpRefs.current[0]?.focus(), 0);
+    } catch {
+      setError("Unable to resend OTP right now");
+    } finally {
+      setResending(false);
+    }
   };
 
   return (
@@ -189,7 +263,11 @@ export default function AdminLogin() {
               <div className="flex gap-3">
                 <button
                   type="button"
-                  onClick={() => setStep("phone")}
+                  onClick={() => {
+                    setStep("phone");
+                    setOtpArray(["", "", "", "", "", ""]);
+                    setError("");
+                  }}
                   className="flex-1 bg-gray-200 py-3 rounded-xl hover:bg-gray-300 transition"
                 >
                   Back
