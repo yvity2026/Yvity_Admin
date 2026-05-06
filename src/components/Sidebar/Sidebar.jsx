@@ -367,6 +367,7 @@ export default function AppShell({ children }) {
           </div>
           <hr className="mt-5 border-t border-[#107171]" />
           {/* sidebar content */}
+          
           <div className="flex-1 overflow-y-auto no-scrollbar scroll-smooth overflow-x-visible">
             {menuItems.map((section, i) => (
               <div key={i} className="mb-5">
