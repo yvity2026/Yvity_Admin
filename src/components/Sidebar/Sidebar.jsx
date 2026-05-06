@@ -22,11 +22,7 @@ import {
   MdOutlineLogout,
   MdOutlinePayment,
 } from "react-icons/md";
-import { PiEyeBold } from "react-icons/pi";
-import { RiHomeLine, RiTimeLine } from "react-icons/ri";
-import { RxPeople } from "react-icons/rx";
 import { FaPlus } from "react-icons/fa6";
-import { createPortal } from "react-dom";
 import clsx from "clsx";
 import { useAdmin } from "@/context/AuthAdminContext";
 import { useSidebar } from "@/context/SidebarContext";
@@ -37,15 +33,15 @@ import { BsShield } from "react-icons/bs";
 import { SiWechat } from "react-icons/si";
 import { IoSettingsOutline } from "react-icons/io5";
 
-function clearBrowserCookies() {
-  document.cookie.split(";").forEach((cookie) => {
-    const name = cookie.split("=")[0]?.trim();
-    if (!name) return;
+// function clearBrowserCookies() {
+//   document.cookie.split(";").forEach((cookie) => {
+//     const name = cookie.split("=")[0]?.trim();
+//     if (!name) return;
 
-    document.cookie = `${name}=; Max-Age=0; path=/`;
-    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-  });
-}
+//     document.cookie = `${name}=; Max-Age=0; path=/`;
+//     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+//   });
+// }
 
 const menuItems = [
   {
@@ -138,44 +134,28 @@ export default function AppShell({ children }) {
     },
     "/admin/customers": {
       title: "Customers",
-      actions: [],
+      actions: ["profile", "notifications"],
     },
     "/admin/irdaiapprovals": {
       title: "IRDAI Approvals",
-      actions: ["Add Entry"],
+      actions: ["profile", "notifications"],
     },
     "/admin/testimonials": {
       title: "Testimonials",
-      actions: ["Add Services"],
+      actions: ["profile", "notifications"],
     },
     "/admin/payments": {
       title: "Payments",
-      actions: ["Add Achievement"],
+      actions: ["profile", "notifications"],
     },
     "/admin/subscriptions": {
       title: "Subscriptions",
-      actions: ["Request Testimonials"],
+      actions: ["profile", "notifications"],
     },
     "/admin/setting": {
       title: "Settings",
-      actions: ["Add Photos"],
+      actions: ["profile", "notifications"],
     },
-    // "/advisor/yvity-score": {
-    //   title: "YVITY Score",
-    //   actions: [],
-    // },
-    // "/advisor/subscriptions": {
-    //   title: "My Subscriptions",
-    //   actions: [],
-    // },
-    // "/advisor/recommendations": {
-    //   title: "Recommendations",
-    //   actions: ["Share Profile"],
-    // },
-    // "/advisor/settings": {
-    //   title: "Settings",
-    //   actions: [],
-    // },
   };
 
   const normalizedPath = pathname.replace(/\/+$/, "");
@@ -269,13 +249,12 @@ export default function AppShell({ children }) {
       setLogoutLoading(true);
       const res = await fetch("/api/auth/logout", { method: "POST" });
       const data = await res.json().catch(() => ({}));
-
-      clearBrowserCookies();
+    //   clearBrowserCookies();
       setAdmin(null);
       window.location.href = data.redirect_url || AUTH_FALLBACK_PATH;
     } catch (error) {
       console.error("Logout failed:", error);
-      clearBrowserCookies();
+    //   clearBrowserCookies();
       setAdmin(null);
       window.location.href = AUTH_FALLBACK_PATH;
     }
@@ -288,6 +267,7 @@ export default function AppShell({ children }) {
   //   if (!pathname.includes("/advisor")) {
   //     return <>{children}</>;
   //   }
+  const role = admin?.role === "super_admin" ? "SUPER ADMIN" : "ADMIN";
   return (
     <div className="min-h-screen flex">
       {/* SIDEBAR (FULL HEIGHT) */}
@@ -339,14 +319,14 @@ export default function AppShell({ children }) {
                   className="object-cover"
                 />
               ) : (
-                <span className="text-white font-semibold">Admin</span>
+                <span className="text-white font-semibold">KM</span>
               )}
             </div>
 
             {/* Name */}
             {!collapsed && (
               <p className="text-[#F8F6F1] font-poppins text-base font-semibold">
-                Admin
+                {admin?.name}
               </p>
             )}
 
@@ -361,13 +341,13 @@ export default function AppShell({ children }) {
               <FaCrown className={collapsed ? "text-base" : "text-sm"} />
 
               {!collapsed && (
-                <p className="text-accent text-xs font-semibold">Gold Member</p>
+                <p className="text-accent text-xs font-semibold">{role}</p>
               )}
             </div>
           </div>
           <hr className="mt-5 border-t border-[#107171]" />
           {/* sidebar content */}
-          
+
           <div className="flex-1 overflow-y-auto no-scrollbar scroll-smooth overflow-x-visible">
             {menuItems.map((section, i) => (
               <div key={i} className="mb-5">
