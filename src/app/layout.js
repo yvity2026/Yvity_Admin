@@ -1,4 +1,3 @@
-
 // import {
 //   Geist,
 //   Geist_Mono,
@@ -76,8 +75,6 @@
 //   );
 // }
 
-
-
 import {
   Geist,
   Geist_Mono,
@@ -89,6 +86,10 @@ import "./globals.css";
 
 // ✅ FIXED HERE
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "@/context/AuthAdminContext";
+import { ModalProvider } from "@/context/ModalContext";
+import { SidebarProvider } from "@/context/SidebarContext";
+import AppShell from "@/components/Sidebar/Sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -127,7 +128,7 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${nunito.variable} ${poppins.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${nunito.variable} ${poppins.variable} h-full antialiased bg-[#F8F6F1]`}
     >
     <body className={`${poppins.className} min-h-full flex flex-col`}>
         <main className="flex-1 flex flex-col">
@@ -139,7 +140,15 @@ export default function RootLayout({ children }) {
               },
             }}
           />
-          {children}
+          <AuthProvider>
+            <ModalProvider>
+              <AppShell>
+              <SidebarProvider>
+                {children}
+                </SidebarProvider>
+              </AppShell>
+            </ModalProvider>
+          </AuthProvider>
         </main>
       </body>
     </html>

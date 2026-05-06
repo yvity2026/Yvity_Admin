@@ -604,7 +604,7 @@ export default function IrdaiModal({ advisor, onClose, onApprove, onReject }) {
             onClick={onClose}
             className="w-[30px] h-[30px] rounded-full bg-[#F0F4F3] border-none cursor-pointer text-[13px] text-gray-400 flex items-center justify-center"
           >
-            ✕
+            <FiX size={18} />
           </button>
         </div>
 
@@ -661,7 +661,6 @@ export default function IrdaiModal({ advisor, onClose, onApprove, onReject }) {
               View Document
             </button>
           </div>
-
         </div>
 
         {/* ── Buttons — pinned at bottom ── */}
@@ -676,6 +675,7 @@ export default function IrdaiModal({ advisor, onClose, onApprove, onReject }) {
             </svg>
             Approve
           </button>
+
           <button
             onClick={onReject}
             className="flex-1 flex items-center justify-center gap-[7px] bg-[#FEF0F0] border-none rounded-[10px] py-[13px] text-[13.5px] font-semibold text-red-600 cursor-pointer"
@@ -686,7 +686,6 @@ export default function IrdaiModal({ advisor, onClose, onApprove, onReject }) {
             Reject
           </button>
         </div>
-
       </div>
     </div>
   );
