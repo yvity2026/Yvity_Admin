@@ -130,7 +130,7 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${nunito.variable} ${poppins.variable} h-full antialiased bg-[#F8F6F1]`}
     >
-      <body className="min-h-full flex flex-col font-poppins">
+    <body className={`${poppins.className} min-h-full flex flex-col`}>
         <main className="flex-1 flex flex-col">
           <Toaster
             position="top-right"

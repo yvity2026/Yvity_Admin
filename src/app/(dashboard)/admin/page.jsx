@@ -5,12 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaUsers } from "react-icons/fa6";
 
-import { Poppins } from "next/font/google";
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
-
 // ── Sidebar nav items ─────────────────────────────────────────────
 const NAV_ITEMS = {
   MAIN: [
@@ -31,56 +25,39 @@ const NAV_ITEMS = {
   ],
 };
 
-const COLORS = {
-  primary:       "#0A4A4A",
-  primaryHover:  "#155e5e",
-  primaryBorder: "#155e5e",
-  accent:        "#8bc34a",
-  gold:          "#d4a017",
-};
-
 // ── Sidebar ───────────────────────────────────────────────────────
-function Sidebar({ activeNav, setActiveNav, onClose, showSidebar, onLogout }) {
+function Sidebar({ activeNav, setActiveNav, onClose, showSidebar }) {
   return (
     <div
-      className={`fixed inset-y-0 left-0 z-40 transition-transform duration-300
+      className={`fixed inset-y-0 left-0 z-40 transition-transform duration-300 w-[240px] flex flex-col h-screen bg-[#0A4A4A]
         ${showSidebar ? "translate-x-0" : "-translate-x-full"}
         md:translate-x-0`}
-     style={{
-  background: COLORS.primary, width: 240,
-  display: "flex", flexDirection: "column",
-  height: "100vh",        
-     
-}}
     >
       {/* Logo */}
-      {/* <div className="h-[60px] bg-[#FAFAFA] flex justify-center items-center border-b border-[#155e5e]"> */}
-        {/* <img */}
-          {/* // src="/images/Adivisor/Navbar/navlogo.png" */}
-          {/* // alt="logo" */}
-          {/* // className="h-10 w-auto object-contain" */}
-        {/* /> */}
-      {/* </div> */}
+      <div className="h-[60px] bg-[#FAFAFA] flex justify-center items-center border-b border-[#155e5e]">
+        <img
+          src="/images/Adivisor/Navbar/navlogo.png"
+          alt="logo"
+          className="h-10 w-auto object-contain"
+        />
+      </div>
 
       {/* User block */}
-      {/* <div style={{ padding: "14px 16px", borderBottom: `1px solid ${COLORS.primaryBorder}`, display: "flex", alignItems: "center", gap: 10 }}> */}
-        {/* <div style={{ */}
-          {/* // width: 40, height: 40, borderRadius: "50%", */}
-          {/* // background: COLORS.gold, color: "#fff", */}
-          {/* // display: "flex", alignItems: "center", justifyContent: "center", */}
-          {/* // fontWeight: 700, fontSize: 14, flexShrink: 0, */}
-        {/* // }}>KM</div> */}
-        {/* <div> */}
-          {/* <div style={{ color: "#fff", fontSize: 16, fontWeight: 600 }}>Admin</div> */}
-          {/* <div style={{ color: COLORS.accent, fontSize: 10, marginTop: 1 }}>● Super Administrator</div> */}
-        {/* </div> */}
-      {/* </div> */}
+      <div className="px-4 py-[14px] border-b border-[#155e5e] flex items-center gap-[10px]">
+        <div className="w-10 h-10 rounded-full bg-[#d4a017] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+          KM
+        </div>
+        <div>
+          <div className="text-white text-base font-semibold">Admin</div>
+          <div className="text-[#8bc34a] text-[10px] mt-[1px]">● Super Administrator</div>
+        </div>
+      </div>
 
       {/* Nav items */}
-      <div style={{ flex: 1, overflowY: "auto" , minHeight: 0}}>
+      <div className="flex-1 overflow-y-auto min-h-0">
         {Object.entries(NAV_ITEMS).map(([section, items]) => (
           <div key={section}>
-            <div style={{ color: "#5fa8a8", fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5, padding: "14px 16px 4px" }}>
+            <div className="text-[#5fa8a8] text-[9px] font-bold uppercase tracking-[1.5px] px-4 pt-[14px] pb-1">
               {section}
             </div>
             {items.map((item) => {
@@ -89,20 +66,15 @@ function Sidebar({ activeNav, setActiveNav, onClose, showSidebar, onLogout }) {
                 <Link
                   key={item.label}
                   href={item.href}
-                  style={{ textDecoration: "none" }}
+                  className="no-underline"
                   onClick={() => { setActiveNav(item.label); onClose && onClose(); }}
                 >
-                  <div style={{
-                    display: "flex", alignItems: "center", gap: 10,
-                    padding: "10px 16px", cursor: "pointer", fontSize: 14,
-                    color: isActive ? "#fff" : "#a3d0d0",
-                    fontWeight: 600,
-                    background: isActive ? COLORS.primaryHover : "transparent",
-                    borderLeft: isActive ? `3px solid ${COLORS.accent}` : "3px solid transparent",
-                    transition: "background 0.18s",
-                  }}
-                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "rgba(255,255,255,0.07)"; }}
-                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
+                  <div
+                    className={`flex items-center gap-[10px] px-4 py-[10px] cursor-pointer text-sm font-semibold transition-colors duration-[180ms]
+                      ${isActive
+                        ? "bg-[#155e5e] text-white border-l-[3px] border-[#8bc34a]"
+                        : "text-[#a3d0d0] border-l-[3px] border-transparent hover:bg-white/[0.07]"
+                      }`}
                   >
                     {item.icon}
                     {item.label}
@@ -115,13 +87,8 @@ function Sidebar({ activeNav, setActiveNav, onClose, showSidebar, onLogout }) {
       </div>
 
       {/* Logout */}
-      <div style={{ padding: "16px 0", borderTop: `1px solid ${COLORS.primaryBorder}` }}>
-        <div
-          style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", color: "#ef4444", fontSize: 13, cursor: "pointer", transition: "background 0.18s" }}
-          onClick={onLogout}
-          onMouseEnter={e => { e.currentTarget.style.background = COLORS.primaryHover; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
-        >
+      <div className="py-4 border-t border-[#155e5e]">
+        <div className="flex items-center gap-[10px] px-4 py-[10px] text-red-500 text-[13px] cursor-pointer transition-colors duration-[180ms] hover:bg-[#155e5e]">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}>
             <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" strokeWidth="2"/>
           </svg>
@@ -133,50 +100,44 @@ function Sidebar({ activeNav, setActiveNav, onClose, showSidebar, onLogout }) {
 }
 
 // ── Topbar ────────────────────────────────────────────────────────
-// function Topbar({ onHamburger }) {
-//   return (
-//     <div
-//       className="fixed top-0 right-0 left-0 md:left-[240px] flex items-center justify-between bg-white px-6 border-b border-gray-200 z-50"
-//       style={{ height: "60px" }}
-//     >
-//       <div style={{ display: "flex", alignItems: "center" }}>
-//         {/* Hamburger — visible on mobile only */}
-//       <button
-//   onClick={onHamburger}
-//   aria-label="Open menu"
-//   className="flex md:hidden items-center justify-center p-1 rounded-md mr-2"
-// >
-//   <svg width="22" height="22" fill="none" stroke="#374151" viewBox="0 0 24 24">
-//     <path d="M4 6h16M4 12h16M4 18h16" strokeWidth="2" strokeLinecap="round" />
-//   </svg>
-// </button>
-//         <span style={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>Overview</span>
-//       </div>
+function Topbar({ onHamburger }) {
+  return (
+    <div className="fixed top-0 right-0 left-0 md:left-[240px] flex items-center justify-between bg-white px-6 border-b border-gray-200 z-50 h-[60px]">
+      <div className="flex items-center">
+        {/* Hamburger — visible on mobile only */}
+        <button
+          onClick={onHamburger}
+          aria-label="Open menu"
+          className="flex md:hidden items-center justify-center p-1 rounded-md mr-2"
+        >
+          <svg width="22" height="22" fill="none" stroke="#374151" viewBox="0 0 24 24">
+            <path d="M4 6h16M4 12h16M4 18h16" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </button>
+        <span className="text-base font-bold text-gray-900">Overview</span>
+      </div>
 
-//       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-//         <select style={{ background: "#f3f4f6", fontSize: 13, padding: "6px 12px", borderRadius: 6, border: "none", outline: "none", cursor: "pointer" }}>
-//           <option value="day">Day</option>
-//           <option value="week">Week</option>
-//           <option value="month">Month</option>
-//         </select>
+      <div className="flex items-center gap-3">
+        <select className="bg-gray-100 text-[13px] px-3 py-1.5 rounded-md border-none outline-none cursor-pointer">
+          <option value="day">Day</option>
+          <option value="week">Week</option>
+          <option value="month">Month</option>
+        </select>
 
-//         <div style={{ position: "relative" }}>
-//           <svg width="20" height="20" fill="none" stroke="#6b7280" viewBox="0 0 24 24">
-//             <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeWidth="2"/>
-//           </svg>
-//           <div style={{ width: 8, height: 8, background: "#f59e0b", borderRadius: "50%", position: "absolute", top: -2, right: -2 }} />
-//         </div>
+        <div className="relative">
+          <svg width="20" height="20" fill="none" stroke="#6b7280" viewBox="0 0 24 24">
+            <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeWidth="2"/>
+          </svg>
+          <div className="w-2 h-2 bg-amber-400 rounded-full absolute -top-0.5 -right-0.5" />
+        </div>
 
-//         <div style={{
-//           width: 36, height: 36, borderRadius: "50%",
-//           background: COLORS.gold, color: "#fff",
-//           display: "flex", alignItems: "center", justifyContent: "center",
-//           fontWeight: 700, fontSize: 12,
-//         }}>KM</div>
-//       </div>
-//     </div>
-//   );
-// }
+        <div className="w-9 h-9 rounded-full bg-[#d4a017] text-white flex items-center justify-center font-bold text-xs">
+          KM
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ── Data ──────────────────────────────────────────────────────────
 const CITIES = [
@@ -197,113 +158,91 @@ const SERVICES = [
 ];
 
 const COMPANIES = [
-  { letter: "H", name: "HDFC Life",    count: 312, pct: 80, bg: "#f0fdfa", border: "#99f6e4", letterBg: "#0f766e", bar: "#0f766e" },
-  { letter: "L", name: "LIC of India", count: 194, pct: 50, bg: "#eff6ff", border: "#bfdbfe", letterBg: "#2563eb", bar: "#2563eb" },
-  { letter: "S", name: "Star Health",  count: 176, pct: 46, bg: "#fefce8", border: "#fde68a", letterBg: "#ca8a04", bar: "#ca8a04" },
-  { letter: "N", name: "New India",    count: 138, pct: 36, bg: "#fef2f2", border: "#fecaca", letterBg: "#dc2626", bar: "#dc2626" },
+  { letter: "H", name: "HDFC Life",    count: 312, pct: 88, bg: "#f0fdfa", border: "#99f6e4", letterBg: "#195FA5", bar: "#195FA5" },
+  { letter: "L", name: "LIC of India", count: 194, pct: 55, bg: "#eff6ff", border: "#bfdbfe", letterBg: "#3B6E10", bar: "#3B6E10" },
+  { letter: "S", name: "Star Health",  count: 176, pct: 50, bg: "#fefce8", border: "#fde68a", letterBg: "#824E0E", bar: "#824E0E" },
+  { letter: "N", name: "New India",    count: 138, pct: 39, bg: "#fef2f2", border: "#fecaca", letterBg: "#993C1D", bar: "#993C1D" },
 ];
 
 const ROLES = [
-  { label: "Senior Advisor",   count: "194",   pct: 55,  color: "#0f766e" },
-  { label: "Junior Advisor",   count: "194",   pct: 60,  color: "#ca8a04" },
-  { label: "Team Leader",      count: "194",   pct: 65,  color: "#2563eb" },
-  { label: "Branch Manager",   count: "194",   pct: 56,  color: "#f97316" },
-  { label: "Trailing Advisor", count: "194",   pct: 30,  color: "#16a34a" },
-  { label: "LIC of India",     count: "194",   pct: 60,  color: "#7c3aed" },
-  { label: "LIC of India",     count: "194",   pct: 65,  color: "#0f766e" },
+  { label: "Senior Advisor",   count: "194",   pct: 55,  color: "#1A6CA2" },
+  { label: "Junior Advisor",   count: "194",   pct: 60,  color: "#3B6E10" },
+  { label: "Team Leader",      count: "194",   pct: 65,  color: "#844D0A" },
+  { label: "Branch Manager",   count: "194",   pct: 56,  color: "#534AB7" },
+  { label: "Trailing Advisor", count: "194",   pct: 30,  color: "#E8971A" },
+  { label: "LIC of India",     count: "194",   pct: 60,  color: "#888888" },
+  { label: "LIC of India",     count: "194",   pct: 65,  color: "#96C458" },
   { label: "Total Advisor",    count: "1,284", pct: 100, color: "#dc2626" },
 ];
 
 const BAR_MONTHS = [
-  { m: "Oct", val: "₹4.2L", h: 58 },
-  { m: "Nov", val: "₹4.3L", h: 62 },
-  { m: "Dec", val: "₹4.2L", h: 58 },
-  { m: "Jan", val: "₹4.3L", h: 62 },
-  { m: "Feb", val: "₹4.1L", h: 56 },
-  { m: "Mar", val: "₹4.5L", h: 68, gold: true },
+  { m: "Oct", val: "₹4.2L", h: 42 },
+  { m: "Nov", val: "₹4.3L", h: 58 },
+  { m: "Dec", val: "₹4.2L", h: 42 },
+  { m: "Jan", val: "₹4.3L", h: 58 },
+  { m: "Feb", val: "₹4.1L", h: 38 },
+  { m: "Mar", val: "₹4.5L", h: 90, gold: true },
 ];
 
-// ── Mini Donut (animated) ─────────────────────────────────────────
+// ── Mini Donut ────────────────────────────────────────────────────
 function MiniDonut({ pct, color, label, count }) {
-  const [hovered, setHovered] = useState(false);
   const r = 14, circ = 2 * Math.PI * r;
-  const targetDash = (pct / 100) * circ;
-  const [animDash, setAnimDash] = useState(0);
-  const rafRef = useRef(null);
-  const startRef = useRef(null);
-
-  useEffect(() => {
-    const duration = 900;
-    const animate = (ts) => {
-      if (!startRef.current) startRef.current = ts;
-      const elapsed = ts - startRef.current;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setAnimDash(eased * targetDash);
-      if (progress < 1) rafRef.current = requestAnimationFrame(animate);
-    };
-    rafRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [targetDash]);
-
-  useEffect(() => {
-    cancelAnimationFrame(rafRef.current);
-    const to = hovered ? circ : targetDash;
-    const duration = 400;
-    startRef.current = null;
-    let startVal = animDash;
-    const animate = (ts) => {
-      if (!startRef.current) { startRef.current = ts; startVal = animDash; }
-      const elapsed = ts - startRef.current;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setAnimDash(startVal + (to - startVal) * eased);
-      if (progress < 1) rafRef.current = requestAnimationFrame(animate);
-    };
-    rafRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [hovered]);
+  const dash = (pct / 100) * circ;
 
   return (
-    <div
-      className="flex flex-col items-center gap-1"
-      style={{ cursor: "pointer", transition: "transform 0.25s ease", transform: hovered ? "scale(1.12)" : "scale(1)" }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <div className="relative w-14 h-14">
-        <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-          <circle cx="18" cy="18" r={r} fill="none" stroke="#e5e7eb" strokeWidth="4" />
-          <circle cx="18" cy="18" r={r} fill="none" stroke={color} strokeWidth={hovered ? 5 : 4}
-            strokeDasharray={`${animDash} ${circ}`}
-            style={{ transition: "stroke-width 0.25s ease, filter 0.25s ease", filter: hovered ? `drop-shadow(0 0 4px ${color}88)` : "none" }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold" style={{ color }}>{pct}%</div>
+    <div className="flex flex-col items-center gap-1">
+      {label !== "Total Advisor" && (
+        <div className="relative w-14 h-14">
+          <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+            <circle cx="18" cy="18" r={r} fill="none" stroke="#e5e7eb" strokeWidth="4" />
+            <circle
+              cx="18" cy="18" r={r}
+              fill="none"
+              stroke={color}
+              strokeWidth="4"
+              strokeDasharray={`${dash} ${circ}`}
+            />
+          </svg>
+          <div
+            className="absolute inset-0 flex items-center justify-center text-[10px] font-bold"
+            style={{ color }}
+          >
+            {pct}%
+          </div>
+        </div>
+      )}
+
+      <div
+        className={`font-poppins text-gray-900 ${
+          label === "Total Advisor"
+            ? "text-xl font-semibold"
+            : "text-sm font-medium"
+        }`}
+      >
+        {count}
       </div>
-      <div className="text-xs font-bold text-gray-800">{count}</div>
-      <div className="text-[10px] text-gray-400 text-center leading-tight">{label}</div>
+
+      <div className="text-[10px] font-medium text-gray-400 text-center leading-tight">
+        {label}
+      </div>
     </div>
   );
 }
 
-// ── Bar Chart — FIXED: extra top padding so tallest label is never clipped ──
+// ── Bar Chart ─────────────────────────────────────────────────────
 function BarChart() {
   const [hoveredIdx, setHoveredIdx] = useState(null);
-  // Added labelPad=18 so labels above the tallest bar are never clipped
-  const W = 450, H = 90, bottomPad = 25, labelPad = 18, barW = 28;
+  const W = 450, H = 130, bottomPad = 25, labelPad = 18, barW = 28;
   const count = BAR_MONTHS.length;
   const spaceBetween = (W - barW * count) / (count - 1);
   const maxVal = Math.max(...BAR_MONTHS.map(b => b.h));
 
   return (
-    <svg viewBox={`0 0 ${W} ${H + bottomPad + labelPad}`} className="w-full" style={{ height: 120 }}>
-      {/* baseline shifted down by labelPad */}
+    <svg viewBox={`0 0 ${W} ${H + bottomPad + labelPad}`} className="w-full" style={{ height: 180 }}>
       <line x1="0" y1={H + labelPad} x2={W} y2={H + labelPad} stroke="#e5e7eb" strokeWidth="2" />
       {BAR_MONTHS.map(({ m, val, h, gold }, i) => {
         const x = i * (barW + spaceBetween);
         const barH = (h / maxVal) * (H - 10);
-        // y origin now starts from labelPad so bars sit on the shifted baseline
         const y = H + labelPad - barH;
         const isHovered = hoveredIdx === i;
         const scale = isHovered ? 1.12 : 1;
@@ -311,12 +250,11 @@ function BarChart() {
         return (
           <g key={m} style={{ cursor: "pointer" }} onMouseEnter={() => setHoveredIdx(i)} onMouseLeave={() => setHoveredIdx(null)}>
             <rect x={x - 6} y={0} width={barW + 12} height={H + bottomPad + labelPad} fill="transparent" />
-            {/* label — always has room above because of labelPad */}
             <text
               x={cx}
               y={isHovered ? y - 6 : y - 4}
               textAnchor="middle"
-              fontSize={isHovered ? "11" : "11"}
+              fontSize={isHovered ? "12" : "12"}
               fontWeight={isHovered ? "700" : "600"}
               fill={isHovered ? (gold ? "#C9A227" : "#1a5c5a") : "#374151"}
               style={{ transition: "all 0.2s ease" }}
@@ -329,17 +267,17 @@ function BarChart() {
               width={barW * scale}
               height={barH * (isHovered ? 1.12 : 1)}
               rx="6"
-              fill={gold ? "#C9A227" : "#1a5c5a"}
+              fill={gold ? "#F59E0B" : "#1a5c5a"}
               style={{
                 transition: "all 0.2s cubic-bezier(0.34,1.56,0.64,1)",
-                filter: isHovered ? `drop-shadow(0 4px 8px ${gold ? "#C9A22766" : "#1a5c5a66"})` : "none",
+                filter: isHovered ? `drop-shadow(0 4px 8px ${gold ? "#EBC88D" : "#F59E0B"})` : "none",
               }}
             />
             <text
               x={cx}
               y={H + labelPad + 18}
               textAnchor="middle"
-              fontSize="11"
+              fontSize="12"
               fill={isHovered ? "#374151" : "#9ca3af"}
               fontWeight={isHovered ? "600" : "400"}
               style={{ transition: "all 0.2s ease" }}
@@ -409,26 +347,50 @@ function PlanDonut() {
 
   return (
     <div className="flex items-center gap-5">
-      <div className="relative flex-shrink-0" style={{ width: 130, height: 130, cursor: "pointer", transition: "transform 0.3s ease", transform: hovered ? "scale(1.08)" : "scale(1)" }} onMouseEnter={() => handleHover(true)} onMouseLeave={() => handleHover(false)}>
+      {/* Circle */}
+      <div className="flex items-center justify-center w-[97px] h-[97px] relative flex-shrink-0">
         <svg viewBox="0 0 36 36" className="w-full h-full">
-          {animSegments.map(({ color, dash, offsetVal }, i) => (
-            <circle key={i} cx="18" cy="18" r={r} fill="transparent" stroke={color} strokeWidth={hovered ? 5 : 4} strokeDasharray={`${dash} ${circ}`} strokeDashoffset={offsetVal} transform="rotate(-90 18 18)" style={{ transition: "stroke-width 0.3s ease, filter 0.3s ease", filter: hovered ? `drop-shadow(0 0 3px ${color}88)` : "none" }} />
-          ))}
-          <text x="18" y="17" textAnchor="middle" fontSize="5.5" fontWeight="700" fill="#1f2937">1,284</text>
-         
-          <text x="18" y="21.5" textAnchor="middle" fontSize="2.8" fill="#9ca3af">total</text>
+          {segments.map(({ color, pct }, i) => {
+            const dash = (pct / 100) * circ;
+            const offset =
+              i === 0 ? 0 :
+              i === 1 ? -(segments[0].pct / 100) * circ :
+              -((segments[0].pct + segments[1].pct) / 100) * circ;
+            return (
+              <circle
+                key={i}
+                cx="18" cy="18" r={r}
+                fill="transparent"
+                stroke={color}
+                strokeWidth="4"
+                strokeDasharray={`${dash} ${circ}`}
+                strokeDashoffset={offset}
+                transform="rotate(-90 18 18)"
+              />
+            );
+          })}
+          <text x="18" y="17" textAnchor="middle" fontSize="6.5" fontWeight="700">
+            1,284
+          </text>
+          <text x="18" y="21.5" textAnchor="middle" fontSize="3.8" fill="#9ca3af">
+            total
+          </text>
         </svg>
       </div>
-      <div className="space-y-2">
+
+      {/* Labels */}
+      <div className="space-y-2 w-full">
         {[
-          { dot: "#ca8a04", label: "Gold",   val: "412 (33%)" },
-          { dot: "#93c5fd", label: "Silver", val: "210 (16%)" },
-          { dot: "#0f766e", label: "Free",   val: "662 (51%)" },
+          { dot: "#f59e0b", label: "Gold",   val: "412 (32%)" },
+          { dot: "#0f766e", label: "Silver", val: "210 (16%)" },
+          { dot: "#e5e7eb", label: "Free",   val: "662 (52%)" },
         ].map(({ dot, label, val }) => (
-          <div key={label} className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: dot }} />
-            <span className="text-xs text-gray-700 w-10">{label}</span>
-            <span className="text-xs text-gray-400">{val}</span>
+          <div key={label} className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: dot }} />
+              <span className="text-sm text-gray-700">{label}</span>
+            </div>
+            <span className="text-[12px] text-gray-500 font-bold">{val}</span>
           </div>
         ))}
       </div>
@@ -438,89 +400,41 @@ function PlanDonut() {
 
 // ── Line Chart ────────────────────────────────────────────────────
 function LineChart() {
-  const [hoveredIdx, setHoveredIdx] = useState(null);
-
   const W = 400;
-  const H = 120;
-
-  const dataX = [50, 110, 170, 230, 290, 350];
-  const dataY = [90, 75, 60, 55, 40, 20];
-
+  const H = 130;
+  const paddingLeft = 38;
+  const paddingBottom = 20;
+  const paddingTop = 10;
+  const chartW = W - paddingLeft;
+  const chartH = H - paddingBottom - paddingTop;
+  const yMin = 400;
+  const yMax = 1500;
+  const yLabels = [1400, 1200, 1000, 800, 400];
+  const rawData = [500, 700, 850, 900, 1050, 1400];
   const months = ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
-  const yLabels = ["1400", "1200", "1000", "800", "600", "400"];
-
-  const pts = dataX.map((x, i) => `${x},${dataY[i]}`).join(" ");
-
-  // const areaPath =
-  //   `M${dataX[0]},${dataY[0]} ` +
-  //   dataX.slice(1).map((x, i) => `L${x},${dataY[i + 1]}`).join(" ") +
-  //   ` L${dataX[dataX.length - 1]},${H} L${dataX[0]},${H}Z`;
+  const count = rawData.length;
+  const toX = (i) => paddingLeft + (i / (count - 1)) * chartW;
+  const toY = (val) =>
+    paddingTop + chartH - ((val - yMin) / (yMax - yMin)) * chartH;
+  const pts = rawData.map((v, i) => `${toX(i)},${toY(v)}`).join(" ");
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-[180px]">
-      
-      {/* 🔥 Y AXIS LINE (LIGHT LIKE DESIGN) */}
-      <line x1="40" y1="11" x2="40" y2={H} stroke="#e5e7eb" />
-
-      {/* 🔥 X AXIS LINE */}
-      <line x1="40" y1={H} x2={W - 10} y2={H} stroke="#e5e7eb" />
-
-      {/* 🔥 Y AXIS VALUES */}
-      {yLabels.map((label, i) => (
-        <text
-          key={i}
-          x="5"
-          y={15 + i * 18}
-          fontSize="9"
-          fill="#9ca3af"
-        >
-          {label}
+    <svg viewBox={`0 0 ${W} ${H + 4}`} className="w-full" style={{ height: 180 }}>
+      {yLabels.map((val) => (
+        <line key={val} x1={paddingLeft} y1={toY(val)} x2={W} y2={toY(val)} stroke="#e5e7eb" strokeWidth="1" />
+      ))}
+      <line x1={paddingLeft} y1={toY(yMin)} x2={W} y2={toY(yMin)} stroke="#e5e7eb" strokeWidth="1" />
+      {yLabels.map((val) => (
+        <text key={val} x={paddingLeft - 4} y={toY(val) + 4} textAnchor="end" fontSize="10" fill="#9ca3af">
+          {val}
         </text>
       ))}
-
-      {/* 🔥 AREA */}
-      {/* <defs>
-        <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#0f766e" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="#0f766e" stopOpacity="0" />
-        </linearGradient>
-      </defs> */}
-
-      {/* <path d={areaPath} fill="url(#areaFill)" /> */}
-
-      {/* 🔥 LINE */}
-      <polyline
-        points={pts}
-        fill="none"
-        stroke="#0f766e"
-        strokeWidth="2.5"
-      />
-
-      {/* 🔥 POINTS */}
-      {dataX.map((x, i) => {
-        const isLast = i === dataX.length - 1;
-
-        return (
-          <circle
-            key={i}
-            cx={x}
-            cy={dataY[i]}
-            r="4"
-            fill={isLast ? "#C9A227" : "#0f766e"}
-          />
-        );
-      })}
-
-      {/* 🔥 MONTH LABELS */}
+      <polyline points={pts} fill="none" stroke="#0f766e" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+      {rawData.map((val, i) => (
+        <circle key={i} cx={toX(i)} cy={toY(val)} r="3.5" fill={i === rawData.length - 1 ? "#C9A227" : "#eef1f1"} />
+      ))}
       {months.map((m, i) => (
-        <text
-          key={m}
-          x={dataX[i]}
-          y={H - 2}
-          textAnchor="middle"
-          fontSize="10"
-          fill="#9ca3af"
-        >
+        <text key={m} x={toX(i)} y={H + 2} textAnchor="middle" fontSize="11" fill="#9ca3af">
           {m}
         </text>
       ))}
@@ -569,12 +483,37 @@ function CityRow({ name, count, pct, color }) {
   }, [hovered]);
 
   return (
-    <div className="flex items-center gap-2" style={{ cursor: "default", padding: "3px 6px", borderRadius: 8, transition: "background 0.2s ease, transform 0.2s ease", background: hovered ? `${color}11` : "transparent", transform: hovered ? "translateX(4px)" : "translateX(0)" }} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
-      <span className="text-[11px] flex-shrink-0" style={{ width: 76, color: hovered ? color : "#374151", fontWeight: hovered ? 600 : 400, transition: "color 0.2s ease" }}>{name}</span>
+    <div
+      className="flex items-center gap-2 cursor-default px-1.5 py-[3px] rounded-lg transition-all duration-200"
+      style={{
+        background: hovered ? `${color}11` : "transparent",
+        transform: hovered ? "translateX(4px)" : "translateX(0)",
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <span
+        className="text-[12px] flex-shrink-0 w-[76px] transition-all duration-200"
+        style={{ color: hovered ? color : "#374151", fontWeight: hovered ? 600 : 400 }}
+      >
+        {name}
+      </span>
       <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-        <div className="h-full rounded-full" style={{ width: `${animPct}%`, background: color, transition: "width 0.3s ease", boxShadow: hovered ? `0 0 6px ${color}88` : "none" }} />
+        <div
+          className="h-full rounded-full"
+          style={{
+            width: `${animPct}%`,
+            background: color,
+            boxShadow: hovered ? `0 0 6px ${color}88` : "none",
+          }}
+        />
       </div>
-      <span className="text-[11px] font-semibold w-8 text-right" style={{ color: hovered ? color : "#374151", transition: "color 0.2s ease" }}>{count}</span>
+      <span
+        className="text-[12px] font-semibold w-8 text-right transition-colors duration-200"
+        style={{ color: hovered ? color : "#374151" }}
+      >
+        {count}
+      </span>
     </div>
   );
 }
@@ -620,18 +559,42 @@ function CompanyCard({ letter, name, count, pct, bg, border, letterBg, bar }) {
   }, [hovered]);
 
   return (
-    <div className="rounded-xl p-3" style={{ background: bg, border: `1px solid ${border}`, transition: "transform 0.25s ease, box-shadow 0.25s ease", transform: hovered ? "translateY(-3px) scale(1.03)" : "translateY(0) scale(1)", boxShadow: hovered ? `0 8px 24px ${bar}33` : "none", cursor: "default" }} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-6 h-6 rounded-md flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0" style={{ background: letterBg }}>{letter}</div>
-        <div>
-          <div className="text-sm font-bold text-gray-800 leading-none">{count}</div>
-          <div className="text-[10px] text-gray-400">{name}</div>
+    <div
+      className="rounded-xl p-3 cursor-default transition-[transform,box-shadow] duration-[250ms]"
+      style={{
+        background: bg,
+        border: `1px solid ${border}`,
+        transform: hovered ? "translateY(-3px) scale(1.03)" : "translateY(0) scale(1)",
+        boxShadow: hovered ? `0 8px 24px ${bar}33` : "none",
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div className="flex items-center gap-3 mb-2">
+        <div
+          className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-[13px] font-bold flex-shrink-0"
+          style={{ background: letterBg }}
+        >
+          {letter}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-[15px] font-bold text-gray-900 leading-tight">{count}</div>
+          <div className="text-[12px] text-gray-400">{name}</div>
+          <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden mt-1.5">
+            <div
+              className="h-full rounded-full"
+              style={{
+                width: `${animPct}%`,
+                background: bar,
+                boxShadow: hovered ? `0 0 6px ${bar}88` : "none",
+              }}
+            />
+          </div>
+          <div className="text-[10px] mt-0.5 font-semibold" style={{ color: bar }}>
+            {pct}% of max
+          </div>
         </div>
       </div>
-      <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
-        <div className="h-full rounded-full" style={{ width: `${animPct}%`, background: bar, transition: "width 0.3s ease", boxShadow: hovered ? `0 0 6px ${bar}88` : "none" }} />
-      </div>
-      <div className="text-[10px] text-gray-400 mt-1">{pct}% of max</div>
     </div>
   );
 }
@@ -639,32 +602,24 @@ function CompanyCard({ letter, name, count, pct, bg, border, letterBg, bar }) {
 // ── Main Dashboard ────────────────────────────────────────────────
 export default function AdminDashboard() {
   const [showSidebar, setShowSidebar] = useState(false);
-  const handleLogout = async () => {
-    try {
-      await fetch("/api/auth/admin/logout", { method: "POST" });
-    } finally {
-      window.location.href = "/auth/admin/login";
-    }
-  };
-  useEffect(() => {
-  if (showSidebar) {
-    document.body.style.overflow = "hidden";
-  } else {
-    document.body.style.overflow = "auto";
-  }
 
-  return () => {
-    document.body.style.overflow = "auto";
-  };
-}, [showSidebar]);
+  useEffect(() => {
+    if (showSidebar) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [showSidebar]);
 
   const [activeNav, setActiveNav] = useState("Overview");
 
   return (
-    <div className={`${poppins.className} flex min-h-screen text-gray-800`} style={{ backgroundColor: "#EEF2F0" }}>
+    <div className="flex min-h-screen text-gray-800 bg-[#EEF2F0]">
 
-      {/* Mobile overlay — tapping outside closes sidebar */}
-      {/* Page-level sidebar commented out because dashboard layout now owns the shared responsive sidebar.
+      {/* Mobile overlay */}
       {showSidebar && (
         <div
           className="fixed inset-0 bg-black/40 z-30 md:hidden"
@@ -672,20 +627,19 @@ export default function AdminDashboard() {
         />
       )}
 
+      {/* Sidebar */}
       <Sidebar
         activeNav={activeNav}
         setActiveNav={setActiveNav}
         onClose={() => setShowSidebar(false)}
         showSidebar={showSidebar}
-        onLogout={handleLogout}
       />
-      */}
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col md:ml-[240px]" style={{ backgroundColor: "#EEF2F0" }}>
+      <main className="flex-1 flex flex-col md:ml-[240px] bg-[#EEF2F0]">
 
         {/* Topbar */}
-        {/* <Topbar onHamburger={() => window.dispatchEvent(new Event("open-dashboard-sidebar"))} /> */}
+        <Topbar onHamburger={() => setShowSidebar(true)} />
 
         {/* Page content */}
         <div className="p-4 space-y-3 mt-[60px]">
@@ -693,58 +647,57 @@ export default function AdminDashboard() {
           {/* ── ROW 1: 4 Stat Cards ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {[
-            {
-              label: "Total Advisors",
-                         val: "1,247",
-                       badge: "↑ 12%",
-                        badgeC: "text-green-700 bg-green-100",
-                        iconBg: "#f0fdfa",
-                       ic: "#0f766e",
-                       icon: "👥"
+              {
+                label: "Total Advisors",
+                val: "1,247",
+                badge: "↑ 12%",
+                badgeC: "text-green-700 bg-green-100",
+                iconBg: "#f0fdfa",
+                ic: "#0f766e",
+                icon: "👥"
               },
-             {
-  label: "Total Customers",
-  val: "8,492",
-  badge: "↑ 34%",
-  badgeC: "text-green-700 bg-green-100",
-  iconBg: "#eff6ff",
-  ic: "#2563eb",
-  icon: <FaUsers />
-},
-{
-  label: "Total Revenue",
-  val: "₹12.4L",
-  badge: "↑ 59%",
-  badgeC: "text-green-700 bg-green-100",
-  iconBg: "#f0fdf4",
-  ic: "#16a34a",
-  icon: "💰"
-},
-{
-  label: "Pending IRDAI Approvals",
-  val: "20",
-  badge: "20 Pending",
-  badgeC: "text-orange-600 bg-orange-100",
-  iconBg: "#fff7ed",
-  ic: "#ea580c",
-  icon: "⏳"
-},
+              {
+                label: "Total Customers",
+                val: "8,492",
+                badge: "↑ 34%",
+                badgeC: "text-green-700 bg-green-100",
+                iconBg: "#eff6ff",
+                ic: "#2563eb",
+                icon: <FaUsers />
+              },
+              {
+                label: "Total Revenue",
+                val: "₹12.4L",
+                badge: "↑ 18%",
+                badgeC: "text-green-700 bg-green-100",
+                iconBg: "#f0fdf4",
+                ic: "#16a34a",
+                icon: "💰"
+              },
+              {
+                label: "Pending IRDAI Approvals",
+                val: "20",
+                badge: "20 Pending",
+                badgeC: "text-orange-600 bg-orange-100",
+                iconBg: "#fff7ed",
+                ic: "#ea580c",
+                icon: "⏳"
+              },
             ].map(({ label, val, badge, badgeC, iconBg, ic, icon }) => (
-              <div key={label} className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm flex flex-col justify-between"
-                style={{ transition: "transform 0.2s ease, box-shadow 0.2s ease", cursor: "default" }}
+              <div
+                key={label}
+                className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm flex flex-col justify-between cursor-default transition-[transform,box-shadow] duration-200"
                 onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 24px #0001"; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = ""; }}
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: iconBg }}>
-                   <div style={{ color: ic, fontSize: "16px" }}>
-  {icon}
-</div>
+                    <div style={{ color: ic, fontSize: "16px" }}>{icon}</div>
                   </div>
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${badgeC}`}>{badge}</span>
                 </div>
-                <div className="text-xl font-bold text-gray-900 leading-tight">{val}</div>
-                <div className="text-[11px] text-gray-400 mt-0.5">{label}</div>
+                <div className="text-2xl font-bold text-gray-900 leading-tight">{val}</div>
+                <div className="text-[12px] text-gray-400 mt-0.5">{label}</div>
               </div>
             ))}
           </div>
@@ -753,51 +706,55 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
             <div className="col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-3">
               <div className="flex justify-between items-center mb-3">
-                <h2 className="text-[14px] font-semibold flex items-center gap-1.5">
-                  <span className="text-yellow-500">●</span> Subscription Revenue
+                <h2 className="text-base font-bold flex items-center gap-1.5">
+                 <span className="text-yellow-500">💰</span>
                 </h2>
-                <span className="text-[11px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded">Last 6 Month ▾</span>
+                <span className="text-[12px] font-medium bg-gray-50 px-2 py-0.5 rounded text-[#0A4A4A]">
+                  Last 6 Month ▾
+                </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-2 py-2 text-center">
-                  <div className="text-sm font-bold text-yellow-700">₹4.2L</div>
-                  <div className="text-[11px] text-gray-500">👑 Gold</div>
-                  <div className="text-[11px] text-gray-400 mt-0.5">140 advisors</div>
-                </div>
-                <div className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-2 text-center">
-                  <div className="text-sm font-bold text-slate-500">₹2.1L</div>
-                  <div className="text-[11px] text-gray-500">🥇 Silver</div>
-                  <div className="text-[11px] text-gray-400 mt-0.5">210 advisors</div>
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-2 text-center">
+                  <div className="text-[20px] font-bold text-black-700">₹4.2L</div>
+                  <div className="text-[12px] text-gray-500">👑 Gold</div>
+                  <div className="text-[#0A4A4A] text-center font-poppins text-[12px] font-semibold leading-4">140 advisors</div>
                 </div>
                 <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-2 text-center">
-                  <div className="text-sm font-bold text-emerald-600">₹0</div>
-                  <div className="text-[11px] text-gray-500">🆓 Free</div>
-                  <div className="text-[11px] text-gray-400 mt-0.5">934 advisors</div>
+                  <div className="text-[20px] font-bold text-black-500">₹2.1L</div>
+                  <div className="text-[12px] text-gray-500">🥇 Silver</div>
+                  <div className="text-[#0A4A4A] text-center text-[12px] font-semibold leading-4 mt-0.5">210 advisors</div>
+                </div>
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-2 text-center">
+                  <div className="text-[20px] font-bold text-black-600">₹0</div>
+                  <div className="text-[12px] text-gray-500">🆓 Free</div>
+                  <div className="text-[#0A4A4A] text-center text-[12px] font-semibold leading-4 mt-0.5">934 advisors</div>
                 </div>
               </div>
-              <p className="text-[11px] text-gray-400 mb-1">Monthly Revenue Trend</p>
-              <div className="mt-16"><BarChart /></div>
+              <p className="text-[12px] text-gray-400 mb-1">Monthly Revenue Trend</p>
+              <div className="mt-35"><BarChart /></div>
             </div>
 
             <div className="col-span-2 flex flex-col gap-3">
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col" style={{ padding: "26px 31px 26px 30px", justifyContent: "center", alignItems: "flex-start", gap: "16px" }}>
                 <div className="flex justify-between items-start mb-1 w-full">
                   <div>
-                    <h2 className="text-[14px] font-semibold flex items-center gap-1.5">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0f766e" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
+                    <h2 className="text-base font-bold leading-4 text-gray-900 flex items-center gap-1.5">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0f766e" strokeWidth="2">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                      </svg>
                       Platform Growth
                     </h2>
-                    <p className="text-[11px] text-gray-400">Total advisors registered · Last 6 months</p>
+                    <p className="text-[12px] text-gray-400 font-medium">Total advisors registered · Last 6 months</p>
                   </div>
-                  <span className="bg-teal-700 text-white text-[11px] font-bold px-2.5 py-0.5 rounded">1,284</span>
+                  <span className=" text-[#0A4A4A] text-[14px] font-bold px-2.5 py-0.5 rounded">1,284</span>
                   
                 </div>
                 <LineChart />
               </div>
               <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-                <div className="flex justify-between items-center mb-3">
-                  <h2 className="text-[14px] font-semibold">🧩 Plan Split</h2>
-                  <span className="text-[11px] text-gray-400">Advisor Subscription Tiers</span>
+                <div className="mb-3">
+                  <h2 className="text-base font-bold mb-1">🧩 Plan Split</h2>
+                  <p className="text-[12px] text-gray-400">Advisor Subscription tier</p>
                 </div>
                 <PlanDonut />
               </div>
@@ -807,7 +764,7 @@ export default function AdminDashboard() {
           {/* ── ROW 3 ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-              <h2 className="text-[14px] font-semibold mb-3">🏙 City – wise Advisors</h2>
+              <h2 className="text-base font-bold mb-3">📌 City – wise Advisors</h2>
               <div className="space-y-2.5">
                 {CITIES.map(({ name, count, pct, color }) => (
                   <CityRow key={name} name={name} count={count} pct={pct} color={color} />
@@ -815,8 +772,8 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-              <h2 className="text-[14px] font-semibold mb-3">🛡 Service – wise Advisors</h2>
-              <table className="w-full text-[11px]">
+              <h2 className="text-base font-bold mb-3">🛡 Service – wise Advisors</h2>
+              <table className="w-full text-[12px]">
                 <thead>
                   <tr className="text-gray-400 text-[11px] border-b border-gray-100">
                     <th className="text-left py-1.5 font-semibold">SERVICE</th>
@@ -842,26 +799,42 @@ export default function AdminDashboard() {
           {/* ── ROW 4 ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
             <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-              <h2 className="text-[14px] font-semibold mb-3">🏢 Company – wise Advisors</h2>
+              <h2 className="text-base font-bold mb-3">🏢 Company – wise Advisors</h2>
               <div className="grid grid-cols-2 gap-2 mb-2">
                 {COMPANIES.map(({ letter, name, count, pct, bg, border, letterBg, bar }) => (
                   <CompanyCard key={name} letter={letter} name={name} count={count} pct={pct} bg={bg} border={border} letterBg={letterBg} bar={bar} />
                 ))}
               </div>
-              <div className="rounded-xl p-3 flex items-center gap-2" style={{ background: "#f9fafb", border: "1px solid #e5e7eb", transition: "transform 0.2s ease, box-shadow 0.2s ease", cursor: "default" }}
-                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px) scale(1.02)"; e.currentTarget.style.boxShadow = "0 6px 20px #0001"; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
+              <div
+                className="rounded-xl p-3 flex items-center gap-3 cursor-default transition-[transform,box-shadow] duration-200"
+                style={{ background: "#f3f0eb", border: "1px solid #e0d9cf" }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = "translateY(-2px) scale(1.02)";
+                  e.currentTarget.style.boxShadow = "0 6px 20px #0001";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = "";
+                  e.currentTarget.style.boxShadow = "";
+                }}
               >
-                <div className="w-6 h-6 bg-gray-400 rounded-md flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">S</div>
-                <div>
-                  <div className="text-sm font-bold text-gray-800 leading-none">362</div>
-                  <div className="text-[10px] text-gray-400">Others · All other companies combined</div>
+                <div className="w-9 h-9 bg-gray-400 rounded-lg flex items-center justify-center text-white text-[13px] font-bold flex-shrink-0">
+                  S
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[15px] font-bold text-gray-900 leading-tight">362</div>
+                  <div className="text-[12px] text-gray-400">Others</div>
+                  <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden mt-1.5">
+                    <div className="h-full rounded-full bg-gray-400" style={{ width: "93%" }} />
+                  </div>
+                  <div className="text-[10px] mt-0.5 font-semibold text-green-600">
+                    All other companies combined
+                  </div>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-              <h2 className="text-[14px] font-semibold mb-3">👥 Role – wise Advisors</h2>
+              <h2 className="text-base font-bold mb-3">👥 Role – wise Advisors</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                 {ROLES.map((item, index) => (
                   <MiniDonut key={item.label + index} pct={item.pct} color={item.color} label={item.label} count={item.count} />
