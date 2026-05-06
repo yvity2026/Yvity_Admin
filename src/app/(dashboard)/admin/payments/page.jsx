@@ -141,7 +141,7 @@ function Avatar({ initials, size = 40, bg = COLORS.gold }) {
   );
 }
 
-function Sidebar({ activeNav, setActiveNav, onClose }) {
+function Sidebar({ activeNav, setActiveNav, onClose, onLogout }) {
   return (
     <div style={{ background: COLORS.primary, minHeight: "100vh", width: 280, flexShrink: 0, display: "flex", flexDirection: "column" }}>
       <div className="h-[60px] bg-[#FAFAFA] flex justify-center items-center border-b border-[#155e5e]">
@@ -196,6 +196,7 @@ function Sidebar({ activeNav, setActiveNav, onClose }) {
       <div style={{ padding: "16px 0" }}>
         <div
           style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", color: "#ef4444", fontSize: 13, cursor: "pointer" }}
+          onClick={onLogout}
           onMouseEnter={(e) => { e.currentTarget.style.background = COLORS.primaryHover; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
         >
@@ -230,6 +231,13 @@ export default function PaymentsDashboard() {
   const [activeNav, setActiveNav]             = useState("Payments");
   const [search, setSearch]                   = useState("");
   const [showSidebar, setShowSidebar]         = useState(false);
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/admin/logout", { method: "POST" });
+    } finally {
+      window.location.href = "/auth/admin/login";
+    }
+  };
   useEffect(() => {
   if (showSidebar) {
     document.body.style.overflow = "hidden";
@@ -319,6 +327,7 @@ export default function PaymentsDashboard() {
         }
       `}</style>
 
+      {/* Local page sidebar commented out because the dashboard layout now renders the shared responsive sidebar.
       {showSidebar && (
         <div
           className="pay-mobile-overlay"
@@ -331,8 +340,10 @@ export default function PaymentsDashboard() {
           activeNav={activeNav}
           setActiveNav={setActiveNav}
           onClose={() => setShowSidebar(false)}
+          onLogout={handleLogout}
         />
       </div>
+      */}
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
@@ -341,7 +352,7 @@ export default function PaymentsDashboard() {
           <div style={{ display: "flex", alignItems: "center" }}>
             <button
               className="pay-hamburger-btn"
-              onClick={() => setShowSidebar(true)}
+              onClick={() => window.dispatchEvent(new Event("open-dashboard-sidebar"))}
               aria-label="Open menu"
             >
               <svg width="22" height="22" fill="none" stroke="#374151" viewBox="0 0 24 24">

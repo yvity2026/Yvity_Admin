@@ -40,7 +40,7 @@ const COLORS = {
 };
 
 // ── Sidebar ───────────────────────────────────────────────────────
-function Sidebar({ activeNav, setActiveNav, onClose, showSidebar }) {
+function Sidebar({ activeNav, setActiveNav, onClose, showSidebar, onLogout }) {
   return (
     <div
       className={`fixed inset-y-0 left-0 z-40 transition-transform duration-300
@@ -54,27 +54,27 @@ function Sidebar({ activeNav, setActiveNav, onClose, showSidebar }) {
 }}
     >
       {/* Logo */}
-      <div className="h-[60px] bg-[#FAFAFA] flex justify-center items-center border-b border-[#155e5e]">
-        <img
-          src="/images/Adivisor/Navbar/navlogo.png"
-          alt="logo"
-          className="h-10 w-auto object-contain"
-        />
-      </div>
+      {/* <div className="h-[60px] bg-[#FAFAFA] flex justify-center items-center border-b border-[#155e5e]"> */}
+        {/* <img */}
+          {/* // src="/images/Adivisor/Navbar/navlogo.png" */}
+          {/* // alt="logo" */}
+          {/* // className="h-10 w-auto object-contain" */}
+        {/* /> */}
+      {/* </div> */}
 
       {/* User block */}
-      <div style={{ padding: "14px 16px", borderBottom: `1px solid ${COLORS.primaryBorder}`, display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{
-          width: 40, height: 40, borderRadius: "50%",
-          background: COLORS.gold, color: "#fff",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontWeight: 700, fontSize: 14, flexShrink: 0,
-        }}>KM</div>
-        <div>
-          <div style={{ color: "#fff", fontSize: 16, fontWeight: 600 }}>Admin</div>
-          <div style={{ color: COLORS.accent, fontSize: 10, marginTop: 1 }}>● Super Administrator</div>
-        </div>
-      </div>
+      {/* <div style={{ padding: "14px 16px", borderBottom: `1px solid ${COLORS.primaryBorder}`, display: "flex", alignItems: "center", gap: 10 }}> */}
+        {/* <div style={{ */}
+          {/* // width: 40, height: 40, borderRadius: "50%", */}
+          {/* // background: COLORS.gold, color: "#fff", */}
+          {/* // display: "flex", alignItems: "center", justifyContent: "center", */}
+          {/* // fontWeight: 700, fontSize: 14, flexShrink: 0, */}
+        {/* // }}>KM</div> */}
+        {/* <div> */}
+          {/* <div style={{ color: "#fff", fontSize: 16, fontWeight: 600 }}>Admin</div> */}
+          {/* <div style={{ color: COLORS.accent, fontSize: 10, marginTop: 1 }}>● Super Administrator</div> */}
+        {/* </div> */}
+      {/* </div> */}
 
       {/* Nav items */}
       <div style={{ flex: 1, overflowY: "auto" , minHeight: 0}}>
@@ -118,6 +118,7 @@ function Sidebar({ activeNav, setActiveNav, onClose, showSidebar }) {
       <div style={{ padding: "16px 0", borderTop: `1px solid ${COLORS.primaryBorder}` }}>
         <div
           style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", color: "#ef4444", fontSize: 13, cursor: "pointer", transition: "background 0.18s" }}
+          onClick={onLogout}
           onMouseEnter={e => { e.currentTarget.style.background = COLORS.primaryHover; }}
           onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
         >
@@ -132,50 +133,50 @@ function Sidebar({ activeNav, setActiveNav, onClose, showSidebar }) {
 }
 
 // ── Topbar ────────────────────────────────────────────────────────
-function Topbar({ onHamburger }) {
-  return (
-    <div
-      className="fixed top-0 right-0 left-0 md:left-[240px] flex items-center justify-between bg-white px-6 border-b border-gray-200 z-50"
-      style={{ height: "60px" }}
-    >
-      <div style={{ display: "flex", alignItems: "center" }}>
-        {/* Hamburger — visible on mobile only */}
-      <button
-  onClick={onHamburger}
-  aria-label="Open menu"
-  className="flex md:hidden items-center justify-center p-1 rounded-md mr-2"
->
-  <svg width="22" height="22" fill="none" stroke="#374151" viewBox="0 0 24 24">
-    <path d="M4 6h16M4 12h16M4 18h16" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-</button>
-        <span style={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>Overview</span>
-      </div>
+// function Topbar({ onHamburger }) {
+//   return (
+//     <div
+//       className="fixed top-0 right-0 left-0 md:left-[240px] flex items-center justify-between bg-white px-6 border-b border-gray-200 z-50"
+//       style={{ height: "60px" }}
+//     >
+//       <div style={{ display: "flex", alignItems: "center" }}>
+//         {/* Hamburger — visible on mobile only */}
+//       <button
+//   onClick={onHamburger}
+//   aria-label="Open menu"
+//   className="flex md:hidden items-center justify-center p-1 rounded-md mr-2"
+// >
+//   <svg width="22" height="22" fill="none" stroke="#374151" viewBox="0 0 24 24">
+//     <path d="M4 6h16M4 12h16M4 18h16" strokeWidth="2" strokeLinecap="round" />
+//   </svg>
+// </button>
+//         <span style={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>Overview</span>
+//       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <select style={{ background: "#f3f4f6", fontSize: 13, padding: "6px 12px", borderRadius: 6, border: "none", outline: "none", cursor: "pointer" }}>
-          <option value="day">Day</option>
-          <option value="week">Week</option>
-          <option value="month">Month</option>
-        </select>
+//       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+//         <select style={{ background: "#f3f4f6", fontSize: 13, padding: "6px 12px", borderRadius: 6, border: "none", outline: "none", cursor: "pointer" }}>
+//           <option value="day">Day</option>
+//           <option value="week">Week</option>
+//           <option value="month">Month</option>
+//         </select>
 
-        <div style={{ position: "relative" }}>
-          <svg width="20" height="20" fill="none" stroke="#6b7280" viewBox="0 0 24 24">
-            <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeWidth="2"/>
-          </svg>
-          <div style={{ width: 8, height: 8, background: "#f59e0b", borderRadius: "50%", position: "absolute", top: -2, right: -2 }} />
-        </div>
+//         <div style={{ position: "relative" }}>
+//           <svg width="20" height="20" fill="none" stroke="#6b7280" viewBox="0 0 24 24">
+//             <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeWidth="2"/>
+//           </svg>
+//           <div style={{ width: 8, height: 8, background: "#f59e0b", borderRadius: "50%", position: "absolute", top: -2, right: -2 }} />
+//         </div>
 
-        <div style={{
-          width: 36, height: 36, borderRadius: "50%",
-          background: COLORS.gold, color: "#fff",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontWeight: 700, fontSize: 12,
-        }}>KM</div>
-      </div>
-    </div>
-  );
-}
+//         <div style={{
+//           width: 36, height: 36, borderRadius: "50%",
+//           background: COLORS.gold, color: "#fff",
+//           display: "flex", alignItems: "center", justifyContent: "center",
+//           fontWeight: 700, fontSize: 12,
+//         }}>KM</div>
+//       </div>
+//     </div>
+//   );
+// }
 
 // ── Data ──────────────────────────────────────────────────────────
 const CITIES = [
@@ -638,6 +639,13 @@ function CompanyCard({ letter, name, count, pct, bg, border, letterBg, bar }) {
 // ── Main Dashboard ────────────────────────────────────────────────
 export default function AdminDashboard() {
   const [showSidebar, setShowSidebar] = useState(false);
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/admin/logout", { method: "POST" });
+    } finally {
+      window.location.href = "/auth/admin/login";
+    }
+  };
   useEffect(() => {
   if (showSidebar) {
     document.body.style.overflow = "hidden";
@@ -656,6 +664,7 @@ export default function AdminDashboard() {
     <div className={`${poppins.className} flex min-h-screen text-gray-800`} style={{ backgroundColor: "#EEF2F0" }}>
 
       {/* Mobile overlay — tapping outside closes sidebar */}
+      {/* Page-level sidebar commented out because dashboard layout now owns the shared responsive sidebar.
       {showSidebar && (
         <div
           className="fixed inset-0 bg-black/40 z-30 md:hidden"
@@ -663,19 +672,20 @@ export default function AdminDashboard() {
         />
       )}
 
-      {/* Sidebar — slides in on mobile, always visible on md+ */}
       <Sidebar
         activeNav={activeNav}
         setActiveNav={setActiveNav}
         onClose={() => setShowSidebar(false)}
         showSidebar={showSidebar}
+        onLogout={handleLogout}
       />
+      */}
 
       {/* Main content */}
       <main className="flex-1 flex flex-col md:ml-[240px]" style={{ backgroundColor: "#EEF2F0" }}>
 
         {/* Topbar */}
-        <Topbar onHamburger={() => setShowSidebar(true)} />
+        {/* <Topbar onHamburger={() => window.dispatchEvent(new Event("open-dashboard-sidebar"))} /> */}
 
         {/* Page content */}
         <div className="p-4 space-y-3 mt-[60px]">

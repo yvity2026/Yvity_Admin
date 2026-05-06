@@ -1,95 +1,97 @@
 "use client";
 
-export default function IrdaiModal({ advisor, onClose, onApprove, onReject }) {
-  const details = [
-    { label: "Advisor", value: advisor?.name || "Rahul Kumar • Vijayawada" },
-    { label: "License No.", value: advisor?.lic || "LIC-AP-2022-48291" },
-    { label: "Type", value: advisor?.type || "Life Insurance Agent" },
-    { label: "Authority", value: advisor?.authority || "IRDAI - Andhra Pradesh" },
-    { label: "Valid Until", value: advisor?.validUntil || "December 2026" },
-    { label: "Submitted", value: advisor?.submitted || "2 days ago" },
-  ];
+import { FiX, FiCheckCircle } from "react-icons/fi";
+import { HiOutlineDocumentText } from "react-icons/hi";
+import { MdCancel } from "react-icons/md";
+
+export default function IrdaiModal({
+  advisor,
+  onClose,
+  onApprove,
+  onReject,
+}) {
+  if (!advisor) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4 py-6">
-      
-      <div className="bg-white w-full max-w-[560px] rounded-2xl shadow-xl overflow-hidden font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-7 py-4 bg-gray-100 border-b border-gray-200">
-          <div className="flex items-center gap-2 text-[15px] font-semibold text-gray-800">
-            <span>👤</span> IRDAI License
+        <div className="flex items-center justify-between px-6 py-4 border-b">
+          <div className="flex items-center gap-2 font-semibold text-lg">
+            <span className="text-xl">👤</span>
+            IRDAI License
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-300"
+            className="p-2 rounded-full hover:bg-gray-100"
           >
-            ✕
+            <FiX size={18} />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="px-7 py-5">
+        {/* Content */}
+        <div className="px-6 py-4 space-y-4 text-sm">
 
-          {/* Center vertical dotted line */}
-
-          {/* Rows */}
-          <div className="space-y-3">
-            {details.map((row) => (
-              <div
-                key={row.label}
-                className="grid grid-cols-2 gap-6 items-center px-1 py-3 border-b border-gray-100 text-sm"
-              >
-                <span className="text-gray-400">{row.label}</span>
-                <span className="text-gray-900 font-medium text-right break-words">
-                  {row.value}
-                </span>
-              </div>
-            ))}
-
-            {/* Plan Paid */}
-            <div className="grid grid-cols-2 gap-6 items-center px-1 py-3 border-b border-gray-100 text-sm">
-              <span className="text-gray-400">Plan Paid</span>
-              <div className="flex justify-end">
-                <span className="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full flex items-center gap-1">
-                  {advisor?.plan || "🪙 Silver • 999"}
-                </span>
-              </div>
+          {[
+            ["Advisor", advisor.name],
+            ["License No.", advisor.license],
+            ["Type", advisor.type],
+            ["Authority", advisor.authority],
+            ["Valid Until", advisor.validUntil],
+            ["Submitted", advisor.submitted],
+          ].map(([label, value], i) => (
+            <div
+              key={i}
+              className="flex justify-between border-b pb-2 text-gray-600"
+            >
+              <span className="font-medium text-gray-500">{label}</span>
+              <span className="text-gray-800 text-right">{value}</span>
             </div>
+          ))}
+
+          {/* Plan */}
+          <div className="flex justify-between border-b pb-2">
+            <span className="font-medium text-gray-500">Plan Paid</span>
+            <span className="px-3 py-1 rounded-full bg-gray-100 text-sm">
+              🏅 {advisor.plan}
+            </span>
           </div>
 
-          {/* Certificate Box */}
-          <div className="mt-5 bg-gray-100 rounded-xl py-8 flex flex-col items-center justify-center text-center">
-            <span className="text-4xl">🏆</span>
-            <p className="text-[15px] font-semibold text-gray-800 mt-2">
+          {/* Certificate */}
+          <div className="border-2 border-dashed rounded-xl p-6 text-center bg-gray-50">
+            <HiOutlineDocumentText className="mx-auto text-3xl text-yellow-500 mb-2" />
+            <p className="font-semibold text-gray-800">
               IRDAI Certificate
             </p>
-            <p className="text-xs text-gray-500">
-              {advisor?.lic || "LIC-AP-2022-48291"} • {advisor?.certificateName || "certificate.jpg"}
+            <p className="text-xs text-gray-500 mb-3">
+              {advisor.fileName}
             </p>
-            <button className="text-sm font-medium text-teal-700 mt-2 hover:underline">
+
+            <button className="text-green-600 font-medium hover:underline">
               View Document
             </button>
           </div>
-
         </div>
 
-        {/* Footer */}
-        <div className="flex gap-4 px-7 pb-6 pt-3">
+        {/* Footer Buttons */}
+        <div className="flex gap-4 px-6 py-4">
           <button
             onClick={onApprove}
-            className="flex-1 py-3 bg-green-100 text-green-700 font-semibold rounded-lg hover:bg-green-200"
+            className="flex-1 flex items-center justify-center gap-2 bg-green-100 text-green-700 py-2 rounded-lg hover:bg-green-200 transition"
           >
-            ✔ Approve
+            <FiCheckCircle />
+            Approve
           </button>
+
           <button
             onClick={onReject}
-            className="flex-1 py-3 bg-red-100 text-red-600 font-semibold rounded-lg hover:bg-red-200"
+            className="flex-1 flex items-center justify-center gap-2 bg-red-100 text-red-600 py-2 rounded-lg hover:bg-red-200 transition"
           >
-            ✖ Reject
+            <MdCancel />
+            Reject
           </button>
         </div>
-
       </div>
     </div>
   );

@@ -1,9 +1,10 @@
+
 "use client";
 import { useState } from "react";
-import CustomerProfile from "@/components/CustomerProfile";
 import Link from "next/link";
 import { useEffect } from "react";
 
+// ── Exact colors from CustomersDashboard ──────────────────────────
 const COLORS = {
   primary: "#0A4A4A",
   primaryHover: "#155e5e",
@@ -12,6 +13,7 @@ const COLORS = {
   gold: "#d4a017",
 };
 
+// ── Exact navItems from CustomersDashboard ────────────────────────
 const navItems = {
   MAIN: [
     {
@@ -103,6 +105,7 @@ const navItems = {
   ],
 };
 
+// ── Exact Avatar from CustomersDashboard ──────────────────────────
 function Avatar({ initials, size = 40, bg = COLORS.gold }) {
   return (
     <div
@@ -125,11 +128,12 @@ function Avatar({ initials, size = 40, bg = COLORS.gold }) {
   );
 }
 
-function Sidebar({ activeNav, setActiveNav, onClose }) {
+// ── Sidebar with mobile onClose support (from CustomersDashboard) ─
+function Sidebar({ activeNav, setActiveNav, onClose, onLogout }) {
   return (
     <div style={{ background: COLORS.primary, minHeight: "100vh", width: 280, flexShrink: 0, display: "flex", flexDirection: "column" }}>
       {/* Logo */}
-    <div className="h-[60px] bg-[#FAFAFA] flex justify-center items-center border-b border-[#155e5e]">
+     <div className="h-[60px] bg-[#FAFAFA] flex justify-center items-center border-b border-[#155e5e]">
   <img
     src="/images/Adivisor/Navbar/navlogo.png"
     alt="logo"
@@ -192,6 +196,7 @@ function Sidebar({ activeNav, setActiveNav, onClose }) {
       <div style={{ padding: "16px 0" }}>
         <div
           style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", color: "#ef4444", fontSize: 13, cursor: "pointer" }}
+          onClick={onLogout}
           onMouseEnter={(e) => { e.currentTarget.style.background = COLORS.primaryHover; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
         >
@@ -205,20 +210,43 @@ function Sidebar({ activeNav, setActiveNav, onClose }) {
   );
 }
 
-// ── Customer data ──────────────────────────────────────────────────────────
-const customers = [
-  { initials: "KM", bg: "#d4a017", name: "Krishna Mohan", mobile: "+91 9123456789", email: "Krishna@email.com", city: "Hyderabad, TS", profession: "Teacher",       reviews: "3 Reviews", lastLogin: "2 hrs ago",  joined: "Jan 2026" },
-  { initials: "KM", bg: "#d4a017", name: "Krishna Mohan", mobile: "+91 9876543210", email: "Krishna@email.com", city: "Hyderabad, TS", profession: "Software Eng.", reviews: "5 Reviews", lastLogin: "10 min ago", joined: "Jan 2026" },
-  { initials: "KM", bg: "#d4a017", name: "Krishna Mohan", mobile: "+91 9876543210", email: "Krishna@email.com", city: "Hyderabad, TS", profession: "Business Owner", reviews: "1 Review",  lastLogin: "Yesterday",  joined: "Jan 2026" },
-  { initials: "KM", bg: "#d4a017", name: "Krishna Mohan", mobile: "+91 9876543210", email: "Krishna@email.com", city: "Hyderabad, TS", profession: "Govt. Employee", reviews: "2 Reviews", lastLogin: "3 days ago", joined: "Jan 2026" },
-  { initials: "KM", bg: "#d4a017", name: "Krishna Mohan", mobile: "+91 9876543210", email: "Krishna@email.com", city: "Hyderabad, TS", profession: "Business Owner", reviews: "1 Review",  lastLogin: "Yesterday",  joined: "Jan 2026" },
+// ── Subscription data (unchanged) ─────────────────────────────────
+const subscriptions = [
+  {
+    name: "Krishna Mohan", plan: "Gold Plan", date: "Jan 15, 2025", amount: "₹2,999",
+    days: "7 days", initials: "KM", avatarBg: "#e8a020",
+    badgeBg: "#fee2e2", badgeColor: "#b91c1c", remind: true,
+  },
+  {
+    name: "Sunitha Mehta", plan: "Gold Plan", date: "Jan 20, 2026", amount: "₹2,999",
+    days: "12 days", initials: "SM", avatarBg: "#1a5a50",
+    badgeBg: "#ffedd5", badgeColor: "#c2410c", remind: true,
+  },
+  {
+    name: "Rahul Kumar", plan: "Silver Plan", date: "Jan 22, 2026", amount: "₹999",
+    days: "14 days", initials: "RK", avatarBg: "#e8a020",
+    badgeBg: "#fef9c3", badgeColor: "#a16207", remind: true,
+  },
+  {
+    name: "Sunitha Mehta", plan: "Gold Plan", date: "Jan 22, 2026", amount: "₹999",
+    days: "28 days", initials: "SM", avatarBg: "#1a5a50",
+    badgeBg: "#dcfce7", badgeColor: "#166534", remind: false,
+  },
 ];
 
-export default function CustomersDashboard() {
-  const [activeNav, setActiveNav] = useState("Customers");
-  const [search, setSearch] = useState("");
-  const [showCustomerModal, setShowCustomerModal] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(false);  
+// ── Main Component ─────────────────────────────────────────────────
+export default function SubscriptionsPage() {
+  const [activeNav, setActiveNav] = useState("Subscriptions");
+  const [search, setSearch]       = useState("");
+  const [showSidebar, setShowSidebar] = useState(false); 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/admin/logout", { method: "POST" });
+    } finally {
+      window.location.href = "/auth/admin/login";
+    }
+  };
+
   useEffect(() => {
   if (showSidebar) {
     document.body.style.overflow = "hidden";
@@ -231,11 +259,9 @@ export default function CustomersDashboard() {
   };
 }, [showSidebar]);
 
-  const filtered = customers.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.email.toLowerCase().includes(search.toLowerCase()) ||
-    c.city.toLowerCase().includes(search.toLowerCase()) ||
-    c.profession.toLowerCase().includes(search.toLowerCase())
+  const filtered = subscriptions.filter(s =>
+    s.name.toLowerCase().includes(search.toLowerCase()) ||
+    s.plan.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -243,21 +269,18 @@ export default function CustomersDashboard() {
 
       {/* ── MOBILE RESPONSIVE STYLES ── */}
       <style>{`
-        .cust-sidebar-container {
+        .subs-sidebar-container {
           position: relative;
           z-index: 50;
         }
-        .cust-hamburger-btn {
+        .subs-hamburger-btn {
           display: none;
         }
-        .cust-mobile-overlay {
-          display: none;
-        }
-        .cust-table-scroll-hint {
+        .subs-mobile-overlay {
           display: none;
         }
         @media (max-width: 768px) {
-          .cust-sidebar-container {
+          .subs-sidebar-container {
             position: fixed !important;
             top: 0;
             left: 0;
@@ -265,17 +288,17 @@ export default function CustomersDashboard() {
             transform: translateX(-100%);
             transition: transform 0.25s ease;
           }
-          .cust-sidebar-container.open {
+          .subs-sidebar-container.open {
             transform: translateX(0);
           }
-          .cust-mobile-overlay {
+          .subs-mobile-overlay {
             display: block;
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.45);
             z-index: 40;
           }
-          .cust-hamburger-btn {
+          .subs-hamburger-btn {
             display: flex !important;
             align-items: center;
             justify-content: center;
@@ -286,58 +309,48 @@ export default function CustomersDashboard() {
             border-radius: 6px;
             margin-right: 8px;
           }
-          .cust-table-scroll-hint {
-            display: block;
-            font-size: 11px;
-            color: #9ca3af;
-            text-align: right;
-            padding: 6px 12px 2px;
-          }
-          .cust-main-content-padding {
+          .subs-main-content-padding {
             padding: 14px !important;
-          }
-          .cust-stat-cards {
-            flex-direction: column !important;
-          }
-          .cust-stat-cards > div {
-            max-width: 100% !important;
           }
         }
       `}</style>
 
       {/* ── MOBILE: Dark overlay — tap to close sidebar ── */}
+      {/* Local page sidebar commented out because the dashboard layout now renders the shared responsive sidebar.
       {showSidebar && (
         <div
-          className="cust-mobile-overlay"
+          className="subs-mobile-overlay"
           onClick={() => setShowSidebar(false)}
         />
       )}
 
-      {/* ── MOBILE: Sidebar wrapped in slide-in container ── */}
-      <div className={`cust-sidebar-container${showSidebar ? " open" : ""}`}>
+      <div className={`subs-sidebar-container${showSidebar ? " open" : ""}`}>
         <Sidebar
           activeNav={activeNav}
           setActiveNav={setActiveNav}
           onClose={() => setShowSidebar(false)}
+          onLogout={handleLogout}
         />
       </div>
+      */}
 
-      {/* Main */}
+      {/* ── Main ── */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        {/* Topbar */}
+
+        {/* ── Topbar ── */}
         <div style={{ background: "#fff", borderBottom: "1px solid #e5e7eb", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center" }}>
             {/* ── MOBILE: Hamburger button ── */}
             <button
-              className="cust-hamburger-btn"
-              onClick={() => setShowSidebar(true)}
+              className="subs-hamburger-btn"
+              onClick={() => window.dispatchEvent(new Event("open-dashboard-sidebar"))}
               aria-label="Open menu"
             >
               <svg width="22" height="22" fill="none" stroke="#374151" viewBox="0 0 24 24">
                 <path d="M4 6h16M4 12h16M4 18h16" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </button>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>Customers</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>Subscriptions</div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ position: "relative" }}>
@@ -350,58 +363,24 @@ export default function CustomersDashboard() {
           </div>
         </div>
 
-        {/* Content */}
-        <div className="cust-main-content-padding" style={{ padding: 24, overflowY: "auto", flex: 1 }}>
+        {/* ── Content (unchanged subscription data & UI) ── */}
+        <div className="subs-main-content-padding" style={{ flex: 1, padding: "24px 28px", overflowY: "auto" }}>
+          <div style={{ background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 2px 10px rgba(0,0,0,0.055)" }}>
 
-          {/* Stat Cards */}
-          <div className="cust-stat-cards" style={{ display: "flex", gap: 16, marginBottom: 22 }}>
-            {/* Total Customers */}
-            <div style={{ background: "#fff", borderRadius: 14, padding: "20px 22px", boxShadow: "0 2px 10px rgba(0,0,0,0.055)", flex: 1, maxWidth: 280 }}>
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: "#eef4f2", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a7a5a" strokeWidth="2">
-                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-                  </svg>
-                </div>
-                <span style={{ background: "#e6f5f0", color: "#1a7a5a", fontSize: 11, fontWeight: 700, borderRadius: 20, padding: "3px 10px" }}>↑ 34%</span>
-              </div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: "#111827", lineHeight: 1.1 }}>8,492</div>
-              <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 3, fontWeight: 500 }}>Total Customers</div>
-            </div>
+            {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
+  
+  <span style={{ fontSize: 18 }}>
+    🔄
+  </span>
 
-            {/* Joined Today */}
-            <div style={{ background: "#fff", borderRadius: 14, padding: "20px 22px", boxShadow: "0 2px 10px rgba(0,0,0,0.055)", flex: 1, maxWidth: 280 }}>
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: "#eef4f2", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2255bb" strokeWidth="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                  </svg>
-                </div>
-                <span style={{ background: "#e6f0ff", color: "#2255bb", fontSize: 11, fontWeight: 700, borderRadius: 20, padding: "3px 10px" }}>+48</span>
-              </div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: "#111827", lineHeight: 1.1 }}>48</div>
-              <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 3, fontWeight: 500 }}>Joined Today</div>
-            </div>
-          </div>
+  <span style={{ fontSize: 15, fontWeight: 700, color: "#1a3330" }}>
+    Upcoming Renewals
+  </span>
+</div>
 
-          {/* Header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-            <svg width="18" height="18" fill="none" stroke="#374151" viewBox="0 0 24 24">
-              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" strokeWidth="2" />
-              <circle cx="9" cy="7" r="4" strokeWidth="2" />
-              <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" strokeWidth="2" />
-            </svg>
-            <span style={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>All Customers</span>
-          </div>
-          <div style={{ fontSize: 12, color: "#9ca3af", marginBottom: 16 }}>8,492 registered users</div>
-
-          {/* Search */}
-          <div style={{ display: "flex", gap: 12, marginBottom: 20, alignItems: "center" }}>
+            {/* Search */}
+           <div style={{ display: "flex", gap: 12, marginBottom: 20, alignItems: "center" }}>
   <style>{`
     .search-wrap {
       display: flex;
@@ -422,6 +401,7 @@ export default function CustomersDashboard() {
       color: #fff;
       flex: 1;
       min-width: 0;
+      font-family: inherit;
     }
     .search-input::placeholder { color: rgba(255,255,255,0.7); }
     .search-arrow {
@@ -436,81 +416,75 @@ export default function CustomersDashboard() {
   `}</style>
 
   <div className="search-wrap">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="2">
+      <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+    </svg>
     <input
       className="search-input"
       placeholder="Search"
       value={search}
-      onChange={(e) => setSearch(e.target.value)}
+      onChange={e => setSearch(e.target.value)}
     />
     <div className="search-arrow">→</div>
   </div>
 </div>
 
-          {/* Table */}
-          <div style={{ background: "#fff", borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.07)" }}>
+            {/* Rows */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {filtered.map((item, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    background: "#f5f7f5", borderRadius: 12, padding: "14px 16px",
+                    transition: "background 0.18s, transform 0.18s",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#edf0ec"; e.currentTarget.style.transform = "translateX(2px)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "#f5f7f5"; e.currentTarget.style.transform = "translateX(0)"; }}
+                >
+                  {/* Left */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: "50%",
+                      background: item.avatarBg, color: "#fff",
+                      fontWeight: 700, fontSize: 12,
+                      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                    }}>
+                      {item.initials}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#1a3330" }}>{item.name}</div>
+                      <div style={{ fontSize: 11, color: "#aaa", marginTop: 2 }}>
+                        {item.plan} &bull; {item.date} &bull; {item.amount}
+                      </div>
+                    </div>
+                  </div>
 
-            {/* ── MOBILE: Scroll hint ── */}
-            <div className="cust-table-scroll-hint">← Scroll to see all columns →</div>
-
-            {/* ── MOBILE: overflowX wrapper correctly wraps the table ── */}
-            <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-              <table style={{ minWidth: 900, width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    {["Name", "Mobile", "Email", "City", "Profession", "Reviews", "Last Login", "Joined", "Actions"].map((h) => (
-                      <th key={h} style={{ textAlign: "left", fontSize: 11, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.5px", padding: "10px 12px", background: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((c, i) => (
-                    <tr
-                      key={i}
-                      style={{ borderBottom: "1px solid #f3f4f6" }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = "#fafafa"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
-                    >
-                      <td style={{ padding: "12px 12px", verticalAlign: "middle" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <Avatar initials={c.initials} size={34} bg={c.bg} />
-                          <span style={{ fontWeight: 600, color: "#111827", fontSize: 13 }}>{c.name}</span>
-                        </div>
-                      </td>
-                      <td style={{ padding: "12px 12px", fontSize: 12, color: "#374151", verticalAlign: "middle" }}>{c.mobile}</td>
-                      <td style={{ padding: "12px 12px", fontSize: 12, color: "#374151", verticalAlign: "middle" }}>{c.email}</td>
-                      <td style={{ padding: "12px 12px", fontSize: 12, color: "#374151", verticalAlign: "middle" }}>{c.city}</td>
-                      <td style={{ padding: "12px 12px", fontSize: 12, color: "#374151", verticalAlign: "middle" }}>{c.profession}</td>
-                      <td style={{ padding: "12px 12px", verticalAlign: "middle" }}>
-                        <span style={{ background: "#d1fae5", color: "#065f46", borderRadius: 20, padding: "3px 10px", fontSize: 11, fontWeight: 600 }}>
-                          {c.reviews}
-                        </span>
-                      </td>
-                      <td style={{ padding: "12px 12px", fontSize: 12, color: "#6b7280", verticalAlign: "middle" }}>{c.lastLogin}</td>
-                      <td style={{ padding: "12px 12px", fontSize: 12, color: "#6b7280", verticalAlign: "middle" }}>{c.joined}</td>
-                      <td style={{ padding: "12px 12px", verticalAlign: "middle" }}>
-                        <button
-                          onClick={() => setShowCustomerModal(true)}
-                          style={{ background: COLORS.primary, color: "#fff", padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer", border: "none" }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = COLORS.primaryHover; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = COLORS.primary; }}
-                        >
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                  {/* Right */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <span style={{
+                      fontSize: 11, fontWeight: 600, padding: "4px 12px", borderRadius: 20,
+                      background: item.badgeBg, color: item.badgeColor, whiteSpace: "nowrap",
+                    }}>
+                      {item.days}
+                    </span>
+                    {item.remind && (
+                      <button
+                        style={{ fontSize: 12, fontWeight: 700, color: COLORS.primary, background: "none", border: "none", cursor: "pointer" }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = COLORS.accent; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = COLORS.primary; }}
+                      >
+                        Remind
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
+
           </div>
         </div>
       </div>
-
-      {showCustomerModal && (
-        <CustomerProfile onClose={() => setShowCustomerModal(false)} />
-      )}
     </div>
   );
 }

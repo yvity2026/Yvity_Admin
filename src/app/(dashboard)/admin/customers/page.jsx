@@ -1,8 +1,7 @@
-
 "use client";
 import { useState } from "react";
+import CustomerProfile from "@/components/CustomerProfile";
 import Link from "next/link";
-import AdvisorProfile from "@/components/AdvisorProfile";
 import { useEffect } from "react";
 
 const COLORS = {
@@ -12,79 +11,6 @@ const COLORS = {
   accent: "#8bc34a",
   gold: "#d4a017",
 };
-
-const advisors = [
-  {
-    id: 1,
-    name: "Krishna Mohan",
-    phone: "+91 9876543210",
-    city: "Nellore, AP",
-    type: "Life+ Health",
-    irdai: "Verified",
-    plan: "Gold",
-    score: 87,
-    maxScore: 90,
-    reviews: null,
-    joined: "Jan 2026",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Krishna Mohan",
-    phone: "+91 9876543210",
-    city: "Nellore, AP",
-    type: "Life",
-    irdai: "Verified",
-    plan: "Gold",
-    score: 87,
-    maxScore: 90,
-    reviews: null,
-    joined: "Jan 2026",
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Krishna Mohan",
-    phone: "+91 9876543210",
-    city: "Nellore, AP",
-    type: "Life+ Health",
-    irdai: "Pending",
-    plan: "Silver",
-    score: 84,
-    maxScore: 0,
-    reviews: null,
-    joined: "Mar 2026",
-    status: "Under Review",
-  },
-  {
-    id: 4,
-    name: "Krishna Mohan",
-    phone: "+91 9876543210",
-    city: "Nellore, AP",
-    type: "Life",
-    irdai: "Verified",
-    plan: "Free",
-    score: 45,
-    maxScore: 3,
-    reviews: null,
-    joined: "Jan 2026",
-    status: "Active",
-  },
-  {
-    id: 5,
-    name: "Krishna Mohan",
-    phone: "+91 9876543210",
-    city: "Nellore, AP",
-    type: "Health",
-    irdai: "Verified",
-    plan: "Gold",
-    score: 87,
-    maxScore: 90,
-    reviews: null,
-    joined: "Jan 2026",
-    status: "Active",
-  },
-];
 
 const navItems = {
   MAIN: [
@@ -199,62 +125,7 @@ function Avatar({ initials, size = 40, bg = COLORS.gold }) {
   );
 }
 
-function IrdaiBadge({ status }) {
-  if (status === "Verified")
-    return (
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 600, background: "#d1fae5", color: "#065f46" }}>
-        ✓ Verified
-      </span>
-    );
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 600, background: "#fffbeb", color: "#92400e" }}>
-      ⏳ Pending
-    </span>
-  );
-}
-
-function PlanBadge({ plan }) {
-  const planStyles = {
-    Gold: { background: "#fef3c7", color: "#92400e", label: "★ Gold" },
-    Silver: { background: "#f1f5f9", color: "#475569", label: "🥈 Silver" },
-    Free: { background: "#f0fdf4", color: "#166534", label: "Free" },
-  };
-  const s = planStyles[plan] || planStyles.Free;
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 600, background: s.background, color: s.color }}>
-      {s.label}
-    </span>
-  );
-}
-
-function StatusBadge({ status }) {
-  if (status === "Active")
-    return (
-      <span style={{ background: "#dcfce7", color: "#166534", display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 12, fontSize: 11, fontWeight: 600 }}>
-        Active
-      </span>
-    );
-  return (
-    <span style={{ background: "#fef9c3", color: "#854d0e", display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 12, fontSize: 11, fontWeight: 600 }}>
-      Under Review
-    </span>
-  );
-}
-
-function ScoreBar({ score }) {
-  const fillColor = score >= 80 ? COLORS.primary : score >= 50 ? "#f59e0b" : "#ef4444";
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-      <span style={{ fontWeight: 600, fontSize: 13 }}>{score}</span>
-      <div style={{ width: 40, height: 4, borderRadius: 2, background: "#e5e7eb", overflow: "hidden" }}>
-        <div style={{ width: `${score}%`, height: "100%", borderRadius: 2, background: fillColor }} />
-      </div>
-    </div>
-  );
-}
-
-// ── Sidebar with onClose for mobile ──────────────────────────────
-function Sidebar({ activeNav, setActiveNav, onClose }) {
+function Sidebar({ activeNav, setActiveNav, onClose, onLogout }) {
   return (
     <div style={{ background: COLORS.primary, minHeight: "100vh", width: 280, flexShrink: 0, display: "flex", flexDirection: "column" }}>
       {/* Logo */}
@@ -302,7 +173,9 @@ function Sidebar({ activeNav, setActiveNav, onClose }) {
                       cursor: "pointer",
                       color: isActive ? "#fff" : "#a3d0d0",
                       background: isActive ? COLORS.primaryHover : "transparent",
-                      borderLeft: isActive ? `3px solid ${COLORS.accent}` : "3px solid transparent",
+                      borderLeft: isActive
+                        ? `3px solid ${COLORS.accent}`
+                        : "3px solid transparent",
                     }}
                   >
                     {item.icon}
@@ -319,6 +192,7 @@ function Sidebar({ activeNav, setActiveNav, onClose }) {
       <div style={{ padding: "16px 0" }}>
         <div
           style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", color: "#ef4444", fontSize: 13, cursor: "pointer" }}
+          onClick={onLogout}
           onMouseEnter={(e) => { e.currentTarget.style.background = COLORS.primaryHover; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
         >
@@ -332,20 +206,27 @@ function Sidebar({ activeNav, setActiveNav, onClose }) {
   );
 }
 
-const filterTabs = [
-  { label: "All (1,042)", key: "all", style: { background: COLORS.primary, color: "#fff" } },
-  { label: "⭐ Gold (451)", key: "gold", style: { background: "#fef9e7", color: "#b7791f", border: "1px solid #f6e05e" } },
-  { label: "🥈 Silver (281)", key: "silver", style: { background: "#f7f7f7", color: "#718096", border: "1px solid #cbd5e0" } },
-  { label: "Free (962)", key: "free", style: { background: "#f0fff4", color: "#276749", border: "1px solid #9ae6b4" } },
-  { label: "⏳ Pending IRDAI", key: "pending", style: { background: "#fffbeb", color: "#b45309", border: "1px solid #fcd34d" } },
-  { label: "🚫 Suspended", key: "suspended", style: { background: "#fef2f2", color: "#b91c1c", border: "1px solid #fca5a5" } },
+// ── Customer data ──────────────────────────────────────────────────────────
+const customers = [
+  { initials: "KM", bg: "#d4a017", name: "Krishna Mohan", mobile: "+91 9123456789", email: "Krishna@email.com", city: "Hyderabad, TS", profession: "Teacher",       reviews: "3 Reviews", lastLogin: "2 hrs ago",  joined: "Jan 2026" },
+  { initials: "KM", bg: "#d4a017", name: "Krishna Mohan", mobile: "+91 9876543210", email: "Krishna@email.com", city: "Hyderabad, TS", profession: "Software Eng.", reviews: "5 Reviews", lastLogin: "10 min ago", joined: "Jan 2026" },
+  { initials: "KM", bg: "#d4a017", name: "Krishna Mohan", mobile: "+91 9876543210", email: "Krishna@email.com", city: "Hyderabad, TS", profession: "Business Owner", reviews: "1 Review",  lastLogin: "Yesterday",  joined: "Jan 2026" },
+  { initials: "KM", bg: "#d4a017", name: "Krishna Mohan", mobile: "+91 9876543210", email: "Krishna@email.com", city: "Hyderabad, TS", profession: "Govt. Employee", reviews: "2 Reviews", lastLogin: "3 days ago", joined: "Jan 2026" },
+  { initials: "KM", bg: "#d4a017", name: "Krishna Mohan", mobile: "+91 9876543210", email: "Krishna@email.com", city: "Hyderabad, TS", profession: "Business Owner", reviews: "1 Review",  lastLogin: "Yesterday",  joined: "Jan 2026" },
 ];
 
-export default function AdvisorsDashboard() {
-  const [activeNav, setActiveNav] = useState("Advisors");
-  const [activeFilter, setActiveFilter] = useState("all");
+export default function CustomersDashboard() {
+  const [activeNav, setActiveNav] = useState("Customers");
   const [search, setSearch] = useState("");
-  const [showSidebar, setShowSidebar] = useState(false); 
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);  
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/admin/logout", { method: "POST" });
+    } finally {
+      window.location.href = "/auth/admin/login";
+    }
+  };
   useEffect(() => {
   if (showSidebar) {
     document.body.style.overflow = "hidden";
@@ -357,11 +238,12 @@ export default function AdvisorsDashboard() {
     document.body.style.overflow = "auto";
   };
 }, [showSidebar]);
-  const [selectedAdvisor, setSelectedAdvisor] = useState(null);
-  const filtered = advisors.filter((a) =>
-    a.name.toLowerCase().includes(search.toLowerCase()) ||
-    a.city.toLowerCase().includes(search.toLowerCase()) ||
-    a.type.toLowerCase().includes(search.toLowerCase())
+
+  const filtered = customers.filter((c) =>
+    c.name.toLowerCase().includes(search.toLowerCase()) ||
+    c.email.toLowerCase().includes(search.toLowerCase()) ||
+    c.city.toLowerCase().includes(search.toLowerCase()) ||
+    c.profession.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -369,21 +251,21 @@ export default function AdvisorsDashboard() {
 
       {/* ── MOBILE RESPONSIVE STYLES ── */}
       <style>{`
-        .adv-sidebar-container {
+        .cust-sidebar-container {
           position: relative;
           z-index: 50;
         }
-        .adv-hamburger-btn {
+        .cust-hamburger-btn {
           display: none;
         }
-        .adv-mobile-overlay {
+        .cust-mobile-overlay {
           display: none;
         }
-        .adv-table-scroll-hint {
+        .cust-table-scroll-hint {
           display: none;
         }
         @media (max-width: 768px) {
-          .adv-sidebar-container {
+          .cust-sidebar-container {
             position: fixed !important;
             top: 0;
             left: 0;
@@ -391,17 +273,17 @@ export default function AdvisorsDashboard() {
             transform: translateX(-100%);
             transition: transform 0.25s ease;
           }
-          .adv-sidebar-container.open {
+          .cust-sidebar-container.open {
             transform: translateX(0);
           }
-          .adv-mobile-overlay {
+          .cust-mobile-overlay {
             display: block;
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.45);
             z-index: 40;
           }
-          .adv-hamburger-btn {
+          .cust-hamburger-btn {
             display: flex !important;
             align-items: center;
             justify-content: center;
@@ -412,35 +294,43 @@ export default function AdvisorsDashboard() {
             border-radius: 6px;
             margin-right: 8px;
           }
-          .adv-table-scroll-hint {
+          .cust-table-scroll-hint {
             display: block;
             font-size: 11px;
             color: #9ca3af;
             text-align: right;
             padding: 6px 12px 2px;
           }
-          .adv-main-content-padding {
+          .cust-main-content-padding {
             padding: 14px !important;
+          }
+          .cust-stat-cards {
+            flex-direction: column !important;
+          }
+          .cust-stat-cards > div {
+            max-width: 100% !important;
           }
         }
       `}</style>
 
       {/* ── MOBILE: Dark overlay — tap to close sidebar ── */}
+      {/* Local page sidebar commented out because the dashboard layout now renders the shared responsive sidebar.
       {showSidebar && (
         <div
-          className="adv-mobile-overlay"
+          className="cust-mobile-overlay"
           onClick={() => setShowSidebar(false)}
         />
       )}
 
-      {/* ── MOBILE: Sidebar wrapped in slide-in container ── */}
-      <div className={`adv-sidebar-container${showSidebar ? " open" : ""}`}>
+      <div className={`cust-sidebar-container${showSidebar ? " open" : ""}`}>
         <Sidebar
           activeNav={activeNav}
           setActiveNav={setActiveNav}
           onClose={() => setShowSidebar(false)}
+          onLogout={handleLogout}
         />
       </div>
+      */}
 
       {/* Main */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -449,15 +339,15 @@ export default function AdvisorsDashboard() {
           <div style={{ display: "flex", alignItems: "center" }}>
             {/* ── MOBILE: Hamburger button ── */}
             <button
-              className="adv-hamburger-btn"
-              onClick={() => setShowSidebar(true)}
+              className="cust-hamburger-btn"
+              onClick={() => window.dispatchEvent(new Event("open-dashboard-sidebar"))}
               aria-label="Open menu"
             >
               <svg width="22" height="22" fill="none" stroke="#374151" viewBox="0 0 24 24">
                 <path d="M4 6h16M4 12h16M4 18h16" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </button>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>Advisors</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>Customers</div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ position: "relative" }}>
@@ -471,7 +361,44 @@ export default function AdvisorsDashboard() {
         </div>
 
         {/* Content */}
-        <div className="adv-main-content-padding" style={{ padding: 24, overflowY: "auto", flex: 1 }}>
+        <div className="cust-main-content-padding" style={{ padding: 24, overflowY: "auto", flex: 1 }}>
+
+          {/* Stat Cards */}
+          <div className="cust-stat-cards" style={{ display: "flex", gap: 16, marginBottom: 22 }}>
+            {/* Total Customers */}
+            <div style={{ background: "#fff", borderRadius: 14, padding: "20px 22px", boxShadow: "0 2px 10px rgba(0,0,0,0.055)", flex: 1, maxWidth: 280 }}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: "#eef4f2", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a7a5a" strokeWidth="2">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                  </svg>
+                </div>
+                <span style={{ background: "#e6f5f0", color: "#1a7a5a", fontSize: 11, fontWeight: 700, borderRadius: 20, padding: "3px 10px" }}>↑ 34%</span>
+              </div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: "#111827", lineHeight: 1.1 }}>8,492</div>
+              <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 3, fontWeight: 500 }}>Total Customers</div>
+            </div>
+
+            {/* Joined Today */}
+            <div style={{ background: "#fff", borderRadius: 14, padding: "20px 22px", boxShadow: "0 2px 10px rgba(0,0,0,0.055)", flex: 1, maxWidth: 280 }}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: "#eef4f2", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2255bb" strokeWidth="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                </div>
+                <span style={{ background: "#e6f0ff", color: "#2255bb", fontSize: 11, fontWeight: 700, borderRadius: 20, padding: "3px 10px" }}>+48</span>
+              </div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: "#111827", lineHeight: 1.1 }}>48</div>
+              <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 3, fontWeight: 500 }}>Joined Today</div>
+            </div>
+          </div>
+
           {/* Header */}
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
             <svg width="18" height="18" fill="none" stroke="#374151" viewBox="0 0 24 24">
@@ -479,38 +406,12 @@ export default function AdvisorsDashboard() {
               <circle cx="9" cy="7" r="4" strokeWidth="2" />
               <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" strokeWidth="2" />
             </svg>
-            <span style={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>All Advisors</span>
+            <span style={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>All Customers</span>
           </div>
-          <div style={{ fontSize: 12, color: "#9ca3af", marginBottom: 16 }}>1,264 total registered advisors</div>
-
-          {/* Filter Tabs */}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-            {filterTabs.map((tab) => (
-              <span
-                key={tab.key}
-                onClick={() => setActiveFilter(tab.key)}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  padding: "5px 12px",
-                  borderRadius: 20,
-                  fontSize: 12,
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  border: "1px solid transparent",
-                  transition: "all 0.15s",
-                  ...(activeFilter === tab.key ? { background: COLORS.primary, color: "#fff", border: "1px solid transparent" } : tab.style),
-                }}
-              >
-                {tab.label}
-              </span>
-            ))}
-          </div>
+          <div style={{ fontSize: 12, color: "#9ca3af", marginBottom: 16 }}>8,492 registered users</div>
 
           {/* Search */}
-          
-<div style={{ display: "flex", gap: 12, marginBottom: 20, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 12, marginBottom: 20, alignItems: "center" }}>
   <style>{`
     .search-wrap {
       display: flex;
@@ -559,14 +460,14 @@ export default function AdvisorsDashboard() {
           <div style={{ background: "#fff", borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.07)" }}>
 
             {/* ── MOBILE: Scroll hint ── */}
-            <div className="adv-table-scroll-hint">← Scroll to see all columns →</div>
+            <div className="cust-table-scroll-hint">← Scroll to see all columns →</div>
 
-            {/* ── Overflow wrapper correctly wraps the table ── */}
+            {/* ── MOBILE: overflowX wrapper correctly wraps the table ── */}
             <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
               <table style={{ minWidth: 900, width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr>
-                    {["Advisor", "City", "Type", "IRDAI", "Plan", "Score", "Reviews", "Joined", "Status", "Actions"].map((h) => (
+                    {["Name", "Mobile", "Email", "City", "Profession", "Reviews", "Last Login", "Joined", "Actions"].map((h) => (
                       <th key={h} style={{ textAlign: "left", fontSize: 11, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.5px", padding: "10px 12px", background: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
                         {h}
                       </th>
@@ -574,57 +475,39 @@ export default function AdvisorsDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((advisor) => (
+                  {filtered.map((c, i) => (
                     <tr
-                      key={advisor.id}
+                      key={i}
                       style={{ borderBottom: "1px solid #f3f4f6" }}
                       onMouseEnter={(e) => { e.currentTarget.style.background = "#fafafa"; }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
                     >
                       <td style={{ padding: "12px 12px", verticalAlign: "middle" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <Avatar initials="KM" size={34} />
-                          <div>
-                            <div style={{ fontWeight: 600, color: "#111827", fontSize: 13 }}>{advisor.name}</div>
-                            <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>{advisor.phone}</div>
-                          </div>
+                          <Avatar initials={c.initials} size={34} bg={c.bg} />
+                          <span style={{ fontWeight: 600, color: "#111827", fontSize: 13 }}>{c.name}</span>
                         </div>
                       </td>
-                      <td style={{ padding: "12px 12px", fontSize: 12, color: "#374151", verticalAlign: "middle" }}>{advisor.city}</td>
-                      <td style={{ padding: "12px 12px", fontSize: 12, color: "#374151", verticalAlign: "middle" }}>{advisor.type}</td>
-                      <td style={{ padding: "12px 12px", verticalAlign: "middle" }}><IrdaiBadge status={advisor.irdai} /></td>
-                      <td style={{ padding: "12px 12px", verticalAlign: "middle" }}><PlanBadge plan={advisor.plan} /></td>
-                      <td style={{ padding: "12px 12px", verticalAlign: "middle" }}><ScoreBar score={advisor.score} /></td>
-                      <td style={{ padding: "12px 12px", fontSize: 13, color: "#374151", verticalAlign: "middle" }}>—</td>
-                      <td style={{ padding: "12px 12px", fontSize: 12, color: "#6b7280", verticalAlign: "middle" }}>{advisor.joined}</td>
-                      <td style={{ padding: "12px 12px", verticalAlign: "middle" }}><StatusBadge status={advisor.status} /></td>
+                      <td style={{ padding: "12px 12px", fontSize: 12, color: "#374151", verticalAlign: "middle" }}>{c.mobile}</td>
+                      <td style={{ padding: "12px 12px", fontSize: 12, color: "#374151", verticalAlign: "middle" }}>{c.email}</td>
+                      <td style={{ padding: "12px 12px", fontSize: 12, color: "#374151", verticalAlign: "middle" }}>{c.city}</td>
+                      <td style={{ padding: "12px 12px", fontSize: 12, color: "#374151", verticalAlign: "middle" }}>{c.profession}</td>
                       <td style={{ padding: "12px 12px", verticalAlign: "middle" }}>
-                        <div style={{ display: "flex", gap: 6 }}>
-                         <button
-  onClick={() => setSelectedAdvisor(advisor)}
-  style={{
-    background: COLORS.primary,
-    color: "#fff",
-    padding: "4px 12px",
-    borderRadius: 6,
-    fontSize: 12,
-    fontWeight: 500,
-    cursor: "pointer",
-    border: "none"
-  }}
->
-  View
-</button>
-                          {advisor.status === "Under Review" ? (
-                            <button style={{ background: "#d1fae5", color: "#065f46", padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer", border: "none" }}>
-                              Approve
-                            </button>
-                          ) : (
-                            <button style={{ background: "#fee2e2", color: "#b91c1c", padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer", border: "none" }}>
-                              Suspend
-                            </button>
-                          )}
-                        </div>
+                        <span style={{ background: "#d1fae5", color: "#065f46", borderRadius: 20, padding: "3px 10px", fontSize: 11, fontWeight: 600 }}>
+                          {c.reviews}
+                        </span>
+                      </td>
+                      <td style={{ padding: "12px 12px", fontSize: 12, color: "#6b7280", verticalAlign: "middle" }}>{c.lastLogin}</td>
+                      <td style={{ padding: "12px 12px", fontSize: 12, color: "#6b7280", verticalAlign: "middle" }}>{c.joined}</td>
+                      <td style={{ padding: "12px 12px", verticalAlign: "middle" }}>
+                        <button
+                          onClick={() => setShowCustomerModal(true)}
+                          style={{ background: COLORS.primary, color: "#fff", padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer", border: "none" }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = COLORS.primaryHover; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = COLORS.primary; }}
+                        >
+                          View
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -634,10 +517,10 @@ export default function AdvisorsDashboard() {
           </div>
         </div>
       </div>
-      {selectedAdvisor && (
-  <AdvisorProfile onClose={() => setSelectedAdvisor(null)} />
-)}
+
+      {showCustomerModal && (
+        <CustomerProfile onClose={() => setShowCustomerModal(false)} />
+      )}
     </div>
-    
   );
 }

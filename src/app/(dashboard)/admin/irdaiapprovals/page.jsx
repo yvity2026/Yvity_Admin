@@ -282,59 +282,60 @@ function Avatar({ initials, size = 40, bg = COLORS.gold }) {
   );
 }
 
-function Sidebar({ activeNav, setActiveNav, onClose }) {
-  return (
-    <div style={{ background: COLORS.primary, minHeight: "100vh", width: 280, flexShrink: 0, display: "flex", flexDirection: "column" }}>
-      <div className="h-[60px] bg-[#FAFAFA] flex justify-center items-center border-b border-[#155e5e]">
-        <img src="/images/Adivisor/Navbar/navlogo.png" alt="logo" className="h-10 w-auto object-contain" />
-      </div>
+// function Sidebar({ activeNav, setActiveNav, onClose, onLogout }) {
+//   return (
+//     <div style={{ background: COLORS.primary, minHeight: "100vh", width: 280, flexShrink: 0, display: "flex", flexDirection: "column" }}>
+//       <div className="h-[60px] bg-[#FAFAFA] flex justify-center items-center border-b border-[#155e5e]">
+//         <img src="/images/Adivisor/Navbar/navlogo.png" alt="logo" className="h-10 w-auto object-contain" />
+//       </div>
 
-      <div style={{ padding: "14px 16px", borderBottom: `1px solid ${COLORS.primaryBorder}` }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Avatar initials="KM" size={40} />
-          <div>
-            <div style={{ color: "#fff", fontSize: 13, fontWeight: 600 }}>Admin</div>
-            <div style={{ color: COLORS.accent, fontSize: 10, marginTop: 1 }}>● Super Administrator</div>
-          </div>
-        </div>
-      </div>
+//       <div style={{ padding: "14px 16px", borderBottom: `1px solid ${COLORS.primaryBorder}` }}>
+//         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+//           <Avatar initials="KM" size={40} />
+//           <div>
+//             <div style={{ color: "#fff", fontSize: 13, fontWeight: 600 }}>Admin</div>
+//             <div style={{ color: COLORS.accent, fontSize: 10, marginTop: 1 }}>● Super Administrator</div>
+//           </div>
+//         </div>
+//       </div>
 
-      <div style={{ flex: 1 }}>
-        {Object.entries(navItems).map(([section, items]) => (
-          <div key={section}>
-            <div style={{ color: "#5fa8a8", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, padding: "14px 16px 4px" }}>
-              {section}
-            </div>
-            {items.map((item) => {
-              const isActive = activeNav === item.label;
-              return (
-                <Link key={item.label} href={item.href} style={{ textDecoration: "none" }} onClick={() => { setActiveNav(item.label); onClose && onClose(); }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", cursor: "pointer", color: isActive ? "#fff" : "#a3d0d0", background: isActive ? COLORS.primaryHover : "transparent", borderLeft: isActive ? `3px solid ${COLORS.accent}` : "3px solid transparent" }}>
-                    {item.icon}
-                    {item.label}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        ))}
-      </div>
+//       <div style={{ flex: 1 }}>
+//         {Object.entries(navItems).map(([section, items]) => (
+//           <div key={section}>
+//             <div style={{ color: "#5fa8a8", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, padding: "14px 16px 4px" }}>
+//               {section}
+//             </div>
+//             {items.map((item) => {
+//               const isActive = activeNav === item.label;
+//               return (
+//                 <Link key={item.label} href={item.href} style={{ textDecoration: "none" }} onClick={() => { setActiveNav(item.label); onClose && onClose(); }}>
+//                   <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", cursor: "pointer", color: isActive ? "#fff" : "#a3d0d0", background: isActive ? COLORS.primaryHover : "transparent", borderLeft: isActive ? `3px solid ${COLORS.accent}` : "3px solid transparent" }}>
+//                     {item.icon}
+//                     {item.label}
+//                   </div>
+//                 </Link>
+//               );
+//             })}
+//           </div>
+//         ))}
+//       </div>
 
-      <div style={{ padding: "16px 0" }}>
-        <div
-          style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", color: "#ef4444", fontSize: 13, cursor: "pointer" }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = COLORS.primaryHover; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
-        >
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}>
-            <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" strokeWidth="2" />
-          </svg>
-          Logout
-        </div>
-      </div>
-    </div>
-  );
-}
+//       <div style={{ padding: "16px 0" }}>
+//         <div
+//           style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", color: "#ef4444", fontSize: 13, cursor: "pointer" }}
+//           onClick={onLogout}
+//           onMouseEnter={(e) => { e.currentTarget.style.background = COLORS.primaryHover; }}
+//           onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+//         >
+//           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}>
+//             <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" strokeWidth="2" />
+//           </svg>
+//           Logout
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 
 const IHourglass = ({ color }) => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
@@ -397,10 +398,17 @@ const ISubmission = () => (
 
 export default function IRDAIApprovals() {
   const [showModal, setShowModal]         = useState(false);
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/admin/logout", { method: "POST" });
+    } finally {
+      window.location.href = "/auth/admin/login";
+    }
+  };
   const [activeNav, setActiveNav]         = useState("IRDAI Approvals");
   const [search, setSearch]               = useState("");
   const [rows, setRows]                   = useState([]);
-  const [showSidebar, setShowSidebar]     = useState(false);
+  // const [showSidebar, setShowSidebar]     = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [openReject, setOpenReject]       = useState(false);
   const [isProcessing, setIsProcessing]   = useState(false);
@@ -414,14 +422,14 @@ export default function IRDAIApprovals() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (showSidebar) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
-    return () => { document.body.style.overflow = "auto"; };
-  }, [showSidebar]);
+  // useEffect(() => {
+  //   if (showSidebar) {
+  //     document.body.style.overflow = "hidden";
+  //   } else {
+  //     document.body.style.overflow = "auto";
+  //   }
+  //   return () => { document.body.style.overflow = "auto"; };
+  // }, [showSidebar]);
 
   useEffect(() => {
     const loadApprovals = async () => {
@@ -675,20 +683,20 @@ export default function IRDAIApprovals() {
       <style>{styles}</style>
       <div className="app-shell">
 
-        {showSidebar && (
+        {/* {showSidebar && (
           <div className="irdai-mobile-overlay" onClick={() => setShowSidebar(false)} />
-        )}
+        )} */}
 
-        <div className={`irdai-sidebar-container${showSidebar ? " open" : ""}`}>
-          <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} onClose={() => setShowSidebar(false)} />
-        </div>
+        {/* <div className={`irdai-sidebar-container${showSidebar ? " open" : ""}`}>
+          <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} onClose={() => setShowSidebar(false)} onLogout={handleLogout} />
+        </div> */}
 
         <div className="main-area">
 
           {/* Topbar */}
           <div style={{ background: "#fff", borderBottom: "1px solid #e5e7eb", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
-              <button className="irdai-hamburger-btn" onClick={() => setShowSidebar(true)} aria-label="Open menu">
+              <button className="irdai-hamburger-btn" onClick={() => window.dispatchEvent(new Event("open-dashboard-sidebar"))} aria-label="Open menu">
                 <svg width="22" height="22" fill="none" stroke="#374151" viewBox="0 0 24 24">
                   <path d="M4 6h16M4 12h16M4 18h16" strokeWidth="2" strokeLinecap="round" />
                 </svg>

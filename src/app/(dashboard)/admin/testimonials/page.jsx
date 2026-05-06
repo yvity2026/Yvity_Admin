@@ -175,7 +175,7 @@ function Avatar({ initials, size = 40, bg = COLORS.gold }) {
   );
 }
 
-function Sidebar({ activeNav, setActiveNav, onClose }) {
+function Sidebar({ activeNav, setActiveNav, onClose, onLogout }) {
   return (
     <div style={{ background: COLORS.primary, minHeight: "100vh", width: 256, flexShrink: 0, display: "flex", flexDirection: "column" }}>
       <div className="h-[60px] bg-[#FAFAFA] flex justify-center items-center border-b border-[#155e5e]">
@@ -215,6 +215,7 @@ function Sidebar({ activeNav, setActiveNav, onClose }) {
         <div
           className="nav-row"
           style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", color: "#ef4444", fontSize: 13, cursor: "pointer" }}
+          onClick={onLogout}
           onMouseEnter={(e) => { e.currentTarget.style.background = COLORS.primaryHover; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
         >
@@ -315,6 +316,14 @@ export default function Testimonials() {
   const [showSidebar, setShowSidebar]   = useState(false);
   const [activeFilter, setActiveFilter] = useState(null); // ← NEW
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/admin/logout", { method: "POST" });
+    } finally {
+      window.location.href = "/auth/admin/login";
+    }
+  };
+
   useEffect(() => {
     if (showSidebar) {
       document.body.style.overflow = "hidden";
@@ -347,17 +356,19 @@ export default function Testimonials() {
 
       <div style={{ display: "flex", minHeight: "100vh", background: "#f3f4f6" }}>
 
+        {/* Local page sidebar commented out because the dashboard layout now renders the shared responsive sidebar.
         {showSidebar && (
           <div className="test-mobile-overlay" onClick={() => setShowSidebar(false)} />
         )}
 
         <div className={`test-sidebar-container${showSidebar ? " open" : ""}`}>
-          <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} onClose={() => setShowSidebar(false)} />
+          <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} onClose={() => setShowSidebar(false)} onLogout={handleLogout} />
         </div>
+        */}
 
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
 
-          <Topbar title="Testimonials" onHamburger={() => setShowSidebar(true)} />
+          <Topbar title="Testimonials" onHamburger={() => window.dispatchEvent(new Event("open-dashboard-sidebar"))} />
 
           <div className="content test-main-content-padding">
 
