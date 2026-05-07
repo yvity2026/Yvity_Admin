@@ -67,7 +67,7 @@ export async function GET() {
 
       return {
         id: item.id,
-        user_id: item.user_id,
+        user_id: item.advisor_id,
         name: user.name || "Advisor",
         email: user.email || null,
         phone: user.mobile || null,
@@ -77,8 +77,13 @@ export async function GET() {
         status,
         submittedAt: item.created_at,
         updatedAt: item.updated_at,
+        licenseNo: item.services[0].license,
+        plan : item.subscription_plan,
+
       };
     });
+
+    console.log(output)
 
     return NextResponse.json({ data: output, stats });
   } catch (error) {

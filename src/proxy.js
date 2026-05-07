@@ -14,7 +14,10 @@ export function proxy(request) {
 
     try {
       const session = JSON.parse(adminSession.value);
-      // Could add more validation here
+      console.log(session)
+      if (!session?.admin_id || !session?.role) {
+        return NextResponse.redirect(new URL("/auth/admin/login", request.url));
+      }
     } catch {
       return NextResponse.redirect(new URL("/auth/admin/login", request.url));
     }

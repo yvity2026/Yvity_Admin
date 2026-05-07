@@ -567,17 +567,17 @@ export default function IrdaiModal({ advisor, onClose, onApprove, onReject }) {
       document.body.style.overflow = original;
     };
   }, []);
-
-  // // ── Safely read any field name your backend sends ──
-  // const name       = advisor?.name       ?? advisor?.advisorName     ?? advisor?.fullName      ?? "—";
-  // const licNo      = advisor?.lic        ?? advisor?.licenseNo       ?? advisor?.licenseNumber ?? advisor?.license ?? "—";
-  // const type       = advisor?.type       ?? advisor?.licenseType     ?? "—";
-  // const authority  = advisor?.authority  ?? advisor?.issuedBy        ?? "—";
-  // const validUntil = advisor?.validUntil ?? advisor?.expiryDate      ?? advisor?.validity      ?? "—";
-  // const plan       = advisor?.plan       ?? advisor?.planName        ?? advisor?.subscription  ?? "—";
-  // const submitted  = advisor?.submitted  ?? advisor?.submittedAt     ?? advisor?.createdAt     ?? "—";
-  // const certName   = advisor?.certificateName ?? advisor?.fileName   ?? advisor?.document      ?? "certificate.jpg";
-  // const certUrl    = advisor?.certificateUrl  ?? advisor?.docUrl     ?? advisor?.fileUrl       ?? null;
+console.log("fdghjgfdsfhjkhgfdsfghjkhgfds",advisor);
+  // ── Safely read any field name your backend sends ──
+  const name       = advisor?.name       ?? advisor?.advisorName     ?? advisor?.fullName      ?? "—";
+  const licNo      = advisor?.licenseNo?.services?.[0]?.license       ?? advisor?.licenseNo       ?? advisor?.licenseNumber ?? advisor?.license ?? "—";
+  const type       = advisor?.type       ?? advisor?.licenseType     ?? "—";
+  const authority  = advisor?.authority  ?? advisor?.issuedBy        ?? "—";
+  const validUntil = advisor?.validUntil ?? advisor?.expiryDate      ?? advisor?.validity      ?? "—";
+  const plan       = advisor?.plan?.subscription_plan       ?? advisor?.planName        ?? advisor?.subscription  ?? "—";
+  const submitted  = advisor?.submittedAt  ?? advisor?.submittedAt     ?? advisor?.createdAt     ?? "—";
+  const certName   = advisor?.certificateName ?? advisor?.fileName   ?? advisor?.document      ?? "certificate.jpg";
+  const certUrl    = advisor?.licenseUrl  ?? advisor?.docUrl     ?? advisor?.fileUrl       ?? null;
 
   const rows = [
     { label: "Advisor",     value: name },
@@ -610,7 +610,7 @@ export default function IrdaiModal({ advisor, onClose, onApprove, onReject }) {
         </div>
 
         {/* ── Scrollable body ── */}
-        <div className="overflow-y-auto flex-1">
+        <div className="overflow-y-auto flex-1 no-scrollbar">
 
           {/* Rows */}
           <div className="px-6">
@@ -633,6 +633,8 @@ export default function IrdaiModal({ advisor, onClose, onApprove, onReject }) {
               <span className="text-[13.5px] text-gray-400 font-normal shrink-0">Plan Paid</span>
               <div className="flex items-center gap-[5px] bg-amber-100 rounded-full px-3 py-1 shrink-0">
                 <span className="text-[12px]">🏅</span>
+                {/* <span className="text-[12px]">🏅</span> */}
+                {/* <span className="text-[12px]">🏅</span> */}
                 <span className="text-[12px] text-amber-900 font-semibold">{plan}</span>
               </div>
             </div>
