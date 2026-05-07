@@ -142,6 +142,7 @@ export default function IRDAIApprovals() {
   const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0, pendingPercentage: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState("");
+  const [data, setData] = useState(null)
 
   useEffect(() => {
     document.body.style.overflow = showSidebar ? "hidden" : "auto";

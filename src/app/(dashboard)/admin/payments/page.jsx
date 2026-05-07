@@ -1,4 +1,3 @@
-
 "use client";
 import { useState, useEffect } from "react";
 import PaymentDetails from "@/components/Paymentdetails";
@@ -10,49 +9,6 @@ const transactions = [
   { id: 3, initials: "PS", avatarBg: "bg-[#3AAFA9]", name: "Priya Sharma",  location: "Hyderabad",   plan: "Silver", amount: "₹2,999", method: "Net Banking", date: "Jan 2, 2026", txnId: "TXN2025010501", status: "Sucess" },
   { id: 4, initials: "PS", avatarBg: "bg-[#3AAFA9]", name: "Priya Sharma",  location: "Nellore, AP", plan: "Gold",   amount: "₹2,999", method: "Card",        date: "Jan 2, 2026", txnId: "TXN2025010501", status: "Sucess" },
 ];
-
-const navItems = {
-  MAIN: [
-    {
-      label: "Overview", href: "/admin",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><rect x="3" y="3" width="7" height="7" rx="1" strokeWidth="2" /><rect x="14" y="3" width="7" height="7" rx="1" strokeWidth="2" /><rect x="3" y="14" width="7" height="7" rx="1" strokeWidth="2" /><rect x="14" y="14" width="7" height="7" rx="1" strokeWidth="2" /></svg>,
-    },
-    {
-      label: "Advisors", href: "/admin/advisors",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><circle cx="9" cy="7" r="4" strokeWidth="2" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeWidth="2" /><path d="M16 11l2 2 4-4" strokeWidth="2" /></svg>,
-    },
-    {
-      label: "Customers", href: "/admin/customers",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><circle cx="12" cy="8" r="4" strokeWidth="2" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" strokeWidth="2" /></svg>,
-    },
-  ],
-  APPROVALS: [
-    {
-      label: "IRDAI Approvals", href: "/admin/irdaiapprovals",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><circle cx="12" cy="12" r="9" strokeWidth="2" /><path d="M9 12l2 2 4-4" strokeWidth="2" /></svg>,
-    },
-    {
-      label: "Testimonials", href: "/admin/testimonials",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z" strokeWidth="2" /></svg>,
-    },
-  ],
-  FINANCE: [
-    {
-      label: "Payments", href: "/admin/payments",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeWidth="2" /></svg>,
-    },
-    {
-      label: "Subscriptions", href: "/admin/subscriptions",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" strokeWidth="2" /></svg>,
-    },
-  ],
-  SYSTEM: [
-    {
-      label: "Settings", href: "/admin/settings",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><circle cx="12" cy="12" r="3" strokeWidth="2" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" strokeWidth="2" /></svg>,
-    },
-  ],
-};
 
 function Avatar({ initials, size = "md" }) {
   const sizeClass = size === "sm" ? "w-8 h-8 text-xs" : "w-10 h-10 text-sm";
@@ -66,7 +22,7 @@ function Avatar({ initials, size = "md" }) {
 
 
 function PlanBadge({ plan }) {
-  const isGold = plan === "Gold";
+  const isGold = plan === "gold";
   return (
     <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border whitespace-nowrap ${isGold ? "text-yellow-800 bg-yellow-100 border-yellow-200" : "text-slate-600 bg-slate-100 border-slate-300"}`}>
       {isGold ? "🏅" : "🥈"} {plan}
@@ -79,16 +35,36 @@ export default function PaymentsDashboard() {
   const [activeNav, setActiveNav]             = useState("Payments");
   const [search, setSearch]                   = useState("");
   const [showSidebar, setShowSidebar]         = useState(false);
+  const [transactions, setTransactions] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    document.body.style.overflow = showSidebar ? "hidden" : "auto";
-    return () => { document.body.style.overflow = "auto"; };
-  }, [showSidebar]);
+    const fetchTransactions = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/admin/payments");
+        if (!res.ok) throw new Error("Failed to fetch payments");
+        const { data, revenue } = await res.json();
+        setTransactions(data || []);
+        setStats(revenue || null)
+      } catch (err) {
+        console.error(err);
+        setError("Unable to load payments.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const filtered = transactions.filter((t) =>
-    t.name.toLowerCase().includes(search.toLowerCase()) ||
-    t.txnId.toLowerCase().includes(search.toLowerCase()) ||
-    t.method.toLowerCase().includes(search.toLowerCase())
+    fetchTransactions();
+  }, []);
+
+  const filtered = transactions.filter(
+    (t) =>
+      t.name?.toLowerCase().includes(search.toLowerCase()) ||
+      t.txnId?.toLowerCase().includes(search.toLowerCase()) ||
+      t.method?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -116,7 +92,7 @@ export default function PaymentsDashboard() {
                 <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full mb-2">
                   ↑ 18%
                 </span>
-                <div className="text-[22px] font-extrabold text-[#1A2B22] leading-tight">₹12.4L</div>
+                <div className="text-[22px] font-extrabold text-[#1A2B22] leading-tight">{stats?.thisMonth}</div>
                 <div className="text-[11px] text-gray-400 mt-0.5 font-medium">Revenue This Month</div>
               </div>
               <div className="w-[38px] h-[38px] rounded-xl bg-orange-50 flex items-center justify-center text-[19px]">💰</div>
@@ -125,7 +101,7 @@ export default function PaymentsDashboard() {
             {/* Gold Plan Revenue */}
             <div className="bg-white rounded-2xl p-[16px_18px] border border-[#E3E6DC] flex justify-between items-start">
               <div className="pt-[22px]">
-                <div className="text-[22px] font-extrabold text-[#1A2B22] leading-tight">₹8.6L</div>
+                <div className="text-[22px] font-extrabold text-[#1A2B22] leading-tight">{stats?.goldPlan}</div>
                 <div className="text-[11px] text-gray-400 mt-0.5 font-medium">Gold Plan Revenue</div>
               </div>
               <div className="w-[38px] h-[38px] rounded-xl bg-yellow-50 flex items-center justify-center text-[19px]">🏅</div>
@@ -134,7 +110,7 @@ export default function PaymentsDashboard() {
             {/* Silver Plan Revenue */}
             <div className="bg-white rounded-2xl p-[16px_18px] border border-[#E3E6DC] flex justify-between items-start">
               <div className="pt-[22px]">
-                <div className="text-[22px] font-extrabold text-[#1A2B22] leading-tight">₹2.1L</div>
+                <div className="text-[22px] font-extrabold text-[#1A2B22] leading-tight">{stats?.silverPlan}</div>
                 <div className="text-[11px] text-gray-400 mt-0.5 font-medium">Silver Plan Revenue</div>
               </div>
               <div className="w-[38px] h-[38px] rounded-xl bg-slate-50 flex items-center justify-center text-[19px]">🥈</div>
@@ -222,7 +198,7 @@ export default function PaymentsDashboard() {
                       <td className="pr-3 text-xs text-gray-500">{txn.date}</td>
 
                       {/* Txn ID */}
-                      <td className="pr-3 text-[11px] text-gray-400 font-mono">{txn.txnId}</td>
+                      <td className="pr-3 text-[11px] text-gray-400 font-mono">{`TXN${txn.txn_id}`}</td>
 
                       {/* Status */}
                       <td className="pr-3">

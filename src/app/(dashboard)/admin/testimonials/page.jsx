@@ -1,39 +1,168 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-
-const navItems = {
-  MAIN: [
-    { label: "Overview",  href: "/admin",           icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><rect x="3" y="3" width="7" height="7" rx="1" strokeWidth="2"/><rect x="14" y="3" width="7" height="7" rx="1" strokeWidth="2"/><rect x="3" y="14" width="7" height="7" rx="1" strokeWidth="2"/><rect x="14" y="14" width="7" height="7" rx="1" strokeWidth="2"/></svg> },
-    { label: "Advisors",  href: "/admin/advisors",  icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><circle cx="9" cy="7" r="4" strokeWidth="2"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeWidth="2"/><path d="M16 11l2 2 4-4" strokeWidth="2"/></svg> },
-    { label: "Customers", href: "/admin/customers", icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><circle cx="12" cy="8" r="4" strokeWidth="2"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" strokeWidth="2"/></svg> },
-  ],
-  APPROVALS: [
-    { label: "IRDAI Approvals", href: "/admin/irdaiapprovals", icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><circle cx="12" cy="12" r="9" strokeWidth="2"/><path d="M9 12l2 2 4-4" strokeWidth="2"/></svg> },
-    { label: "Testimonials",    href: "/admin/testimonials",   icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z" strokeWidth="2"/></svg> },
-  ],
-  FINANCE: [
-    { label: "Payments",      href: "/admin/payments",      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeWidth="2"/></svg> },
-    { label: "Subscriptions", href: "/admin/subscriptions", icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" strokeWidth="2"/></svg> },
-  ],
-  SYSTEM: [
-    { label: "Settings", href: "/admin/settings", icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><circle cx="12" cy="12" r="3" strokeWidth="2"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" strokeWidth="2"/></svg> },
-  ],
-};
+import Image from "next/image";
 
 // ── Icon components ──
-const ISearch     = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.42)" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>;
-const ITextReview = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2255bb" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>;
-const IAudio      = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c57a00" strokeWidth="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>;
-const IVideo      = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6633bb" strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>;
-const ITextSm     = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>;
-const IAudioSm    = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/></svg>;
-const IVideoSm    = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>;
-const IShield     = () => <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>;
-const IHourglassSm= () => <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#c57a00" strokeWidth="2.5"><path d="M5 22h14M5 2h14M17 22v-4l-5-5-5 5v4M7 2v4l5 5 5-5V2"/></svg>;
-const ICheckSm    = () => <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>;
-const IXSm        = () => <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
-const IPanelUsers = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a7a5a" strokeWidth="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>;
+const ISearch = () => (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="rgba(255,255,255,0.42)"
+    strokeWidth="2"
+  >
+    <circle cx="11" cy="11" r="8" />
+    <path d="M21 21l-4.35-4.35" />
+  </svg>
+);
+const ITextReview = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#2255bb"
+    strokeWidth="2"
+  >
+    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="16" y1="13" x2="8" y2="13" />
+    <line x1="16" y1="17" x2="8" y2="17" />
+  </svg>
+);
+const IAudio = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#c57a00"
+    strokeWidth="2"
+  >
+    <path d="M9 18V5l12-2v13" />
+    <circle cx="6" cy="18" r="3" />
+    <circle cx="18" cy="16" r="3" />
+  </svg>
+);
+const IVideo = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#6633bb"
+    strokeWidth="2"
+  >
+    <polygon points="23 7 16 12 23 17 23 7" />
+    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+  </svg>
+);
+const ITextSm = () => (
+  <svg
+    width="11"
+    height="11"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+  >
+    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="16" y1="13" x2="8" y2="13" />
+  </svg>
+);
+const IAudioSm = () => (
+  <svg
+    width="11"
+    height="11"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+  >
+    <path d="M9 18V5l12-2v13" />
+    <circle cx="6" cy="18" r="3" />
+  </svg>
+);
+const IVideoSm = () => (
+  <svg
+    width="11"
+    height="11"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+  >
+    <polygon points="23 7 16 12 23 17 23 7" />
+    <rect x="1" y="5" width="15" height="14" rx="2" />
+  </svg>
+);
+const IShield = () => (
+  <svg
+    width="10"
+    height="10"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+  >
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <polyline points="9 12 11 14 15 10" />
+  </svg>
+);
+const IHourglassSm = () => (
+  <svg
+    width="10"
+    height="10"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#c57a00"
+    strokeWidth="2.5"
+  >
+    <path d="M5 22h14M5 2h14M17 22v-4l-5-5-5 5v4M7 2v4l5 5 5-5V2" />
+  </svg>
+);
+const ICheckSm = () => (
+  <svg
+    width="9"
+    height="9"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#fff"
+    strokeWidth="3"
+  >
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+const IXSm = () => (
+  <svg
+    width="10"
+    height="10"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="3"
+  >
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+const IPanelUsers = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#1a7a5a"
+    strokeWidth="2.5"
+  >
+    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+  </svg>
+);
 
 // ── Sub-components ──
 function Avatar({ initials, size = "md", bgColor = "#d4a017" }) {
@@ -48,7 +177,6 @@ function Avatar({ initials, size = "md", bgColor = "#d4a017" }) {
   );
 }
 
-
 function Topbar({ title, onHamburger }) {
   return (
     <div className="bg-white border-b border-gray-200 h-[60px] px-6 flex items-center justify-between shrink-0">
@@ -58,16 +186,35 @@ function Topbar({ title, onHamburger }) {
           aria-label="Open menu"
           className="flex md:hidden items-center justify-center p-1.5 rounded-md mr-2 bg-transparent border-none cursor-pointer"
         >
-          <svg width="22" height="22" fill="none" stroke="#374151" viewBox="0 0 24 24">
-            <path d="M4 6h16M4 12h16M4 18h16" strokeWidth="2" strokeLinecap="round" />
+          <svg
+            width="22"
+            height="22"
+            fill="none"
+            stroke="#374151"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M4 6h16M4 12h16M4 18h16"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
           </svg>
         </button>
         <span className="text-[18px] font-bold text-gray-900">{title}</span>
       </div>
       <div className="flex items-center gap-3">
         <div className="relative">
-          <svg width="20" height="20" fill="none" stroke="#6b7280" viewBox="0 0 24 24">
-            <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeWidth="2"/>
+          <svg
+            width="20"
+            height="20"
+            fill="none"
+            stroke="#6b7280"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+              strokeWidth="2"
+            />
           </svg>
           <div className="w-2 h-2 bg-amber-400 rounded-full absolute -top-0.5 -right-0.5" />
         </div>
@@ -77,11 +224,16 @@ function Topbar({ title, onHamburger }) {
   );
 }
 
-function Stars({ count = 5, max = 5 }) {
+function Stars({ count, max = 5 }) {
   return (
     <div className="flex gap-0.5">
       {Array.from({ length: max }).map((_, i) => (
-        <span key={i} className={`text-[13px] ${i < count ? "text-[#e8a020]" : "text-gray-200"}`}>★</span>
+        <span
+          key={i}
+          className={`text-[13px] ${i < count ? "text-[#e8a020]" : "text-gray-200"}`}
+        >
+          ★
+        </span>
       ))}
     </div>
   );
@@ -89,17 +241,65 @@ function Stars({ count = 5, max = 5 }) {
 
 function TypeBadge({ type }) {
   if (type === "text")
-    return <span className="inline-flex items-center gap-1 bg-[#e8f4ff] text-[#2255bb] rounded-[7px] px-[9px] py-[3px] text-[11px] font-semibold"><ITextSm />Text</span>;
+    return (
+      <span className="inline-flex items-center gap-1 bg-[#e8f4ff] text-[#2255bb] rounded-[7px] px-[9px] py-[3px] text-[11px] font-semibold">
+        <ITextSm />
+        Text
+      </span>
+    );
   if (type === "audio")
-    return <span className="inline-flex items-center gap-1 bg-[#fff5e6] text-[#c57a00] rounded-[7px] px-[9px] py-[3px] text-[11px] font-semibold"><IAudioSm />Audio</span>;
-  return <span className="inline-flex items-center gap-1 bg-[#f0ecff] text-[#6633bb] rounded-[7px] px-[9px] py-[3px] text-[11px] font-semibold"><IVideoSm />Video</span>;
+    return (
+      <span className="inline-flex items-center gap-1 bg-[#fff5e6] text-[#c57a00] rounded-[7px] px-[9px] py-[3px] text-[11px] font-semibold">
+        <IAudioSm />
+        Audio
+      </span>
+    );
+  return (
+    <span className="inline-flex items-center gap-1 bg-[#f0ecff] text-[#6633bb] rounded-[7px] px-[9px] py-[3px] text-[11px] font-semibold">
+      <IVideoSm />
+      Video
+    </span>
+  );
 }
 
 // ── Data ──
 const testimonials = [
-  { clientInitials: "RS", clientBg: "#e84040", clientName: "Ravi Shankar", clientLoc: "Nellore, AP", advisor: "Krishna Mohan", type: "text",  rating: 5, review: '"Very trustworthy advisor..."', otp: true, submitted: "2 days ago" },
-  { clientInitials: "RS", clientBg: "#e84040", clientName: "Ravi Shankar", clientLoc: "Nellore, AP", advisor: "Krishna Mohan", type: "audio", rating: 5, review: "Audio recording · 1 · 12",        otp: true, submitted: "3 days ago" },
-  { clientInitials: "PS", clientBg: "#6633bb", clientName: "Priya Sharma", clientLoc: "Hyderabad",   advisor: "Krishna Mohan", type: "video", rating: 5, review: "Video · 1 · 45 min",              otp: true, submitted: "4 days ago" },
+  {
+    clientInitials: "RS",
+    clientBg: "#e84040",
+    clientName: "Ravi Shankar",
+    clientLoc: "Nellore, AP",
+    advisor: "Krishna Mohan",
+    type: "text",
+    rating: 5,
+    review: '"Very trustworthy advisor..."',
+    otp: true,
+    submitted: "2 days ago",
+  },
+  {
+    clientInitials: "RS",
+    clientBg: "#e84040",
+    clientName: "Ravi Shankar",
+    clientLoc: "Nellore, AP",
+    advisor: "Krishna Mohan",
+    type: "audio",
+    rating: 5,
+    review: "Audio recording · 1 · 12",
+    otp: true,
+    submitted: "3 days ago",
+  },
+  {
+    clientInitials: "PS",
+    clientBg: "#6633bb",
+    clientName: "Priya Sharma",
+    clientLoc: "Hyderabad",
+    advisor: "Krishna Mohan",
+    type: "video",
+    rating: 5,
+    review: "Video · 1 · 45 min",
+    otp: true,
+    submitted: "4 days ago",
+  },
 ];
 
 const filterButtons = [
@@ -124,7 +324,11 @@ const filterButtons = [
   {
     key: "video",
     label: "Rejected",
-    icon: <span className="text-[#cc3333] font-bold text-[13px] leading-none">✕</span>,
+    icon: (
+      <span className="text-[#cc3333] font-bold text-[13px] leading-none">
+        ✕
+      </span>
+    ),
     active: "bg-[#fff0f0] border-[#cc3333] text-[#cc3333]",
     inactive: "bg-white border-gray-200 text-gray-500",
   },
@@ -132,25 +336,64 @@ const filterButtons = [
 
 // ── Page ──
 export default function Testimonials() {
-  const [activeNav, setActiveNav]       = useState("Testimonials");
-  const [search, setSearch]             = useState("");
-  const [rows, setRows]                 = useState(testimonials);
-  const [showSidebar, setShowSidebar]   = useState(false);
+  const [activeNav, setActiveNav] = useState("Testimonials");
+  const [search, setSearch] = useState("");
+  const [data, setData] = useState([]);
+// const [filtered, setFiltered] = useState([]);
+  const [showSidebar, setShowSidebar] = useState(false);
   const [activeFilter, setActiveFilter] = useState(null);
+
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        setLoading(true);
+
+        const res = await fetch(
+          `/api/admin/testimonials?page=${page}&limit=10`,
+        );
+
+        const json = await res.json();
+
+        const mapped = (json.data || []).map((c) => ({
+          id: c.id,
+          name: c.name,
+          mobile: c.phone,
+          email: c.email,
+          city: c.location,
+          profession: "Customer", // backend doesn’t provide this
+          reviews: `${c.reviewCount || 0} Reviews`,
+          lastLogin: "—", // backend missing
+          joined: c.joinedAt ? new Date(c.joinedAt).toLocaleDateString() : "—",
+        }));
+
+        setTestimonials(mapped);
+      } catch (err) {
+        console.error("Failed to fetch customers", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCustomers();
+  }, [page]);
 
   useEffect(() => {
     document.body.style.overflow = showSidebar ? "hidden" : "auto";
-    return () => { document.body.style.overflow = "auto"; };
+    return () => {
+      document.body.style.overflow = "auto";
+    };
   }, [showSidebar]);
 
-  const filtered = rows.filter((r) => {
-    const matchSearch =
-      r.clientName.toLowerCase().includes(search.toLowerCase()) ||
-      r.advisor.toLowerCase().includes(search.toLowerCase()) ||
-      r.type.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = !activeFilter || r.type === activeFilter;
-    return matchSearch && matchFilter;
-  });
+  const filtered = (testimonials || []).filter(
+    (c) =>
+      (c.name || "").toLowerCase().includes(search.toLowerCase()) ||
+      (c.email || "").toLowerCase().includes(search.toLowerCase()) ||
+      (c.city || "").toLowerCase().includes(search.toLowerCase()) ||
+      (c.profession || "").toLowerCase().includes(search.toLowerCase()),
+  );
 
   const handleReject = (idx) => {
     const real = rows.indexOf(filtered[idx]);
@@ -159,7 +402,6 @@ export default function Testimonials() {
 
   return (
     <div className="flex min-h-screen bg-gray-100 font-sans">
-
       {/* Mobile overlay */}
       {showSidebar && (
         <div
@@ -168,39 +410,59 @@ export default function Testimonials() {
         />
       )}
 
-
-
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* <Topbar title="Testimonials" onHamburger={() => setShowSidebar(true)} /> */}
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-[22px_26px] md:p-[22px_26px] p-3.5">
-
           {/* Stat cards */}
           <div className="flex gap-3.5 mb-5 flex-wrap">
             {[
-              { delay: "0s",    icon: <ITextReview />, iconBg: "bg-[#e8f0ff]", num: "18,240", label: "Text Reviews" },
-              { delay: "80ms",  icon: <IAudio />,      iconBg: "bg-[#fff5e6]", num: "3,810",  label: "Audio" },
-              { delay: "160ms", icon: <IVideo />,      iconBg: "bg-[#f0ecff]", num: "3,810",  label: "Video" },
+              {
+                delay: "0s",
+                icon: <ITextReview />,
+                iconBg: "bg-[#e8f0ff]",
+                num: "18,240",
+                label: "Text Reviews",
+              },
+              {
+                delay: "80ms",
+                icon: <IAudio />,
+                iconBg: "bg-[#fff5e6]",
+                num: "3,810",
+                label: "Audio",
+              },
+              {
+                delay: "160ms",
+                icon: <IVideo />,
+                iconBg: "bg-[#f0ecff]",
+                num: "3,810",
+                label: "Video",
+              },
             ].map((card) => (
               <div
                 key={card.label}
                 className="bg-white rounded-[14px] px-[22px] py-[18px] shadow-[0_2px_10px_rgba(0,0,0,0.055)] flex-1 min-w-[150px] max-w-[260px] animate-[fadeInUp_0.4s_ease_both] hover:shadow-[0_8px_22px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 transition-all duration-200"
                 style={{ animationDelay: card.delay }}
               >
-                <div className={`w-9 h-9 rounded-[9px] ${card.iconBg} flex items-center justify-center mb-2.5`}>
+                <div
+                  className={`w-9 h-9 rounded-[9px] ${card.iconBg} flex items-center justify-center mb-2.5`}
+                >
                   {card.icon}
                 </div>
-                <div className="text-[26px] font-extrabold text-[#1a3330] leading-tight">{card.num}</div>
-                <div className="text-[12px] text-gray-400 mt-[3px] font-medium">{card.label}</div>
+                <div className="text-[26px] font-extrabold text-[#1a3330] leading-tight">
+                  {card.num}
+                </div>
+                <div className="text-[12px] text-gray-400 mt-[3px] font-medium">
+                  {card.label}
+                </div>
               </div>
             ))}
           </div>
 
           {/* Panel */}
           <div className="bg-white rounded-2xl px-[22px] py-5 shadow-[0_2px_10px_rgba(0,0,0,0.055)] animate-[fadeInUp_0.4s_80ms_ease_both]">
-
             {/* Panel header */}
             <div className="flex items-start justify-between mb-4 flex-wrap gap-2.5">
               <div className="flex items-center gap-[9px]">
@@ -208,8 +470,12 @@ export default function Testimonials() {
                   <IPanelUsers />
                 </div>
                 <div>
-                  <div className="text-[15px] font-bold text-[#1a3330]">Testimonials Approvals</div>
-                  <div className="text-[11px] text-gray-300 mt-px">All reviews are OTP · verified by clients</div>
+                  <div className="text-[15px] font-bold text-[#1a3330]">
+                    Testimonials Approvals
+                  </div>
+                  <div className="text-[11px] text-gray-300 mt-px">
+                    All reviews are OTP · verified by clients
+                  </div>
                 </div>
               </div>
 
@@ -242,7 +508,9 @@ export default function Testimonials() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
-                <span className="text-white/70 text-lg cursor-pointer shrink-0">→</span>
+                <span className="text-white/70 text-lg cursor-pointer shrink-0">
+                  →
+                </span>
               </div>
             </div>
 
@@ -251,8 +519,20 @@ export default function Testimonials() {
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
-                    {["Client", "Advisor", "Type", "Rating", "Review", "OTP", "Submitted", "Actions"].map((h) => (
-                      <th key={h} className="text-left text-[11px] font-semibold text-gray-300 tracking-[0.3px] px-2.5 py-[7px] border-b border-gray-100">
+                    {[
+                      "Client",
+                      "Advisor",
+                      "Type",
+                      "Rating",
+                      "Review",
+                      "OTP",
+                      "Submitted",
+                      "Actions",
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        className="text-left text-[11px] font-semibold text-gray-300 tracking-[0.3px] px-2.5 py-[7px] border-b border-gray-100"
+                      >
                         {h}
                       </th>
                     ))}
@@ -261,29 +541,48 @@ export default function Testimonials() {
                 <tbody>
                   {filtered.length === 0 && (
                     <tr>
-                      <td colSpan={8} className="text-center text-gray-300 py-8 text-[12px]">No testimonials found.</td>
+                      <td
+                        colSpan={8}
+                        className="text-center text-gray-300 py-8 text-[12px]"
+                      >
+                        No testimonials found.
+                      </td>
                     </tr>
                   )}
                   {filtered.map((r, i) => (
-                    <tr key={i} className="border-b border-gray-50 hover:bg-[#f7faf9] transition-colors duration-150">
+                    <tr
+                      key={i}
+                      className="border-b border-gray-50 hover:bg-[#f7faf9] transition-colors duration-150"
+                    >
                       {/* Client */}
                       <td className="px-2.5 py-3 align-middle">
                         <div className="flex items-center gap-[9px]">
-                          <div
-                            className="w-[34px] h-[34px] rounded-full text-white font-bold text-[11px] flex items-center justify-center shrink-0"
-                            style={{ backgroundColor: r.clientBg }}
-                          >
-                            {r.clientInitials}
+                          <div className="w-[34px] h-[34px] rounded-full overflow-hidden relative shrink-0 bg-gray-200 flex items-center justify-center">
+                            <Image
+                              src={r?.profile_pic}
+                              alt={r?.name}
+                              fill
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.src = "/default-avatar.png";
+                              }}
+                            />
                           </div>
                           <div>
-                            <div className="text-[13px] font-bold text-[#1a3330]">{r.clientName}</div>
-                            <div className="text-[11px] text-gray-300 mt-px">{r.clientLoc}</div>
+                            <div className="text-[13px] font-bold text-[#1a3330]">
+                              {r.name}
+                            </div>
+                            <div className="text-[11px] text-gray-300 mt-px">
+                              {r.location}
+                            </div>
                           </div>
                         </div>
                       </td>
                       {/* Advisor */}
                       <td className="px-2.5 py-3 align-middle">
-                        <span className="text-[12px] font-semibold text-gray-700">{r.advisor}</span>
+                        <span className="text-[12px] font-semibold text-gray-700">
+                          {r.advisor}
+                        </span>
                       </td>
                       {/* Type */}
                       <td className="px-2.5 py-3 align-middle">
@@ -295,19 +594,24 @@ export default function Testimonials() {
                       </td>
                       {/* Review */}
                       <td className="px-2.5 py-3 align-middle">
-                        <span className="text-[12px] text-gray-500 max-w-[180px] whitespace-nowrap overflow-hidden text-ellipsis block">{r.review}</span>
+                        <span className="text-[12px] text-gray-500 max-w-[180px] whitespace-nowrap overflow-hidden text-ellipsis block">
+                          {r.review}
+                        </span>
                       </td>
                       {/* OTP */}
                       <td className="px-2.5 py-3 align-middle">
-                        {r.otp && (
+                        {r.is_verified && (
                           <span className="bg-[#e6f5f0] text-[#1a7a5a] rounded-full px-2.5 py-[3px] text-[11px] font-bold inline-flex items-center gap-1">
-                            <IShield />OTP
+                            <IShield />
+                            OTP
                           </span>
                         )}
                       </td>
                       {/* Submitted */}
                       <td className="px-2.5 py-3 align-middle">
-                        <span className="text-[11px] text-gray-300 whitespace-nowrap">{r.submitted}</span>
+                        <span className="text-[11px] text-gray-300 whitespace-nowrap">
+                          {r.submitted}
+                        </span>
                       </td>
                       {/* Actions */}
                       <td className="px-2.5 py-3 align-middle">
@@ -319,7 +623,8 @@ export default function Testimonials() {
                             onClick={() => handleReject(i)}
                             className="px-3 py-[5px] rounded-full text-[11px] font-semibold border-[1.5px] border-[#ffcccc] bg-[#fff5f5] text-[#cc3333] cursor-pointer flex items-center gap-1 transition-all duration-200 hover:bg-[#cc3333] hover:text-white hover:border-[#cc3333] hover:-translate-y-0.5 hover:scale-[1.04] hover:shadow-[0_4px_14px_rgba(204,51,51,0.25)]"
                           >
-                            <IXSm />Reject
+                            <IXSm />
+                            Reject
                           </button>
                         </div>
                       </td>
