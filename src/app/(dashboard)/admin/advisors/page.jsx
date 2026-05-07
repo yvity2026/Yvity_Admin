@@ -168,12 +168,12 @@ const filterTabs = [
 ];
 
 const filterTabStyles = {
-  all: "bg-yellow-50 text-yellow-800 border border-yellow-200",
-  gold: "bg-yellow-50 text-yellow-800 border border-yellow-200",
-  silver: "bg-gray-100 text-gray-600 border border-gray-300",
-  free: "bg-green-50 text-green-800 border border-green-300",
-  pending: "bg-yellow-50 text-yellow-800 border border-yellow-300",
-  suspended: "bg-red-50 text-red-700 border border-red-300",
+  all: "bg-white-50 text-[6B7280] border border-yellow-200",
+  gold: "bg-white-50 text-[6B7280] border border-yellow-200",
+  silver: "bg-white-50 text-[6B7280] border border-gray-300",
+  free: "bg-white-50 text-[6B7280] border border-green-300",
+  pending: "bg-white-50 text-[6B7280] border border-yellow-300",
+  suspended: "bg-white-50 text-[6B7280] border border-red-300",
 };
 
 export default function AdvisorsDashboard() {
@@ -263,8 +263,9 @@ export default function AdvisorsDashboard() {
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Content */}
-        <div className="p-6 md:p-6 p-3.5 overflow-y-auto flex-1">
-          {/* Header */}
+        <div className="p-6 md:p-6 p-3.5 flex-1">
+
+                  {/* Header */}
           <div className="flex items-center gap-2 mb-1">
             <svg
               width="18"

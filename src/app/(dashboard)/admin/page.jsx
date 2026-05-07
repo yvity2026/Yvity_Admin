@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaUsers } from "react-icons/fa6";
+import { GoHome } from "react-icons/go";
 
 // ── Data ──────────────────────────────────────────────────────────
 const CITY_COLORS = [
@@ -203,8 +204,6 @@ function BarChart() {
         const x = i * (barW + spaceBetween);
         const barH = (h / maxVal) * (H - 10);
         const y = H + labelPad - barH;
-        const isHovered = hoveredIdx === i;
-        const scale = isHovered ? 1.12 : 1;
         const cx = x + barW / 2;
         return (
           <g
@@ -269,9 +268,9 @@ function PlanDonut() {
   const r = 15.9,
     circ = 2 * Math.PI * r;
   const segments = [
-    { pct: 33, color: "#ca8a04", offset: 0 },
-    { pct: 17, color: "#93c5fd", offset: -33 },
-    { pct: 50, color: "#0f766e", offset: -50 },
+    { pct: 25, color: "#F59E0B", offset: 0 },
+    { pct: 50, color: "#E8F4F4", offset: -33 },
+    { pct: 25, color: "#0A4A4A", offset: -50 },
   ];
   const [animPcts, setAnimPcts] = useState(segments.map(() => 0));
   const rafRef = useRef(null);
@@ -368,6 +367,7 @@ function PlanDonut() {
           >
             total
           </text>
+          
         </svg>
       </div>
 
@@ -386,7 +386,7 @@ function PlanDonut() {
               />
               <span className="text-sm text-gray-700">{label}</span>
             </div>
-            <span className="text-[12px] text-gray-500 font-bold">{val}</span>
+            <span className="text-[12px] text-#374151 font-normal">{val}</span>
           </div>
         ))}
       </div>
@@ -1050,9 +1050,9 @@ if (loading || !dashdata) {
                       style={{ width: "93%" }}
                     />
                   </div>
-                  <div className="text-[10px] mt-0.5 font-semibold text-green-600">
-                    All other companies combined
-                  </div>
+                  <div className="text-[10px] mt-0.5 font-semibold" style={{ color: "#065F46" }}>
+  All other companies combined
+</div>
                 </div>
               </div>
             </div>

@@ -129,7 +129,9 @@ const filtered = customers.filter((c) =>
           {/* Stat Cards */}
           <div className="flex flex-col md:flex-row gap-4 mb-5">
             {/* Total Customers */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm flex-1 max-w-[280px] max-md:max-w-full">
+            <div className="bg-white rounded-2xl p-5 shadow-sm ">
+
+
               <div className="flex items-start justify-between mb-2">
                 <div className="w-10 h-10 rounded-xl bg-[#eef4f2] flex items-center justify-center">
                   <svg
@@ -158,8 +160,10 @@ const filtered = customers.filter((c) =>
             </div>
 
             {/* Joined Today */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm flex-1 max-w-[280px] max-md:max-w-full">
-              <div className="flex items-start justify-between mb-2">
+
+<div className="bg-white rounded-2xl p-5 shadow-sm w-full">
+
+                          <div className="flex items-start justify-between mb-2">
                 <div className="w-10 h-10 rounded-xl bg-[#eef4f2] flex items-center justify-center">
                   <svg
                     width="22"
