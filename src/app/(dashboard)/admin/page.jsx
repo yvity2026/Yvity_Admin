@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaUsers } from "react-icons/fa6";
+import { GoHome } from "react-icons/go";
 
 // ── Sidebar nav items ─────────────────────────────────────────────
 const NAV_ITEMS = {
@@ -193,7 +194,6 @@ function MiniDonut({ pct, color, label, count }) {
 
 // ── Bar Chart ─────────────────────────────────────────────────────
 function BarChart() {
-  const [hoveredIdx, setHoveredIdx] = useState(null);
   const W = 450, H = 130, bottomPad = 25, labelPad = 18, barW = 28;
   const count = BAR_MONTHS.length;
   const spaceBetween = (W - barW * count) / (count - 1);
@@ -202,48 +202,38 @@ function BarChart() {
   return (
     <svg viewBox={`0 0 ${W} ${H + bottomPad + labelPad}`} className="w-full" style={{ height: 180 }}>
       <line x1="0" y1={H + labelPad} x2={W} y2={H + labelPad} stroke="#e5e7eb" strokeWidth="2" />
+      {[0.25, 0.5, 0.75, 1].map(ratio => {
+  const y = H + labelPad - ratio * (H - 10);
+  return (
+    <line
+      key={ratio}
+      x1="0" y1={y}
+      x2={W} y2={y}
+      stroke="#e5e7eb"
+      strokeWidth="1"
+      strokeDasharray="0"
+    />
+  );
+})}
       {BAR_MONTHS.map(({ m, val, h, gold }, i) => {
         const x = i * (barW + spaceBetween);
         const barH = (h / maxVal) * (H - 10);
         const y = H + labelPad - barH;
-        const isHovered = hoveredIdx === i;
-        const scale = isHovered ? 1.12 : 1;
         const cx = x + barW / 2;
         return (
-          <g key={m} style={{ cursor: "pointer" }} onMouseEnter={() => setHoveredIdx(i)} onMouseLeave={() => setHoveredIdx(null)}>
-            <rect x={x - 6} y={0} width={barW + 12} height={H + bottomPad + labelPad} fill="transparent" />
-            <text
-              x={cx}
-              y={isHovered ? y - 6 : y - 4}
-              textAnchor="middle"
-              fontSize={isHovered ? "12" : "12"}
-              fontWeight={isHovered ? "700" : "600"}
-              fill={isHovered ? (gold ? "#C9A227" : "#1a5c5a") : "#374151"}
-              style={{ transition: "all 0.2s ease" }}
-            >
+          <g key={m}>
+           <text x={cx} y={y - 4} textAnchor="middle" fontSize="12" fontWeight="600" fill="#374151">
               {val}
             </text>
-            <rect
-              x={cx - (barW * scale) / 2}
-              y={isHovered ? y - (barH * 0.12) : y}
-              width={barW * scale}
-              height={barH * (isHovered ? 1.12 : 1)}
-              rx="6"
-              fill={gold ? "#F59E0B" : "#1a5c5a"}
-              style={{
-                transition: "all 0.2s cubic-bezier(0.34,1.56,0.64,1)",
-                filter: isHovered ? `drop-shadow(0 4px 8px ${gold ? "#EBC88D" : "#F59E0B"})` : "none",
-              }}
-            />
-            <text
-              x={cx}
-              y={H + labelPad + 18}
-              textAnchor="middle"
-              fontSize="12"
-              fill={isHovered ? "#374151" : "#9ca3af"}
-              fontWeight={isHovered ? "600" : "400"}
-              style={{ transition: "all 0.2s ease" }}
-            >
+           <rect
+  x={cx - barW / 2}
+  y={y}
+  width={barW}
+  height={barH}
+  rx="6"
+  fill={gold ? "#F59E0B" : "#1a5c5a"}
+/>
+            <text x={cx} y={H + labelPad + 18} textAnchor="middle" fontSize="12" fill="#9ca3af" fontWeight="400">
               {m}
             </text>
           </g>
@@ -258,9 +248,9 @@ function PlanDonut() {
   const [hovered, setHovered] = useState(false);
   const r = 15.9, circ = 2 * Math.PI * r;
   const segments = [
-    { pct: 33, color: "#ca8a04", offset: 0 },
-    { pct: 17, color: "#93c5fd", offset: -33 },
-    { pct: 50, color: "#0f766e", offset: -50 },
+    { pct: 25, color: "#F59E0B", offset: 0 },
+    { pct: 50, color: "#E8F4F4", offset: -33 },
+    { pct: 25, color: "#0A4A4A", offset: -50 },
   ];
   const [animPcts, setAnimPcts] = useState(segments.map(() => 0));
   const rafRef = useRef(null);
@@ -337,6 +327,7 @@ function PlanDonut() {
           <text x="18" y="21.5" textAnchor="middle" fontSize="3.8" fill="#9ca3af">
             total
           </text>
+          
         </svg>
       </div>
 
@@ -352,7 +343,7 @@ function PlanDonut() {
               <span className="w-2.5 h-2.5 rounded-full" style={{ background: dot }} />
               <span className="text-sm text-gray-700">{label}</span>
             </div>
-            <span className="text-[12px] text-gray-500 font-bold">{val}</span>
+            <span className="text-[12px] text-#374151 font-normal">{val}</span>
           </div>
         ))}
       </div>
@@ -552,7 +543,7 @@ function CompanyCard({ letter, name, count, pct, bg, border, letterBg, bar }) {
               }}
             />
           </div>
-          <div className="text-[10px] mt-0.5 font-semibold" style={{ color: bar }}>
+          <div className="text-[10px] mt-0.5 font-semibold" style={{ color: "#065F46" }}>
             {pct}% of max
           </div>
         </div>
@@ -659,9 +650,10 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
             <div className="col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-3">
               <div className="flex justify-between items-center mb-3">
-                <h2 className="text-base font-bold flex items-center gap-1.5">
-                 <span className="text-yellow-500">💰</span>
-                </h2>
+                <h2 className="text-base font-bold flex items-center gap-1.5">  
+                  <span>    💰 <span className="text-black">Subscription Revenue</span>  
+                  </span>
+                  </h2>
                 <span className="text-[12px] font-medium bg-gray-50 px-2 py-0.5 rounded text-[#0A4A4A]">
                   Last 6 Month ▾
                 </span>
@@ -689,17 +681,20 @@ export default function AdminDashboard() {
 
             <div className="col-span-2 flex flex-col gap-3">
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col" style={{ padding: "26px 31px 26px 30px", justifyContent: "center", alignItems: "flex-start", gap: "16px" }}>
-                <div className="flex justify-between items-start mb-1 w-full">
-                  <div>
-                    <h2 className="text-base font-bold leading-4 text-gray-900 flex items-center gap-1.5">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0f766e" strokeWidth="2">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                      </svg>
-                      Platform Growth
-                    </h2>
-                    <p className="text-[12px] text-gray-400 font-medium">Total advisors registered · Last 6 months</p>
-                  </div>
-                  <span className=" text-[#0A4A4A] text-[14px] font-bold px-2.5 py-0.5 rounded">1,284</span>
+               <div className="flex items-start mb-1 w-full">
+          <div className="w-full">
+  <h2 className="text-base font-bold leading-4 text-gray-900 flex items-center gap-1.5">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0f766e" strokeWidth="2">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </svg>
+    Platform Growth
+  </h2>
+  <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+    <p className="text-[12px] text-gray-400 font-medium">Total advisors registered · Last 6 months</p>
+    <span style={{ fontSize: "12px", color: "#9ca3af", whiteSpace: "nowrap" }}>current</span>
+  </div>
+</div>         
+  <span className=" text-[#0A4A4A] text-[14px] font-bold px-2.5 py-0.5 rounded">1,284</span>
                   
                 </div>
                 <LineChart />
@@ -752,7 +747,9 @@ export default function AdminDashboard() {
           {/* ── ROW 4 ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
             <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-              <h2 className="text-base font-bold mb-3">🏢 Company – wise Advisors</h2>
+              <h2 className="text-base font-bold mb-3 flex items-center gap-1.5">
+  <GoHome size={22} strokeWidth={1} /> Company – wise Advisors
+</h2>
               <div className="grid grid-cols-2 gap-2 mb-2">
                 {COMPANIES.map(({ letter, name, count, pct, bg, border, letterBg, bar }) => (
                   <CompanyCard key={name} letter={letter} name={name} count={count} pct={pct} bg={bg} border={border} letterBg={letterBg} bar={bar} />
@@ -779,9 +776,9 @@ export default function AdminDashboard() {
                   <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden mt-1.5">
                     <div className="h-full rounded-full bg-gray-400" style={{ width: "93%" }} />
                   </div>
-                  <div className="text-[10px] mt-0.5 font-semibold text-green-600">
-                    All other companies combined
-                  </div>
+                  <div className="text-[10px] mt-0.5 font-semibold" style={{ color: "#065F46" }}>
+  All other companies combined
+</div>
                 </div>
               </div>
             </div>
