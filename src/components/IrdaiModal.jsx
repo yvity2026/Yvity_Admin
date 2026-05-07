@@ -551,6 +551,7 @@
 "use client";
 import { Poppins } from "next/font/google";
 import { useEffect } from "react";
+import { FiX } from "react-icons/fi";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -567,16 +568,16 @@ export default function IrdaiModal({ advisor, onClose, onApprove, onReject }) {
     };
   }, []);
 
-  // ── Safely read any field name your backend sends ──
-  const name       = advisor?.name       ?? advisor?.advisorName     ?? advisor?.fullName      ?? "—";
-  const licNo      = advisor?.lic        ?? advisor?.licenseNo       ?? advisor?.licenseNumber ?? advisor?.license ?? "—";
-  const type       = advisor?.type       ?? advisor?.licenseType     ?? "—";
-  const authority  = advisor?.authority  ?? advisor?.issuedBy        ?? "—";
-  const validUntil = advisor?.validUntil ?? advisor?.expiryDate      ?? advisor?.validity      ?? "—";
-  const plan       = advisor?.plan       ?? advisor?.planName        ?? advisor?.subscription  ?? "—";
-  const submitted  = advisor?.submitted  ?? advisor?.submittedAt     ?? advisor?.createdAt     ?? "—";
-  const certName   = advisor?.certificateName ?? advisor?.fileName   ?? advisor?.document      ?? "certificate.jpg";
-  const certUrl    = advisor?.certificateUrl  ?? advisor?.docUrl     ?? advisor?.fileUrl       ?? null;
+  // // ── Safely read any field name your backend sends ──
+  // const name       = advisor?.name       ?? advisor?.advisorName     ?? advisor?.fullName      ?? "—";
+  // const licNo      = advisor?.lic        ?? advisor?.licenseNo       ?? advisor?.licenseNumber ?? advisor?.license ?? "—";
+  // const type       = advisor?.type       ?? advisor?.licenseType     ?? "—";
+  // const authority  = advisor?.authority  ?? advisor?.issuedBy        ?? "—";
+  // const validUntil = advisor?.validUntil ?? advisor?.expiryDate      ?? advisor?.validity      ?? "—";
+  // const plan       = advisor?.plan       ?? advisor?.planName        ?? advisor?.subscription  ?? "—";
+  // const submitted  = advisor?.submitted  ?? advisor?.submittedAt     ?? advisor?.createdAt     ?? "—";
+  // const certName   = advisor?.certificateName ?? advisor?.fileName   ?? advisor?.document      ?? "certificate.jpg";
+  // const certUrl    = advisor?.certificateUrl  ?? advisor?.docUrl     ?? advisor?.fileUrl       ?? null;
 
   const rows = [
     { label: "Advisor",     value: name },

@@ -675,43 +675,10 @@ export default function CustomersDashboard() {
         />
       )}
 
-      {/* Sidebar */}
-      <div
-        className={`fixed top-0 left-0 h-screen z-50 md:relative md:translate-x-0 md:z-auto md:flex md:shrink-0 ${
-          showSidebar ? "translate-x-0" : "-translate-x-full"
-        } md:block`}
-      >
-        <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} onClose={() => setShowSidebar(false)} />
-      </div>
-
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
 
-        {/* Topbar */}
-        <div className="bg-white border-b border-gray-200 px-6 h-[60px] flex items-center justify-between">
-          <div className="flex items-center">
-            {/* Hamburger */}
-            <button
-              className="md:hidden flex items-center justify-center bg-transparent border-none cursor-pointer p-1.5 rounded-md mr-2"
-              onClick={() => setShowSidebar(true)}
-              aria-label="Open menu"
-            >
-              <svg width="22" height="22" fill="none" stroke="#374151" viewBox="0 0 24 24">
-                <path d="M4 6h16M4 12h16M4 18h16" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
-            <div className="text-lg font-bold text-gray-900">Customers</div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <svg width="20" height="20" fill="none" stroke="#6b7280" viewBox="0 0 24 24">
-                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeWidth="2" />
-              </svg>
-              <div className="w-2 h-2 bg-amber-400 rounded-full absolute -top-0.5 -right-0.5" />
-            </div>
-            <Avatar initials="KM" size="sm" />
-          </div>
-        </div>
+
 
         {/* Content */}
         <div className="p-6 max-md:p-3.5 overflow-y-auto flex-1">

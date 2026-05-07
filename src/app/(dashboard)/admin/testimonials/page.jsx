@@ -532,63 +532,6 @@ function Avatar({ initials, size = "md", bgColor = "#d4a017" }) {
   );
 }
 
-function Sidebar({ activeNav, setActiveNav, onClose }) {
-  return (
-    <div className="bg-[#0A4A4A] min-h-screen w-64 shrink-0 flex flex-col">
-      <div className="h-[60px] bg-[#FAFAFA] flex justify-center items-center border-b border-[#155e5e]">
-        <img src="/images/Adivisor/Navbar/navlogo.png" alt="logo" className="h-10 w-auto object-contain" />
-      </div>
-
-      <div className="px-4 py-[14px] border-b border-[#155e5e] flex items-center gap-2.5">
-        <Avatar initials="KM" size="md" />
-        <div>
-          <div className="text-white text-[13px] font-semibold">Admin</div>
-          <div className="text-[#8bc34a] text-[10px] mt-px">● Super Administrator</div>
-        </div>
-      </div>
-
-      <div className="flex-1">
-        {Object.entries(navItems).map(([section, items]) => (
-          <div key={section}>
-            <div className="text-[#5fa8a8] text-[9px] font-bold uppercase tracking-[1.5px] px-4 pt-[14px] pb-1">
-              {section}
-            </div>
-            {items.map((item) => {
-              const isActive = activeNav === item.label;
-              return (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="no-underline"
-                  onClick={() => { setActiveNav(item.label); onClose?.(); }}
-                >
-                  <div className={`flex items-center gap-2.5 px-4 py-[9px] cursor-pointer text-[13px] transition-colors duration-[180ms] border-l-[3px]
-                    ${isActive
-                      ? "text-white font-semibold bg-[#155e5e] border-[#8bc34a]"
-                      : "text-[#a3d0d0] font-normal border-transparent hover:bg-white/[0.07]"
-                    }`}
-                  >
-                    {item.icon}
-                    {item.label}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-
-      <div className="py-4 border-t border-[#155e5e]">
-        <div className="flex items-center gap-2.5 px-4 py-[9px] text-red-500 text-[13px] cursor-pointer transition-colors hover:bg-[#155e5e]">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}>
-            <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" strokeWidth="2"/>
-          </svg>
-          Logout
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function Topbar({ title, onHamburger }) {
   return (
@@ -709,14 +652,11 @@ export default function Testimonials() {
         />
       )}
 
-      {/* Sidebar */}
-      <div className={`fixed top-0 left-0 h-screen z-50 transition-transform duration-[250ms] md:relative md:translate-x-0 ${showSidebar ? "translate-x-0" : "-translate-x-full"}`}>
-        <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} onClose={() => setShowSidebar(false)} />
-      </div>
+
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        <Topbar title="Testimonials" onHamburger={() => setShowSidebar(true)} />
+        {/* <Topbar title="Testimonials" onHamburger={() => setShowSidebar(true)} /> */}
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-[22px_26px] md:p-[22px_26px] p-3.5">

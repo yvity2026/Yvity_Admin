@@ -99,45 +99,7 @@ function Sidebar({ activeNav, setActiveNav, onClose, showSidebar }) {
   );
 }
 
-// ── Topbar ────────────────────────────────────────────────────────
-function Topbar({ onHamburger }) {
-  return (
-    <div className="fixed top-0 right-0 left-0 md:left-[240px] flex items-center justify-between bg-white px-6 border-b border-gray-200 z-50 h-[60px]">
-      <div className="flex items-center">
-        {/* Hamburger — visible on mobile only */}
-        <button
-          onClick={onHamburger}
-          aria-label="Open menu"
-          className="flex md:hidden items-center justify-center p-1 rounded-md mr-2"
-        >
-          <svg width="22" height="22" fill="none" stroke="#374151" viewBox="0 0 24 24">
-            <path d="M4 6h16M4 12h16M4 18h16" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </button>
-        <span className="text-base font-bold text-gray-900">Overview</span>
-      </div>
 
-      <div className="flex items-center gap-3">
-        <select className="bg-gray-100 text-[13px] px-3 py-1.5 rounded-md border-none outline-none cursor-pointer">
-          <option value="day">Day</option>
-          <option value="week">Week</option>
-          <option value="month">Month</option>
-        </select>
-
-        <div className="relative">
-          <svg width="20" height="20" fill="none" stroke="#6b7280" viewBox="0 0 24 24">
-            <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeWidth="2"/>
-          </svg>
-          <div className="w-2 h-2 bg-amber-400 rounded-full absolute -top-0.5 -right-0.5" />
-        </div>
-
-        <div className="w-9 h-9 rounded-full bg-[#d4a017] text-white flex items-center justify-center font-bold text-xs">
-          KM
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ── Data ──────────────────────────────────────────────────────────
 const CITIES = [
@@ -627,22 +589,13 @@ export default function AdminDashboard() {
         />
       )}
 
-      {/* Sidebar */}
-      <Sidebar
-        activeNav={activeNav}
-        setActiveNav={setActiveNav}
-        onClose={() => setShowSidebar(false)}
-        showSidebar={showSidebar}
-      />
+
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col md:ml-[240px] bg-[#EEF2F0]">
-
-        {/* Topbar */}
-        <Topbar onHamburger={() => setShowSidebar(true)} />
+      <main className="flex-1 flex flex-col bg-[#EEF2F0]">
 
         {/* Page content */}
-        <div className="p-4 space-y-3 mt-[60px]">
+        <div className="p-4 space-y-3">
 
           {/* ── ROW 1: 4 Stat Cards ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">

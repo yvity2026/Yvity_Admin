@@ -1028,74 +1028,7 @@ function Avatar({ initials, size = "md", bgClass = "bg-yellow-600" }) {
   );
 }
 
-// ── Sidebar ──────────────────────────────────────────────────────
-function Sidebar({ activeNav, setActiveNav, onClose }) {
-  const handleLogout = async () => {
-    try {
-      await fetch("/api/auth/admin/logout", { method: "POST" });
-      window.location.href = "/auth/admin/login";
-    } catch (err) {
-      console.error("Logout failed", err);
-    }
-  };
 
-  return (
-    <div className="bg-[#0A4A4A] min-h-screen w-[280px] shrink-0 flex flex-col">
-      {/* Logo */}
-      <div className="h-[60px] bg-[#FAFAFA] flex justify-center items-center border-b border-[#155e5e]">
-        <img src="/images/Adivisor/Navbar/navlogo.png" alt="logo" className="h-10 w-auto object-contain" />
-      </div>
-
-      {/* User */}
-      <div className="px-4 py-3.5 border-b border-[#155e5e]">
-        <div className="flex items-center gap-2.5">
-          <Avatar initials="KM" />
-          <div>
-            <div className="text-white text-[13px] font-semibold">Admin</div>
-            <div className="text-[#8bc34a] text-[10px] mt-0.5">● Super Administrator</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Nav */}
-      <div className="flex-1">
-        {Object.entries(navItems).map(([section, items]) => (
-          <div key={section}>
-            <div className="text-[#5fa8a8] text-[10px] font-semibold uppercase tracking-widest px-4 pt-3.5 pb-1">
-              {section}
-            </div>
-            {items.map((item) => {
-              const isActive = activeNav === item.label;
-              return (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="no-underline"
-                  onClick={() => { setActiveNav(item.label); onClose && onClose(); }}
-                >
-                  <div className={`flex items-center gap-2.5 px-4 py-2.5 cursor-pointer text-sm border-l-[3px] ${isActive ? "text-white bg-[#155e5e] border-[#8bc34a]" : "text-[#a3d0d0] bg-transparent border-transparent hover:bg-[#155e5e]"}`}>
-                    {item.icon}
-                    {item.label}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-
-      {/* Logout */}
-      <div className="py-4" onClick={handleLogout}>
-        <div className="flex items-center gap-2.5 px-4 py-2.5 text-red-500 text-sm cursor-pointer hover:bg-[#155e5e]">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}>
-            <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" strokeWidth="2" />
-          </svg>
-          Logout
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ── Main page ────────────────────────────────────────────────────
 export default function IRDAIApprovals() {
@@ -1281,42 +1214,15 @@ export default function IRDAIApprovals() {
     <div className="flex min-h-screen bg-[#f0f2ee] font-sans">
 
       {/* Mobile overlay */}
-      {showSidebar && (
+      {/* {showSidebar && (
         <div className="fixed inset-0 bg-black/45 z-40 md:hidden" onClick={() => setShowSidebar(false)} />
-      )}
+      )} */}
 
-      {/* Sidebar */}
-      <div className={`fixed top-0 left-0 h-screen z-50 md:relative md:translate-x-0 md:z-auto md:flex md:shrink-0 ${showSidebar ? "translate-x-0" : "-translate-x-full"} md:block`}>
-        <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} onClose={() => setShowSidebar(false)} />
-      </div>
 
       {/* Main area */}
       <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* Topbar */}
-        <div className="bg-white border-b border-gray-200 px-6 h-[60px] flex items-center justify-between">
-          <div className="flex items-center">
-            <button
-              className="md:hidden flex items-center justify-center bg-transparent border-none cursor-pointer p-1.5 rounded-md mr-2"
-              onClick={() => setShowSidebar(true)}
-              aria-label="Open menu"
-            >
-              <svg width="22" height="22" fill="none" stroke="#374151" viewBox="0 0 24 24">
-                <path d="M4 6h16M4 12h16M4 18h16" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
-            <div className="text-lg font-bold text-gray-900">IRDAI Approvals</div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <svg width="20" height="20" fill="none" stroke="#6b7280" viewBox="0 0 24 24">
-                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeWidth="2" />
-              </svg>
-              <div className="w-2 h-2 bg-amber-400 rounded-full absolute -top-0.5 -right-0.5" />
-            </div>
-            <Avatar initials="KM" size="sm" />
-          </div>
-        </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 max-md:p-3.5">
@@ -1423,7 +1329,7 @@ export default function IRDAIApprovals() {
                     <div className="text-[13px] font-bold text-[#1a3330]">
                       {r.name} <span className="text-gray-400 font-medium">• {r.location}</span>
                     </div>
-                    <div className="text-[11px] text-gray-400 mt-0.5">
+                    <div className="text-[11px] text-gray-400 mt-0.5 break-all sm:break-normal">
                       {r.lic} &bull; {r.type} &bull; {r.plan} &bull; {r.submitted}
                     </div>
                   </div>
