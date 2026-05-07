@@ -21,3 +21,25 @@
     transform: translateX(100%);
   }
 }
+
+/* ── Mobile: disable zoom, enable horizontal scroll ── */
+@media (max-width: 768px) {
+  html {
+    touch-action: pan-x pan-y; /* blocks pinch-zoom gesture */
+   
+    
+  }
+
+  body {
+    width: 100%;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* Wrap any wide table/card content with this class */
+  .mobile-scroll-x {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* smooth iOS momentum scroll */
+    width: 100%;
+  }
+}
