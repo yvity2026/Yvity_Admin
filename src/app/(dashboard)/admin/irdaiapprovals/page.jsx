@@ -1371,7 +1371,6 @@ export default function IRDAIApprovals() {
                 </div>
                 <span className="text-[15px] font-bold text-[#1a3330]">IRDAI Submissions</span>
               </div>
-
               {/* Filter pills */}
               <div className="flex items-center gap-2 flex-wrap">
                 {filterButtons.map((btn) => {
