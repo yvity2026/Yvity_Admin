@@ -1108,9 +1108,10 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
             <div className="col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-3">
               <div className="flex justify-between items-center mb-3">
-                <h2 className="text-base font-bold flex items-center gap-1.5">
-                  <span className="text-yellow-500">💰</span>
-                </h2>
+                <h2 className="text-[16px] font-bold flex items-center gap-1.5">
+  <span className="text-yellow-500">💰</span>
+  <span className="font-bold text-[16px]">Subscription Revenue</span>
+</h2>
                 <span className="text-[12px] font-medium bg-gray-50 px-2 py-0.5 rounded text-[#0A4A4A]">
                   Last 6 Month ▾
                 </span>
