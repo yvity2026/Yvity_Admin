@@ -867,7 +867,7 @@ export default function AppShell({ children }) {
       //     return;
       //   }
       try {
-        const res = await fetch("src/app/api/auth/admin/login/route.js");
+        const res = await fetch("/api/auth/me");
 
         const data = await res.json();
         console.log("API response:", data);

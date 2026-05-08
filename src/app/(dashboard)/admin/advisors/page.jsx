@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import AdvisorProfile from "@/components/AdvisorProfile";
+import { useAdvisors } from "@/hooks/TanstankQuery/useAdvisor";
+import AdvisorsSkeleton from "./loading";
 
 // const advisors = [
 //   {
@@ -76,16 +78,23 @@ import AdvisorProfile from "@/components/AdvisorProfile";
 //   },
 // ];
 
-function Avatar({ initials, size = "md" }) {
+import Image from "next/image";
+
+function Avatar({ src, initials, size = "md" }) {
   const sizeClass =
-    size === "sm"
-      ? "w-8 h-8 text-xs"
-      : size === "lg"
-        ? "w-12 h-12 text-base"
-        : "w-10 h-10 text-sm";
+    size === "sm" ? "w-8 h-8" : size === "lg" ? "w-12 h-12" : "w-10 h-10";
+
+  if (src) {
+    return (
+      <div className={`${sizeClass} relative rounded-full overflow-hidden`}>
+        <Image src={src} alt="avatar" fill className="object-cover" />
+      </div>
+    );
+  }
+
   return (
     <div
-      className={`${sizeClass} rounded-full bg-yellow-600 text-white flex items-center justify-center font-bold shrink-0`}
+      className={`${sizeClass} rounded-full bg-yellow-600 text-white flex items-center justify-center font-bold`}
     >
       {initials}
     </div>
@@ -182,7 +191,9 @@ export default function AdvisorsDashboard() {
   const [search, setSearch] = useState("");
   const [showSidebar, setShowSidebar] = useState(false);
   const [selectedAdvisor, setSelectedAdvisor] = useState(null);
-  const [advisors, setAdvisors] = useState([]);
+
+  const { data, isLoading, error } = useAdvisors(activeFilter);
+  const advisors = data?.data || [];
 
   useEffect(() => {
     document.body.style.overflow = showSidebar ? "hidden" : "auto";
@@ -198,49 +209,49 @@ export default function AdvisorsDashboard() {
       (a.plan || "").toLowerCase().includes(search.toLowerCase()),
   );
 
-  useEffect(() => {
-    const fetchAdvisors = async () => {
-      try {
-        const params = new URLSearchParams();
+  // useEffect(() => {
+  //   const fetchAdvisors = async () => {
+  //     try {
+  //       const params = new URLSearchParams();
 
-        // Plan filters
-        if (activeFilter === "gold") {
-          params.append("plan", "gold");
-        }
+  //       // Plan filters
+  //       if (activeFilter === "gold") {
+  //         params.append("plan", "gold");
+  //       }
 
-        if (activeFilter === "silver") {
-          params.append("plan", "silver");
-        }
+  //       if (activeFilter === "silver") {
+  //         params.append("plan", "silver");
+  //       }
 
-        if (activeFilter === "free") {
-          params.append("plan", "free");
-        }
+  //       if (activeFilter === "free") {
+  //         params.append("plan", "free");
+  //       }
 
-        // Status filters
-        if (activeFilter === "pending") {
-          params.append("account_status", "under_review");
-        }
+  //       // Status filters
+  //       if (activeFilter === "pending") {
+  //         params.append("account_status", "under_review");
+  //       }
 
-        if (activeFilter === "suspended") {
-          params.append("account_status", "action_required");
-        }
+  //       if (activeFilter === "suspended") {
+  //         params.append("account_status", "action_required");
+  //       }
 
-        const res = await fetch(`/api/admin/advisors?${params.toString()}`);
+  //       const res = await fetch(`/api/admin/advisors?${params.toString()}`);
 
-        if (!res.ok) {
-          throw new Error("Failed to fetch advisors");
-        }
+  //       if (!res.ok) {
+  //         throw new Error("Failed to fetch advisors");
+  //       }
 
-        const json = await res.json();
+  //       const json = await res.json();
 
-        setAdvisors(json.data || []);
-      } catch (error) {
-        console.error("Failed to fetch advisors:", error);
-      }
-    };
+  //       setAdvisors(json.data || []);
+  //     } catch (error) {
+  //       console.error("Failed to fetch advisors:", error);
+  //     }
+  //   };
 
-    fetchAdvisors();
-  }, [activeFilter]);
+  //   fetchAdvisors();
+  // }, [activeFilter]);
 
   //Status :
   function IrdaiBadge({ status }) {
@@ -258,14 +269,15 @@ export default function AdvisorsDashboard() {
     );
   }
 
+  if (isLoading) return <AdvisorsSkeleton />;
+
   return (
     <div className="flex min-h-screen font-poppins bg-gray-100">
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Content */}
         <div className="p-6 md:p-6 p-3.5 flex-1">
-
-                  {/* Header */}
+          {/* Header */}
           <div className="flex items-center gap-2 mb-1">
             <svg
               width="18"
@@ -370,13 +382,16 @@ export default function AdvisorsDashboard() {
                     >
                       <td className="px-3 py-3 align-middle">
                         <div className="flex items-center gap-2.5">
-                          <Avatar initials="KM" size="sm" />
+                          <Avatar
+                            src={advisor.profile_pic}
+                            initials={advisor.name?.[0]}
+                          />
                           <div>
                             <div className="font-semibold text-gray-900 text-[13px]">
                               {advisor.name}
                             </div>
                             <div className="text-[11px] text-gray-400 mt-0.5">
-                              {advisor.phone}
+                              {`+91${advisor.phone}`}
                             </div>
                           </div>
                         </div>

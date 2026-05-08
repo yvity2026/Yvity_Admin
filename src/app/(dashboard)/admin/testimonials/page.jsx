@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useTestimonials } from "@/hooks/TanstankQuery/useTestimonial";
+import TestimonialsSkeleton from "./loading";
 
 // ── Icon components ──
 const ISearch = () => (
@@ -345,47 +347,64 @@ const filterButtons = [
 export default function Testimonials() {
   const [activeNav, setActiveNav] = useState("Testimonials");
   const [search, setSearch] = useState("");
-  const [data, setData] = useState([]);
-// const [filtered, setFiltered] = useState([]);
+  // const [data, setData] = useState([]);
+  // const [filtered, setFiltered] = useState([]);
   const [showSidebar, setShowSidebar] = useState(false);
   const [activeFilter, setActiveFilter] = useState(null);
 
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const { data, isLoading, error } = useTestimonials(page);
 
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        setLoading(true);
+  const testimonials = Array.isArray(data?.data)
+    ? data.data.map((c) => ({
+        id: c.id,
+        name: c.name || "Unknown User",
+        profile_pic: c.profile_pic || "/default-avatar.png",
+        location: c.location || "Unknown",
+        advisor: c.advisor_name || "—",
+        type: c.type || "text",
+        rating: c.rating || 5,
+        review: c.review || "No review",
+        is_verified: c.is_verified || false,
+        submitted: c.joinedAt ? new Date(c.joinedAt).toLocaleDateString() : "—",
+        otp: true
+      }))
+    : [];
+  // const [loading, setLoading] = useState(false);
 
-        const res = await fetch(
-          `/api/admin/testimonials?page=${page}&limit=10`,
-        );
+  // useEffect(() => {
+  //   const fetchCustomers = async () => {
+  //     try {
+  //       setLoading(true);
 
-        const json = await res.json();
+  //       const res = await fetch(
+  //         `/api/admin/testimonials?page=${page}&limit=10`,
+  //       );
 
-        const mapped = (json.data || []).map((c) => ({
-          id: c.id,
-          name: c.name,
-          mobile: c.phone,
-          email: c.email,
-          city: c.location,
-          profession: "Customer", // backend doesn’t provide this
-          reviews: `${c.reviewCount || 0} Reviews`,
-          lastLogin: "—", // backend missing
-          joined: c.joinedAt ? new Date(c.joinedAt).toLocaleDateString() : "—",
-        }));
+  //       const json = await res.json();
 
-        setTestimonials(mapped);
-      } catch (err) {
-        console.error("Failed to fetch customers", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  //       const mapped = (json.data || []).map((c) => ({
+  //         id: c.id,
+  //         name: c.name,
+  //         mobile: c.phone,
+  //         email: c.email,
+  //         city: c.location,
+  //         profession: "Customer", // backend doesn’t provide this
+  //         reviews: `${c.reviewCount || 0} Reviews`,
+  //         lastLogin: "—", // backend missing
+  //         joined: c.joinedAt ? new Date(c.joinedAt).toLocaleDateString() : "—",
+  //       }));
 
-    fetchCustomers();
-  }, [page]);
+  //       setTestimonials(mapped);
+  //     } catch (err) {
+  //       console.error("Failed to fetch customers", err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchCustomers();
+  // }, [page]);
 
   useEffect(() => {
     document.body.style.overflow = showSidebar ? "hidden" : "auto";
@@ -394,23 +413,18 @@ export default function Testimonials() {
     };
   }, [showSidebar]);
 
-  // const filtered = (testimonials || []).filter(
-  //   (c) =>
-  //     (c.name || "").toLowerCase().includes(search.toLowerCase()) ||
-  //     (c.email || "").toLowerCase().includes(search.toLowerCase()) ||
-  //     (c.city || "").toLowerCase().includes(search.toLowerCase()) ||
-  //     (c.profession || "").toLowerCase().includes(search.toLowerCase()),
-  // );
-const filtered = (testimonials || []).filter((c) => {
-  const matchesSearch =
-    (c.name || "").toLowerCase().includes(search.toLowerCase()) ||
-    (c.email || "").toLowerCase().includes(search.toLowerCase()) ||
-    (c.city || "").toLowerCase().includes(search.toLowerCase()) ||
-    (c.profession || "").toLowerCase().includes(search.toLowerCase());
+  const filtered = testimonials.filter((c) => {
+    const matchSearch =
+      (c.name || "").toLowerCase().includes(search.toLowerCase()) ||
+      (c.location || "").toLowerCase().includes(search.toLowerCase()) ||
+      (c.review || "").toLowerCase().includes(search.toLowerCase());
 
-  if (activeFilter === "all" || activeFilter === null) {
-    return matchesSearch;
-  }
+    const matchFilter = !activeFilter || c.type === activeFilter;
+
+    return matchSearch && matchFilter;
+  });
+
+  const matchFilter = !activeFilter || c.type === activeFilter;
 
   return matchesSearch && c.type === activeFilter;
 });
@@ -418,6 +432,10 @@ const filtered = (testimonials || []).filter((c) => {
     const real = rows.indexOf(filtered[idx]);
     setRows((prev) => prev.filter((_, i) => i !== real));
   };
+
+  if (isLoading) {
+    return <TestimonialsSkeleton />;
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-100 font-sans">
@@ -578,13 +596,12 @@ const filtered = (testimonials || []).filter((c) => {
                         <div className="flex items-center gap-[9px]">
                           <div className="w-[34px] h-[34px] rounded-full overflow-hidden relative shrink-0 bg-gray-200 flex items-center justify-center">
                             <Image
-                              src={r?.profile_pic}
-                              alt={r?.name}
+                              src={r.profile_pic || "/default-avatar.png"}
+                              alt={r.name}
                               fill
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.currentTarget.src = "/default-avatar.png";
-                              }}
+                              sizes="40px"
+                              className="object-cover"
+                              unoptimized
                             />
                           </div>
                           <div>
@@ -619,7 +636,7 @@ const filtered = (testimonials || []).filter((c) => {
                       </td>
                       {/* OTP */}
                       <td className="px-2.5 py-3 align-middle">
-                        {r.is_verified && (
+                        {r.otp && (
                           <span className="bg-[#e6f5f0] text-[#1a7a5a] rounded-full px-2.5 py-[3px] text-[11px] font-bold inline-flex items-center gap-1">
                             <IShield />
                             OTP

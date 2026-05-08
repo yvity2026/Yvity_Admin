@@ -13,8 +13,9 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/context/AuthAdminContext";
 import { ModalProvider } from "@/context/ModalContext";
-import { SidebarProvider } from "@/context/SidebarContext";
-import AppShell from "@/components/Sidebar/Sidebar";
+// import { SidebarProvider } from "@/context/SidebarContext";
+// import AppShell from "@/components/Sidebar/Sidebar";
+import QueryProvider from "@/providers/QueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -72,15 +73,17 @@ export default function RootLayout({ children }) {
               },
             }}
           />
+          <QueryProvider>
           <AuthProvider>
             <ModalProvider>
-              <AppShell>
-              <SidebarProvider>
+              {/* <AppShell> */}
+              {/* <SidebarProvider> */}
                 {children}
-                </SidebarProvider>
-              </AppShell>
+                {/* </SidebarProvider> */}
+              {/* </AppShell> */}
             </ModalProvider>
           </AuthProvider>
+          </QueryProvider>
         </main>
       </body>
     </html>

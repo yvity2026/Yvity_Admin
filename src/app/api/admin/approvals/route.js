@@ -36,7 +36,7 @@ export async function GET() {
     const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("advisor_profiles")
-      .select("*, user:users(id, email, name, mobile, city)")
+      .select("*, user:users(id, email, name, mobile, city, selfie_url)")
       .in("account_status", ["under_review", "active", "action_required"])
       .order("created_at", { ascending: false });
 
@@ -71,6 +71,7 @@ export async function GET() {
         name: user.name || "Advisor",
         email: user.email || null,
         phone: user.mobile || null,
+        profile_pic : user.selfie_url,
         location: user.city || "Unknown, IN",
         licenseUrl: item.iridai_certificate_url,
         isVerified: item.profile_status,

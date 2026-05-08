@@ -1,76 +1,58 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSubscriptions } from "@/hooks/TanstankQuery/useSubscription";
+import Image from "next/image";
+import SubscriptionsSkeleton from "./loading";
 
-function Avatar({ initials, size = "md" }) {
-  const sizeClass = size === "sm" ? "w-8 h-8 text-xs" : "w-10 h-10 text-sm";
+function Avatar({
+  src,
+  alt,
+  initials,
+  size = "md",
+  bgClass = "bg-yellow-600",
+}) {
+  const sizeClass =
+    size === "sm"
+      ? "w-8 h-8 text-xs"
+      : size === "lg"
+        ? "w-12 h-12 text-sm"
+        : "w-10 h-10 text-sm";
+
   return (
     <div
-      className={`${sizeClass} rounded-full bg-yellow-600 text-white flex items-center justify-center font-bold shrink-0`}
+      className={`${sizeClass} relative rounded-full overflow-hidden flex items-center justify-center font-bold text-white shrink-0 ${bgClass}`}
     >
-      {initials}
+      {src ? (
+        <Image
+          src={src}
+          alt={alt || "avatar"}
+          fill
+          className="object-cover"
+          sizes="40px"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
+        />
+      ) : (
+        initials
+      )}
     </div>
   );
 }
 
 // ── Badge color map keyed by badgeBg hex ────────────────────────
 // Since badge colors come from data, we encode them as Tailwind classes directly in the data
-const subscriptions = [
-  {
-    name: "Krishna Mohan",
-    plan: "Gold Plan",
-    date: "Jan 15, 2025",
-    amount: "₹2,999",
-    days: "7 days",
-    initials: "KM",
-    avatarBg: "bg-[#e8a020]",
-    badgeCls: "bg-red-100 text-red-700",
-    remind: true,
-  },
-  {
-    name: "Sunitha Mehta",
-    plan: "Gold Plan",
-    date: "Jan 20, 2026",
-    amount: "₹2,999",
-    days: "12 days",
-    initials: "SM",
-    avatarBg: "bg-[#1a5a50]",
-    badgeCls: "bg-orange-100 text-orange-700",
-    remind: true,
-  },
-  {
-    name: "Rahul Kumar",
-    plan: "Silver Plan",
-    date: "Jan 22, 2026",
-    amount: "₹999",
-    days: "14 days",
-    initials: "RK",
-    avatarBg: "bg-[#e8a020]",
-    badgeCls: "bg-yellow-100 text-yellow-700",
-    remind: true,
-  },
-  {
-    name: "Sunitha Mehta",
-    plan: "Gold Plan",
-    date: "Jan 22, 2026",
-    amount: "₹999",
-    days: "28 days",
-    initials: "SM",
-    avatarBg: "bg-[#1a5a50]",
-    badgeCls: "bg-green-100 text-green-700",
-    remind: false,
-  },
-];
 
 export default function SubscriptionsPage() {
   const [activeNav, setActiveNav] = useState("Subscriptions");
   const [search, setSearch] = useState("");
   const [showSidebar, setShowSidebar] = useState(false);
 
-  const [subscriptions, setSubscriptions] = useState([]);
+  // const [subscriptions, setSubscriptions] = useState([]);
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
-  const [totalPages, setTotalPages] = useState(1);
+  // const [limit] = useState(10);
+  // const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -80,27 +62,37 @@ export default function SubscriptionsPage() {
     };
   }, [showSidebar]);
 
-  useEffect(() => {
-    const fetchSubscriptions = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(
-          `/api/admin/subscriptions?limit=${limit}&page=${page}`,
-        );
-        const data = await res.json();
-        if (data.success) {
-          setSubscriptions(data.data);
-          setTotalPages(data.pagination.totalPages);
-        } else {
-          console.error("Failed to load subscriptions:", data.error);
-        }
-      } catch (err) {
-        console.error("Fetch error:", err);
-      }
-      setLoading(false);
-    };
-    fetchSubscriptions();
-  }, [page, limit]);
+  const limit = 10;
+  const { data, isLoading, isError, error, isFetching } = useSubscriptions(
+    page,
+    limit,
+  );
+
+  const subscriptions = data?.subscriptions || [];
+  const totalPages = data?.pagination?.totalPages || 1;
+
+
+  // useEffect(() => {
+  //   const fetchSubscriptions = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const res = await fetch(
+  //         `/api/admin/subscriptions?limit=${limit}&page=${page}`,
+  //       );
+  //       const data = await res.json();
+  //       if (data.success) {
+  //         setSubscriptions(data.data);
+  //         setTotalPages(data.pagination.totalPages);
+  //       } else {
+  //         console.error("Failed to load subscriptions:", data.error);
+  //       }
+  //     } catch (err) {
+  //       console.error("Fetch error:", err);
+  //     }
+  //     setLoading(false);
+  //   };
+  //   fetchSubscriptions();
+  // }, [page, limit]);
 
   const filtered = subscriptions.filter(
     (s) =>
@@ -115,6 +107,9 @@ export default function SubscriptionsPage() {
       0,
     );
   };
+  if(isLoading){
+    return (<SubscriptionsSkeleton/>)
+  }
 
   return (
     <div className="flex min-h-screen font-sans bg-gray-100">
@@ -176,11 +171,12 @@ export default function SubscriptionsPage() {
                   >
                     {/* Left */}
                     <div className="flex items-center gap-3">
-                      <div
-                        className={`w-10 h-10 rounded-full ${item.avatarBg} text-white font-bold text-xs flex items-center justify-center shrink-0`}
-                      >
-                        {item.initials}
-                      </div>
+                      <Avatar
+                        src={item.profile_pic}
+                        alt={item.name}
+                        initials={item.initials}
+                        size="md"
+                      />
                       <div>
                         <div className="text-[13px] font-bold text-[#1a3330]">
                           {item.name}

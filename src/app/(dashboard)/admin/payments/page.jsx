@@ -2,6 +2,9 @@
 import { useState, useEffect } from "react";
 import PaymentDetails from "@/components/Paymentdetails";
 import Link from "next/link";
+import { usePayments } from "@/hooks/TanstankQuery/usePayment";
+import PaymentsSkeleton from "./loading";
+import Image from "next/image";
 
 const transactions = [
   { id: 1, initials: "KM", avatarBg: "bg-[#E8833A]", name: "Krishna Mohan", location: "Nellore, AP", plan: "Gold",   amount: "₹2,999", method: "UPI",        date: "Jan 2, 2026", txnId: "TXN2025010501", status: "Sucess" },
@@ -35,30 +38,38 @@ export default function PaymentsDashboard() {
   const [activeNav, setActiveNav]             = useState("Payments");
   const [search, setSearch]                   = useState("");
   const [showSidebar, setShowSidebar]         = useState(false);
-  const [transactions, setTransactions] = useState([]);
-  const [stats, setStats] = useState(null);
+  // const [transactions, setTransactions] = useState([]);
+  // const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/admin/payments");
-        if (!res.ok) throw new Error("Failed to fetch payments");
-        const { data, revenue } = await res.json();
-        setTransactions(data || []);
-        setStats(revenue || null)
-      } catch (err) {
-        console.error(err);
-        setError("Unable to load payments.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    const {
+    data,
+    isLoading,
+    error,
+  } = usePayments();
+const transactions = data?.data || [];
+const stats = data?.revenue || {};
 
-    fetchTransactions();
-  }, []);
+  // useEffect(() => {
+  //   const fetchTransactions = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const res = await fetch("/api/admin/payments");
+  //       if (!res.ok) throw new Error("Failed to fetch payments");
+  //       const { data, revenue } = await res.json();
+  //       setTransactions(data || []);
+  //       setStats(revenue || null)
+  //     } catch (err) {
+  //       console.error(err);
+  //       setError("Unable to load payments.");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchTransactions();
+  // }, []);
 
   const filtered = transactions.filter(
     (t) =>
@@ -66,6 +77,12 @@ export default function PaymentsDashboard() {
       t.txnId?.toLowerCase().includes(search.toLowerCase()) ||
       t.method?.toLowerCase().includes(search.toLowerCase())
   );
+
+    if (isLoading) {
+    return (
+      <PaymentsSkeleton />
+    );
+  }
 
   return (
     <div className="flex min-h-screen font-sans bg-[#EDEEE6]">
@@ -175,9 +192,14 @@ export default function PaymentsDashboard() {
                       {/* Adviser */}
                       <td className="py-2.5 pr-3">
                         <div className="flex items-center gap-2">
-                          <div className={`w-[30px] h-[30px] rounded-full ${txn.avatarBg} flex items-center justify-center text-white text-[10px] font-bold shrink-0`}>
-                            {txn.initials}
-                          </div>
+                          <div className="w-[30px] h-[30px] rounded-full overflow-hidden shrink-0 relative bg-gray-200">
+  <Image
+    src={txn.profile_pic || "/default-avatar.png"}
+    alt={txn.name || "User"}
+    fill
+    className="object-cover"
+  />
+</div>
                           <div>
                             <div className="text-xs font-semibold text-[#1A2B22]">{txn.name}</div>
                             <div className="text-[10px] text-gray-400">{txn.location}</div>
