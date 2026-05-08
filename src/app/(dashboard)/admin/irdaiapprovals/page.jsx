@@ -235,7 +235,10 @@ export default function IRDAIApprovals() {
       r.name.toLowerCase().includes(search.toLowerCase()) ||
       r.location.toLowerCase().includes(search.toLowerCase()) ||
       r.type.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = !activeFilter || r.status === activeFilter;
+    const matchFilter =
+  !activeFilter ||
+  activeFilter === "all" ||
+  r.status === activeFilter;
     return matchSearch && matchFilter;
   });
 
@@ -285,6 +288,14 @@ export default function IRDAIApprovals() {
 
   // ── Filter button definitions ────────────────────────────────
   const filterButtons = [
+    {
+  key: "all",
+  label: "All",
+  icon: <span className="text-[11px] font-bold">•</span>,
+  activeCls: "bg-[#e6f5f0] border-[#0A4A4A] text-[#0A4A4A]",
+  defaultCls: "bg-white border-gray-200 text-gray-500",
+},
+
     {
       key: "pending", label: "Pending",
       icon: <IHourglassSm />,
