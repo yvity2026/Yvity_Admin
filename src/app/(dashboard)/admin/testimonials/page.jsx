@@ -424,10 +424,10 @@ export default function Testimonials() {
     return matchSearch && matchFilter;
   });
 
-  const matchFilter = !activeFilter || c.type === activeFilter;
+  // const matchFilter = !activeFilter || c.type === activeFilter;
 
-  return matchesSearch && c.type === activeFilter;
-});
+  // return matchesSearch && c.type === activeFilter;
+
   const handleReject = (idx) => {
     const real = rows.indexOf(filtered[idx]);
     setRows((prev) => prev.filter((_, i) => i !== real));
