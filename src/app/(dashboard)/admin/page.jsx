@@ -1,9 +1,39 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaUsers } from "react-icons/fa6";
 import { GoHome } from "react-icons/go";
+import { useDashboard } from "@/hooks/TanstankQuery/useDashboard";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Filler,
+} from "chart.js";
+
+import { Line } from "react-chartjs-2";
+import { Doughnut } from "react-chartjs-2";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  ArcElement,
+  BarElement,
+  Tooltip,
+  Filler
+);
+
+
+import { Bar } from "react-chartjs-2";
+
 
 // ── Data ──────────────────────────────────────────────────────────
 const CITY_COLORS = [
@@ -22,82 +52,6 @@ const normalizeCompany = (name) =>
     .toLowerCase()
     .replace(/\(.*?\)/g, "")
     .trim();
-
-
-
-
-// old data
-// const CITIES = [
-//   { name: "Hyderabad", count: 312, pct: 81, color: "#0f766e" },
-//   { name: "Nellore", count: 194, pct: 50, color: "#eab308" },
-//   { name: "Vijayawada", count: 175, pct: 45, color: "#2563eb" },
-//   { name: "Vizag", count: 138, pct: 36, color: "#f97316" },
-//   { name: "Chennai", count: 102, pct: 26, color: "#10b981" },
-//   { name: "Others", count: 362, pct: 93, color: "#60a5fa" },
-// ];
-
-// const SERVICES = [
-//   { name: "Term Life", life: "117", health: "—", total: "303" },
-//   { name: "ULIP / Investment", life: "224", health: "—", total: "224" },
-//   {
-//     name: "Critical Illness",
-//     life: "188",
-//     health: "334",
-//     total: "198",
-//     hBlue: true,
-//   },
-//   {
-//     name: "Pension / Annuity",
-//     life: "—",
-//     health: "174",
-//     total: "206",
-//     hBlue: true,
-//   },
-//   { name: "Group Insurance", life: "113", health: "—", total: "233" },
-// ];
-
-// const COMPANIES = [
-//   {
-//     letter: "H",
-//     name: "HDFC Life",
-//     count: 312,
-//     pct: 88,
-//     bg: "#f0fdfa",
-//     border: "#99f6e4",
-//     letterBg: "#195FA5",
-//     bar: "#195FA5",
-//   },
-//   {
-//     letter: "L",
-//     name: "LIC of India",
-//     count: 194,
-//     pct: 55,
-//     bg: "#eff6ff",
-//     border: "#bfdbfe",
-//     letterBg: "#3B6E10",
-//     bar: "#3B6E10",
-//   },
-//   {
-//     letter: "S",
-//     name: "Star Health",
-//     count: 176,
-//     pct: 50,
-//     bg: "#fefce8",
-//     border: "#fde68a",
-//     letterBg: "#824E0E",
-//     bar: "#824E0E",
-//   },
-//   {
-//     letter: "N",
-//     name: "New India",
-//     count: 138,
-//     pct: 39,
-//     bg: "#fef2f2",
-//     border: "#fecaca",
-//     letterBg: "#993C1D",
-//     bar: "#993C1D",
-//   },
-// ];
 
 const ROLES = [
   { label: "Senior Advisor", count: "194", pct: 55, color: "#1A6CA2" },
@@ -175,312 +129,616 @@ function MiniDonut({ pct, color, label, count }) {
 }
 
 // ── Bar Chart ─────────────────────────────────────────────────────
-function BarChart() {
-  const [hoveredIdx, setHoveredIdx] = useState(null);
-  const W = 450,
-    H = 130,
-    bottomPad = 25,
-    labelPad = 18,
-    barW = 28;
-  const count = BAR_MONTHS.length;
-  const spaceBetween = (W - barW * count) / (count - 1);
-  const maxVal = Math.max(...BAR_MONTHS.map((b) => b.h));
+// function BarChart() {
+//   const [hoveredIdx, setHoveredIdx] = useState(null);
+//   const W = 450,
+//     H = 130,
+//     bottomPad = 25,
+//     labelPad = 18,
+//     barW = 28;
+//   const count = BAR_MONTHS.length;
+//   const spaceBetween = (W - barW * count) / (count - 1);
+//   const maxVal = Math.max(...BAR_MONTHS.map((b) => b.h));
 
-  return (
-    <svg
-      viewBox={`0 0 ${W} ${H + bottomPad + labelPad}`}
-      className="w-full"
-      style={{ height: 180 }}
-    >
-      <line
-        x1="0"
-        y1={H + labelPad}
-        x2={W}
-        y2={H + labelPad}
-        stroke="#e5e7eb"
-        strokeWidth="2"
-      />
-      {BAR_MONTHS.map(({ m, val, h, gold }, i) => {
-        const x = i * (barW + spaceBetween);
-        const barH = (h / maxVal) * (H - 10);
-        const y = H + labelPad - barH;
-        const cx = x + barW / 2;
-        return (
-          <g
-            key={m}
-            style={{ cursor: "pointer" }}
-            onMouseEnter={() => setHoveredIdx(i)}
-            onMouseLeave={() => setHoveredIdx(null)}
-          >
-            <rect
-              x={x - 6}
-              y={0}
-              width={barW + 12}
-              height={H + bottomPad + labelPad}
-              fill="transparent"
-            />
-            <text
-              x={cx}
-              y={isHovered ? y - 6 : y - 4}
-              textAnchor="middle"
-              fontSize={isHovered ? "12" : "12"}
-              fontWeight={isHovered ? "700" : "600"}
-              fill={isHovered ? (gold ? "#C9A227" : "#1a5c5a") : "#374151"}
-              style={{ transition: "all 0.2s ease" }}
-            >
-              {val}
-            </text>
-            <rect
-              x={cx - (barW * scale) / 2}
-              y={isHovered ? y - barH * 0.12 : y}
-              width={barW * scale}
-              height={barH * (isHovered ? 1.12 : 1)}
-              rx="6"
-              fill={gold ? "#F59E0B" : "#1a5c5a"}
-              style={{
-                transition: "all 0.2s cubic-bezier(0.34,1.56,0.64,1)",
-                filter: isHovered
-                  ? `drop-shadow(0 4px 8px ${gold ? "#EBC88D" : "#F59E0B"})`
-                  : "none",
-              }}
-            />
-            <text
-              x={cx}
-              y={H + labelPad + 18}
-              textAnchor="middle"
-              fontSize="12"
-              fill={isHovered ? "#374151" : "#9ca3af"}
-              fontWeight={isHovered ? "600" : "400"}
-              style={{ transition: "all 0.2s ease" }}
-            >
-              {m}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
-  );
-}
+//   return (
+//     <svg
+//       viewBox={`0 0 ${W} ${H + bottomPad + labelPad}`}
+//       className="w-full"
+//       style={{ height: 180 }}
+//     >
+//       <line
+//         x1="0"
+//         y1={H + labelPad}
+//         x2={W}
+//         y2={H + labelPad}
+//         stroke="#e5e7eb"
+//         strokeWidth="2"
+//       />
+//       {BAR_MONTHS.map(({ m, val, h, gold }, i) => {
+//         const x = i * (barW + spaceBetween);
+//         const barH = (h / maxVal) * (H - 10);
+//         const y = H + labelPad - barH;
+//         const cx = x + barW / 2;
+//         const isHovered = hoveredIdx === i;
+//         const scale = isHovered ? 1.15 : 1;
+//         return (
+//           <g
+//             key={m}
+//             style={{ cursor: "pointer" }}
+//             onMouseEnter={() => setHoveredIdx(i)}
+//             onMouseLeave={() => setHoveredIdx(null)}
+//           >
+//             <rect
+//               x={x - 6}
+//               y={0}
+//               width={barW + 12}
+//               height={H + bottomPad + labelPad}
+//               fill="transparent"
+//             />
+//             <text
+//               x={cx}
+//               y={isHovered ? y - 6 : y - 4}
+//               textAnchor="middle"
+//               fontSize={isHovered ? "12" : "12"}
+//               fontWeight={isHovered ? "700" : "600"}
+//               fill={isHovered ? (gold ? "#C9A227" : "#1a5c5a") : "#374151"}
+//               style={{ transition: "all 0.2s ease" }}
+//             >
+//               {val}
+//             </text>
+//             <rect
+//               x={cx - (barW * scale) / 2}
+//               y={isHovered ? y - barH * 0.12 : y}
+//               width={barW * scale}
+//               height={barH * (isHovered ? 1.12 : 1)}
+//               rx="6"
+//               fill={gold ? "#F59E0B" : "#1a5c5a"}
+//               style={{
+//                 transition: "all 0.2s cubic-bezier(0.34,1.56,0.64,1)",
+//                 filter: isHovered
+//                   ? `drop-shadow(0 4px 8px ${gold ? "#EBC88D" : "#F59E0B"})`
+//                   : "none",
+//               }}
+//             />
+//             <text
+//               x={cx}
+//               y={H + labelPad + 18}
+//               textAnchor="middle"
+//               fontSize="12"
+//               fill={isHovered ? "#374151" : "#9ca3af"}
+//               fontWeight={isHovered ? "600" : "400"}
+//               style={{ transition: "all 0.2s ease" }}
+//             >
+//               {m}
+//             </text>
+//           </g>
+//         );
+//       })}
+//     </svg>
+//   );
+// }
 
-// ── Plan Split Donut ──────────────────────────────────────────────
-function PlanDonut() {
-  const [hovered, setHovered] = useState(false);
-  const r = 15.9,
-    circ = 2 * Math.PI * r;
-  const segments = [
-    { pct: 25, color: "#F59E0B", offset: 0 },
-    { pct: 50, color: "#E8F4F4", offset: -33 },
-    { pct: 25, color: "#0A4A4A", offset: -50 },
-  ];
-  const [animPcts, setAnimPcts] = useState(segments.map(() => 0));
-  const rafRef = useRef(null);
-  const startRef = useRef(null);
 
-  useEffect(() => {
-    const duration = 1000;
-    startRef.current = null;
-    const animate = (ts) => {
-      if (!startRef.current) startRef.current = ts;
-      const elapsed = ts - startRef.current;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setAnimPcts(segments.map((s) => s.pct * eased));
-      if (progress < 1) rafRef.current = requestAnimationFrame(animate);
+function RevenueBarChart() {
+  const data = useMemo(() => {
+    return {
+      labels: BAR_MONTHS.map((item) => item.m),
+
+      datasets: [
+        {
+          data: BAR_MONTHS.map((item) => item.h),
+
+          backgroundColor: BAR_MONTHS.map((item) =>
+            item.gold ? "#F59E0B" : "#0f766e",
+          ),
+
+          hoverBackgroundColor: BAR_MONTHS.map((item) =>
+            item.gold ? "#d97706" : "#115e59",
+          ),
+
+          borderRadius: 10,
+          borderSkipped: false,
+          barThickness: 28,
+          hoverBorderRadius: 12,
+        },
+      ],
     };
-    rafRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
-  const handleHover = (isHover) => {
-    setHovered(isHover);
-    cancelAnimationFrame(rafRef.current);
-    const duration = 400;
-    startRef.current = null;
-    const currentPcts = [...animPcts];
-    const targetPcts = isHover
-      ? segments.map((s) => s.pct * 1.05)
-      : segments.map((s) => s.pct);
-    const animate = (ts) => {
-      if (!startRef.current) startRef.current = ts;
-      const elapsed = ts - startRef.current;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setAnimPcts(
-        targetPcts.map((t, i) => currentPcts[i] + (t - currentPcts[i]) * eased),
-      );
-      if (progress < 1) rafRef.current = requestAnimationFrame(animate);
-    };
-    rafRef.current = requestAnimationFrame(animate);
-  };
+  const options = useMemo(() => {
+    return {
+      responsive: true,
 
-  let cumOffset = 0;
-  const animSegments = segments.map((s, i) => {
-    const dash = (animPcts[i] / 100) * circ;
-    const offsetVal = (-cumOffset / 100) * circ;
-    cumOffset += animPcts[i];
-    return { ...s, dash, offsetVal };
-  });
+      maintainAspectRatio: false,
+
+      animation: {
+        duration: 1000,
+        easing: "easeOutQuart",
+      },
+
+      plugins: {
+        legend: {
+          display: false,
+        },
+
+        tooltip: {
+          backgroundColor: "#111827",
+          padding: 12,
+          displayColors: false,
+
+          callbacks: {
+            title: (items) => items[0].label,
+
+            label: (context) => {
+              return BAR_MONTHS[context.dataIndex].val;
+            },
+          },
+        },
+      },
+
+      interaction: {
+        mode: "index",
+        intersect: false,
+      },
+
+      scales: {
+        x: {
+          grid: {
+            display: false,
+            drawBorder: false,
+          },
+
+          border: {
+            display: false,
+          },
+
+          ticks: {
+            color: "#9ca3af",
+            font: {
+              size: 12,
+              weight: 500,
+            },
+          },
+        },
+
+        y: {
+          beginAtZero: true,
+
+          grid: {
+            display: false,
+            drawBorder: false,
+          },
+
+          border: {
+            display: false,
+          },
+
+          ticks: {
+            display: false,
+          },
+        },
+      },
+
+      hover: {
+        mode: "nearest",
+        intersect: true,
+      },
+    };
+  }, []);
 
   return (
-    <div className="flex items-center gap-5">
-      {/* Circle */}
-      <div className="flex items-center justify-center w-[97px] h-[97px] relative flex-shrink-0">
-        <svg viewBox="0 0 36 36" className="w-full h-full">
-          {segments.map(({ color, pct }, i) => {
-            const dash = (pct / 100) * circ;
-            const offset =
-              i === 0
-                ? 0
-                : i === 1
-                  ? -(segments[0].pct / 100) * circ
-                  : -((segments[0].pct + segments[1].pct) / 100) * circ;
-            return (
-              <circle
-                key={i}
-                cx="18"
-                cy="18"
-                r={r}
-                fill="transparent"
-                stroke={color}
-                strokeWidth="4"
-                strokeDasharray={`${dash} ${circ}`}
-                strokeDashoffset={offset}
-                transform="rotate(-90 18 18)"
-              />
-            );
-          })}
-          <text
-            x="18"
-            y="17"
-            textAnchor="middle"
-            fontSize="6.5"
-            fontWeight="700"
-          >
-            1,284
-          </text>
-          <text
-            x="18"
-            y="21.5"
-            textAnchor="middle"
-            fontSize="3.8"
-            fill="#9ca3af"
-          >
-            total
-          </text>
-          
-        </svg>
-      </div>
-
-      {/* Labels */}
-      <div className="space-y-2 w-full">
-        {[
-          { dot: "#f59e0b", label: "Gold", val: "412 (32%)" },
-          { dot: "#0f766e", label: "Silver", val: "210 (16%)" },
-          { dot: "#e5e7eb", label: "Free", val: "662 (52%)" },
-        ].map(({ dot, label, val }) => (
-          <div key={label} className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2">
-              <span
-                className="w-2.5 h-2.5 rounded-full"
-                style={{ background: dot }}
-              />
-              <span className="text-sm text-gray-700">{label}</span>
-            </div>
-            <span className="text-[12px] text-#374151 font-normal">{val}</span>
-          </div>
-        ))}
-      </div>
+    <div className="w-full h-[180px]">
+      <Bar data={data} options={options} />
     </div>
   );
 }
 
-// ── Line Chart ────────────────────────────────────────────────────
-function LineChart() {
-  const W = 400;
-  const H = 130;
-  const paddingLeft = 38;
-  const paddingBottom = 20;
-  const paddingTop = 10;
-  const chartW = W - paddingLeft;
-  const chartH = H - paddingBottom - paddingTop;
-  const yMin = 400;
-  const yMax = 1500;
-  const yLabels = [1400, 1200, 1000, 800, 400];
-  const rawData = [500, 700, 850, 900, 1050, 1400];
-  const months = ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
-  const count = rawData.length;
-  const toX = (i) => paddingLeft + (i / (count - 1)) * chartW;
-  const toY = (val) =>
-    paddingTop + chartH - ((val - yMin) / (yMax - yMin)) * chartH;
-  const pts = rawData.map((v, i) => `${toX(i)},${toY(v)}`).join(" ");
+// ── Plan Split Donut ──────────────────────────────────────────────
+const PLAN_DATA = [
+  {
+    label: "Gold",
+    value: 412,
+    color: "#F59E0B",
+  },
+
+  {
+    label: "Silver",
+    value: 210,
+    color: "#0f766e",
+  },
+
+  {
+    label: "Free",
+    value: 662,
+    color: "#E8F4F4",
+  },
+];
+
+function PlanDonut() {
+  const total = PLAN_DATA.reduce((sum, item) => sum + item.value, 0);
+
+  const data = useMemo(() => {
+    return {
+      labels: PLAN_DATA.map((item) => item.label),
+
+      datasets: [
+        {
+          data: PLAN_DATA.map((item) => item.value),
+
+          backgroundColor: PLAN_DATA.map((item) => item.color),
+
+          hoverBackgroundColor: PLAN_DATA.map((item) => item.color),
+
+          borderWidth: 0,
+
+          hoverOffset: 6,
+
+          cutout: "72%",
+        },
+      ],
+    };
+  }, []);
+
+  const options = useMemo(() => {
+    return {
+      responsive: true,
+
+      maintainAspectRatio: false,
+
+      animation: {
+        animateRotate: true,
+        duration: 1200,
+        easing: "easeOutQuart",
+      },
+
+      plugins: {
+        legend: {
+          display: false,
+        },
+
+        tooltip: {
+          backgroundColor: "#111827",
+
+          padding: 12,
+
+          callbacks: {
+            label: (context) => {
+              const value = context.raw;
+
+              const pct = Math.round((value / total) * 100);
+
+              return `${context.label}: ${value} (${pct}%)`;
+            },
+          },
+        },
+      },
+    };
+  }, [total]);
 
   return (
-    <svg
-      viewBox={`0 0 ${W} ${H + 4}`}
-      className="w-full"
-      style={{ height: 180 }}
-    >
-      {yLabels.map((val) => (
-        <line
-          key={val}
-          x1={paddingLeft}
-          y1={toY(val)}
-          x2={W}
-          y2={toY(val)}
-          stroke="#e5e7eb"
-          strokeWidth="1"
-        />
-      ))}
-      <line
-        x1={paddingLeft}
-        y1={toY(yMin)}
-        x2={W}
-        y2={toY(yMin)}
-        stroke="#e5e7eb"
-        strokeWidth="1"
-      />
-      {yLabels.map((val) => (
-        <text
-          key={val}
-          x={paddingLeft - 4}
-          y={toY(val) + 4}
-          textAnchor="end"
-          fontSize="10"
-          fill="#9ca3af"
-        >
-          {val}
-        </text>
-      ))}
-      <polyline
-        points={pts}
-        fill="none"
-        stroke="#0f766e"
-        strokeWidth="2.5"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-      {rawData.map((val, i) => (
-        <circle
-          key={i}
-          cx={toX(i)}
-          cy={toY(val)}
-          r="3.5"
-          fill={i === rawData.length - 1 ? "#C9A227" : "#eef1f1"}
-        />
-      ))}
-      {months.map((m, i) => (
-        <text
-          key={m}
-          x={toX(i)}
-          y={H + 2}
-          textAnchor="middle"
-          fontSize="11"
-          fill="#9ca3af"
-        >
-          {m}
-        </text>
-      ))}
-    </svg>
+    <div className="flex items-center gap-5">
+      {/* Donut */}
+      <div className="relative w-[97px] h-[97px] flex-shrink-0">
+        <Doughnut data={data} options={options} />
+
+        {/* Center Content */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <div className="text-[15px] font-bold text-gray-900">
+            {total.toLocaleString()}
+          </div>
+
+          <div className="text-[10px] text-gray-400 mt-[-2px]">
+            total
+          </div>
+        </div>
+      </div>
+
+      {/* Labels */}
+      <div className="space-y-2 w-full">
+        {PLAN_DATA.map((item) => {
+          const pct = Math.round((item.value / total) * 100);
+
+          return (
+            <div
+              key={item.label}
+              className="flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-2.5 h-2.5 rounded-full transition-transform duration-200 group-hover:scale-125"
+                  style={{
+                    background: item.color,
+                  }}
+                />
+
+                <span className="text-sm text-gray-700 font-medium">
+                  {item.label}
+                </span>
+              </div>
+
+              <span className="text-[12px] text-gray-600 font-medium">
+                {item.value} ({pct}%)
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+// function PlanDonut() {
+//   const [hovered, setHovered] = useState(false);
+//   const r = 15.9,
+//     circ = 2 * Math.PI * r;
+//   const segments = [
+//     { pct: 25, color: "#F59E0B", offset: 0 },
+//     { pct: 50, color: "#E8F4F4", offset: -33 },
+//     { pct: 25, color: "#0A4A4A", offset: -50 },
+//   ];
+//   const [animPcts, setAnimPcts] = useState(segments.map(() => 0));
+//   const rafRef = useRef(null);
+//   const startRef = useRef(null);
+
+//   useEffect(() => {
+//     const duration = 1000;
+//     startRef.current = null;
+//     const animate = (ts) => {
+//       if (!startRef.current) startRef.current = ts;
+//       const elapsed = ts - startRef.current;
+//       const progress = Math.min(elapsed / duration, 1);
+//       const eased = 1 - Math.pow(1 - progress, 3);
+//       setAnimPcts(segments.map((s) => s.pct * eased));
+//       if (progress < 1) rafRef.current = requestAnimationFrame(animate);
+//     };
+//     rafRef.current = requestAnimationFrame(animate);
+//     return () => cancelAnimationFrame(rafRef.current);
+//   }, []);
+
+//   const handleHover = (isHover) => {
+//     setHovered(isHover);
+//     cancelAnimationFrame(rafRef.current);
+//     const duration = 400;
+//     startRef.current = null;
+//     const currentPcts = [...animPcts];
+//     const targetPcts = isHover
+//       ? segments.map((s) => s.pct * 1.05)
+//       : segments.map((s) => s.pct);
+//     const animate = (ts) => {
+//       if (!startRef.current) startRef.current = ts;
+//       const elapsed = ts - startRef.current;
+//       const progress = Math.min(elapsed / duration, 1);
+//       const eased = 1 - Math.pow(1 - progress, 3);
+//       setAnimPcts(
+//         targetPcts.map((t, i) => currentPcts[i] + (t - currentPcts[i]) * eased),
+//       );
+//       if (progress < 1) rafRef.current = requestAnimationFrame(animate);
+//     };
+//     rafRef.current = requestAnimationFrame(animate);
+//   };
+
+//   let cumOffset = 0;
+//   const animSegments = segments.map((s, i) => {
+//     const dash = (animPcts[i] / 100) * circ;
+//     const offsetVal = (-cumOffset / 100) * circ;
+//     cumOffset += animPcts[i];
+//     return { ...s, dash, offsetVal };
+//   });
+
+//   return (
+//     <div className="flex items-center gap-5">
+//       {/* Circle */}
+//       <div className="flex items-center justify-center w-[97px] h-[97px] relative flex-shrink-0">
+//         <svg viewBox="0 0 36 36" className="w-full h-full">
+//           {segments.map(({ color, pct }, i) => {
+//             const dash = (pct / 100) * circ;
+//             const offset =
+//               i === 0
+//                 ? 0
+//                 : i === 1
+//                   ? -(segments[0].pct / 100) * circ
+//                   : -((segments[0].pct + segments[1].pct) / 100) * circ;
+//             return (
+//               <circle
+//                 key={i}
+//                 cx="18"
+//                 cy="18"
+//                 r={r}
+//                 fill="transparent"
+//                 stroke={color}
+//                 strokeWidth="4"
+//                 strokeDasharray={`${dash} ${circ}`}
+//                 strokeDashoffset={offset}
+//                 transform="rotate(-90 18 18)"
+//               />
+//             );
+//           })}
+//           <text
+//             x="18"
+//             y="17"
+//             textAnchor="middle"
+//             fontSize="6.5"
+//             fontWeight="700"
+//           >
+//             1,284
+//           </text>
+//           <text
+//             x="18"
+//             y="21.5"
+//             textAnchor="middle"
+//             fontSize="3.8"
+//             fill="#9ca3af"
+//           >
+//             total
+//           </text>
+//         </svg>
+//       </div>
+
+//       {/* Labels */}
+//       <div className="space-y-2 w-full">
+//         {[
+//           { dot: "#f59e0b", label: "Gold", val: "412 (32%)" },
+//           { dot: "#0f766e", label: "Silver", val: "210 (16%)" },
+//           { dot: "#e5e7eb", label: "Free", val: "662 (52%)" },
+//         ].map(({ dot, label, val }) => (
+//           <div key={label} className="flex items-center justify-between w-full">
+//             <div className="flex items-center gap-2">
+//               <span
+//                 className="w-2.5 h-2.5 rounded-full"
+//                 style={{ background: dot }}
+//               />
+//               <span className="text-sm text-gray-700">{label}</span>
+//             </div>
+//             <span className="text-[12px] text-#374151 font-normal">{val}</span>
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// }
+
+// ── Line Chart ────────────────────────────────────────────────────
+// function LineChart() {
+//   const W = 400;
+//   const H = 130;
+//   const paddingLeft = 38;
+//   const paddingBottom = 20;
+//   const paddingTop = 10;
+//   const chartW = W - paddingLeft;
+//   const chartH = H - paddingBottom - paddingTop;
+//   const yMin = 400;
+//   const yMax = 1500;
+//   const yLabels = [1400, 1200, 1000, 800, 400];
+//   const rawData = [500, 700, 850, 900, 1050, 1400];
+//   const months = ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
+//   const count = rawData.length;
+//   const toX = (i) => paddingLeft + (i / (count - 1)) * chartW;
+//   const toY = (val) =>
+//     paddingTop + chartH - ((val - yMin) / (yMax - yMin)) * chartH;
+//   const pts = rawData.map((v, i) => `${toX(i)},${toY(v)}`).join(" ");
+
+//   return (
+//     <svg
+//       viewBox={`0 0 ${W} ${H + 4}`}
+//       className="w-full"
+//       style={{ height: 180 }}
+//     >
+//       {yLabels.map((val) => (
+//         <line
+//           key={val}
+//           x1={paddingLeft}
+//           y1={toY(val)}
+//           x2={W}
+//           y2={toY(val)}
+//           stroke="#e5e7eb"
+//           strokeWidth="1"
+//         />
+//       ))}
+//       <line
+//         x1={paddingLeft}
+//         y1={toY(yMin)}
+//         x2={W}
+//         y2={toY(yMin)}
+//         stroke="#e5e7eb"
+//         strokeWidth="1"
+//       />
+//       {yLabels.map((val) => (
+//         <text
+//           key={val}
+//           x={paddingLeft - 4}
+//           y={toY(val) + 4}
+//           textAnchor="end"
+//           fontSize="10"
+//           fill="#9ca3af"
+//         >
+//           {val}
+//         </text>
+//       ))}
+//       <polyline
+//         points={pts}
+//         fill="none"
+//         stroke="#0f766e"
+//         strokeWidth="2.5"
+//         strokeLinejoin="round"
+//         strokeLinecap="round"
+//       />
+//       {rawData.map((val, i) => (
+//         <circle
+//           key={i}
+//           cx={toX(i)}
+//           cy={toY(val)}
+//           r="3.5"
+//           fill={i === rawData.length - 1 ? "#C9A227" : "#eef1f1"}
+//         />
+//       ))}
+//       {months.map((m, i) => (
+//         <text
+//           key={m}
+//           x={toX(i)}
+//           y={H + 2}
+//           textAnchor="middle"
+//           fontSize="11"
+//           fill="#9ca3af"
+//         >
+//           {m}
+//         </text>
+//       ))}
+//     </svg>
+//   );
+// }
+function GrowthChart() {
+  const data = {
+    labels: ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"],
+    datasets: [
+      {
+        data: [500, 700, 850, 900, 1050, 1400],
+        borderColor: "#0f766e",
+        backgroundColor: "rgba(15,118,110,0.12)",
+        fill: true,
+        tension: 0.45,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+
+    animation: {
+      duration: 1200,
+      easing: "easeOutQuart",
+    },
+
+    scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+      },
+
+      y: {
+        border: {
+          display: false,
+        },
+
+        grid: {
+          color: "#eef2f7",
+        },
+      },
+    },
+  };
+
+  return (
+    <div className="h-[180px] w-full">
+      <Line data={data} options={options} />
+    </div>
   );
 }
 
@@ -603,8 +861,6 @@ function CompanyCard({ letter, name, count, pct, bg, border, letterBg, bar }) {
     return () => cancelAnimationFrame(rafRef.current);
   }, [hovered]);
 
- 
-
   return (
     <div
       className="rounded-xl p-3 cursor-default transition-[transform,box-shadow] duration-[250ms]"
@@ -655,7 +911,13 @@ function CompanyCard({ letter, name, count, pct, bg, border, letterBg, bar }) {
 
 // ── Main Dashboard ────────────────────────────────────────────────
 export default function AdminDashboard() {
+  //  const [dashdata, setDashData] = useState(null);
   const [showSidebar, setShowSidebar] = useState(false);
+   const {
+    data: dashdata,
+    isLoading,
+    error,
+  } = useDashboard();
 
   useEffect(() => {
     if (showSidebar) {
@@ -668,97 +930,92 @@ export default function AdminDashboard() {
     };
   }, [showSidebar]);
 
-  const [dashdata, setDashData] = useState(null);
-const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  async function load() {
-    try {
-      const res = await fetch("/api/admin/overview");
-      const json = await res.json();
-      setDashData(json);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+  // useEffect(() => {
+  //   async function load() {
+  //     try {
+  //       const res = await fetch("/api/admin/overview");
+  //       const json = await res.json();
+  //       setDashData(json);
+  //     } catch (err) {
+  //       console.error(err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
+
+  //   load();
+  // }, []);
+
+  const totalCityCount = dashdata?.analytics?.cities?.reduce(
+    (sum, c) => sum + c.total,
+    0,
+  );
+
+  const CITIES = (dashdata?.analytics?.cities || []).map((c, i) => ({
+    name: c.city,
+    count: c.total,
+    pct: totalCityCount ? Math.round((c.total / totalCityCount) * 100) : 0,
+    color: CITY_COLORS[i % CITY_COLORS.length],
+  }));
+
+  //companies :
+  const groupedCompanies = {};
+
+  (dashdata?.analytics?.companies || []).forEach((c) => {
+    const key = normalizeCompany(c.company);
+
+    if (!groupedCompanies[key]) {
+      groupedCompanies[key] = {
+        name: c.company.trim(),
+        count: 0,
+      };
     }
+
+    groupedCompanies[key].count += c.total;
+  });
+
+  const companyList = Object.values(groupedCompanies);
+
+  const maxCompany = Math.max(...companyList.map((c) => c.count));
+
+  const COMPANY_COLORS = [
+    "#195FA5",
+    "#3B6E10",
+    "#824E0E",
+    "#993C1D",
+    "#0f766e",
+  ];
+
+  const COMPANIES = companyList.map((c, i) => ({
+    letter: c.name?.[0]?.toUpperCase() || "X",
+    name: c.name,
+    count: c.count,
+    pct: Math.round((c.count / maxCompany) * 100),
+    bg: "#f9fafb",
+    border: "#e5e7eb",
+    letterBg: COMPANY_COLORS[i % COMPANY_COLORS.length],
+    bar: COMPANY_COLORS[i % COMPANY_COLORS.length],
+  }));
+
+  // Services :
+  const SERVICE_COLORS = {
+    "Life Insurance": "#0f766e",
+    "Health Insurance": "#2563eb",
+    "General Insurance": "#f97316",
+    Other: "#9ca3af",
+  };
+
+  const SERVICES = (dashdata?.analytics?.services || []).map((s) => ({
+    name: s.service_type,
+    total: s.total,
+    color: SERVICE_COLORS[s.service_type] || "#6b7280",
+  }));
+
+  
+  if (isLoading || !dashdata) {
+    return <div className="p-6">Loading dashboard...</div>;
   }
-
-  load();
-}, []);
-
-const totalCityCount = dashdata?.analytics?.cities?.reduce(
-  (sum, c) => sum + c.total,
-  0,
-);
-
-const CITIES = (dashdata?.analytics?.cities || []).map((c, i) => ({
-  name: c.city,
-  count: c.total,
-  pct: totalCityCount ? Math.round((c.total / totalCityCount) * 100) : 0,
-  color: CITY_COLORS[i % CITY_COLORS.length],
-}));
-
-//companies : 
-const groupedCompanies = {};
-
-(dashdata?.analytics?.companies || []).forEach((c) => {
-  const key = normalizeCompany(c.company);
-
-  if (!groupedCompanies[key]) {
-    groupedCompanies[key] = {
-      name: c.company.trim(),
-      count: 0,
-    };
-  }
-
-  groupedCompanies[key].count += c.total;
-});
-
-const companyList = Object.values(groupedCompanies);
-
-const maxCompany = Math.max(...companyList.map((c) => c.count));
-
-const COMPANY_COLORS = [
-  "#195FA5",
-  "#3B6E10",
-  "#824E0E",
-  "#993C1D",
-  "#0f766e",
-];
-
-const COMPANIES = companyList.map((c, i) => ({
-  letter: c.name?.[0]?.toUpperCase() || "X",
-  name: c.name,
-  count: c.count,
-  pct: Math.round((c.count / maxCompany) * 100),
-  bg: "#f9fafb",
-  border: "#e5e7eb",
-  letterBg: COMPANY_COLORS[i % COMPANY_COLORS.length],
-  bar: COMPANY_COLORS[i % COMPANY_COLORS.length],
-}));
-
-// Services : 
-const SERVICE_COLORS = {
-  "Life Insurance": "#0f766e",
-  "Health Insurance": "#2563eb",
-  "General Insurance": "#f97316",
-  Other: "#9ca3af",
-};
-
-const SERVICES = (dashdata?.analytics?.services || []).map((s) => ({
-  name: s.service_type,
-  total: s.total,
-  color: SERVICE_COLORS[s.service_type] || "#6b7280",
-}));
-
-// Roles : 
-
-
-const [activeNav, setActiveNav] = useState("Overview");
-if (loading || !dashdata) {
-  return <div className="p-6">Loading dashboard...</div>;
-}
 
   return (
     <div className="flex min-h-screen text-gray-800 bg-[#EEF2F0]">
@@ -865,7 +1122,7 @@ if (loading || !dashdata) {
                   </div>
                   <div className="text-[12px] text-gray-500">👑 Gold</div>
                   <div className="text-[#0A4A4A] text-center font-poppins text-[12px] font-semibold leading-4">
-                   {`${dashdata?.advisors?.gold} advisors`}
+                    {`${dashdata?.advisors?.gold} advisors`}
                   </div>
                 </div>
                 <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-2 text-center">
@@ -889,7 +1146,7 @@ if (loading || !dashdata) {
                 Monthly Revenue Trend
               </p>
               <div className="mt-35">
-                <BarChart />
+                <RevenueBarChart />
               </div>
             </div>
 
@@ -926,7 +1183,7 @@ if (loading || !dashdata) {
                     1,284
                   </span>
                 </div>
-                <LineChart />
+                <GrowthChart />
               </div>
               <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
                 <div className="mb-3">
@@ -946,7 +1203,7 @@ if (loading || !dashdata) {
               <h2 className="text-base font-bold mb-3">
                 📌 City – wise Advisors
               </h2>
-              <div className="space-y-2.5">
+              <div className="space-y-2.5 max-h-[234px] overflow-y-auto no-scrollbar">
                 {CITIES.map(({ name, count, pct, color }) => (
                   <CityRow
                     key={name}
@@ -958,11 +1215,11 @@ if (loading || !dashdata) {
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+            <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm ">
               <h2 className="text-base font-bold mb-3">
                 🛡 Service – wise Advisors
               </h2>
-              <table className="w-full text-[12px]">
+              <table className="w-full text-[12px] max-h-[234px] overflow-y-auto no-scollbar">
                 <thead>
                   <tr className="text-gray-400 text-[11px] border-b border-gray-100">
                     <th className="text-left py-1.5 font-semibold">SERVICE</th>
@@ -1006,6 +1263,7 @@ if (loading || !dashdata) {
               <h2 className="text-base font-bold mb-3">
                 🏢 Company – wise Advisors
               </h2>
+              <div className="max-h-[300px] overflow-y-auto no-scrollbar">
               <div className="grid grid-cols-2 gap-2 mb-2">
                 {COMPANIES.map(
                   ({ letter, name, count, pct, bg, border, letterBg, bar }) => (
@@ -1050,10 +1308,14 @@ if (loading || !dashdata) {
                       style={{ width: "93%" }}
                     />
                   </div>
-                  <div className="text-[10px] mt-0.5 font-semibold" style={{ color: "#065F46" }}>
-  All other companies combined
-</div>
+                  <div
+                    className="text-[10px] mt-0.5 font-semibold"
+                    style={{ color: "#065F46" }}
+                  >
+                    All other companies combined
+                  </div>
                 </div>
+              </div>           
               </div>
             </div>
 

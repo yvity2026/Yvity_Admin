@@ -17,7 +17,7 @@ export async function GET(req) {
       .select(
         `
         *,
-        user:users(*),
+        user:users(*)
       `,
         { count: "exact" },
       )

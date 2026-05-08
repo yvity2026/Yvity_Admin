@@ -1,74 +1,64 @@
-
 "use client";
 import { useState, useEffect } from "react";
 import IrdaiModal from "@/components/IrdaiModal";
 import RejectModal from "@/components/RejectModal";
 import Link from "next/link";
-
-const navItems = {
-  MAIN: [
-    {
-      label: "Overview", href: "/admin",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><rect x="3" y="3" width="7" height="7" rx="1" strokeWidth="2" /><rect x="14" y="3" width="7" height="7" rx="1" strokeWidth="2" /><rect x="3" y="14" width="7" height="7" rx="1" strokeWidth="2" /><rect x="14" y="14" width="7" height="7" rx="1" strokeWidth="2" /></svg>,
-    },
-    {
-      label: "Advisors", href: "/admin/advisors",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><circle cx="9" cy="7" r="4" strokeWidth="2" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeWidth="2" /><path d="M16 11l2 2 4-4" strokeWidth="2" /></svg>,
-    },
-    {
-      label: "Customers", href: "/admin/customers",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><circle cx="12" cy="8" r="4" strokeWidth="2" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" strokeWidth="2" /></svg>,
-    },
-  ],
-  APPROVALS: [
-    {
-      label: "IRDAI Approvals", href: "/admin/irdaiapprovals",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><circle cx="12" cy="12" r="9" strokeWidth="2" /><path d="M9 12l2 2 4-4" strokeWidth="2" /></svg>,
-    },
-    {
-      label: "Testimonials", href: "/admin/testimonials",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z" strokeWidth="2" /></svg>,
-    },
-  ],
-  FINANCE: [
-    {
-      label: "Payments", href: "/admin/payments",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeWidth="2" /></svg>,
-    },
-    {
-      label: "Subscriptions", href: "/admin/subscriptions",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" strokeWidth="2" /></svg>,
-    },
-  ],
-  SYSTEM: [
-    {
-      label: "Settings", href: "/admin/settings",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><circle cx="12" cy="12" r="3" strokeWidth="2" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" strokeWidth="2" /></svg>,
-    },
-  ],
-};
+import {
+  useApprovalActions,
+  useApprovals,
+} from "@/hooks/TanstankQuery/useApprovals";
+import IRDAISkeleton from "./loading";
+import Image from "next/image";
 
 // ── Icon components ──────────────────────────────────────────────
 const IHourglass = ({ color }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+  >
     <path d="M5 22h14M5 2h14M17 22v-4.172a2 2 0 00-.586-1.414L12 12M7 22v-4.172a2 2 0 01.586-1.414L12 12m0 0L7 6.172A2 2 0 016.414 4.758 2 2 0 015 4V2h14v2a2 2 0 01-.586 1.414A2 2 0 0117 6.172L12 12z" />
   </svg>
 );
 const ICheckCircle = ({ color }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+  >
     <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
     <polyline points="22 4 12 14.01 9 11.01" />
   </svg>
 );
 const IXCircle = ({ color }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+  >
     <circle cx="12" cy="12" r="10" />
     <line x1="15" y1="9" x2="9" y2="15" />
     <line x1="9" y1="9" x2="15" y2="15" />
   </svg>
 );
 const ICalendar = () => (
-  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+  <svg
+    width="11"
+    height="11"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+  >
     <rect x="3" y="4" width="18" height="18" rx="2" />
     <line x1="16" y1="2" x2="16" y2="6" />
     <line x1="8" y1="2" x2="8" y2="6" />
@@ -76,23 +66,51 @@ const ICalendar = () => (
   </svg>
 );
 const ICheckSm = () => (
-  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3">
+  <svg
+    width="8"
+    height="8"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#fff"
+    strokeWidth="3"
+  >
     <polyline points="20 6 9 17 4 12" />
   </svg>
 );
 const IXSm = () => (
-  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+  <svg
+    width="11"
+    height="11"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="3"
+  >
     <line x1="18" y1="6" x2="6" y2="18" />
     <line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 const IHourglassSm = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+  <svg
+    width="13"
+    height="13"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+  >
     <path d="M5 22h14M5 2h14M17 22v-4.172a2 2 0 00-.586-1.414L12 12M7 22v-4.172a2 2 0 01.586-1.414L12 12" />
   </svg>
 );
 const ISubmission = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a7a5a" strokeWidth="2.5">
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#1a7a5a"
+    strokeWidth="2.5"
+  >
     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
     <polyline points="14 2 14 8 20 8" />
     <line x1="16" y1="13" x2="8" y2="13" />
@@ -104,14 +122,17 @@ const ISubmission = () => (
 // ── Day badge helper ─────────────────────────────────────────────
 function DayBadge({ dayType, days }) {
   const colorMap = {
-    "day-red":    "bg-red-50 text-red-600",
+    "day-red": "bg-red-50 text-red-600",
     "day-orange": "bg-orange-50 text-[#c57a00]",
     "day-yellow": "bg-yellow-50 text-yellow-700",
-    "day-green":  "bg-green-50 text-green-700",
+    "day-green": "bg-green-50 text-green-700",
   };
   return (
-    <span className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold whitespace-nowrap ${colorMap[dayType] || colorMap["day-yellow"]}`}>
-      <ICalendar />{days}
+    <span
+      className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold whitespace-nowrap ${colorMap[dayType] || colorMap["day-yellow"]}`}
+    >
+      <ICalendar />
+      {days}
     </span>
   );
 }
@@ -120,113 +141,141 @@ function DayBadge({ dayType, days }) {
 function Avatar({ initials, size = "md", bgClass = "bg-yellow-600" }) {
   const sizeClass = size === "sm" ? "w-8 h-8 text-xs" : "w-10 h-10 text-xs";
   return (
-    <div className={`${sizeClass} ${bgClass} rounded-full text-white flex items-center justify-center font-bold shrink-0`}>
+    <div
+      className={`${sizeClass} ${bgClass} rounded-full text-white flex items-center justify-center font-bold shrink-0`}
+    >
       {initials}
     </div>
   );
 }
 
-
-
 // ── Main page ────────────────────────────────────────────────────
 export default function IRDAIApprovals() {
-  const [showModal, setShowModal]       = useState(false);
-  const [activeNav, setActiveNav]       = useState("IRDAI Approvals");
-  const [search, setSearch]             = useState("");
-  const [rows, setRows]                 = useState([]);
-  const [showSidebar, setShowSidebar]   = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [activeNav, setActiveNav] = useState("IRDAI Approvals");
+  const [search, setSearch] = useState("");
+  // const [rows, setRows]                 = useState([]);
+  const [showSidebar, setShowSidebar] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
-  const [openReject, setOpenReject]     = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [openReject, setOpenReject] = useState(false);
+  // const [isProcessing, setIsProcessing] = useState(false);
   const [activeFilter, setActiveFilter] = useState(null);
-  const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0, pendingPercentage: 0 });
+  // const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0, pendingPercentage: 0 });
   const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState("");
-  const [data, setData] = useState(null)
+  // const [error, setError]     = useState("");
+  // const [data, setData] = useState(null);
+  const { data, isLoading, error } = useApprovals();
+
+  const { approve, reject, isProcessing } = useApprovalActions();
+
+  const rows = data?.data || [];
+  const stats = data?.stats || {};
 
   useEffect(() => {
     document.body.style.overflow = showSidebar ? "hidden" : "auto";
-    return () => { document.body.style.overflow = "auto"; };
+    return () => {
+      document.body.style.overflow = "auto";
+    };
   }, [showSidebar]);
 
-  useEffect(() => {
-    const loadApprovals = async () => {
-      try {
-        setLoading(true);
-        setError("");
-        const response = await fetch("/api/admin/approvals");
-        if (!response.ok) throw new Error(`Failed to load approvals: ${response.status}`);
+  // useEffect(() => {
+  //   const loadApprovals = async () => {
+  //     try {
+  //       setLoading(true);
+  //       setError("");
+  //       const response = await fetch("/api/admin/approvals");
+  //       if (!response.ok) throw new Error(`Failed to load approvals: ${response.status}`);
 
-        const payload = await response.json();
-        const items = payload?.data || [];
-        const nextStats = payload?.stats || { pending: 0, approved: 0, rejected: 0 };
-        const total = nextStats.pending + nextStats.approved + nextStats.rejected;
+  //       const payload = await response.json();
+  //       const items = payload?.data || [];
+  //       const nextStats = payload?.stats || { pending: 0, approved: 0, rejected: 0 };
+  //       const total = nextStats.pending + nextStats.approved + nextStats.rejected;
 
-        setStats({
-          pending: nextStats.pending || 0,
-          approved: nextStats.approved || 0,
-          rejected: nextStats.rejected || 0,
-          pendingPercentage: total ? ((nextStats.pending / total) * 100).toFixed(2) : 0,
-        });
+  //       setStats({
+  //         pending: nextStats.pending || 0,
+  //         approved: nextStats.approved || 0,
+  //         rejected: nextStats.rejected || 0,
+  //         pendingPercentage: total ? ((nextStats.pending / total) * 100).toFixed(2) : 0,
+  //       });
 
-        const nextRows = items.map((item, index) => {
-          const name = item.name || "Advisor";
-          const location = item.location || "Unknown, IN";
-          const status = item.status || "pending";
-          const initials = name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("") || "AD";
-          const submittedAt = item.submittedAt ? new Date(item.submittedAt) : new Date();
-          const diffDays = Math.max(1, Math.floor((Date.now() - submittedAt.getTime()) / 86400000));
-          const days = `${diffDays} ${diffDays === 1 ? "day" : "days"}`;
-          const fileName = item.licenseUrl ? item.licenseUrl.split("/").pop() : "certificate.jpg";
-          const dayTypeByStatus = {
-            pending: diffDays > 3 ? "day-red" : "day-yellow",
-            approved: "day-green",
-            rejected: "day-orange",
-          };
-          return {
-            id: item.id, status, initials,
-            bgClass: index % 2 === 0 ? "bg-[#e8a020]" : "bg-[#1a5a50]",
-            name, location,
-            lic: item.licenseUrl ? fileName : "LIC-AP-2022-48291",
-            type: "Life Insurance",
-            plan: status === "approved" ? "Approved" : status === "rejected" ? "Rejected" : "Pending Review",
-            submitted: `Submitted ${days} ago`,
-            days, dayType: dayTypeByStatus[status] || "day-yellow",
-            certificateName: fileName,
-          };
-        });
-        setRows(nextRows);
-      } catch (fetchError) {
-        console.warn("Unable to load advisor approvals", fetchError);
-        setError("Failed to load approvals");
-        setRows([]);
-        setStats({ pending: 0, approved: 0, rejected: 0, pendingPercentage: 0 });
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadApprovals();
-  }, []);
+  //       const nextRows = items.map((item, index) => {
+  //         const name = item.name || "Advisor";
+  //         const location = item.location || "Unknown, IN";
+  //         const status = item.status || "pending";
+  //         const initials = name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("") || "AD";
+  //         const submittedAt = item.submittedAt ? new Date(item.submittedAt) : new Date();
+  //         const diffDays = Math.max(1, Math.floor((Date.now() - submittedAt.getTime()) / 86400000));
+  //         const days = `${diffDays} ${diffDays === 1 ? "day" : "days"}`;
+  //         const fileName = item.licenseUrl ? item.licenseUrl.split("/").pop() : "certificate.jpg";
+  //         const dayTypeByStatus = {
+  //           pending: diffDays > 3 ? "day-red" : "day-yellow",
+  //           approved: "day-green",
+  //           rejected: "day-orange",
+  //         };
+  //         return {
+  //           id: item.id, status, initials,
+  //           bgClass: index % 2 === 0 ? "bg-[#e8a020]" : "bg-[#1a5a50]",
+  //           name, location,
+  //           lic: item.licenseUrl ? fileName : "LIC-AP-2022-48291",
+  //           type: "Life Insurance",
+  //           plan: status === "approved" ? "Approved" : status === "rejected" ? "Rejected" : "Pending Review",
+  //           submitted: `Submitted ${days} ago`,
+  //           days, dayType: dayTypeByStatus[status] || "day-yellow",
+  //           certificateName: fileName,
+  //         };
+  //       });
+  //       setRows(nextRows);
+  //     } catch (fetchError) {
+  //       console.warn("Unable to load advisor approvals", fetchError);
+  //       setError("Failed to load approvals");
+  //       setRows([]);
+  //       setStats({ pending: 0, approved: 0, rejected: 0, pendingPercentage: 0 });
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   loadApprovals();
+  // }, []);
 
   const updateRowStatus = (id, status) => {
     setRows((prev) =>
       prev.map((item) =>
-        item.id !== id ? item : {
-          ...item, status,
-          plan: status === "approved" ? "Approved" : status === "rejected" ? "Rejected" : "Pending Review",
-          dayType: status === "approved" ? "day-green" : status === "rejected" ? "day-orange" : item.dayType,
-        }
-      )
+        item.id !== id
+          ? item
+          : {
+              ...item,
+              status,
+              plan:
+                status === "approved"
+                  ? "Approved"
+                  : status === "rejected"
+                    ? "Rejected"
+                    : "Pending Review",
+              dayType:
+                status === "approved"
+                  ? "day-green"
+                  : status === "rejected"
+                    ? "day-orange"
+                    : item.dayType,
+            },
+      ),
     );
   };
 
   const updateStatsForStatusChange = (nextStatus) => {
     setStats((prev) => {
-      const pending  = Math.max(0, prev.pending - 1);
-      const approved = nextStatus === "approved" ? prev.approved + 1 : prev.approved;
-      const rejected = nextStatus === "rejected" ? prev.rejected + 1 : prev.rejected;
-      const total    = pending + approved + rejected;
-      return { pending, approved, rejected, pendingPercentage: total ? ((pending / total) * 100).toFixed(2) : 0 };
+      const pending = Math.max(0, prev.pending - 1);
+      const approved =
+        nextStatus === "approved" ? prev.approved + 1 : prev.approved;
+      const rejected =
+        nextStatus === "rejected" ? prev.rejected + 1 : prev.rejected;
+      const total = pending + approved + rejected;
+      return {
+        pending,
+        approved,
+        rejected,
+        pendingPercentage: total ? ((pending / total) * 100).toFixed(2) : 0,
+      };
     });
   };
 
@@ -248,11 +297,23 @@ export default function IRDAIApprovals() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "approve", advisorId: id }),
       });
-      if (!response.ok) { console.error("Approval failed", await response.text()); return; }
+      if (!response.ok) {
+        console.error("Approval failed", await response.text());
+        return;
+      }
       updateRowStatus(id, "approved");
       updateStatsForStatusChange("approved");
       if (selectedSubmission?.id === id) {
-        setSelectedSubmission((prev) => prev ? { ...prev, status: "approved", dayType: "day-green", plan: "Approved" } : null);
+        setSelectedSubmission((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: "approved",
+                dayType: "day-green",
+                plan: "Approved",
+              }
+            : null,
+        );
         setShowModal(false);
       }
     } catch (err) {
@@ -269,9 +330,17 @@ export default function IRDAIApprovals() {
       const response = await fetch("/api/admin/approvals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "reject", advisorId: selectedSubmission.id, reason, note }),
+        body: JSON.stringify({
+          action: "reject",
+          advisorId: selectedSubmission.id,
+          reason,
+          note,
+        }),
       });
-      if (!response.ok) { console.error("Reject failed", await response.text()); return; }
+      if (!response.ok) {
+        console.error("Reject failed", await response.text());
+        return;
+      }
       updateRowStatus(selectedSubmission.id, "rejected");
       updateStatsForStatusChange("rejected");
       setOpenReject(false);
@@ -286,59 +355,76 @@ export default function IRDAIApprovals() {
   // ── Filter button definitions ────────────────────────────────
   const filterButtons = [
     {
-      key: "pending", label: "Pending",
+      key: "pending",
+      label: "Pending",
       icon: <IHourglassSm />,
-      activeCls:  "bg-[#fff5e6] border-[#e8a020] text-[#c57a00]",
+      activeCls: "bg-[#fff5e6] border-[#e8a020] text-[#c57a00]",
       defaultCls: "bg-white border-gray-200 text-gray-500",
     },
     {
-      key: "approved", label: "Approved",
+      key: "approved",
+      label: "Approved",
       icon: (
         <span className="w-3.5 h-3.5 rounded-full bg-[#1a7a5a] flex items-center justify-center shrink-0">
-          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+          <svg
+            width="8"
+            height="8"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#fff"
+            strokeWidth="3"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
         </span>
       ),
-      activeCls:  "bg-[#e6f5f0] border-[#1a7a5a] text-[#1a7a5a]",
+      activeCls: "bg-[#e6f5f0] border-[#1a7a5a] text-[#1a7a5a]",
       defaultCls: "bg-white border-gray-200 text-gray-500",
     },
     {
-      key: "rejected", label: "Rejected",
-      icon: <span className="text-[#cc3333] font-bold text-sm leading-none">✕</span>,
-      activeCls:  "bg-[#fff0f0] border-[#cc3333] text-[#cc3333]",
+      key: "rejected",
+      label: "Rejected",
+      icon: (
+        <span className="text-[#cc3333] font-bold text-sm leading-none">✕</span>
+      ),
+      activeCls: "bg-[#fff0f0] border-[#cc3333] text-[#cc3333]",
       defaultCls: "bg-white border-gray-200 text-gray-500",
     },
   ];
 
+  if (isLoading) return <IRDAISkeleton />;
+
   return (
     <div className="flex min-h-screen bg-[#f0f2ee] font-sans">
-
       {/* Mobile overlay */}
       {/* {showSidebar && (
         <div className="fixed inset-0 bg-black/45 z-40 md:hidden" onClick={() => setShowSidebar(false)} />
       )} */}
 
-
       {/* Main area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-
         {/* Topbar */}
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 max-md:p-3.5">
-
           {/* Stat cards */}
           <div className="flex flex-wrap gap-4 mb-5">
-
             {/* Pending */}
             <div className="bg-white rounded-2xl p-[18px_22px] shadow-sm flex-1 min-w-[160px] max-w-[240px] max-md:max-w-full">
               <div className="flex items-start justify-between mb-2.5">
                 <div className="w-[38px] h-[38px] rounded-xl bg-[#fff5e6] flex items-center justify-center">
                   <IHourglass color="#c57a00" />
                 </div>
-                <span className="bg-[#fff5e6] text-[#c57a00] text-[10px] font-bold rounded-full px-2.5 py-0.5">20 Pending</span>
+                <span className="bg-[#fff5e6] text-[#c57a00] text-[10px] font-bold rounded-full px-2.5 py-0.5">
+                  20 Pending
+                </span>
               </div>
-              <div className="text-[28px] font-extrabold text-[#1a3330] leading-tight">{stats?.pending}</div>
-              <div className="text-xs text-gray-400 mt-0.5 font-medium">Pending Review</div>
+              <div className="text-[28px] font-extrabold text-[#1a3330] leading-tight">
+                {stats?.pending}
+              </div>
+              <div className="text-xs text-gray-400 mt-0.5 font-medium">
+                Pending Review
+              </div>
             </div>
 
             {/* Approved */}
@@ -347,10 +433,16 @@ export default function IRDAIApprovals() {
                 <div className="w-[38px] h-[38px] rounded-xl bg-[#e6f5f0] flex items-center justify-center">
                   <ICheckCircle color="#1a7a5a" />
                 </div>
-                <span className="bg-[#e6f5f0] text-[#1a7a5a] text-[10px] font-bold rounded-full px-2.5 py-0.5 flex items-center gap-1">↑ 18%</span>
+                <span className="bg-[#e6f5f0] text-[#1a7a5a] text-[10px] font-bold rounded-full px-2.5 py-0.5 flex items-center gap-1">
+                  ↑ 18%
+                </span>
               </div>
-              <div className="text-[28px] font-extrabold text-[#1a3330] leading-tight">{stats?.approved}</div>
-              <div className="text-xs text-gray-400 mt-0.5 font-medium">Approved</div>
+              <div className="text-[28px] font-extrabold text-[#1a3330] leading-tight">
+                {stats?.approved}
+              </div>
+              <div className="text-xs text-gray-400 mt-0.5 font-medium">
+                Approved
+              </div>
             </div>
 
             {/* Rejected */}
@@ -360,21 +452,26 @@ export default function IRDAIApprovals() {
                   <IXCircle color="#cc3333" />
                 </div>
               </div>
-              <div className="text-[28px] font-extrabold text-[#1a3330] leading-tight">{stats?.rejected}</div>
-              <div className="text-xs text-gray-400 mt-0.5 font-medium">Rejected</div>
+              <div className="text-[28px] font-extrabold text-[#1a3330] leading-tight">
+                {stats?.rejected}
+              </div>
+              <div className="text-xs text-gray-400 mt-0.5 font-medium">
+                Rejected
+              </div>
             </div>
           </div>
 
           {/* Submissions panel */}
           <div className="bg-white rounded-2xl p-[22px_24px] shadow-sm">
-
             {/* Panel header */}
             <div className="flex items-center justify-between mb-4 flex-wrap gap-2.5">
               <div className="flex items-center gap-2.5">
                 <div className="w-[26px] h-[26px] rounded-lg bg-[#eef4f2] flex items-center justify-center">
                   <ISubmission />
                 </div>
-                <span className="text-[15px] font-bold text-[#1a3330]">IRDAI Submissions</span>
+                <span className="text-[15px] font-bold text-[#1a3330]">
+                  IRDAI Submissions
+                </span>
               </div>
               {/* Filter pills */}
               <div className="flex items-center gap-2 flex-wrap">
@@ -403,14 +500,18 @@ export default function IRDAIApprovals() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
-                <div className="text-white text-lg cursor-pointer shrink-0">→</div>
+                <div className="text-white text-lg cursor-pointer shrink-0">
+                  →
+                </div>
               </div>
             </div>
 
             {/* Submission rows */}
             <div className="flex flex-col gap-2.5">
               {filtered.length === 0 && (
-                <div className="text-center text-gray-300 py-8 text-sm">No submissions found.</div>
+                <div className="text-center text-gray-300 py-8 text-sm">
+                  No submissions found.
+                </div>
               )}
               {filtered.map((r, i) => (
                 <div
@@ -418,17 +519,28 @@ export default function IRDAIApprovals() {
                   className="bg-[#f9fbf9] rounded-xl px-[18px] py-3.5 flex items-center gap-3.5 border border-[#eef0ee] flex-wrap hover:bg-white hover:shadow-md"
                 >
                   {/* Avatar */}
-                  <div className={`w-10 h-10 rounded-full ${r.bgClass} text-white font-bold text-xs flex items-center justify-center shrink-0`}>
-                    {r.initials}
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 bg-gray-200">
+                    <Image
+                      src={r.profile_pic || "/default-avatar.png"}
+                      alt={r.name || "Advisor"}
+                      fill
+                      sizes="40px"
+                      className="object-cover"
+                      unoptimized
+                    />
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="text-[13px] font-bold text-[#1a3330]">
-                      {r.name} <span className="text-gray-400 font-medium">• {r.location}</span>
+                      {r.name}{" "}
+                      <span className="text-gray-400 font-medium">
+                        • {r.location}
+                      </span>
                     </div>
                     <div className="text-[11px] text-gray-400 mt-0.5 break-all sm:break-normal">
-                      {r.lic} &bull; {r.type} &bull; {r.plan} &bull; {r.submitted}
+                      {r.licenseNo} &bull; {r.type} &bull; {r.plan} &bull;{" "}
+                      {r.submittedAt}
                     </div>
                   </div>
 
@@ -437,7 +549,10 @@ export default function IRDAIApprovals() {
                     <div className="flex items-center gap-2 w-full sm:w-auto">
                       <DayBadge dayType={r.dayType} days={r.days} />
                       <button
-                        onClick={() => { setSelectedSubmission(r); setShowModal(true); }}
+                        onClick={() => {
+                          setSelectedSubmission(r);
+                          setShowModal(true);
+                        }}
                         className="px-3 py-1 text-[#0d3330] text-xs font-semibold underline underline-offset-2 bg-transparent border-none cursor-pointer hover:text-[#1a7a5a]"
                       >
                         View
@@ -448,7 +563,7 @@ export default function IRDAIApprovals() {
                       <div className="flex items-center gap-2 w-full sm:w-auto">
                         <button
                           className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-[18px] py-1.5 rounded-full text-xs font-semibold border-[1.5px] border-[#b3e0cc] bg-[#e6f5f0] text-[#1a7a5a] cursor-pointer hover:bg-[#1a7a5a] hover:text-white hover:border-[#1a7a5a]"
-                          onClick={() => approveSubmission(r.id)}
+                          onClick={() => approve(r.id)}
                         >
                           <span className="w-4 h-4 rounded-full bg-[#1a7a5a] flex items-center justify-center shrink-0">
                             <ICheckSm />
@@ -457,7 +572,10 @@ export default function IRDAIApprovals() {
                         </button>
                         <button
                           className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-[18px] py-1.5 rounded-full text-xs font-semibold border-[1.5px] border-[#ffcccc] bg-[#fff5f5] text-[#cc3333] cursor-pointer hover:bg-[#cc3333] hover:text-white hover:border-[#cc3333]"
-                          onClick={() => { setSelectedSubmission(r); setOpenReject(true); }}
+                          onClick={() => {
+                            setSelectedSubmission(r);
+                            setOpenReject(true);
+                          }}
                         >
                           <IXSm /> Reject
                         </button>
@@ -474,16 +592,33 @@ export default function IRDAIApprovals() {
       {showModal && (
         <IrdaiModal
           advisor={selectedSubmission}
-          onClose={() => { setShowModal(false); setSelectedSubmission(null); }}
-          onApprove={() => selectedSubmission && approveSubmission(selectedSubmission.id)}
-          onReject={() => { setShowModal(false); setOpenReject(true); }}
+          onClose={() => {
+            setShowModal(false);
+            setSelectedSubmission(null);
+          }}
+          onApprove={() =>
+            selectedSubmission && approveSubmission(selectedSubmission.id)
+          }
+          onReject={() => {
+            setShowModal(false);
+            setOpenReject(true);
+          }}
         />
       )}
       {openReject && (
         <RejectModal
           open={openReject}
-          setOpen={(value) => { if (!value) setSelectedSubmission(null); setOpenReject(value); }}
-          onConfirm={rejectSubmission}
+          setOpen={(value) => {
+            if (!value) setSelectedSubmission(null);
+            setOpenReject(value);
+          }}
+          onConfirm={({ reason, note }) =>
+            reject({
+              advisorId: selectedSubmission.id,
+              reason,
+              note,
+            })
+          }
         />
       )}
     </div>
