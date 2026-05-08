@@ -306,6 +306,13 @@ const testimonials = [
 
 const filterButtons = [
   {
+  key: "all",
+  label: "All",
+  icon: <span className="text-[11px] font-bold">•</span>,
+  active: "bg-[#e6f5f0] border-[#0A4A4A] text-[#0A4A4A]",
+  inactive: "bg-white border-gray-200 text-gray-500",
+},
+  {
     key: "text",
     label: "Pending",
     icon: <IHourglassSm />,
@@ -419,6 +426,8 @@ export default function Testimonials() {
 
   const matchFilter = !activeFilter || c.type === activeFilter;
 
+  return matchesSearch && c.type === activeFilter;
+});
   const handleReject = (idx) => {
     const real = rows.indexOf(filtered[idx]);
     setRows((prev) => prev.filter((_, i) => i !== real));
@@ -515,7 +524,7 @@ export default function Testimonials() {
                     <button
                       key={btn.key}
                       onClick={() => setActiveFilter(isActive ? null : btn.key)}
-                      className={`inline-flex items-center gap-1.5 px-[14px] py-[5px] rounded-full border-[1.5px] text-[12px] font-semibold cursor-pointer transition-all duration-[180ms]
+                      className={`inline-flex items-center gap-1.5 px-[14px] py-[5px] rounded-full border-[1.5px] text-[12px] font-semibold font-poppins cursor-pointer transition-all duration-[180ms]
                         ${isActive ? `${btn.active} scale-95 shadow-inner` : `${btn.inactive} scale-100`}`}
                     >
                       {btn.icon}

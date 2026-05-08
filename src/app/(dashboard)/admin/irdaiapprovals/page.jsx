@@ -284,7 +284,10 @@ export default function IRDAIApprovals() {
       r.name.toLowerCase().includes(search.toLowerCase()) ||
       r.location.toLowerCase().includes(search.toLowerCase()) ||
       r.type.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = !activeFilter || r.status === activeFilter;
+    const matchFilter =
+  !activeFilter ||
+  activeFilter === "all" ||
+  r.status === activeFilter;
     return matchSearch && matchFilter;
   });
 

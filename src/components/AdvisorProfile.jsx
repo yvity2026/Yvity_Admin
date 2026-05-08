@@ -64,9 +64,10 @@ export default function AdvisorProfile({ onClose }) {
                 <td className="text-gray-800 py-1">+91 9876543210</td>
                 <td className="text-gray-400 py-1">Plan</td>
                 <td>
-                  <span className="text-[11px] px-2 py-[2px] rounded-full bg-yellow-100 text-yellow-700 border border-yellow-300">
-                    ★ Gold +₹3,999/yr
-                  </span>
+                 <span className="text-[11px] px-2 py-[2px] rounded-full bg-yellow-100 text-yellow-700 border border-yellow-300 flex flex-col items-center leading-tight">
+  <span>★ Gold</span>
+  <span>+₹3,999/yr</span>
+</span>
                 </td>
               </tr>
 

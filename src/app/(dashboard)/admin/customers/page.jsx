@@ -113,8 +113,8 @@ const filtered = customers.filter((c) =>
 );
 
   return (
-    <div className="flex min-h-screen font-sans bg-gray-100">
-      {/* Mobile overlay */}
+<div className="flex min-h-screen font-sans bg-gray-100">
+    {/* Mobile overlay */}
       {showSidebar && (
         <div
           className="fixed inset-0 bg-black/45 z-40 md:hidden"
@@ -123,13 +123,16 @@ const filtered = customers.filter((c) =>
       )}
 
       {/* Main */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+<div className="flex-1 flex flex-col">
         {/* Content */}
-        <div className="p-6 max-md:p-3.5 overflow-y-auto flex-1">
+<div className="p-6 max-md:p-3.5 flex-1 overflow-x-auto">
+
           {/* Stat Cards */}
-          <div className="flex flex-col md:flex-row gap-4 mb-5">
+
+<div className="flex flex-col sm:flex-row gap-4 mb-5 max-w-[280px] sm:max-w-full">
+
             {/* Total Customers */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm ">
+           <div className="bg-white rounded-2xl p-3 shadow-sm flex-1 min-w-[160px] max-w-[240px] max-md:max-w-full">
 
 
               <div className="flex items-start justify-between mb-2">
@@ -161,7 +164,7 @@ const filtered = customers.filter((c) =>
 
             {/* Joined Today */}
 
-<div className="bg-white rounded-2xl p-5 shadow-sm w-full">
+<div className="bg-white rounded-2xl p-5 shadow-sm flex-1 min-w-[160px] max-w-[240px] max-md:max-w-full">
 
                           <div className="flex items-start justify-between mb-2">
                 <div className="w-10 h-10 rounded-xl bg-[#eef4f2] flex items-center justify-center">
@@ -235,16 +238,13 @@ const filtered = customers.filter((c) =>
           </div>
 
           {/* Table */}
-          <div className="bg-white rounded-xl shadow-sm">
-            {/* Mobile scroll hint */}
+
+<div className="bg-white rounded-xl shadow-sm overflow-x-auto">            {/* Mobile scroll hint */}
             <div className="md:hidden text-[11px] text-gray-400 text-right px-3 pt-1.5">
               ← Scroll to see all columns →
             </div>
 
-            <div
-              className="overflow-x-auto"
-              style={{ WebkitOverflowScrolling: "touch" }}
-            >
+            <div className="overflow-x-auto w-full" style={{ WebkitOverflowScrolling: "touch" }}>
               <table className="min-w-[900px] w-full border-collapse">
                 <thead>
                   <tr>
