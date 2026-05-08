@@ -67,7 +67,7 @@ console.log("fdghjgfdsfhjkhgfdsfghjkhgfds",advisor);
             {rows.map((row) => (
               <div
                 key={row.label}
-                className="flex items-start justify-between gap-4 py-[14px] border-b border-[#F3F3F3]"
+                className="flex items-start justify-between gap-4 py-[8px] border-b border-[#F3F3F3]"
               >
                 <span className="text-[13.5px] text-gray-400 font-normal shrink-0">
                   {row.label}

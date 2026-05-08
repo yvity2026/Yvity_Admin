@@ -80,16 +80,16 @@ export default function RejectModal({ onClose, onConfirm }) {
         </div>
 
         {/* ── Buttons ── */}
-        <div className="flex border-t border-[#F0F0F0] mt-[10px]">
+        <div className="flex border-t border-[#F0F0F0] mt-[10px] px-[18px] pb-[18px] pt-[14px] gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-[15px] bg-red-500 border-none text-[14px] font-bold text-white cursor-pointer"
+            className="flex-1 py-[15px] rounded-xl bg-[#E43E3E] border-none text-[14px] font-bold text-white cursor-pointer"
           >
-            Cancel
+            Confirm Reject
           </button>
           <button
             onClick={() => onConfirm?.({ reason, note })}
-            className="flex-1 py-[15px] bg-[#E43E3E] border-none text-[14px] font-bold text-[#C9A227] cursor-pointer"
+            className="flex-1 py-[15px] rounded-xl bg-[#0A4A4A] border-none text-[14px] font-bold text-[#C9A227] cursor-pointer"
           >
             Confirm Reject
           </button>
