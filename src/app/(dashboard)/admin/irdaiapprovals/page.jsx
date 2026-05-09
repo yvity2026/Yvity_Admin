@@ -10,6 +10,7 @@ import {
 } from "@/hooks/TanstankQuery/useApprovals";
 import IRDAISkeleton from "./loading";
 import Image from "next/image";
+import toast from "react-hot-toast";
 
 // ── Icon components ──────────────────────────────────────────────
 const IHourglass = ({ color }) => (
@@ -162,10 +163,9 @@ export default function IRDAIApprovals() {
   // const [isProcessing, setIsProcessing] = useState(false);
   const [activeFilter, setActiveFilter] = useState(null);
   // const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0, pendingPercentage: 0 });
-  const [loading, setLoading] = useState(true);
   // const [error, setError]     = useState("");
   // const [data, setData] = useState(null);
-  const { data, isLoading, error } = useApprovals();
+  const { data, isLoading, refetch } = useApprovals();
   const [showPriorityModal, setShowPriorityModal] = useState(false);
   const { approve, reject, isProcessing } = useApprovalActions();
 
@@ -238,47 +238,17 @@ export default function IRDAIApprovals() {
   //   loadApprovals();
   // }, []);
 
-  const updateRowStatus = (id, status) => {
-    setRows((prev) =>
-      prev.map((item) =>
-        item.id !== id
-          ? item
-          : {
-              ...item,
-              status,
-              plan:
-                status === "approved"
-                  ? "Approved"
-                  : status === "rejected"
-                    ? "Rejected"
-                    : "Pending Review",
-              dayType:
-                status === "approved"
-                  ? "day-green"
-                  : status === "rejected"
-                    ? "day-orange"
-                    : item.dayType,
-            },
-      ),
-    );
-  };
+  function formatDate(dateString) {
+  if (!dateString) return "-";
 
-  const updateStatsForStatusChange = (nextStatus) => {
-    setStats((prev) => {
-      const pending = Math.max(0, prev.pending - 1);
-      const approved =
-        nextStatus === "approved" ? prev.approved + 1 : prev.approved;
-      const rejected =
-        nextStatus === "rejected" ? prev.rejected + 1 : prev.rejected;
-      const total = pending + approved + rejected;
-      return {
-        pending,
-        approved,
-        rejected,
-        pendingPercentage: total ? ((pending / total) * 100).toFixed(2) : 0,
-      };
-    });
-  };
+  const date = new Date(dateString);
+
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
   const filtered = (rows || []).filter((r) => {
     const matchSearch =
@@ -286,73 +256,40 @@ export default function IRDAIApprovals() {
       r.location.toLowerCase().includes(search.toLowerCase()) ||
       r.type.toLowerCase().includes(search.toLowerCase());
     const matchFilter =
-  !activeFilter ||
-  activeFilter === "all" ||
-  r.status === activeFilter;
+      !activeFilter || activeFilter === "all" || r.status === activeFilter;
     return matchSearch && matchFilter;
   });
 
   const approveSubmission = async (id) => {
     if (!id || isProcessing) return;
-    setIsProcessing(true);
     try {
-      const response = await fetch("/api/admin/approvals", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "approve", advisorId: id }),
-      });
-      if (!response.ok) {
-        console.error("Approval failed", await response.text());
-        return;
-      }
-      updateRowStatus(id, "approved");
-      updateStatsForStatusChange("approved");
-      if (selectedSubmission?.id === id) {
-        setSelectedSubmission((prev) =>
-          prev
-            ? {
-                ...prev,
-                status: "approved",
-                dayType: "day-green",
-                plan: "Approved",
-              }
-            : null,
-        );
-        setShowModal(false);
-      }
+      await approve(id);
+      toast.success("Advisor approved successfully");
+      await refetch();
+      setShowModal(false);
+      setSelectedSubmission(null);
     } catch (err) {
       console.error("Approve submission error", err);
-    } finally {
-      setIsProcessing(false);
+      toast.error(err.message || "Failed to approve advisor");
     }
   };
 
   const rejectSubmission = async ({ reason, note }) => {
     if (!selectedSubmission?.id || isProcessing) return;
-    setIsProcessing(true);
     try {
-      const response = await fetch("/api/admin/approvals", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "reject",
-          advisorId: selectedSubmission.id,
-          reason,
-          note,
-        }),
+      await reject({
+        advisorId: selectedSubmission.id,
+        reason,
+        note,
       });
-      if (!response.ok) {
-        console.error("Reject failed", await response.text());
-        return;
-      }
-      updateRowStatus(selectedSubmission.id, "rejected");
-      updateStatsForStatusChange("rejected");
+      toast.success("Advisor moved to action required");
+      await refetch();
       setOpenReject(false);
+      setShowModal(false);
       setSelectedSubmission(null);
     } catch (err) {
       console.error("Reject submission error", err);
-    } finally {
-      setIsProcessing(false);
+      toast.error(err.message || "Failed to reject advisor");
     }
   };
 
@@ -397,7 +334,7 @@ export default function IRDAIApprovals() {
   ];
 
   if (isLoading) return <IRDAISkeleton />;
-
+  console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaa", selectedSubmission);
   return (
     <div className="flex min-h-screen bg-[#f0f2ee] font-sans">
       {/* Mobile overlay */}
@@ -548,29 +485,27 @@ export default function IRDAIApprovals() {
                     </div>
                   </div>
 
-                {/*priority */}
-<div className="flex flex-wrap items-center gap-2 shrink-0 max-sm:w-full">
-  <div className="flex items-center gap-2 w-full sm:w-auto">
+                  {/*priority */}
+                  <div className="flex flex-wrap items-center gap-2 shrink-0 max-sm:w-full">
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      {/* Priority Button */}
+                      <button
+                        onClick={() => {
+                          setSelectedSubmission(r);
+                          setShowPriorityModal(true);
+                        }}
+                        className="px-3 py-1 text-[#8B0000] text-xs font-semibold underline underline-offset-2 bg-transparent border-none cursor-pointer hover:text-red-600"
+                      >
+                        Priority
+                      </button>
 
-    {/* Priority Button */}
-    <button
-      onClick={() => {
-        setSelectedSubmission(r);
-        setShowPriorityModal(true);
-      }}
-      className="px-3 py-1 text-[#8B0000] text-xs font-semibold underline underline-offset-2 bg-transparent border-none cursor-pointer hover:text-red-600"
-    >
-      Priority
-    </button>
-
-    {/* View Button */}
-    
-  </div>
-</div>
+                      {/* View Button */}
+                    </div>
+                  </div>
                   {/* Actions */}
                   <div className="flex flex-wrap items-center gap-2 shrink-0 max-sm:w-full">
                     <div className="flex items-center gap-2 w-full sm:w-auto">
-                      <DayBadge dayType={r.dayType} days={r.days} />
+                      {/* <DayBadge dayType={r.dayType} days={r.days} /> */}
                       <button
                         onClick={() => {
                           setSelectedSubmission(r);
@@ -586,7 +521,7 @@ export default function IRDAIApprovals() {
                       <div className="flex items-center gap-2 w-full sm:w-auto">
                         <button
                           className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-[18px] py-1.5 rounded-full text-xs font-semibold border-[1.5px] border-[#b3e0cc] bg-[#e6f5f0] text-[#1a7a5a] cursor-pointer hover:bg-[#1a7a5a] hover:text-white hover:border-[#1a7a5a]"
-                          onClick={() => approve(r.id)}
+                          onClick={() => approveSubmission(r.id)}
                         >
                           <span className="w-4 h-4 rounded-full bg-[#1a7a5a] flex items-center justify-center shrink-0">
                             <ICheckSm />
@@ -629,26 +564,28 @@ export default function IRDAIApprovals() {
         />
       )}
 
-
       {showPriorityModal && (
-  <PriorityModal
-    onClose={() => setShowPriorityModal(false)}
-  />
-)}
+        <PriorityModal
+          advisor={selectedSubmission}
+          heroCount={stats?.heroCount || 0}
+          landingCount={stats?.lanCount || 0}
+          onClose={() => {
+            setShowPriorityModal(false);
+            setSelectedSubmission(null);
+          }}
+          onUpdated={refetch}
+          initialHero={selectedSubmission?.is_hero || false}
+          initialLan={selectedSubmission?.is_landing || false}
+        />
+      )}
       {openReject && (
         <RejectModal
-          open={openReject}
-          setOpen={(value) => {
-            if (!value) setSelectedSubmission(null);
-            setOpenReject(value);
+          onClose={() => {
+            setOpenReject(false);
+            setSelectedSubmission(null);
           }}
-          onConfirm={({ reason, note }) =>
-            reject({
-              advisorId: selectedSubmission.id,
-              reason,
-              note,
-            })
-          }
+          onConfirm={rejectSubmission}
+          isSubmitting={isProcessing}
         />
       )}
     </div>

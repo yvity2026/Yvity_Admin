@@ -17,7 +17,8 @@ export async function GET(req) {
       .select(
         `
         *,
-        user:users(*)
+        user:users(*),
+        advisor:users!advisor_testimonials_advisor_id_fkey(id, name)
       `,
         { count: "exact" },
       )
@@ -43,7 +44,6 @@ export async function GET(req) {
 
     const output = (data || []).map((item) => {
       const user = item.user || {};
-      const advisor = item.advisor;
       const type = item.testimonial_type || "text";
 
       // normalize + count
@@ -58,13 +58,16 @@ export async function GET(req) {
         phone: user.mobile || null,
         type,
         rating: item.testimonial_rating || 0,
-        advisorname: advisor?.advisorUser?.name,
+        advisor_name: item.advisor?.name || "—",
         profile_pic: user.selfie_url || null,
+        review: item.content || (item.media_url ? item.media_url.split("/").pop() : "No review"),
+        content: item.content || "",
+        media_url: item.media_url || null,
+        is_verified: item.is_mobile_verified || false,
+        status: item.status || "pending",
 
         joinedAt: item.created_at || null,
         location: user.city || "Unknown, IN",
-
-        status: user.account_status || "pending",
 
         reviewCount: user.advisor_testimonials?.length || 0,
 
@@ -91,6 +94,57 @@ export async function GET(req) {
         error: "Internal server error",
       },
       { status: 500 },
+    );
+  }
+}
+
+export async function POST(req) {
+  try {
+    const supabase = createAdminClient();
+    const body = await req.json();
+    const testimonialId = String(body?.testimonialId || "").trim();
+    const action = String(body?.action || "").trim().toLowerCase();
+
+    if (!testimonialId) {
+      return NextResponse.json(
+        { error: "testimonialId is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!["approve", "reject"].includes(action)) {
+      return NextResponse.json(
+        { error: "Invalid action" },
+        { status: 400 }
+      );
+    }
+
+    const updates = {
+      status: action === "approve" ? "approved" : "rejected",
+      is_mobile_verified: action === "approve",
+    };
+
+    const { data, error } = await supabase
+      .from("advisor_testimonials")
+      .update(updates)
+      .eq("id", testimonialId)
+      .select("id, status, is_mobile_verified")
+      .single();
+
+    if (error) {
+      console.error("Failed to update testimonial", error);
+      return NextResponse.json(
+        { error: "Failed to update testimonial" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
+    console.error("POST testimonials failed:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
     );
   }
 }

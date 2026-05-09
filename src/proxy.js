@@ -9,17 +9,17 @@ export function proxy(request) {
 
     if (!adminSession) {
       // Redirect to login
-      return NextResponse.redirect(new URL("/auth/admin/login", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
 
     try {
       const session = JSON.parse(adminSession.value);
       console.log(session)
       if (!session?.admin_id || !session?.role) {
-        return NextResponse.redirect(new URL("/auth/admin/login", request.url));
+        return NextResponse.redirect(new URL("/", request.url));
       }
     } catch {
-      return NextResponse.redirect(new URL("/auth/admin/login", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
 

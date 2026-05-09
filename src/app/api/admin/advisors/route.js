@@ -19,6 +19,7 @@ export async function GET(req) {
         reviews:advisor_testimonials(*),
         scores:advisor_scores(*),
         recommendations:advisor_recommendations(*),
+        testimonials:advisor_testimonials(*),
         advisor:advisor_profiles!inner(
           *
         )
@@ -85,10 +86,11 @@ export async function GET(req) {
         email: item.email || null,
         phone: item.mobile || null,
         profile_pic: item.selfie_url || null,
+        profession: item.profession || null,
 
         // Location
         location: item.city || "Unknown, IN",
-
+        registeredAt: item.created_at || null,
         // Advisor Info
         licenseUrl: advisor.iridai_certificate_url || null,
         licenseNo: advisor.services?.[0]?.license || null,
@@ -112,10 +114,12 @@ export async function GET(req) {
 
         // Reviews
         reviewCount: reviews.length || 0,
-
+        planexpiry: advisor.subscription_expires_at || null,
         // Recommendation count
         recommendationCount:
           item.recommendations?.length || 0,
+        testimonialCount:
+          item.testimonials?.length || 0,
       };
     });
 

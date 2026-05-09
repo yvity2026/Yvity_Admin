@@ -18,6 +18,7 @@ function Avatar({ initials, size = "md" }) {
 export default function CustomersDashboard() {
   const [search, setSearch] = useState("");
   const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -202,7 +203,10 @@ export default function CustomersDashboard() {
                     <td className="px-3 py-3 text-xs text-gray-500 align-middle whitespace-nowrap">{c.joinedAt}</td>
                     <td className="px-3 py-3 align-middle">
                       <button
-                        onClick={() => setShowCustomerModal(true)}
+                        onClick={() => {
+                          setSelectedCustomer(c);
+                          setShowCustomerModal(true);
+                        }}
                         className="bg-[#0A4A4A] hover:bg-[#155e5e] text-white px-3 py-1 rounded-md text-xs font-medium cursor-pointer border-none"
                       >
                         View
@@ -221,7 +225,13 @@ export default function CustomersDashboard() {
       ═══════════════════════════════════════════════════════════════════ */}
 
       {showCustomerModal && (
-        <CustomerProfile onClose={() => setShowCustomerModal(false)} />
+        <CustomerProfile
+          customer={selectedCustomer}
+          onClose={() => {
+            setShowCustomerModal(false);
+            setSelectedCustomer(null);
+          }}
+        />
       )}
     </div>
   );
