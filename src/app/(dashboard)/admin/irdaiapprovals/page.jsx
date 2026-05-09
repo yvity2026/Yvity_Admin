@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import IrdaiModal from "@/components/IrdaiModal";
 import RejectModal from "@/components/RejectModal";
+import PriorityModal from "@/components/PriorityModal";
 import Link from "next/link";
 import {
   useApprovalActions,
@@ -165,7 +166,7 @@ export default function IRDAIApprovals() {
   // const [error, setError]     = useState("");
   // const [data, setData] = useState(null);
   const { data, isLoading, error } = useApprovals();
-
+  const [showPriorityModal, setShowPriorityModal] = useState(false);
   const { approve, reject, isProcessing } = useApprovalActions();
 
   const rows = data?.data || [];
@@ -547,6 +548,25 @@ export default function IRDAIApprovals() {
                     </div>
                   </div>
 
+                {/*priority */}
+<div className="flex flex-wrap items-center gap-2 shrink-0 max-sm:w-full">
+  <div className="flex items-center gap-2 w-full sm:w-auto">
+
+    {/* Priority Button */}
+    <button
+      onClick={() => {
+        setSelectedSubmission(r);
+        setShowPriorityModal(true);
+      }}
+      className="px-3 py-1 text-[#8B0000] text-xs font-semibold underline underline-offset-2 bg-transparent border-none cursor-pointer hover:text-red-600"
+    >
+      Priority
+    </button>
+
+    {/* View Button */}
+    
+  </div>
+</div>
                   {/* Actions */}
                   <div className="flex flex-wrap items-center gap-2 shrink-0 max-sm:w-full">
                     <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -608,6 +628,13 @@ export default function IRDAIApprovals() {
           }}
         />
       )}
+
+
+      {showPriorityModal && (
+  <PriorityModal
+    onClose={() => setShowPriorityModal(false)}
+  />
+)}
       {openReject && (
         <RejectModal
           open={openReject}

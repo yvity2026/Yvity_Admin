@@ -1139,9 +1139,9 @@ export default function AppShell({ children }) {
       {/* Collapse Button */}
       <CollapseButton sidebarWidth={sidebarWidth} />
       {/* RIGHT SIDE (HEADER + MAIN) */}
-      <div className="flex flex-col flex-1 ">
+      <div className="flex flex-col flex-1">
         {/* HEADER (TOP RIGHT) */}
-        <header className="py-[18px] px-4 min-h-[60px] sticky top-0 z-10  flex items-center justify-between md:px-[90px] md:py-[10px] bg-white shadow-[0_0_4px_0_rgba(0,0,0,0.25)]">
+        <header className="py-[18px] px-4 min-h-[60px] sticky top-0 left-0 right-0 z-10 flex items-center justify-between md:px-[90px] md:py-[10px] bg-white shadow-[0_0_4px_0_rgba(0,0,0,0.25)]">
           <h3 className="text-black font-poppins text-base font-bold leading-normal">
             {currentHeader.title}
           </h3>
@@ -1225,7 +1225,7 @@ export default function AppShell({ children }) {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ duration: 0.3, ease: easeInOut }}
-              className="fixed top-0 right-0 h-full bg-[#0A4A4A] z-50 md:hidden flex flex-col"
+              className="fixed top-0 right-0 h-full bg-[#0A4A4A] z-50 md:hidden  flex flex-col"
             >
               {/*  HEADER WITH LOGO (REPLACES DASHBOARD TEXT) */}
               <div className="relative flex items-center justify-end">
@@ -1320,7 +1320,7 @@ export default function AppShell({ children }) {
         )}
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 bg-[#F8F6F1]">{children}</main>
+        <main className="flex-1 bg-[#F8F6F1] overflow-x-visible">{children}</main>
       </div>
       {tooltip.visible && collapsed && (
         <div
