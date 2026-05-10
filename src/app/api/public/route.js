@@ -1,198 +1,197 @@
-import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
-import { ValidateUser } from "@/lib/auth/ValidateUser";
+// import { NextResponse } from "next/server";
+// import { createAdminClient } from "@/lib/supabase/server";
 
-// CREATE testimonial
-export async function POST(req) {
-  try {
-    const supabase = createAdminClient();
-    const body = await req.json();
-    const {
-      advisor_id,
-      name,
-      userId,
-      mobile_number,
-      content,
-      media_url,
-      otp_code,
-      otp_expires_at,
-      testimonial_type = "text",
-      testimonial_rating,
-      is_mobile_verified,
-      status
-    } = body;
+// // CREATE testimonial
+// export async function POST(req) {
+//   try {
+//     const supabase = createAdminClient();
+//     const body = await req.json();
+//     const {
+//       advisor_id,
+//       name,
+//       userId,
+//       mobile_number,
+//       content,
+//       media_url,
+//       otp_code,
+//       otp_expires_at,
+//       testimonial_type = "text",
+//       testimonial_rating,
+//       is_mobile_verified,
+//       status
+//     } = body;
 
-    console.log(body);
+//     console.log(body);
 
-    // 🔐 Validation
-    if (!advisor_id || !name || !mobile_number) {
-      return NextResponse.json(
-        { error: "Missing required fields: advisor_id, name, mobile_number" },
-        { status: 400 },
-      );
-    }
+//     // 🔐 Validation
+//     if (!advisor_id || !name || !mobile_number) {
+//       return NextResponse.json(
+//         { error: "Missing required fields: advisor_id, name, mobile_number" },
+//         { status: 400 },
+//       );
+//     }
 
-    if (!/^[6-9]\d{9}$/.test(mobile_number)) {
-      return NextResponse.json(
-        { error: "Invalid mobile number format" },
-        { status: 400 },
-      );
-    }
+//     if (!/^[6-9]\d{9}$/.test(mobile_number)) {
+//       return NextResponse.json(
+//         { error: "Invalid mobile number format" },
+//         { status: 400 },
+//       );
+//     }
 
-    if (!content && !media_url) {
-      return NextResponse.json(
-        { error: "Either content or media_url is required" },
-        { status: 400 },
-      );
-    }
+//     if (!content && !media_url) {
+//       return NextResponse.json(
+//         { error: "Either content or media_url is required" },
+//         { status: 400 },
+//       );
+//     }
 
-    const allowedTypes = ["text", "audio", "video"];
-    if (!allowedTypes.includes(testimonial_type)) {
-      return NextResponse.json(
-        { error: "Invalid testimonial type" },
-        { status: 400 },
-      );
-    }
+//     const allowedTypes = ["text", "audio", "video"];
+//     if (!allowedTypes.includes(testimonial_type)) {
+//       return NextResponse.json(
+//         { error: "Invalid testimonial type" },
+//         { status: 400 },
+//       );
+//     }
 
-    if (testimonial_type === "text" && !content) {
-      return NextResponse.json(
-        { error: "Text testimonial content is required" },
-        { status: 400 },
-      );
-    }
+//     if (testimonial_type === "text" && !content) {
+//       return NextResponse.json(
+//         { error: "Text testimonial content is required" },
+//         { status: 400 },
+//       );
+//     }
 
-    if (testimonial_type !== "text" && !media_url) {
-      return NextResponse.json(
-        { error: "Media URL is required for audio and video testimonials" },
-        { status: 400 },
-      );
-    }
+//     if (testimonial_type !== "text" && !media_url) {
+//       return NextResponse.json(
+//         { error: "Media URL is required for audio and video testimonials" },
+//         { status: 400 },
+//       );
+//     }
 
-    const { data: advisorData, error: advisorError } = await supabase
-      .from("advisor_profiles")
-      .select("subscription_plan,account_status")
-      .eq("advisor_id", advisor_id)
-      .maybeSingle();
+//     const { data: advisorData, error: advisorError } = await supabase
+//       .from("advisor_profiles")
+//       .select("subscription_plan,account_status")
+//       .eq("advisor_id", advisor_id)
+//       .maybeSingle();
 
-    if (advisorError || !advisorData) {
-      return NextResponse.json({ error: "Advisor not found" }, { status: 404 });
-    }
+//     if (advisorError || !advisorData) {
+//       return NextResponse.json({ error: "Advisor not found" }, { status: 404 });
+//     }
 
-    const plan = String(advisorData.subscription_plan || "free").toLowerCase();
-    const accountStatus = String(
-      advisorData.account_status || "active",
-    ).toLowerCase();
-    const effectivePlan =
-      accountStatus === "active" && (plan === "silver" || plan === "gold")
-        ? plan
-        : "free";
+//     const plan = String(advisorData.subscription_plan || "free").toLowerCase();
+//     const accountStatus = String(
+//       advisorData.account_status || "active",
+//     ).toLowerCase();
+//     const effectivePlan =
+//       accountStatus === "active" && (plan === "silver" || plan === "gold")
+//         ? plan
+//         : "free";
 
-    if (effectivePlan === "free") {
-      if (testimonial_type !== "text") {
-        return NextResponse.json(
-          {
-            error:
-              "Free plan advisors can only receive text testimonials. Audio and video testimonials are not allowed.",
-          },
-          { status: 403 },
-        );
-      }
+//     if (effectivePlan === "free") {
+//       if (testimonial_type !== "text") {
+//         return NextResponse.json(
+//           {
+//             error:
+//               "Free plan advisors can only receive text testimonials. Audio and video testimonials are not allowed.",
+//           },
+//           { status: 403 },
+//         );
+//       }
 
-      const { count: textCount, error: countError } = await supabase
-        .from("advisor_testimonials")
-        .select("id", { count: "exact", head: true })
-        .eq("advisor_id", advisor_id)
-        .eq("testimonial_type", "text");
+//       const { count: textCount, error: countError } = await supabase
+//         .from("advisor_testimonials")
+//         .select("id", { count: "exact", head: true })
+//         .eq("advisor_id", advisor_id)
+//         .eq("testimonial_type", "text");
 
-      if (countError) {
-        console.error("Error counting testimonials:", countError);
-        return NextResponse.json(
-          { error: "Unable to validate testimonial quota" },
-          { status: 500 },
-        );
-      }
+//       if (countError) {
+//         console.error("Error counting testimonials:", countError);
+//         return NextResponse.json(
+//           { error: "Unable to validate testimonial quota" },
+//           { status: 500 },
+//         );
+//       }
 
-      if (textCount >= 5) {
-        return NextResponse.json(
-          {
-            error:
-              "Free plan advisors can only receive up to 5 text testimonials. Please upgrade the advisor plan to accept more testimonials.",
-          },
-          { status: 403 },
-        );
-      }
-    }
+//       if (textCount >= 5) {
+//         return NextResponse.json(
+//           {
+//             error:
+//               "Free plan advisors can only receive up to 5 text testimonials. Please upgrade the advisor plan to accept more testimonials.",
+//           },
+//           { status: 403 },
+//         );
+//       }
+//     }
 
-    if (effectivePlan === "silver" && testimonial_type === "video") {
-      return NextResponse.json(
-        {
-          error:
-            "Silver plan advisors can receive text and audio testimonials only. Video testimonials are not allowed.",
-        },
-        { status: 403 },
-      );
-    }
+//     if (effectivePlan === "silver" && testimonial_type === "video") {
+//       return NextResponse.json(
+//         {
+//           error:
+//             "Silver plan advisors can receive text and audio testimonials only. Video testimonials are not allowed.",
+//         },
+//         { status: 403 },
+//       );
+//     }
 
-    // 🔐 Check if user is logged in
-    let currentUser = null;
-    let user_id = null;
-    // let is_mobile_verified = false;
+//     // 🔐 Check if user is logged in
+//     let currentUser = null;
+//     let user_id = null;
+//     // let is_mobile_verified = false;
 
-    try {
-      currentUser = await ValidateUser();
-      if (currentUser) {
-        user_id = currentUser.id;
-      }
-    } catch (err) {
-      return NextResponse.json(
-        {
-          error: "user must be logged in ",
-        },
-        { status: 403 },
-      );
-    }
+//     try {
+//       currentUser = await ValidateUser();
+//       if (currentUser) {
+//         user_id = currentUser.id;
+//       }
+//     } catch (err) {
+//       return NextResponse.json(
+//         {
+//           error: "user must be logged in ",
+//         },
+//         { status: 403 },
+//       );
+//     }
 
-    // Insert testimonial
-    const { data, error } = await supabase
-      .from("advisor_testimonials")
-      .insert({
-        advisor_id,
-        user_id: user_id || userId || null,
-        name,
-        mobile_number,
-        testimonial_type,
-        otp_code,
-        otp_expires_at,
-        content: testimonial_type === "text" ? content : null,
-        media_url: testimonial_type !== "text" ? media_url : null,
-        testimonial_rating: Number(testimonial_rating),
-        status,
-        is_mobile_verified
-      })
-      .select()
-      .single();
+//     // Insert testimonial
+//     const { data, error } = await supabase
+//       .from("advisor_testimonials")
+//       .insert({
+//         advisor_id,
+//         user_id: user_id || userId || null,
+//         name,
+//         mobile_number,
+//         testimonial_type,
+//         otp_code,
+//         otp_expires_at,
+//         content: testimonial_type === "text" ? content : null,
+//         media_url: testimonial_type !== "text" ? media_url : null,
+//         testimonial_rating: Number(testimonial_rating),
+//         status,
+//         is_mobile_verified
+//       })
+//       .select()
+//       .single();
 
-    if (error) {
-      console.error("Supabase insert error:", error);
-      throw error;
-    }
+//     if (error) {
+//       console.error("Supabase insert error:", error);
+//       throw error;
+//     }
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Testimonial submitted successfully",
-        data,
-      },
-      { status: 201 },
-    );
-  } catch (err) {
-    console.error("Testimonial submission error:", err);
-    return NextResponse.json(
-      { error: err.message || "Internal server error" },
-      { status: 500 },
-    );
-  }
-}
+//     return NextResponse.json(
+//       {
+//         success: true,
+//         message: "Testimonial submitted successfully",
+//         data,
+//       },
+//       { status: 201 },
+//     );
+//   } catch (err) {
+//     console.error("Testimonial submission error:", err);
+//     return NextResponse.json(
+//       { error: err.message || "Internal server error" },
+//       { status: 500 },
+//     );
+//   }
+// }
 
 
 
