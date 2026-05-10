@@ -714,9 +714,9 @@ const menuItems = [
       },
       {
         id: 2,
-        label: "Advisors",
+        label: "Subscribers",
         icon: <LuUsersRound />,
-        link: "/admin/advisors",
+        link: "/admin/subscribers",
       },
       {
         id: 3,
@@ -752,12 +752,12 @@ const menuItems = [
         icon: <MdOutlinePayment />,
         link: "/admin/payments",
       },
-      {
-        id: 2,
-        label: "Subscription",
-        icon: <LuCreditCard />,
-        link: "/admin/subscriptions",
-      },
+      // {
+      //   id: 2,
+      //   label: "Subscription",
+      //   icon: <LuCreditCard />,
+      //   link: "/admin/subscriptions",
+      // },
     ],
   },
   {

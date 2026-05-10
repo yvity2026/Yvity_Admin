@@ -12,12 +12,25 @@ export async function GET() {
         { status: 401 }
       );
     }
-    console.log(session.admin_id)
+
     const supabase = createAdminClient();
 
-    const { data, error} = await supabase.from("admin_users").select("*").eq("id", session.admin_id).maybeSingle();
+    const { data, error } = await supabase
+      .from("admin_users")
+      .select("*")
+      .eq("id", session.admin_id)
+      .maybeSingle();
 
     if (error) {
+      console.error(error);
+
+      return NextResponse.json(
+        { success: false, message: "Database error" },
+        { status: 500 }
+      );
+    }
+
+    if (!data) {
       return NextResponse.json(
         { success: false, message: "Admin not found" },
         { status: 404 }
@@ -26,9 +39,8 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      data : data
+      data,
     });
-
   } catch (error) {
     console.error("API ERROR:", error);
 

@@ -18,4 +18,12 @@ export const WHATSAPP_TEMPLATES = {
           : "text",
     },
   },
+  
+  TESTIMONIAL_REQUEST_WITH_PROFILE: {
+    name: "testimonial_request_with_profile",
+    language: "en",
+    bodyParams: ["client_name", "personal_message", "profile_link"],
+  },
 };
+
+

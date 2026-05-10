@@ -1,6 +1,7 @@
-
 "use client";
-import { useState, useEffect } from "react";
+
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { Poppins } from "next/font/google";
 
 const poppins = Poppins({
@@ -8,11 +9,10 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
 });
 
-export default function RejectModal({ onClose, onConfirm }) {
+export default function RejectModal({ onClose, onConfirm, isSubmitting = false }) {
   const [reason, setReason] = useState("");
   const [note, setNote] = useState("");
 
-  // ── Lock body scroll when modal is open ──
   useEffect(() => {
     const original = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -22,38 +22,42 @@ export default function RejectModal({ onClose, onConfirm }) {
   }, []);
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       className={`${poppins.className} fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 p-4`}
     >
-      <div className="w-full max-w-[430px] bg-white rounded-2xl overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.16)]">
-
-        {/* ── Header ── */}
-        <div className="flex items-center justify-between px-[18px] pt-4 pb-[14px] border-b border-[#EFEFEF]">
+      <motion.div
+        initial={{ opacity: 0, y: 18, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 10, scale: 0.98 }}
+        className="w-full max-w-[430px] overflow-hidden rounded-2xl bg-white shadow-[0_10px_40px_rgba(0,0,0,0.16)]"
+      >
+        <div className="flex items-center justify-between border-b border-[#EFEFEF] px-[18px] pb-[14px] pt-4">
           <div className="flex items-center gap-2">
-            <span className="text-[17px] leading-none">⚠️</span>
+            <span className="text-[17px] leading-none">!</span>
             <span className="text-[15px] font-bold text-gray-900">
               Reject IRDAI Submission
             </span>
           </div>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-gray-100 border-none cursor-pointer text-[13px] text-gray-500 flex items-center justify-center"
+            disabled={isSubmitting}
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-[13px] text-gray-500 disabled:opacity-60"
           >
-            ✕
+            x
           </button>
         </div>
 
-        {/* ── Warning Banner ── */}
-        <div className="mx-[18px] mt-[14px] bg-red-50 border border-red-200 rounded-lg px-[14px] py-[9px] text-center">
-          <span className="text-[12.5px] text-red-600 font-medium">
-            This will mark the advisor's profile as "Action Required"
+        <div className="mx-[18px] mt-[14px] rounded-lg border border-red-200 bg-red-50 px-[14px] py-[9px] text-center">
+          <span className="text-[12.5px] font-medium text-red-600">
+            This will mark the advisor&apos;s profile as &quot;Action Required&quot;
           </span>
         </div>
 
-        {/* ── Form ── */}
         <div className="px-[18px] pt-4">
-
-          <div className="text-[13.5px] font-bold text-gray-900 mb-2">
+          <div className="mb-2 text-[13.5px] font-bold text-gray-900">
             Reason for Rejection
           </div>
 
@@ -62,10 +66,10 @@ export default function RejectModal({ onClose, onConfirm }) {
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="License number mismatch"
-            className="w-full box-border border-0 border-b border-gray-200 py-2 pb-[10px] text-[13.5px] text-gray-700 outline-none bg-transparent font-[inherit] placeholder:text-gray-400"
+            className="w-full border-0 border-b border-gray-200 bg-transparent py-2 pb-[10px] text-[13.5px] text-gray-700 outline-none placeholder:text-gray-400"
           />
 
-          <div className="text-[13.5px] font-bold text-gray-900 mt-[18px] mb-2">
+          <div className="mb-2 mt-[18px] text-[13.5px] font-bold text-gray-900">
             Additional Note{" "}
             <span className="font-normal text-gray-500">(shown to advisor)</span>
           </div>
@@ -73,29 +77,29 @@ export default function RejectModal({ onClose, onConfirm }) {
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Explain what the advisor needs to fix…."
+            placeholder="Explain what the advisor needs to fix..."
             rows={4}
-            className="w-full box-border border-0 resize-none py-2 text-[13px] text-gray-700 outline-none bg-transparent font-[inherit] leading-relaxed placeholder:text-gray-400"
+            className="w-full resize-none border-0 bg-transparent py-2 text-[13px] leading-relaxed text-gray-700 outline-none placeholder:text-gray-400"
           />
         </div>
 
-        {/* ── Buttons ── */}
-        <div className="flex border-t border-[#F0F0F0] mt-[10px] px-[18px] pb-[18px] pt-[14px] gap-3">
+        <div className="mt-[10px] flex gap-3 border-t border-[#F0F0F0] px-[18px] pb-[18px] pt-[14px]">
           <button
             onClick={onClose}
-            className="flex-1 py-[15px] rounded-xl bg-[#E43E3E] border-none text-[14px] font-bold text-white cursor-pointer"
+            disabled={isSubmitting}
+            className="flex-1 rounded-xl bg-[#F3F4F6] py-[15px] text-[14px] font-bold text-gray-700 disabled:opacity-60"
           >
-            Confirm Reject
+            Cancel
           </button>
           <button
             onClick={() => onConfirm?.({ reason, note })}
-            className="flex-1 py-[15px] rounded-xl bg-[#0A4A4A] border-none text-[14px] font-bold text-[#C9A227] cursor-pointer"
+            disabled={isSubmitting}
+            className="flex-1 rounded-xl bg-[#0A4A4A] py-[15px] text-[14px] font-bold text-[#C9A227] disabled:opacity-60"
           >
-            Confirm Reject
+            {isSubmitting ? "Rejecting..." : "Confirm Reject"}
           </button>
         </div>
-
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

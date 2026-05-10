@@ -1,15 +1,23 @@
 "use client"
 
-import { redirect } from "next/navigation";
+import { useAdmin } from "@/context/AuthAdminContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import AdminLogin from "@/components/AdminLogin";
 
 export default function Home() {
-  // const router = useRouter();
-  // return (
-  //   <>
-    
-  //   </>
-  // );
-  // redirect("/auth/init");
-  redirect("/auth/admin/login");
+  const { admin, loading } = useAdmin();
+  const router = useRouter();
 
+  useEffect(() => {
+    if (!loading && admin) {
+      router.replace("/admin");
+    }
+  }, [admin, loading, router]);
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+
+  if (admin) return null; // will redirect
+
+  return <AdminLogin />;
 }

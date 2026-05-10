@@ -209,49 +209,7 @@ export default function AdvisorsDashboard() {
       (a.plan || "").toLowerCase().includes(search.toLowerCase()),
   );
 
-  // useEffect(() => {
-  //   const fetchAdvisors = async () => {
-  //     try {
-  //       const params = new URLSearchParams();
-
-  //       // Plan filters
-  //       if (activeFilter === "gold") {
-  //         params.append("plan", "gold");
-  //       }
-
-  //       if (activeFilter === "silver") {
-  //         params.append("plan", "silver");
-  //       }
-
-  //       if (activeFilter === "free") {
-  //         params.append("plan", "free");
-  //       }
-
-  //       // Status filters
-  //       if (activeFilter === "pending") {
-  //         params.append("account_status", "under_review");
-  //       }
-
-  //       if (activeFilter === "suspended") {
-  //         params.append("account_status", "action_required");
-  //       }
-
-  //       const res = await fetch(`/api/admin/advisors?${params.toString()}`);
-
-  //       if (!res.ok) {
-  //         throw new Error("Failed to fetch advisors");
-  //       }
-
-  //       const json = await res.json();
-
-  //       setAdvisors(json.data || []);
-  //     } catch (error) {
-  //       console.error("Failed to fetch advisors:", error);
-  //     }
-  //   };
-
-  //   fetchAdvisors();
-  // }, [activeFilter]);
+  console.log(data);
 
   //Status :
   function IrdaiBadge({ status }) {
@@ -356,11 +314,11 @@ export default function AdvisorsDashboard() {
                     {[
                       "Advisor",
                       "City",
-                      "Type",
+                      "Mobile",
                       "IRDAI",
                       "Plan",
-                      "Score",
-                      "Reviews",
+                      // "Score",
+                      // "Reviews",
                       "Joined",
                       "Status",
                       "Actions",
@@ -388,10 +346,10 @@ export default function AdvisorsDashboard() {
                           />
                           <div>
                             <div className="font-semibold text-gray-900 text-[13px]">
-                              {advisor.name}
+                              {advisor?.name}
                             </div>
                             <div className="text-[11px] text-gray-400 mt-0.5">
-                              {`+91${advisor.phone}`}
+                              {advisor?.profession}
                             </div>
                           </div>
                         </div>
@@ -400,7 +358,7 @@ export default function AdvisorsDashboard() {
                         {advisor.location}
                       </td>
                       <td className="px-3 py-3 text-xs text-gray-700 align-middle">
-                        {advisor.type}
+                        {`+91${advisor?.phone || "—"}`}
                       </td>
                       <td className="px-3 py-3 align-middle">
                         <IrdaiBadge
@@ -410,12 +368,12 @@ export default function AdvisorsDashboard() {
                       <td className="px-3 py-3 align-middle">
                         <PlanBadge plan={advisor.plan} />
                       </td>
-                      <td className="px-3 py-3 align-middle">
+                      {/* <td className="px-3 py-3 align-middle">
                         <ScoreBar score={advisor.total || 0} />
-                      </td>
-                      <td className="px-3 py-3 text-[13px] text-gray-700 align-middle">
+                      </td> */}
+                      {/* <td className="px-3 py-3 text-[13px] text-gray-700 align-middle">
                         —
-                      </td>
+                      </td> */}
                       <td className="px-3 py-3 text-xs text-gray-500 align-middle">
                         {advisor.submittedAt
                           ? new Date(advisor.submittedAt).toLocaleDateString()
@@ -453,7 +411,10 @@ export default function AdvisorsDashboard() {
       </div>
 
       {selectedAdvisor && (
-        <AdvisorProfile onClose={() => setSelectedAdvisor(null)} />
+        <AdvisorProfile
+          data={selectedAdvisor}
+          onClose={() => setSelectedAdvisor(null)}
+        />
       )}
     </div>
   );

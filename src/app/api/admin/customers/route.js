@@ -51,7 +51,7 @@ export async function GET(req) {
         location: item.city || "Unknown, IN",
         status: item.account_status || "pending",
         reviewCount: reviews.length || 0,
-        LastLogin : item.last_login_at
+        lastLogin: item.last_login_at || null,
       };
     });
 

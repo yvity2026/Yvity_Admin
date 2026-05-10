@@ -1,9 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import Image from "next/image";
-import { useTestimonials } from "@/hooks/TanstankQuery/useTestimonial";
+import { useTestimonialActions, useTestimonials } from "@/hooks/TanstankQuery/useTestimonial";
 import TestimonialsSkeleton from "./loading";
+import { FaPlus } from "react-icons/fa6";
+import { RequestTestimonialModal } from "@/components/features/Modals/RequestTestimonial";
+import TestimonialReviewModal from "@/components/TestimonialReviewModal";
+import toast from "react-hot-toast";
 
 // ── Icon components ──
 const ISearch = () => (
@@ -313,14 +316,14 @@ const filterButtons = [
   inactive: "bg-white border-gray-200 text-gray-500",
 },
   {
-    key: "text",
+    key: "pending",
     label: "Pending",
     icon: <IHourglassSm />,
     active: "bg-[#fff5e6] border-[#e8a020] text-[#c57a00]",
     inactive: "bg-white border-gray-200 text-gray-500",
   },
   {
-    key: "audio",
+    key: "approved",
     label: "Approved",
     icon: (
       <span className="w-[14px] h-[14px] rounded-full bg-[#1a7a5a] flex items-center justify-center shrink-0">
@@ -331,7 +334,7 @@ const filterButtons = [
     inactive: "bg-white border-gray-200 text-gray-500",
   },
   {
-    key: "video",
+    key: "rejected",
     label: "Rejected",
     icon: (
       <span className="text-[#cc3333] font-bold text-[13px] leading-none">
@@ -343,17 +346,21 @@ const filterButtons = [
   },
 ];
 
+
+
 // ── Page ──
 export default function Testimonials() {
-  const [activeNav, setActiveNav] = useState("Testimonials");
   const [search, setSearch] = useState("");
   // const [data, setData] = useState([]);
   // const [filtered, setFiltered] = useState([]);
   const [showSidebar, setShowSidebar] = useState(false);
   const [activeFilter, setActiveFilter] = useState(null);
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [selectedTestimonial, setSelectedTestimonial] = useState(null);
 
   const [page, setPage] = useState(1);
-  const { data, isLoading, error } = useTestimonials(page);
+  const { data, isLoading, refetch } = useTestimonials(page);
+  const { approve, reject, isProcessing } = useTestimonialActions();
 
   const testimonials = Array.isArray(data?.data)
     ? data.data.map((c) => ({
@@ -364,12 +371,31 @@ export default function Testimonials() {
         advisor: c.advisor_name || "—",
         type: c.type || "text",
         rating: c.rating || 5,
-        review: c.review || "No review",
+        review:
+          c.type === "text"
+            ? c.review || c.content || "No review"
+            : c.type === "audio"
+              ? "Audio testimonial attached"
+              : "Video testimonial attached",
         is_verified: c.is_verified || false,
+        status: c.status || "pending",
+        phone: c.phone || "",
+        content: c.content || "",
+        media_url: c.media_url || null,
         submitted: c.joinedAt ? new Date(c.joinedAt).toLocaleDateString() : "—",
-        otp: true
+        otp: Boolean(c.is_verified)
       }))
     : [];
+
+  const testimonialStats = testimonials.reduce(
+    (acc, testimonial) => {
+      if (testimonial.type === "text") acc.text += 1;
+      if (testimonial.type === "audio") acc.audio += 1;
+      if (testimonial.type === "video") acc.video += 1;
+      return acc;
+    },
+    { text: 0, audio: 0, video: 0 }
+  );
   // const [loading, setLoading] = useState(false);
 
   // useEffect(() => {
@@ -419,7 +445,8 @@ export default function Testimonials() {
       (c.location || "").toLowerCase().includes(search.toLowerCase()) ||
       (c.review || "").toLowerCase().includes(search.toLowerCase());
 
-    const matchFilter = !activeFilter || c.type === activeFilter;
+    const matchFilter =
+      !activeFilter || activeFilter === "all" || c.status === activeFilter;
 
     return matchSearch && matchFilter;
   });
@@ -428,9 +455,29 @@ export default function Testimonials() {
 
   // return matchesSearch && c.type === activeFilter;
 
-  const handleReject = (idx) => {
-    const real = rows.indexOf(filtered[idx]);
-    setRows((prev) => prev.filter((_, i) => i !== real));
+  const handleApprove = async () => {
+    if (!selectedTestimonial?.id) return;
+    try {
+      await approve(selectedTestimonial.id);
+      toast.success("Testimonial approved successfully");
+      await refetch();
+      setSelectedTestimonial(null);
+    } catch (error) {
+      toast.error(error.message || "Failed to approve testimonial");
+    }
+  };
+
+  const handleReject = async (testimonial) => {
+    try {
+      await reject(testimonial.id);
+      toast.success("Testimonial rejected successfully");
+      await refetch();
+      if (selectedTestimonial?.id === testimonial.id) {
+        setSelectedTestimonial(null);
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to reject testimonial");
+    }
   };
 
   if (isLoading) {
@@ -452,7 +499,7 @@ export default function Testimonials() {
         {/* <Topbar title="Testimonials" onHamburger={() => setShowSidebar(true)} /> */}
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-[22px_26px] md:p-[22px_26px] p-3.5">
+        <div className="flex-1 overflow-y-auto p-[22px_26px]">
           {/* Stat cards */}
           <div className="flex gap-3.5 mb-5 flex-wrap">
             {[
@@ -460,21 +507,21 @@ export default function Testimonials() {
                 delay: "0s",
                 icon: <ITextReview />,
                 iconBg: "bg-[#e8f0ff]",
-                num: "18,240",
+                num: testimonialStats.text,
                 label: "Text Reviews",
               },
               {
                 delay: "80ms",
                 icon: <IAudio />,
                 iconBg: "bg-[#fff5e6]",
-                num: "3,810",
+                num: testimonialStats.audio,
                 label: "Audio",
               },
               {
                 delay: "160ms",
                 icon: <IVideo />,
                 iconBg: "bg-[#f0ecff]",
-                num: "3,810",
+                num: testimonialStats.video,
                 label: "Video",
               },
             ].map((card) => (
@@ -516,8 +563,16 @@ export default function Testimonials() {
                 </div>
               </div>
 
-              {/* Filter pills */}
               <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={() => setShowRequestModal(true)}
+                  className="inline-flex items-center gap-1.5 px-[14px] py-[5px] rounded-full border-[1.5px] border-[#0A4A4A] bg-[#0A4A4A] text-white text-[12px] font-semibold cursor-pointer transition-all duration-[180ms] hover:bg-[#0f6f6f] hover:scale-105"
+                >
+                  <FaPlus className="text-xs" />
+                  Request Testimonial
+                </button>
+
+                {/* Filter pills */}
                 {filterButtons.map((btn) => {
                   const isActive = activeFilter === btn.key;
                   return (
@@ -630,7 +685,7 @@ export default function Testimonials() {
                       </td>
                       {/* Review */}
                       <td className="px-2.5 py-3 align-middle">
-                        <span className="text-[12px] text-gray-500 max-w-[180px] whitespace-nowrap overflow-hidden text-ellipsis block">
+                        <span className="text-[12px] text-gray-500 max-w-[240px] whitespace-nowrap overflow-hidden text-ellipsis block">
                           {r.review}
                         </span>
                       </td>
@@ -652,11 +707,14 @@ export default function Testimonials() {
                       {/* Actions */}
                       <td className="px-2.5 py-3 align-middle">
                         <div className="flex items-center gap-1.5">
-                          <button className="px-[13px] py-[5px] rounded-full text-[11px] font-semibold border-[1.5px] border-[#0A4A4A] bg-white text-[#0A4A4A] cursor-pointer transition-all duration-200 hover:bg-[#0A4A4A] hover:text-white hover:-translate-y-0.5 hover:scale-[1.04] hover:shadow-[0_4px_14px_rgba(10,74,74,0.25)]">
+                          <button
+                            onClick={() => setSelectedTestimonial(r)}
+                            className="px-[13px] py-[5px] rounded-full text-[11px] font-semibold border-[1.5px] border-[#0A4A4A] bg-white text-[#0A4A4A] cursor-pointer transition-all duration-200 hover:bg-[#0A4A4A] hover:text-white hover:-translate-y-0.5 hover:scale-[1.04] hover:shadow-[0_4px_14px_rgba(10,74,74,0.25)]"
+                          >
                             View
                           </button>
                           <button
-                            onClick={() => handleReject(i)}
+                            onClick={() => handleReject(r)}
                             className="px-3 py-[5px] rounded-full text-[11px] font-semibold border-[1.5px] border-[#ffcccc] bg-[#fff5f5] text-[#cc3333] cursor-pointer flex items-center gap-1 transition-all duration-200 hover:bg-[#cc3333] hover:text-white hover:border-[#cc3333] hover:-translate-y-0.5 hover:scale-[1.04] hover:shadow-[0_4px_14px_rgba(204,51,51,0.25)]"
                           >
                             <IXSm />
@@ -675,6 +733,20 @@ export default function Testimonials() {
 
       {/* Keyframe animation — defined once in global CSS or tailwind.config; kept here as a one-time <style> only for the animation name reference */}
       <style>{`@keyframes fadeInUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }`}</style>
+
+      {showRequestModal && (
+        <RequestTestimonialModal onClose={() => setShowRequestModal(false)} />
+      )}
+
+      {selectedTestimonial && (
+        <TestimonialReviewModal
+          testimonial={selectedTestimonial}
+          onClose={() => setSelectedTestimonial(null)}
+          onApprove={handleApprove}
+          onReject={() => handleReject(selectedTestimonial)}
+          isProcessing={isProcessing}
+        />
+      )}
     </div>
   );
 }

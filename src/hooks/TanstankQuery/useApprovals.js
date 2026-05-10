@@ -26,11 +26,13 @@ async function updateApproval({ action, advisorId, reason, note }) {
     }),
   });
 
+  const json = await res.json().catch(() => ({}));
+
   if (!res.ok) {
-    throw new Error("Failed to update approval");
+    throw new Error(json?.error || "Failed to update approval");
   }
 
-  return res.json();
+  return json;
 }
 
 export function useApprovals() {
@@ -57,13 +59,13 @@ export function useApprovalActions() {
 
   return {
     approve: (advisorId) =>
-      mutation.mutate({
+      mutation.mutateAsync({
         action: "approve",
         advisorId,
       }),
 
     reject: ({ advisorId, reason, note }) =>
-      mutation.mutate({
+      mutation.mutateAsync({
         action: "reject",
         advisorId,
         reason,
