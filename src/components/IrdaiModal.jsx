@@ -17,24 +17,67 @@ export default function IrdaiModal({ advisor, onClose, onApprove, onReject }) {
       document.body.style.overflow = original;
     };
   }, []);
-console.log("fdghjgfdsfhjkhgfdsfghjkhgfds",advisor);
-  // ── Safely read any field name your backend sends ──
-  const name       = advisor?.name       ?? advisor?.advisorName     ?? advisor?.fullName      ?? "—";
-  const licNo      = advisor?.licenseNo?.services?.[0]?.license       ?? advisor?.licenseNo       ?? advisor?.licenseNumber ?? advisor?.license ?? "—";
-  const type       = advisor?.type       ?? advisor?.licenseType     ?? "—";
-  const authority  = advisor?.authority  ?? advisor?.issuedBy        ?? "—";
-  const validUntil = advisor?.validUntil ?? advisor?.expiryDate      ?? advisor?.validity      ?? "—";
-  const plan       = advisor?.plan?.subscription_plan       ?? advisor?.planName        ?? advisor?.subscription  ?? "—";
-  const submitted  = advisor?.submittedAt  ?? advisor?.submittedAt     ?? advisor?.createdAt     ?? "—";
-  const certName   = advisor?.certificateName ?? advisor?.fileName   ?? advisor?.document      ?? "certificate.jpg";
-  const certUrl    = advisor?.licenseUrl  ?? advisor?.docUrl     ?? advisor?.fileUrl       ?? null;
+
+  const formatDate = (value) => {
+    if (!value) return "—";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+
+    return date.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const status =
+    advisor?.status ||
+    (advisor?.account_status === "active"
+      ? "approved"
+      : advisor?.account_status === "action_required"
+      ? "rejected"
+      : "pending");
+
+  const name =
+    advisor?.name ?? advisor?.advisorName ?? advisor?.fullName ?? "—";
+  const email = advisor?.email ?? advisor?.user?.email ?? "—";
+  const phone = advisor?.phone ?? advisor?.user?.mobile ?? "—";
+  const location = advisor?.location ?? advisor?.city ?? "—";
+  const licNo =
+    advisor?.licenseNo?.services?.[0]?.license ??
+    advisor?.licenseNo ??
+    advisor?.licenseNumber ??
+    advisor?.license ??
+    "—";
+  const type = advisor?.type ?? advisor?.licenseType ?? "—";
+  const authority = advisor?.authority ?? advisor?.issuedBy ?? "—";
+  const validUntil =
+    formatDate(advisor?.validUntil ?? advisor?.expiryDate ?? advisor?.validity);
+  const plan =
+    typeof advisor?.plan === "string"
+      ? advisor.plan
+      : advisor?.plan?.subscription_plan ?? advisor?.planName ?? advisor?.subscription ?? "Free";
+  const submitted = formatDate(
+    advisor?.submittedAt ?? advisor?.createdAt ?? advisor?.created_at,
+  );
+  const updatedAt = formatDate(advisor?.updatedAt ?? advisor?.updated_at);
+  const certName =
+    advisor?.certificateName ?? advisor?.fileName ?? advisor?.document ?? "certificate.jpg";
+  const certUrl = advisor?.licenseUrl ?? advisor?.docUrl ?? advisor?.fileUrl ?? null;
 
   const rows = [
-    { label: "Advisor",     value: name },
+    { label: "Advisor", value: name },
+    { label: "Email", value: email },
+    { label: "Phone", value: phone },
+    { label: "Location", value: location },
     { label: "License No.", value: licNo },
-    { label: "Type",        value: type },
-    { label: "Authority",   value: authority },
+    { label: "Type", value: type },
+    { label: "Authority", value: authority },
     { label: "Valid Until", value: validUntil },
+    { label: "Plan", value: plan },
+    { label: "Submitted", value: submitted },
+    { label: "Last Updated", value: updatedAt },
+    { label: "Status", value: status || "pending" },
   ];
 
   return (
@@ -109,35 +152,46 @@ console.log("fdghjgfdsfhjkhgfdsfghjkhgfds",advisor);
             </div>
             <button
               onClick={() => certUrl && window.open(certUrl, "_blank")}
-              className="bg-transparent border-none text-[13.5px] font-bold text-teal-700 cursor-pointer"
+              disabled={!certUrl}
+              className={`bg-transparent border-none text-[13.5px] font-bold ${certUrl ? "text-teal-700 hover:text-teal-900" : "text-gray-400 cursor-not-allowed"}`}
             >
-              View Document
+              {certUrl ? "View Document" : "No document available"}
             </button>
           </div>
         </div>
 
         {/* ── Buttons — pinned at bottom ── */}
         <div className="flex gap-3 px-[18px] pt-3 pb-[22px] shrink-0 bg-white border-t border-[#F3F3F3]">
-          <button
-            onClick={onApprove}
-            className="flex-1 flex items-center justify-center gap-[7px] bg-[#E8F5F0] border-none rounded-[10px] py-[13px] text-[13.5px] font-semibold text-teal-700 cursor-pointer"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0F766E" strokeWidth="2.5">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Approve
-          </button>
+          {status === "pending" ? (
+            <>
+              <button
+                onClick={onApprove}
+                className="flex-1 flex items-center justify-center gap-[7px] bg-[#E8F5F0] border-none rounded-[10px] py-[13px] text-[13.5px] font-semibold text-teal-700 cursor-pointer"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0F766E" strokeWidth="2.5">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Approve
+              </button>
 
-          <button
-            onClick={onReject}
-            className="flex-1 flex items-center justify-center gap-[7px] bg-[#FEF0F0] border-none rounded-[10px] py-[13px] text-[13.5px] font-semibold text-red-600 cursor-pointer"
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.5">
-              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
-            </svg>
-            Reject
-          </button>
+              <button
+                onClick={onReject}
+                className="flex-1 flex items-center justify-center gap-[7px] bg-[#FEF0F0] border-none rounded-[10px] py-[13px] text-[13.5px] font-semibold text-red-600 cursor-pointer"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.5">
+                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+                </svg>
+                Reject
+              </button>
+            </>
+          ) : (
+            <div className="flex-1 rounded-[10px] border border-gray-200 bg-gray-50 px-4 py-[13px] text-[13.5px] font-semibold text-gray-600 text-center">
+              {status === "approved"
+                ? "This submission has already been approved."
+                : "This submission has already been rejected."}
+            </div>
+          )}
         </div>
       </div>
     </div>
