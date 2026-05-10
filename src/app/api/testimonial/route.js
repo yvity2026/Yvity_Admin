@@ -100,7 +100,7 @@ export async function POST(request) {
         respondent_type: respondentType,
         mobile_number: mobileNumber,
         testimonial_type: testimonialType,
-        testimonial_rating,
+        testimonial_rating: testimonialRating,
         content: testimonialType === "text" ? content : null,
         media_url: testimonialType === "text" ? null : mediaUrl,
         status: "submitted",

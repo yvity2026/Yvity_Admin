@@ -12,20 +12,11 @@ export async function GET(req) {
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
-    let query = supabase
-      .from("advisor_testimonials")
-      .select(
-        `
-        *,
-        user:users(*),
-        advisor:users!advisor_testimonials_advisor_id_fkey(id, name)
-      `,
-        { count: "exact" },
-      )
+    const { data, error, count } = await supabase
+      .from("yvity_testimonials")
+      .select("*", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(from, to);
-
-    const { data, error, count } = await query;
 
     if (error) {
       console.error("Query failed:", error);
@@ -36,42 +27,35 @@ export async function GET(req) {
       );
     }
 
-    const typeCounts = {
-      text: 0,
-      audio: 0,
-      video: 0,
-    };
-
     const output = (data || []).map((item) => {
-      const user = item.user || {};
       const type = item.testimonial_type || "text";
-
-      // normalize + count
-      if (type === "text") typeCounts.text += 1;
-      else if (type === "audio") typeCounts.audio += 1;
-      else if (type === "video") typeCounts.video += 1;
 
       return {
         id: item.id,
-        name: user.name || "User",
-        email: user.email || null,
-        phone: user.mobile || null,
+        name: item.name || "Public User",
+        email: null,
+        phone: item.mobile_number || null,
         type,
         rating: item.testimonial_rating || 0,
-        advisor_name: item.advisor?.name || "—",
-        profile_pic: user.selfie_url || null,
-        review: item.content || (item.media_url ? item.media_url.split("/").pop() : "No review"),
+        advisor_name:
+          item.respondent_type === "advisor"
+            ? "Advisor"
+            : "Customer",
+        profile_pic: null,
+        review:
+          type === "text"
+            ? item.content || "No review"
+            : item.media_url
+            ? item.media_url.split("/").pop()
+            : "No media attached",
         content: item.content || "",
         media_url: item.media_url || null,
-        is_verified: item.is_mobile_verified || false,
-        status: item.status || "pending",
-
+        is_verified: false,
+        status: item.status === "submitted" ? "pending" : item.status || "pending",
         joinedAt: item.created_at || null,
-        location: user.city || "Unknown, IN",
-
-        reviewCount: user.advisor_testimonials?.length || 0,
-
-        lastLogin: user.last_login_at || null,
+        location: item.city || "Unknown, IN",
+        reviewCount: 0,
+        lastLogin: null,
       };
     });
 
@@ -121,14 +105,13 @@ export async function POST(req) {
 
     const updates = {
       status: action === "approve" ? "approved" : "rejected",
-      is_mobile_verified: action === "approve",
     };
 
     const { data, error } = await supabase
-      .from("advisor_testimonials")
+      .from("yvity_testimonials")
       .update(updates)
       .eq("id", testimonialId)
-      .select("id, status, is_mobile_verified")
+      .select("id, status")
       .single();
 
     if (error) {

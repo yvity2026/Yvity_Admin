@@ -88,7 +88,7 @@ export async function GET() {
         submittedAt: item.created_at,
         updatedAt: item.updated_at,
         licenseNo: item.services[0].license,
-        plan: item.subscription_plan,
+        plan: item.subscription_plan || item.plan || "Free",
         is_hero: item.is_hero || false,
         is_landing: item.is_landing || false,
       };
