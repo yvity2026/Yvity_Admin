@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
@@ -12,6 +12,7 @@ const TESTIMONIAL_TYPES = [
   { key: "video", label: "Video", accent: "text-[#2346A0]" },
 ];
 
+export const dynamic = "force-dynamic"  
 const RESPONDENT_OPTIONS = [
   { value: "customer", label: "Customer" },
   { value: "advisor", label: "Advisor" },
@@ -31,7 +32,7 @@ function getErrorMessage(message, fallback) {
   return message || fallback;
 }
 
-export default function PublicTestimonialPage() {
+function TestimonialForm() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState("text");
   const [form, setForm] = useState(initialForm);
@@ -493,6 +494,14 @@ export default function PublicTestimonialPage() {
         </motion.section>
       </div>
     </div>
+  );
+}
+
+export default function PublicTestimonialPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <TestimonialForm />
+    </Suspense>
   );
 }
 
