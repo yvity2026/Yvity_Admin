@@ -88,6 +88,7 @@ export async function POST(req) {
     const body = await req.json();
     const testimonialId = String(body?.testimonialId || "").trim();
     const action = String(body?.action || "").trim().toLowerCase();
+    const reply = String(body?.reply || "").trim();
 
     if (!testimonialId) {
       return NextResponse.json(
@@ -96,16 +97,24 @@ export async function POST(req) {
       );
     }
 
-    if (!["approve", "reject"].includes(action)) {
+    if (!["approve", "reject", "send_reply"].includes(action)) {
       return NextResponse.json(
         { error: "Invalid action" },
         { status: 400 }
       );
     }
 
-    const updates = {
-      status: action === "approve" ? "approved" : "rejected",
-    };
+    const updates = {};
+
+    if (action === "approve") {
+      updates.status = "approved";
+    } else if (action === "reject") {
+      updates.status = "rejected";
+    }
+
+    if ((action === "approve" || action === "send_reply") && reply) {
+      updates.yvity_reply = reply;
+    }
 
     const { data, error } = await supabase
       .from("yvity_testimonials")

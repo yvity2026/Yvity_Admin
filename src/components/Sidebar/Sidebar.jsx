@@ -927,13 +927,14 @@ export default function AppShell({ children }) {
 
     try {
       setLogoutLoading(true);
-      await fetch("/api/auth/admin/logout", { method: "POST" });
+      const res = await fetch("/api/auth/admin/logout", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
       setAdmin(null);
-      window.location.href = "/auth/admin/login";
+      window.location.href = "/";
     } catch (error) {
       console.error("Logout failed:", error);
       setAdmin(null);
-      window.location.href = "/auth/admin/login";
+      window.location.href = "/";
     }
   };
 

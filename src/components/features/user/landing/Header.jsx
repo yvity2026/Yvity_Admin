@@ -61,7 +61,7 @@ const Header = () => {
       method: "POST",
     });
 
-    window.location.href = "/auth/admin/login";
+    window.location.href = "/";
   } catch (err) {
     console.error("Logout failed", err);
   }
