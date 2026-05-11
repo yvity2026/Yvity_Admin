@@ -25,7 +25,7 @@ export function useTestimonials(page) {
   });
 }
 
-async function updateTestimonialStatus({ testimonialId, action }) {
+async function updateTestimonialStatus({ testimonialId, action, reply }) {
   const res = await fetch("/api/admin/testimonials", {
     method: "POST",
     headers: {
@@ -34,6 +34,7 @@ async function updateTestimonialStatus({ testimonialId, action }) {
     body: JSON.stringify({
       testimonialId,
       action,
+      reply,
     }),
   });
 
@@ -58,10 +59,12 @@ export function useTestimonialActions() {
   });
 
   return {
-    approve: (testimonialId) =>
-      mutation.mutateAsync({ testimonialId, action: "approve" }),
+    approve: (testimonialId, reply) =>
+      mutation.mutateAsync({ testimonialId, action: "approve", reply }),
     reject: (testimonialId) =>
       mutation.mutateAsync({ testimonialId, action: "reject" }),
+    sendReply: (testimonialId, reply) =>
+      mutation.mutateAsync({ testimonialId, action: "send_reply", reply }),
     isProcessing: mutation.isPending,
   };
 }
