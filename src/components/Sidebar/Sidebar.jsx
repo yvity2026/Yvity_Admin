@@ -661,28 +661,19 @@
 import { easeInOut, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AiOutlineUser } from "react-icons/ai";
-import { BiPulse } from "react-icons/bi";
-import {
-  FaBell,
-  FaCrown,
-  FaMedal,
-  FaRegStar,
-  FaRegUser,
-  FaUser,
-} from "react-icons/fa";
-import { FiShield } from "react-icons/fi";
+import { FaBell, FaCrown, FaUser } from "react-icons/fa";
 import { GiHamburgerMenu } from "react-icons/gi";
-import { LuCreditCard, LuUsersRound } from "react-icons/lu";
-import {
-  MdChatBubbleOutline,
-  MdOutlineLogout,
-  MdOutlinePayment,
-} from "react-icons/md";
+import { HiOutlineUserGroup } from "react-icons/hi";
+import { LuUsersRound } from "react-icons/lu";
+import { MdOutlineLogout, MdOutlinePayment } from "react-icons/md";
 import { FaPlus } from "react-icons/fa6";
 import clsx from "clsx";
+import {
+  canAccessSidebarItem,
+  getFirstAccessibleAdminRoute,
+} from "@/lib/admin/permissions";
 import { useAdmin } from "@/context/AuthAdminContext";
 import { useSidebar } from "@/context/SidebarContext";
 import { useModal } from "@/context/ModalContext";
@@ -711,18 +702,21 @@ const menuItems = [
         label: "Overview",
         icon: <TbCategoryPlus />,
         link: "/admin",
+        permissionKey: "overview",
       },
       {
         id: 2,
         label: "Subscribers",
         icon: <LuUsersRound />,
         link: "/admin/subscribers",
+        permissionKey: "subscribers",
       },
       {
         id: 3,
         label: "Customers",
         icon: <FaUser />,
         link: "/admin/customers",
+        permissionKey: "customers",
       },
     ],
   },
@@ -734,12 +728,14 @@ const menuItems = [
         label: "IRDAI Approvals",
         icon: <BsShield />,
         link: "/admin/irdaiapprovals",
+        permissionKey: "irdai_approvals",
       },
       {
         id: 2,
         label: "Testimonials",
         icon: <SiWechat />,
         link: "/admin/testimonials",
+        permissionKey: "testimonials",
       },
     ],
   },
@@ -751,13 +747,21 @@ const menuItems = [
         label: "Payments",
         icon: <MdOutlinePayment />,
         link: "/admin/payments",
+        permissionKey: "payments",
       },
-      // {
-      //   id: 2,
-      //   label: "Subscription",
-      //   icon: <LuCreditCard />,
-      //   link: "/admin/subscriptions",
-      // },
+    ],
+  },
+  {
+    title: "Administration",
+    navitems: [
+      {
+        id: 1,
+        label: "Roles & Permissions",
+        icon: <HiOutlineUserGroup />,
+        link: "/admin/roles",
+        permissionKey: "roles_permissions",
+        alternatePermissionKeys: ["create_admin_user"],
+      },
     ],
   },
   {
@@ -768,6 +772,7 @@ const menuItems = [
         label: "Settings",
         icon: <IoSettingsOutline />,
         link: "/admin/settings",
+        permissionKey: "settings",
       },
     ],
   },
@@ -776,15 +781,18 @@ const menuItems = [
 export default function AppShell({ children }) {
   const { collapsed } = useSidebar();
   const { openModal } = useModal();
-  const { loading, setLoading, setAdmin, admin } = useAdmin();
+  const { setLoading, setAdmin, admin } = useAdmin();
   const [logoutLoading, setLogoutLoading] = useState(false);
   // const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
   const headerConfig = {
     "/admin": {
       title: "Overview",
+      actions: ["profile", "notifications"],
+    },
+    "/admin/subscribers": {
+      title: "Subscribers",
       actions: ["profile", "notifications"],
     },
     "/admin/advisors": {
@@ -807,12 +815,20 @@ export default function AppShell({ children }) {
       title: "Payments",
       actions: ["profile", "notifications"],
     },
+    "/admin/roles": {
+      title: "Roles & Permissions",
+      actions: ["profile", "notifications"],
+    },
     "/admin/subscriptions": {
       title: "Subscriptions",
       actions: ["profile", "notifications"],
     },
-    "/admin/setting": {
+    "/admin/settings": {
       title: "Settings",
+      actions: ["profile", "notifications"],
+    },
+    "/admin/unauthorized": {
+      title: "Access Restricted",
       actions: ["profile", "notifications"],
     },
   };
@@ -840,12 +856,6 @@ export default function AppShell({ children }) {
   // const hideSidebarRoutes = ["/advisor/public-view"];
 
   const sidebarWidth = collapsed ? 80 : 260;
-
-  const name = "Krishna Mohan";
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("");
   const SIDEBAR_TRANSITION = {
     duration: 0.35,
     ease: [0.4, 0, 0.2, 1], // smoother than easeInOut
@@ -899,7 +909,18 @@ export default function AppShell({ children }) {
     };
   }, [mobileOpen]);
 
-  console.log(admin);
+  const visibleMenuItems = menuItems
+    .map((section) => ({
+      ...section,
+      navitems: section.navitems.filter((item) =>
+        canAccessSidebarItem(
+          admin,
+          item.permissionKey,
+          item.alternatePermissionKeys || [],
+        ),
+      ),
+    }))
+    .filter((section) => section.navitems.length > 0);
 
   const handleLogout = async () => {
     if (logoutLoading) return;
@@ -946,14 +967,8 @@ export default function AppShell({ children }) {
 //   window.location.href = "/login";
 // };
 
-  const isDefaultActions =
-    currentHeader.actions.includes("notifications") ||
-    currentHeader.actions.includes("profile");
-
-  //   if (!pathname.includes("/advisor")) {
-  //     return <>{children}</>;
-  //   }
   const role = admin?.role === "super_admin" ? "SUPER ADMIN" : "ADMIN";
+  const fallbackRoute = getFirstAccessibleAdminRoute(admin || {});
   return (
     <div className="min-h-screen flex">
       {/* SIDEBAR (FULL HEIGHT) */}
@@ -1035,7 +1050,7 @@ export default function AppShell({ children }) {
           {/* sidebar content */}
 
           <div className="flex-1 overflow-y-auto no-scrollbar scroll-smooth overflow-x-visible">
-            {menuItems.map((section, i) => (
+            {visibleMenuItems.map((section, i) => (
               <div key={i} className="mb-5">
                 {!collapsed && (
                   <h3 className=" text-sm font-bold leading-2 tracking-[1.4px] px-6 text-left my-4 text-[#53807E] uppercase ">
@@ -1077,7 +1092,7 @@ export default function AppShell({ children }) {
   `}
                     >
                       <Link
-                        href={item.link || "#"}
+                        href={item.link || fallbackRoute}
                         className={`flex items-center w-full transition-colors duration-300
     ${collapsed ? "justify-center" : "gap-4"}
   `}
@@ -1256,7 +1271,7 @@ export default function AppShell({ children }) {
 
                 <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(245,158,11,0.2)] text-[#F59E0B] text-xs font-semibold">
                   <FaCrown className="text-xs" />
-                  Gold Member
+                  {role}
                 </div>
               </div>
 
@@ -1264,7 +1279,7 @@ export default function AppShell({ children }) {
 
               {/* MENU */}
               <div className="flex-1 h-screen overflow-y-auto">
-                {menuItems.map((section, i) => (
+                {visibleMenuItems.map((section, i) => (
                   <div key={i} className="mb-4">
                     <h3 className=" text-xs tracking-widest px-6 mt-4 mb-2 text-[#53807E] uppercase">
                       {section.title}

@@ -1,46 +1,41 @@
-import { validateAdmin } from "@/lib/auth/validateAdmin";
-import { createAdminClient } from "@/lib/supabase/server";
+import { normalizePermissions } from "@/lib/admin/permissions";
+import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const session = await validateAdmin();
-
-    if (!session) {
+    const admin = await getAuthenticatedAdmin();
+    if (!admin) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
       );
     }
-
-    const supabase = createAdminClient();
-
-    const { data, error } = await supabase
-      .from("admin_users")
-      .select("*")
-      .eq("id", session.admin_id)
-      .maybeSingle();
-
-    if (error) {
-      console.error(error);
-
-      return NextResponse.json(
-        { success: false, message: "Database error" },
-        { status: 500 }
-      );
-    }
-
-    if (!data) {
-      return NextResponse.json(
-        { success: false, message: "Admin not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
-      data,
+      data: {
+        ...admin,
+        permissions: normalizePermissions(admin.permissions),
+      },
     });
+
+    response.cookies.set(
+      "admin_session",
+      JSON.stringify({
+        admin_id: admin.id,
+        role: admin.role,
+        permissions: normalizePermissions(admin.permissions),
+      }),
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 60 * 60 * 24 * 7,
+        path: "/",
+      }
+    );
+
+    return response;
   } catch (error) {
     console.error("API ERROR:", error);
 

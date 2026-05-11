@@ -1,5 +1,6 @@
 "use client"
 
+import { getFirstAccessibleAdminRoute } from "@/lib/admin/permissions";
 import { useAdmin } from "@/context/AuthAdminContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -11,7 +12,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!loading && admin) {
-      router.replace("/admin");
+      router.replace(getFirstAccessibleAdminRoute(admin));
     }
   }, [admin, loading, router]);
 
