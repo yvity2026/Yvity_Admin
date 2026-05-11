@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { hashOtp, hashPhone } from "@/lib/auth/hash";
+import { normalizePermissions } from "@/lib/admin/permissions";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function POST(request) {
@@ -50,8 +51,9 @@ export async function POST(request) {
     // 5. get admin
     const { data: admin } = await supabase
       .from("admin_users")
-      .select("id, role, permissions")
+      .select("id, role, permissions, is_active")
       .eq("phone_number", `+91${phone}`)
+      .eq("is_active", true)
       .single();
 
     if (!admin) {
@@ -63,7 +65,7 @@ export async function POST(request) {
       admin: {
         id: admin.id,
         role: admin.role,
-        permissions: admin.permissions,
+        permissions: normalizePermissions(admin.permissions),
       },
     });
 
@@ -72,19 +74,18 @@ export async function POST(request) {
       JSON.stringify({
         admin_id: admin.id,
         role: admin.role,
-        permissions: admin.permissions,
+        permissions: normalizePermissions(admin.permissions),
       }),
       {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
         maxAge: 60 * 60 * 24 * 7,
+        path: "/",
       },
     );
 
     return response;
-
-    return NextResponse.json({ success: true, admin });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
