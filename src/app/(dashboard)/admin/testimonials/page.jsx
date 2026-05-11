@@ -360,13 +360,13 @@ export default function Testimonials() {
 
   const [page, setPage] = useState(1);
   const { data, isLoading, refetch } = useTestimonials(page);
-  const { approve, reject, isProcessing } = useTestimonialActions();
+  const { approve, reject, sendReply, isProcessing } = useTestimonialActions();
 
   const testimonials = Array.isArray(data?.data)
     ? data.data.map((c) => ({
         id: c.id,
         name: c.name || "Unknown User",
-        profile_pic: c.profile_pic || "/default-avatar.png",
+        profile_pic: c.profile_pic || null,
         location: c.location || "Unknown",
         advisor: c.advisor_name || "—",
         type: c.type || "text",
@@ -455,10 +455,10 @@ export default function Testimonials() {
 
   // return matchesSearch && c.type === activeFilter;
 
-  const handleApprove = async () => {
+  const handleApprove = async (reply) => {
     if (!selectedTestimonial?.id) return;
     try {
-      await approve(selectedTestimonial.id);
+      await approve(selectedTestimonial.id, reply);
       toast.success("Testimonial approved successfully");
       await refetch();
       setSelectedTestimonial(null);
@@ -467,16 +467,15 @@ export default function Testimonials() {
     }
   };
 
-  const handleReject = async (testimonial) => {
+  const handleSendReply = async (reply) => {
+    if (!selectedTestimonial?.id || !reply.trim()) return;
     try {
-      await reject(testimonial.id);
-      toast.success("Testimonial rejected successfully");
+      await sendReply(selectedTestimonial.id, reply);
+      toast.success("Reply sent successfully");
       await refetch();
-      if (selectedTestimonial?.id === testimonial.id) {
-        setSelectedTestimonial(null);
-      }
+      setSelectedTestimonial(null);
     } catch (error) {
-      toast.error(error.message || "Failed to reject testimonial");
+      toast.error(error.message || "Failed to send reply");
     }
   };
 
@@ -650,14 +649,20 @@ export default function Testimonials() {
                       <td className="px-2.5 py-3 align-middle">
                         <div className="flex items-center gap-[9px]">
                           <div className="w-[34px] h-[34px] rounded-full overflow-hidden relative shrink-0 bg-gray-200 flex items-center justify-center">
-                            <Image
-                              src={r.profile_pic || "/default-avatar.png"}
-                              alt={r.name}
-                              fill
-                              sizes="40px"
-                              className="object-cover"
-                              unoptimized
-                            />
+                            {r.profile_pic ? (
+                              <Image
+                                src={r.profile_pic}
+                                alt={r.name}
+                                fill
+                                sizes="40px"
+                                className="object-cover"
+                                unoptimized
+                              />
+                            ) : (
+                              <span className="text-[13px] font-bold uppercase text-[#1a3330]">
+                                {r.name?.charAt(0) || "U"}
+                              </span>
+                            )}
                           </div>
                           <div>
                             <div className="text-[13px] font-bold text-[#1a3330]">
@@ -742,8 +747,9 @@ export default function Testimonials() {
         <TestimonialReviewModal
           testimonial={selectedTestimonial}
           onClose={() => setSelectedTestimonial(null)}
-          onApprove={handleApprove}
+          onApprove={(reply) => handleApprove(reply)}
           onReject={() => handleReject(selectedTestimonial)}
+          onSendReply={(reply) => handleSendReply(reply)}
           isProcessing={isProcessing}
         />
       )}
