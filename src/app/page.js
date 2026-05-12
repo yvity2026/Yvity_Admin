@@ -20,4 +20,4 @@ export default function Home() {
   if (admin) return null; // will redirect
 
   return <AdminLogin />;
-}
+};

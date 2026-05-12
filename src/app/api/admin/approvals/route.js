@@ -94,8 +94,6 @@ export async function GET() {
       };
     });
 
-    console.log(output);
-
     return NextResponse.json({ data: output, stats });
   } catch (error) {
     console.error("Admin approvals GET failed", error);

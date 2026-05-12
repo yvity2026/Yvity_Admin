@@ -8,6 +8,17 @@ import { RequestTestimonialModal } from "@/components/features/Modals/RequestTes
 import TestimonialReviewModal from "@/components/TestimonialReviewModal";
 import toast from "react-hot-toast";
 
+// Helper function to format date to DD/MM/YYYY
+const formatDate = (dateString) => {
+  if (!dateString) return "—";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "—";
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
 // ── Icon components ──
 const ISearch = () => (
   <svg
@@ -382,7 +393,7 @@ export default function Testimonials() {
         phone: c.phone || "",
         content: c.content || "",
         media_url: c.media_url || null,
-        submitted: c.joinedAt ? new Date(c.joinedAt).toLocaleDateString() : "—",
+        submitted: formatDate(c.joinedAt),
         otp: Boolean(c.is_verified)
       }))
     : [];
@@ -484,7 +495,7 @@ export default function Testimonials() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-sans">
+    <div className="flex min-h-screen bg-gray-100 font-sans overflow-x-hidden w-full">
       {/* Mobile overlay */}
       {showSidebar && (
         <div
@@ -494,7 +505,7 @@ export default function Testimonials() {
       )}
 
       {/* Main */}
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+      <div className="flex-1 flex flex-col overflow-x-hidden min-w-0 w-full">
         {/* <Topbar title="Testimonials" onHamburger={() => setShowSidebar(true)} /> */}
 
         {/* Content */}

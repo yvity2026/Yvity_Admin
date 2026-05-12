@@ -3,7 +3,7 @@ import React from "react";
 const PaymentDetails = ({ onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-lg w-[650px] p-8 font-sans">
+      <div className="bg-white rounded-2xl shadow-lg  w-[90%] md:w-[650px] p-8 font-sans">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -83,7 +83,7 @@ const PaymentDetails = ({ onClose }) => {
           <div className="flex items-center justify-between">
             <span className="text-gray-500 text-sm">Date & Time</span>
             <span className="text-gray-800 text-sm font-medium">
-              Jan 5, 2026 · 10:32 AM
+              05/01/2026 · 10:32 AM
             </span>
           </div>
 
@@ -110,7 +110,7 @@ const PaymentDetails = ({ onClose }) => {
           <div className="flex items-center justify-between">
             <span className="text-gray-500 text-sm">Next Renewal</span>
             <span className="text-gray-800 text-sm font-medium">
-              Jan 5, 2026
+              05/01/2026
             </span>
           </div>
 

@@ -1319,7 +1319,7 @@ export default function AppShell({ children }) {
         )}
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 bg-[#F8F6F1] overflow-x-visible">{children}</main>
+        <main className="flex-1 bg-[#F8F6F1] overflow-x-hidden w-full">{children}</main>
       </div>
       {tooltip.visible && collapsed && (
         <div

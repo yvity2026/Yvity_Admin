@@ -14,6 +14,16 @@ export default function CustomerProfile({ onClose, customer }) {
       .slice(0, 2)
       .toUpperCase() || "CU";
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "—";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "—";
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -25,12 +35,12 @@ export default function CustomerProfile({ onClose, customer }) {
         initial={{ opacity: 0, y: 18, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 10, scale: 0.98 }}
-        className="w-[400px] overflow-hidden rounded-2xl bg-white shadow-xl"
+        className="md:w-[400px] overflow-hidden rounded-2xl bg-white shadow-xl"
       >
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-[18px]">
           <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-            <span className="text-base text-gray-400">Customer</span>
-            Customer Details
+            <span className="text-base text-gray-400">Customer Details</span>
+            {/* Customer Details */}
           </h2>
           <button
             onClick={onClose}
@@ -41,8 +51,16 @@ export default function CustomerProfile({ onClose, customer }) {
         </div>
 
         <div className="flex items-center gap-3.5 px-6 py-5">
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-teal-900 text-[13px] font-bold tracking-wide text-white">
-            {initials}
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-teal-900 text-[13px] font-bold tracking-wide text-white overflow-hidden">
+            {customer.profile_pic ? (
+              <img
+                src={customer.profile_pic}
+                alt={customer.name || "Customer"}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              initials
+            )}
           </div>
           <div>
             <h3 className="mb-1.5 text-[15px] font-semibold text-gray-800">
@@ -68,8 +86,8 @@ export default function CustomerProfile({ onClose, customer }) {
             { label: "City", value: customer.location || "—" },
             { label: "Profession", value: customer.profession || "—" },
             { label: "Reviews Given", value: `${customer.reviewCount || 0} reviews` },
-            { label: "Last Login", value: customer.lastLogin || "—" },
-            { label: "Registered", value: customer.joinedAt || "—" },
+            { label: "Last Login", value: formatDate(customer.lastLogin) },
+            { label: "Registered", value: formatDate(customer.joinedAt) },
           ].map(({ label, value }, i, arr) => (
             <div
               key={label}
