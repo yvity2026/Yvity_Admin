@@ -58,7 +58,7 @@ function getInitials(name) {
     .map((part) => part[0]?.toUpperCase() || "")
     .join("");
 
-  return initials || "YITY";
+  return initials || "YVITY";
 }
 
 export default function CreateAdminModal({ onClose }) {
