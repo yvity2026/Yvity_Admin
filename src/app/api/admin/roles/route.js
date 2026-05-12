@@ -59,6 +59,10 @@ export async function POST(request) {
     const name = String(body?.name || "").trim();
     const phoneNumber = normalizeAdminPhoneNumber(body?.phone_number);
     const permissions = normalizePermissions(body?.permissions);
+    const profileImageUrl =
+      typeof body?.profile_image_url === "string" && body.profile_image_url.trim()
+        ? body.profile_image_url.trim()
+        : null;
 
     if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -93,6 +97,7 @@ export async function POST(request) {
         phone_number: phoneNumber,
         role: "admin",
         permissions,
+        profile_image_url: profileImageUrl,
         created_by: currentAdmin.id,
       })
       .select("*")
