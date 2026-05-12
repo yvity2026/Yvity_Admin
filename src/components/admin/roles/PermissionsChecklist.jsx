@@ -58,14 +58,14 @@ export default function PermissionsChecklist({
             <button
               type="button"
               onClick={handleSelectAll}
-              className="rounded-md border border-[#0A4A4A]/20 px-3 py-1.5 text-xs font-semibold text-[#0A4A4A]"
+              className="cursor-pointer rounded-md border border-[#0A4A4A]/20 px-3 py-1.5 text-xs font-semibold text-[#0A4A4A]"
             >
               Select All
             </button>
             <button
               type="button"
               onClick={handleDeselectAll}
-              className="rounded-md border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600"
+              className="cursor-pointer rounded-md border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600"
             >
               Deselect All
             </button>

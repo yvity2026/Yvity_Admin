@@ -969,6 +969,14 @@ export default function AppShell({ children }) {
 
   const role = admin?.role === "super_admin" ? "SUPER ADMIN" : "ADMIN";
   const fallbackRoute = getFirstAccessibleAdminRoute(admin || {});
+  const adminProfileImage = admin?.profile_image_url || admin?.selfie_url || "";
+  const adminInitials =
+    admin?.name
+      ?.split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() || "")
+      .join("") || "KM";
   return (
     <div className="min-h-screen flex">
       {/* SIDEBAR (FULL HEIGHT) */}
@@ -1012,15 +1020,15 @@ export default function AppShell({ children }) {
     ${collapsed ? "w-10 h-10" : "w-14 h-14"}
   `}
             >
-              {admin?.selfie_url ? (
+              {adminProfileImage ? (
                 <Image
-                  src={admin.selfie_url}
+                  src={adminProfileImage}
                   alt="admin Image"
                   fill
                   className="object-cover"
                 />
               ) : (
-                <span className="text-white font-semibold">KM</span>
+                <span className="text-white font-semibold">{adminInitials}</span>
               )}
             </div>
 
@@ -1178,16 +1186,16 @@ export default function AppShell({ children }) {
 
               {currentHeader.actions.includes("profile") && (
                 <motion.button className="rounded-full h-10 w-10 bg-[#F59E0B] cursor-pointer ring-[2px] ring-[#FEC564] overflow-hidden relative flex items-center justify-center">
-                  {admin?.selfie_url ? (
+                  {adminProfileImage ? (
                     <Image
-                      src={admin.selfie_url}
+                      src={adminProfileImage}
                       alt="Profile"
                       fill
                       className="object-cover"
                     />
                   ) : (
                     <p className="font-bold text-sm text-white">
-                      {admin?.name?.charAt(0) || "K"}
+                      {adminInitials}
                     </p>
                   )}
                 </motion.button>
@@ -1253,18 +1261,18 @@ export default function AppShell({ children }) {
 
               {/* PROFILE */}
               <div className="px-6 py-4">
-                <div className=" relative  rounded-full bg-white mb-2 overflow-hidden">
-                  {admin?.selfie_url ? (
+                <div className="relative mb-2 h-16 w-16 overflow-hidden rounded-full bg-[#F59E0B] ring-2 ring-[#FEC564]">
+                  {adminProfileImage ? (
                     <Image
-                      src={admin.selfie_url}
+                      src={adminProfileImage}
                       alt="admin Image"
                       fill
                       className="object-cover"
                     />
                   ) : (
-                    <span className="text-white font-semibold">
-                      {admin?.name?.charAt(0).toUpperCase() || "A"}
-                    </span>
+                    <div className="flex h-full w-full items-center justify-center text-white font-semibold">
+                      {adminInitials}
+                    </div>
                   )}
                 </div>
                 <p className="text-[#F8F6F1] font-semibold">{admin?.name}</p>

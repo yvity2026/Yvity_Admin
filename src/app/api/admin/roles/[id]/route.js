@@ -112,6 +112,13 @@ export async function PUT(request, { params }) {
       updates.permissions = normalizePermissions(body.permissions);
     }
 
+    if (body?.profile_image_url !== undefined) {
+      updates.profile_image_url =
+        typeof body.profile_image_url === "string" && body.profile_image_url.trim()
+          ? body.profile_image_url.trim()
+          : null;
+    }
+
     if (body?.is_active !== undefined) {
       if (typeof body.is_active !== "boolean") {
         return NextResponse.json(
