@@ -978,7 +978,7 @@ export default function AppShell({ children }) {
       .map((part) => part[0]?.toUpperCase() || "")
       .join("") || "KM";
   return (
-    <div className="min-h-screen flex">
+    <div className="h-screen flex overflow-hidden">
       {/* SIDEBAR (FULL HEIGHT) */}
       <motion.aside
         animate={{ width: collapsed ? 80 : 260 }}
@@ -1161,7 +1161,7 @@ export default function AppShell({ children }) {
       {/* Collapse Button */}
       <CollapseButton sidebarWidth={sidebarWidth} />
       {/* RIGHT SIDE (HEADER + MAIN) */}
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         {/* HEADER (TOP RIGHT) */}
         <header className="py-[18px] px-4 min-h-[60px] sticky top-0 left-0 right-0 z-10 flex items-center justify-between md:px-[90px] md:py-[10px] bg-white shadow-[0_0_4px_0_rgba(0,0,0,0.25)]">
           <h3 className="text-black font-poppins text-base font-bold leading-normal">
@@ -1342,7 +1342,7 @@ export default function AppShell({ children }) {
         )}
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 bg-[#F8F6F1] overflow-x-hidden w-full">{children}</main>
+        <main className="flex-1 min-w-0 overflow-auto bg-[#F8F6F1]">{children}</main>
       </div>
       {tooltip.visible && collapsed && (
         <div
