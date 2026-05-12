@@ -222,7 +222,7 @@ export default function RolesPermissionsPage() {
 
   return (
     <div className="min-h-screen min-w-0 overflow-x-hidden bg-[#EEF2F0] p-3 sm:p-4 lg:p-6">
-      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:mb-5 xl:grid-cols-4">
+      <div className="mb-4 grid gap-4 grid-cols-2 xl:mb-5 xl:grid-cols-4">
         {[
           { label: "Total Admin Users", value: totalAdmins },
           { label: "Active Accounts", value: activeAdmins },
@@ -233,8 +233,8 @@ export default function RolesPermissionsPage() {
             key={card.label}
             className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5"
           >
-            <p className="text-sm font-medium text-gray-500">{card.label}</p>
-            <p className="mt-2 text-3xl font-bold text-gray-900">{card.value}</p>
+            <p className="text-xs sm:text-sm font-medium text-gray-500">{card.label}</p>
+            <p className="mt-auto text-xl md:text-3xl font-bold text-gray-900">{card.value}</p>
           </div>
         ))}
       </div>
