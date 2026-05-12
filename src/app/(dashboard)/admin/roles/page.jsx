@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FiEdit2, FiEye, FiTrash2 } from "react-icons/fi";
 import {
@@ -15,6 +15,10 @@ import {
 } from "@/hooks/TanstankQuery/useAdminUsers";
 import CreateAdminModal from "@/components/admin/roles/CreateAdminModal";
 import EditPermissionsModal from "@/components/admin/roles/EditPermissionsModal";
+import PaginationControls from "@/components/common/PaginationControls";
+import { getPaginationData } from "@/lib/pagination";
+
+const ADMIN_USERS_PER_PAGE = 5;
 
 function formatDate(value, withTime = false) {
   if (!value) {
@@ -109,6 +113,7 @@ export default function RolesPermissionsPage() {
   const [readOnlyModal, setReadOnlyModal] = useState(false);
   const [adminPendingDelete, setAdminPendingDelete] = useState(null);
   const [deletingAdminId, setDeletingAdminId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const deactivateAdminUser = useDeactivateAdminUser();
 
   const canViewRolesSection = canAccessRolesSection(admin);
@@ -138,6 +143,12 @@ export default function RolesPermissionsPage() {
 
     return matchesSearch && matchesRole && matchesStatus;
   });
+  const pagination = getPaginationData(
+    filteredAdminUsers,
+    currentPage,
+    ADMIN_USERS_PER_PAGE,
+  );
+  const paginatedAdminUsers = pagination.items;
 
   const totalAdmins = adminUsers.length;
   const activeAdmins = adminUsers.filter((adminUser) => adminUser.is_active).length;
@@ -147,6 +158,16 @@ export default function RolesPermissionsPage() {
   const createAccessCount = adminUsers.filter((adminUser) =>
     Boolean(adminUser.permissions?.create_admin_user),
   ).length;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, roleFilter, statusFilter]);
+
+  useEffect(() => {
+    if (currentPage > pagination.totalPages) {
+      setCurrentPage(pagination.totalPages);
+    }
+  }, [currentPage, pagination.totalPages]);
 
   const handleDeleteAdmin = (adminUser) => {
     setAdminPendingDelete(adminUser);
@@ -274,7 +295,7 @@ export default function RolesPermissionsPage() {
             </div>
           )}
 
-          {filteredAdminUsers.map((adminUser) => {
+          {paginatedAdminUsers.map((adminUser) => {
             const permissionSummary = getPermissionSummary(adminUser.permissions);
             const isOwnAccount = admin?.id === adminUser.id;
             const isDeletingThisAdmin =
@@ -406,7 +427,7 @@ export default function RolesPermissionsPage() {
                 </tr>
               )}
 
-              {filteredAdminUsers.map((adminUser) => {
+              {paginatedAdminUsers.map((adminUser) => {
                 const permissionSummary = getPermissionSummary(adminUser.permissions);
                 const isOwnAccount = admin?.id === adminUser.id;
                 const isDeletingThisAdmin =
@@ -492,6 +513,12 @@ export default function RolesPermissionsPage() {
             </tbody>
           </table>
         </div>
+
+        <PaginationControls
+          pagination={pagination}
+          onPageChange={setCurrentPage}
+          label="admin users"
+        />
       </div>
 
       {showCreateModal && <CreateAdminModal onClose={() => setShowCreateModal(false)} />}
