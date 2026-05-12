@@ -7,6 +7,11 @@ import { FaPlus } from "react-icons/fa6";
 import { RequestTestimonialModal } from "@/components/features/Modals/RequestTestimonial";
 import TestimonialReviewModal from "@/components/TestimonialReviewModal";
 import toast from "react-hot-toast";
+import PaginationControls from "@/components/common/PaginationControls";
+import { getPaginationData } from "@/lib/pagination";
+
+const TESTIMONIALS_FETCH_LIMIT = 5000;
+const TESTIMONIALS_PER_PAGE = 5;
 
 // Helper function to format date to DD/MM/YYYY
 const formatDate = (dateString) => {
@@ -368,9 +373,8 @@ export default function Testimonials() {
   const [activeFilter, setActiveFilter] = useState(null);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [selectedTestimonial, setSelectedTestimonial] = useState(null);
-
-  const [page, setPage] = useState(1);
-  const { data, isLoading, refetch } = useTestimonials(page);
+  const [currentPage, setCurrentPage] = useState(1);
+  const { data, isLoading, refetch } = useTestimonials(1, TESTIMONIALS_FETCH_LIMIT);
   const { approve, reject, sendReply, isProcessing } = useTestimonialActions();
 
   const testimonials = Array.isArray(data?.data)
@@ -407,41 +411,7 @@ export default function Testimonials() {
     },
     { text: 0, audio: 0, video: 0 }
   );
-  // const [loading, setLoading] = useState(false);
-
-  // useEffect(() => {
-  //   const fetchCustomers = async () => {
-  //     try {
-  //       setLoading(true);
-
-  //       const res = await fetch(
-  //         `/api/admin/testimonials?page=${page}&limit=10`,
-  //       );
-
-  //       const json = await res.json();
-
-  //       const mapped = (json.data || []).map((c) => ({
-  //         id: c.id,
-  //         name: c.name,
-  //         mobile: c.phone,
-  //         email: c.email,
-  //         city: c.location,
-  //         profession: "Customer", // backend doesn’t provide this
-  //         reviews: `${c.reviewCount || 0} Reviews`,
-  //         lastLogin: "—", // backend missing
-  //         joined: c.joinedAt ? new Date(c.joinedAt).toLocaleDateString() : "—",
-  //       }));
-
-  //       setTestimonials(mapped);
-  //     } catch (err) {
-  //       console.error("Failed to fetch customers", err);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchCustomers();
-  // }, [page]);
+  
 
   useEffect(() => {
     document.body.style.overflow = showSidebar ? "hidden" : "auto";
@@ -461,6 +431,12 @@ export default function Testimonials() {
 
     return matchSearch && matchFilter;
   });
+  const pagination = getPaginationData(
+    filtered,
+    currentPage,
+    TESTIMONIALS_PER_PAGE,
+  );
+  const paginatedTestimonials = pagination.items;
 
   // const matchFilter = !activeFilter || c.type === activeFilter;
 
@@ -487,6 +463,20 @@ export default function Testimonials() {
       setSelectedTestimonial(null);
     } catch (error) {
       toast.error(error.message || "Failed to send reply");
+    }
+  };
+
+  const handleReject = async (testimonial) => {
+    const target = testimonial || selectedTestimonial;
+    if (!target?.id) return;
+
+    try {
+      await reject(target.id);
+      toast.success("Testimonial rejected successfully");
+      await refetch();
+      setSelectedTestimonial(null);
+    } catch (error) {
+      toast.error(error.message || "Failed to reject testimonial");
     }
   };
 
@@ -588,7 +578,10 @@ export default function Testimonials() {
                   return (
                     <button
                       key={btn.key}
-                      onClick={() => setActiveFilter(isActive ? null : btn.key)}
+                      onClick={() => {
+                        setActiveFilter(isActive ? null : btn.key);
+                        setCurrentPage(1);
+                      }}
                       className={`inline-flex items-center gap-1.5 px-[14px] py-[5px] rounded-full border-[1.5px] text-[12px] font-semibold font-poppins cursor-pointer transition-all duration-[180ms]
                         ${isActive ? `${btn.active} scale-95 shadow-inner` : `${btn.inactive} scale-100`}`}
                     >
@@ -608,7 +601,10 @@ export default function Testimonials() {
                   className="border-none bg-transparent outline-none text-[14px] text-white flex-1 min-w-0 placeholder:text-white/70"
                   placeholder="Search"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setCurrentPage(1);
+                  }}
                 />
                 <span className="text-white/70 text-lg cursor-pointer shrink-0">
                   →
@@ -651,7 +647,7 @@ export default function Testimonials() {
                       </td>
                     </tr>
                   )}
-                  {filtered.map((r, i) => (
+                  {paginatedTestimonials.map((r, i) => (
                     <tr
                       key={i}
                       className="border-b border-gray-50 hover:bg-[#f7faf9] transition-colors duration-150"
@@ -743,6 +739,12 @@ export default function Testimonials() {
                 </tbody>
               </table>
             </div>
+
+            <PaginationControls
+              pagination={pagination}
+              onPageChange={setCurrentPage}
+              label="testimonials"
+            />
           </div>
         </div>
       </div>

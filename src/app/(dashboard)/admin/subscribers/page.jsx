@@ -4,6 +4,8 @@ import Link from "next/link";
 import AdvisorProfile from "@/components/AdvisorProfile";
 import { useAdvisors } from "@/hooks/TanstankQuery/useAdvisor";
 import AdvisorsSkeleton from "./loading";
+import PaginationControls from "@/components/common/PaginationControls";
+import { getPaginationData } from "@/lib/pagination";
 
 // Helper function to format date to DD/MM/YYYY
 const formatDate = (dateString) => {
@@ -16,80 +18,11 @@ const formatDate = (dateString) => {
   return `${day}/${month}/${year}`;
 };
 
-// const advisors = [
-//   {
-//     id: 1,
-//     name: "Krishna Mohan",
-//     phone: "+91 9876543210",
-//     city: "Nellore, AP",
-//     type: "Life+ Health",
-//     irdai: "Verified",
-//     plan: "Gold",
-//     score: 87,
-//     maxScore: 90,
-//     reviews: null,
-//     joined: "Jan 2026",
-//     status: "Active",
-//   },
-//   {
-//     id: 2,
-//     name: "Krishna Mohan",
-//     phone: "+91 9876543210",
-//     city: "Nellore, AP",
-//     type: "Life",
-//     irdai: "Verified",
-//     plan: "Gold",
-//     score: 87,
-//     maxScore: 90,
-//     reviews: null,
-//     joined: "Jan 2026",
-//     status: "Active",
-//   },
-//   {
-//     id: 3,
-//     name: "Krishna Mohan",
-//     phone: "+91 9876543210",
-//     city: "Nellore, AP",
-//     type: "Life+ Health",
-//     irdai: "Pending",
-//     plan: "Silver",
-//     score: 84,
-//     maxScore: 0,
-//     reviews: null,
-//     joined: "Mar 2026",
-//     status: "Under Review",
-//   },
-//   {
-//     id: 4,
-//     name: "Krishna Mohan",
-//     phone: "+91 9876543210",
-//     city: "Nellore, AP",
-//     type: "Life",
-//     irdai: "Verified",
-//     plan: "Free",
-//     score: 45,
-//     maxScore: 3,
-//     reviews: null,
-//     joined: "Jan 2026",
-//     status: "Active",
-//   },
-//   {
-//     id: 5,
-//     name: "Krishna Mohan",
-//     phone: "+91 9876543210",
-//     city: "Nellore, AP",
-//     type: "Health",
-//     irdai: "Verified",
-//     plan: "Gold",
-//     score: 87,
-//     maxScore: 90,
-//     reviews: null,
-//     joined: "Jan 2026",
-//     status: "Active",
-//   },
-// ];
+
 
 import Image from "next/image";
+
+const SUBSCRIBERS_PER_PAGE = 5;
 
 function Avatar({ src, initials, size = "md" }) {
   const sizeClass =
@@ -209,6 +142,7 @@ export default function AdvisorsDashboard() {
   const [search, setSearch] = useState("");
   const [showSidebar, setShowSidebar] = useState(false);
   const [selectedAdvisor, setSelectedAdvisor] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data, isLoading, error } = useAdvisors(activeFilter);
   const advisors = data?.data || [];
@@ -226,6 +160,12 @@ export default function AdvisorsDashboard() {
       (a.location || "").toLowerCase().includes(search.toLowerCase()) ||
       (a.plan || "").toLowerCase().includes(search.toLowerCase()),
   );
+  const pagination = getPaginationData(
+    filtered,
+    currentPage,
+    SUBSCRIBERS_PER_PAGE,
+  );
+  const paginatedAdvisors = pagination.items;
 
   console.log(data);
 
@@ -285,7 +225,10 @@ export default function AdvisorsDashboard() {
             {filterTabs.map((tab) => (
               <span
                 key={tab.key}
-                onClick={() => setActiveFilter(tab.key)}
+                onClick={() => {
+                  setActiveFilter(tab.key);
+                  setCurrentPage(1);
+                }}
                 className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium cursor-pointer border ${
                   activeFilter === tab.key
                     ? "bg-[#0A4A4A] text-white border-transparent"
@@ -304,7 +247,10 @@ export default function AdvisorsDashboard() {
                 className="border-none bg-transparent outline-none text-sm text-white flex-1 min-w-0 placeholder-white/70"
                 placeholder="Search"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
               />
               <div className="text-white text-lg cursor-pointer shrink-0">
                 →
@@ -352,7 +298,7 @@ export default function AdvisorsDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((advisor) => (
+                  {paginatedAdvisors.map((advisor) => (
                     <tr
                       key={advisor.id}
                       className="border-b border-gray-100 hover:bg-gray-50"
@@ -423,6 +369,12 @@ export default function AdvisorsDashboard() {
                 </tbody>
               </table>
             </div>
+
+            <PaginationControls
+              pagination={pagination}
+              onPageChange={setCurrentPage}
+              label="advisors"
+            />
           </div>
         </div>
       </div>

@@ -5,13 +5,11 @@ import Link from "next/link";
 import { usePayments } from "@/hooks/TanstankQuery/usePayment";
 import PaymentsSkeleton from "./loading";
 import Image from "next/image";
+import PaginationControls from "@/components/common/PaginationControls";
+import { getPaginationData } from "@/lib/pagination";
 
-const transactions = [
-  { id: 1, initials: "KM", avatarBg: "bg-[#E8833A]", name: "Krishna Mohan", location: "Nellore, AP", plan: "Gold",   amount: "₹2,999", method: "UPI",        date: "02/01/2026", txnId: "TXN2025010501", status: "Sucess" },
-  { id: 2, initials: "PS", avatarBg: "bg-[#3AAFA9]", name: "Priya Sharma",  location: "Nellore, AP", plan: "Gold",   amount: "₹2,999", method: "Card",        date: "02/01/2026", txnId: "TXN2025010501", status: "Sucess" },
-  { id: 3, initials: "PS", avatarBg: "bg-[#3AAFA9]", name: "Priya Sharma",  location: "Hyderabad",   plan: "Silver", amount: "₹2,999", method: "Net Banking", date: "02/01/2026", txnId: "TXN2025010501", status: "Sucess" },
-  { id: 4, initials: "PS", avatarBg: "bg-[#3AAFA9]", name: "Priya Sharma",  location: "Nellore, AP", plan: "Gold",   amount: "₹2,999", method: "Card",        date: "02/01/2026", txnId: "TXN2025010501", status: "Sucess" },
-];
+const PAYMENTS_PER_PAGE = 5;
+
 
 function Avatar({ initials, size = "md" }) {
   const sizeClass = size === "sm" ? "w-8 h-8 text-xs" : "w-10 h-10 text-sm";
@@ -38,7 +36,8 @@ export default function PaymentsDashboard() {
   const [activeNav, setActiveNav]             = useState("Payments");
   const [search, setSearch]                   = useState("");
   const [showSidebar, setShowSidebar]         = useState(false);
-  // const [transactions, setTransactions] = useState([]);
+  const [currentPage, setCurrentPage]         = useState(1);
+  
   // const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   // const [error, setError] = useState(null);
@@ -71,12 +70,14 @@ const stats = data?.revenue || {};
   //   fetchTransactions();
   // }, []);
 
-  const filtered = transactions.filter(
+const filtered = transactions.filter(
     (t) =>
       t.name?.toLowerCase().includes(search.toLowerCase()) ||
       t.txnId?.toLowerCase().includes(search.toLowerCase()) ||
       t.method?.toLowerCase().includes(search.toLowerCase())
   );
+  const pagination = getPaginationData(filtered, currentPage, PAYMENTS_PER_PAGE);
+  const paginatedTransactions = pagination.items;
 
     if (isLoading) {
     return (
@@ -160,7 +161,10 @@ const stats = data?.revenue || {};
                   className="border-none bg-transparent outline-none text-[13px] text-white flex-1 min-w-0 placeholder-white/70"
                   placeholder="Search transactions..."
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setCurrentPage(1);
+                  }}
                 />
                 <div className="text-white text-lg cursor-pointer shrink-0">→</div>
               </div>
@@ -184,10 +188,10 @@ const stats = data?.revenue || {};
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((txn, i) => (
+                  {paginatedTransactions.map((txn, i) => (
                     <tr
                       key={txn.id}
-                      className={`hover:bg-gray-50 ${i < filtered.length - 1 ? "border-b border-[#F3F6F0]" : ""}`}
+                      className={`hover:bg-gray-50 ${i < paginatedTransactions.length - 1 ? "border-b border-[#F3F6F0]" : ""}`}
                     >
                       {/* Adviser */}
                       <td className="py-2.5 pr-3">
@@ -256,6 +260,12 @@ const stats = data?.revenue || {};
                 </tbody>
               </table>
             </div>
+
+            <PaginationControls
+              pagination={pagination}
+              onPageChange={setCurrentPage}
+              label="transactions"
+            />
           </div>
         </main>
       </div>

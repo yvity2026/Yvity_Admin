@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-async function fetchTestimonials(page) {
+async function fetchTestimonials(page, limit = 10) {
   const res = await fetch(
-    `/api/admin/testimonials?page=${page}&limit=10`
+    `/api/admin/testimonials?page=${page}&limit=${limit}`
   );
 
   if (!res.ok) {
@@ -13,11 +13,11 @@ async function fetchTestimonials(page) {
 }
 
 // ── TanStack Hook ──────────────────────────────────────
-export function useTestimonials(page) {
+export function useTestimonials(page, limit = 10) {
   return useQuery({
-    queryKey: ["testimonials", page],
+    queryKey: ["testimonials", page, limit],
 
-    queryFn: () => fetchTestimonials(page),
+    queryFn: () => fetchTestimonials(page, limit),
 
     staleTime: 1000 * 60 * 5,
 
