@@ -11,6 +11,10 @@ import {
 import IRDAISkeleton from "./loading";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import PaginationControls from "@/components/common/PaginationControls";
+import { getPaginationData } from "@/lib/pagination";
+
+const IRDAI_SUBMISSIONS_PER_PAGE = 5;
 
 // ── Icon components ──────────────────────────────────────────────
 const IHourglass = ({ color }) => (
@@ -175,6 +179,7 @@ export default function IRDAIApprovals() {
   const [openReject, setOpenReject] = useState(false);
   // const [isProcessing, setIsProcessing] = useState(false);
   const [activeFilter, setActiveFilter] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
   // const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0, pendingPercentage: 0 });
   // const [error, setError]     = useState("");
   // const [data, setData] = useState(null);
@@ -192,64 +197,7 @@ export default function IRDAIApprovals() {
     };
   }, [showSidebar]);
 
-  // useEffect(() => {
-  //   const loadApprovals = async () => {
-  //     try {
-  //       setLoading(true);
-  //       setError("");
-  //       const response = await fetch("/api/admin/approvals");
-  //       if (!response.ok) throw new Error(`Failed to load approvals: ${response.status}`);
-
-  //       const payload = await response.json();
-  //       const items = payload?.data || [];
-  //       const nextStats = payload?.stats || { pending: 0, approved: 0, rejected: 0 };
-  //       const total = nextStats.pending + nextStats.approved + nextStats.rejected;
-
-  //       setStats({
-  //         pending: nextStats.pending || 0,
-  //         approved: nextStats.approved || 0,
-  //         rejected: nextStats.rejected || 0,
-  //         pendingPercentage: total ? ((nextStats.pending / total) * 100).toFixed(2) : 0,
-  //       });
-
-  //       const nextRows = items.map((item, index) => {
-  //         const name = item.name || "Advisor";
-  //         const location = item.location || "Unknown, IN";
-  //         const status = item.status || "pending";
-  //         const initials = name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("") || "AD";
-  //         const submittedAt = item.submittedAt ? new Date(item.submittedAt) : new Date();
-  //         const diffDays = Math.max(1, Math.floor((Date.now() - submittedAt.getTime()) / 86400000));
-  //         const days = `${diffDays} ${diffDays === 1 ? "day" : "days"}`;
-  //         const fileName = item.licenseUrl ? item.licenseUrl.split("/").pop() : "certificate.jpg";
-  //         const dayTypeByStatus = {
-  //           pending: diffDays > 3 ? "day-red" : "day-yellow",
-  //           approved: "day-green",
-  //           rejected: "day-orange",
-  //         };
-  //         return {
-  //           id: item.id, status, initials,
-  //           bgClass: index % 2 === 0 ? "bg-[#e8a020]" : "bg-[#1a5a50]",
-  //           name, location,
-  //           lic: item.licenseUrl ? fileName : "LIC-AP-2022-48291",
-  //           type: "Life Insurance",
-  //           plan: status === "approved" ? "Approved" : status === "rejected" ? "Rejected" : "Pending Review",
-  //           submitted: `Submitted ${days} ago`,
-  //           days, dayType: dayTypeByStatus[status] || "day-yellow",
-  //           certificateName: fileName,
-  //         };
-  //       });
-  //       setRows(nextRows);
-  //     } catch (fetchError) {
-  //       console.warn("Unable to load advisor approvals", fetchError);
-  //       setError("Failed to load approvals");
-  //       setRows([]);
-  //       setStats({ pending: 0, approved: 0, rejected: 0, pendingPercentage: 0 });
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   loadApprovals();
-  // }, []);
+ 
 
   function formatDate(dateString) {
     if (!dateString) return "-";
@@ -271,6 +219,12 @@ export default function IRDAIApprovals() {
       !activeFilter || activeFilter === "all" || r.status === activeFilter;
     return matchSearch && matchFilter;
   });
+  const pagination = getPaginationData(
+    filtered,
+    currentPage,
+    IRDAI_SUBMISSIONS_PER_PAGE,
+  );
+  const paginatedRows = pagination.items;
 
   const approveSubmission = async (id) => {
     if (!id || isProcessing) return;
@@ -432,7 +386,10 @@ export default function IRDAIApprovals() {
                   return (
                     <button
                       key={btn.key}
-                      onClick={() => setActiveFilter(isActive ? null : btn.key)}
+                      onClick={() => {
+                        setActiveFilter(isActive ? null : btn.key);
+                        setCurrentPage(1);
+                      }}
                       className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border-[1.5px] text-xs font-semibold cursor-pointer ${isActive ? btn.activeCls : btn.defaultCls}`}
                     >
                       {btn.icon}
@@ -450,7 +407,10 @@ export default function IRDAIApprovals() {
                   className="border-none bg-transparent outline-none text-sm text-white flex-1 min-w-0 placeholder-white/70"
                   placeholder="Search"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setCurrentPage(1);
+                  }}
                 />
                 <div className="text-white text-lg cursor-pointer shrink-0">
                   →
@@ -465,7 +425,7 @@ export default function IRDAIApprovals() {
                   No submissions found.
                 </div>
               )}
-              {filtered.map((r, i) => (
+              {paginatedRows.map((r, i) => (
                 <div
                   key={i}
                   className="bg-[#f9fbf9] rounded-xl px-[18px] py-3.5 flex items-center gap-3.5 border border-[#eef0ee] flex-wrap hover:bg-white hover:shadow-md"
@@ -554,6 +514,12 @@ export default function IRDAIApprovals() {
                 </div>
               ))}
             </div>
+
+            <PaginationControls
+              pagination={pagination}
+              onPageChange={setCurrentPage}
+              label="submissions"
+            />
           </div>
         </div>
       </div>

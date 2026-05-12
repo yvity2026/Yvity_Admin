@@ -3,8 +3,13 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import CustomerProfile from "@/components/CustomerProfile";
-import { FiUsers, FiCalendar, FiUser, FiSearch } from "react-icons/fi";
+import PaginationControls from "@/components/common/PaginationControls";
+import { getPaginationData } from "@/lib/pagination";
+import { FiUsers, FiCalendar, FiUser } from "react-icons/fi";
 import { HiOutlineArrowNarrowRight } from "react-icons/hi";
+
+const FETCH_LIMIT = 5000;
+const CUSTOMERS_PER_PAGE = 5;
 
 function Avatar({ src, initials, size = "md" }) {
   const sizeClass = size === "sm" ? "w-8 h-8 text-xs" : "w-10 h-10 text-sm";
@@ -45,15 +50,14 @@ export default function CustomersDashboard() {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const limit = 10;
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Data fetching
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/admin/customers?page=${page}&limit=${limit}`);
+        const res = await fetch(`/api/admin/customers?page=1&limit=${FETCH_LIMIT}`);
         const json = await res.json();
         setCustomers(json.data || []);
       } catch (error) {
@@ -63,7 +67,7 @@ export default function CustomersDashboard() {
       }
     };
     fetchCustomers();
-  }, [page]);
+  }, []);
 
   // Filtering data
   const filtered = customers.filter(
@@ -72,6 +76,12 @@ export default function CustomersDashboard() {
       (c.email || "").toLowerCase().includes(search.toLowerCase()) ||
       (c.location || "").toLowerCase().includes(search.toLowerCase())
   );
+  const pagination = getPaginationData(
+    filtered,
+    currentPage,
+    CUSTOMERS_PER_PAGE,
+  );
+  const paginatedCustomers = pagination.items;
 
   return (
     <div className="flex flex-col min-h-screen font-sans bg-gray-100 overflow-x-hidden w-full">
@@ -122,17 +132,7 @@ export default function CustomersDashboard() {
 
         </div>
       </div>
-      {/* ═══════════════════════════════════════════════════════════════════
-          END SECTION 1
-      ═══════════════════════════════════════════════════════════════════ */}
-
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          SECTION 2 — TABLE AREA
-          flex-1 fills remaining height. overflow-x-hidden prevents this
-          container from growing wider than the viewport, which is what
-          allows the inner overflow-x-auto to actually scroll.
-      ═══════════════════════════════════════════════════════════════════ */}
+      
       <div className="flex-1 px-6 max-md:px-3.5 pb-6 max-md:pb-3.5 w-full overflow-x-hidden ">
 
         {/* Sub-header */}
@@ -141,7 +141,7 @@ export default function CustomersDashboard() {
           <span className="text-base font-bold text-gray-900">All Customers</span>
         </div>
         <div className="text-xs text-gray-400 mb-4">
-          {`${customers.length} registered users`}
+          {`${filtered.length} registered users`}
         </div>
 
         {/* Search */}
@@ -151,7 +151,10 @@ export default function CustomersDashboard() {
               className="border-none bg-transparent outline-none text-sm text-white flex-1 placeholder-white/70"
               placeholder="Search"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
             />
             <HiOutlineArrowNarrowRight size={20} className="text-white cursor-pointer shrink-0" />
           </div>
@@ -184,7 +187,29 @@ export default function CustomersDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((c, i) => (
+                {!loading && paginatedCustomers.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={9}
+                      className="px-4 py-10 text-center text-sm text-gray-500"
+                    >
+                      No customers match the current search.
+                    </td>
+                  </tr>
+                )}
+
+                {loading && (
+                  <tr>
+                    <td
+                      colSpan={9}
+                      className="px-4 py-10 text-center text-sm text-gray-500"
+                    >
+                      Loading customers...
+                    </td>
+                  </tr>
+                )}
+
+                {paginatedCustomers.map((c, i) => (
                   <tr key={i} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="px-3 py-3 align-middle">
                       <div className="flex items-center gap-2.5">
@@ -228,6 +253,14 @@ export default function CustomersDashboard() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div className="px-3 sm:px-4 lg:px-5">
+            <PaginationControls
+              pagination={pagination}
+              onPageChange={setCurrentPage}
+              label="customers"
+            />
           </div>
         </div>
 

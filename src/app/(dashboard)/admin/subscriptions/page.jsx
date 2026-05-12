@@ -82,29 +82,6 @@ export default function SubscriptionsPage() {
   const subscriptions = data?.subscriptions || [];
   const totalPages = data?.pagination?.totalPages || 1;
 
-
-  // useEffect(() => {
-  //   const fetchSubscriptions = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const res = await fetch(
-  //         `/api/admin/subscriptions?limit=${limit}&page=${page}`,
-  //       );
-  //       const data = await res.json();
-  //       if (data.success) {
-  //         setSubscriptions(data.data);
-  //         setTotalPages(data.pagination.totalPages);
-  //       } else {
-  //         console.error("Failed to load subscriptions:", data.error);
-  //       }
-  //     } catch (err) {
-  //       console.error("Fetch error:", err);
-  //     }
-  //     setLoading(false);
-  //   };
-  //   fetchSubscriptions();
-  // }, [page, limit]);
-
   const filtered = subscriptions.filter(
     (s) =>
       s.name.toLowerCase().includes(search.toLowerCase()) ||
