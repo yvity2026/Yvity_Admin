@@ -35,6 +35,7 @@ ChartJS.register(
 
 import { Bar } from "react-chartjs-2";
 import { ChevronDown } from "lucide-react";
+import AdminDashboardSkeleton from "./loading";
 
 // ── Data ──────────────────────────────────────────────────────────
 const CITY_COLORS = [
@@ -54,15 +55,15 @@ const normalizeCompany = (name) =>
     .replace(/\(.*?\)/g, "")
     .trim();
 
-const ROLES = [
-  { label: "Senior Advisor", count: "194", pct: 55, color: "#1A6CA2" },
-  { label: "Junior Advisor", count: "194", pct: 60, color: "#3B6E10" },
-  { label: "Team Leader", count: "194", pct: 65, color: "#844D0A" },
-  { label: "Branch Manager", count: "194", pct: 56, color: "#534AB7" },
-  { label: "Trailing Advisor", count: "194", pct: 30, color: "#E8971A" },
-  { label: "LIC of India", count: "194", pct: 60, color: "#888888" },
-  { label: "LIC of India", count: "194", pct: 65, color: "#96C458" },
-  { label: "Total Advisor", count: "1,284", pct: 100, color: "#dc2626" },
+const ROLE_WISE_COLORS = [
+  "#1A6CA2",
+  "#3B6E10",
+  "#844D0A",
+  "#534AB7",
+  "#E8971A",
+  "#888888",
+  "#96C458",
+  "#dc2626",
 ];
 
 const BAR_MONTHS = [
@@ -1103,8 +1104,30 @@ export default function AdminDashboard() {
     color: SERVICE_COLORS[s.service_type] || "#6b7280",
   }));
 
+  const totalRoleWiseCount = (dashdata?.analytics?.roleWise || []).reduce(
+    (sum, item) => sum + item.total,
+    0,
+  );
+
+  const ROLES = [
+    ...(dashdata?.analytics?.roleWise || []).map((item, index) => ({
+      label: item.profession,
+      count: item.total.toLocaleString(),
+      pct: totalRoleWiseCount
+        ? Math.round((item.total / totalRoleWiseCount) * 100)
+        : 0,
+      color: ROLE_WISE_COLORS[index % ROLE_WISE_COLORS.length],
+    })),
+    {
+      label: "Total Advisors",
+      count: (dashdata?.advisors?.total || 0).toLocaleString(),
+      pct: 100,
+      color: ROLE_WISE_COLORS[ROLE_WISE_COLORS.length - 1],
+    },
+  ];
+
   if (isLoading || !dashdata) {
-    return <div className="p-6">Loading dashboard...</div>;
+    return <AdminDashboardSkeleton />;
   }
 
   return (

@@ -5,6 +5,8 @@ import { useAdmin } from "@/context/AuthAdminContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import AdminLogin from "@/components/AdminLogin";
+import YVITYLoadingPage from "./loading/page";
+
 
 export default function Home() {
   const { admin, loading } = useAdmin();
@@ -16,7 +18,7 @@ export default function Home() {
     }
   }, [admin, loading, router]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (loading) return <YVITYLoadingPage />;
 
   if (admin) return null; // will redirect
 
