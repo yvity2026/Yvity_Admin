@@ -5,6 +5,17 @@ import AdvisorProfile from "@/components/AdvisorProfile";
 import { useAdvisors } from "@/hooks/TanstankQuery/useAdvisor";
 import AdvisorsSkeleton from "./loading";
 
+// Helper function to format date to DD/MM/YYYY
+const formatDate = (dateString) => {
+  if (!dateString) return "—";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "—";
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
 // const advisors = [
 //   {
 //     id: 1,
@@ -87,7 +98,14 @@ function Avatar({ src, initials, size = "md" }) {
   if (src) {
     return (
       <div className={`${sizeClass} relative rounded-full overflow-hidden`}>
-        <Image src={src} alt="avatar" fill className="object-cover" />
+        <Image
+          src={src}
+          alt="avatar"
+          fill
+          sizes="40px"
+          unoptimized
+          className="object-cover"
+        />
       </div>
     );
   }
@@ -230,11 +248,11 @@ export default function AdvisorsDashboard() {
   if (isLoading) return <AdvisorsSkeleton />;
 
   return (
-    <div className="flex min-h-screen font-poppins bg-gray-100">
+    <div className="flex min-h-screen font-poppins bg-gray-100 overflow-x-hidden w-full">
       {/* Main */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-x-hidden w-full">
         {/* Content */}
-        <div className="p-6 md:p-6 p-3.5 flex-1">
+        <div className="p-6 md:p-6 p-3.5 flex-1 w-full">
           {/* Header */}
           <div className="flex items-center gap-2 mb-1">
             <svg
@@ -301,14 +319,15 @@ export default function AdvisorsDashboard() {
               ← Scroll to see all columns →
             </div>
 
-            <div
+<div
               className="overflow-x-auto w-full"
               style={{
                 WebkitOverflowScrolling: "touch",
                 scrollBehavior: "smooth",
+                maxWidth: "100%",
               }}
             >
-              <table className="min-w-[900px] w-full border-collapse">
+              <table className="min-w-[950px] w-full border-collapse">
                 <thead>
                   <tr>
                     {[
@@ -375,9 +394,7 @@ export default function AdvisorsDashboard() {
                         —
                       </td> */}
                       <td className="px-3 py-3 text-xs text-gray-500 align-middle">
-                        {advisor.submittedAt
-                          ? new Date(advisor.submittedAt).toLocaleDateString()
-                          : "-"}
+                        {formatDate(advisor.submittedAt)}
                       </td>
                       <td className="px-3 py-3 align-middle">
                         <StatusBadge status={advisor.status} />

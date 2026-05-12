@@ -38,6 +38,16 @@ export default function TestimonialReviewModal({
 
   if (!testimonial) return null;
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "—";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "—";
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -104,7 +114,7 @@ export default function TestimonialReviewModal({
               </div>
               <div className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-[#173736]">
                 <FiClock size={14} />
-                {testimonial.submitted}
+                {formatDate(testimonial.submitted)}
               </div>
             </div>
             <div>
@@ -126,14 +136,22 @@ export default function TestimonialReviewModal({
               {testimonial.type === "text" ? (
                 testimonial.content || testimonial.review || "No review provided."
               ) : testimonial.media_url ? (
-                <a
-                  href={testimonial.media_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-semibold text-[#0A4A4A] underline underline-offset-4"
-                >
-                  Open {testimonial.type} file
-                </a>
+                testimonial.type === "image" ? (
+                  <img
+                    src={testimonial.media_url}
+                    alt="Testimonial"
+                    className="max-w-full h-auto rounded-lg"
+                  />
+                ) : (
+                  <a
+                    href={testimonial.media_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-semibold text-[#0A4A4A] underline underline-offset-4"
+                  >
+                    Open {testimonial.type} file
+                  </a>
+                )
               ) : (
                 "No media attached."
               )}

@@ -46,6 +46,7 @@ export async function GET(req) {
         name: item.name || "Advisor",
         email: item.email || null,
         phone: item.mobile || null,
+        profession: item.profession || null,
         profile_pic: item.selfie_url || null,
         joinedAt: item.created_at || null,
         location: item.city || "Unknown, IN",

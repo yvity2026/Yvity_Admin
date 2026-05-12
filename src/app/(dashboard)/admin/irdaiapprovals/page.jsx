@@ -151,6 +151,19 @@ function Avatar({ initials, size = "md", bgClass = "bg-yellow-600" }) {
   );
 }
 
+// ── IrdaiBadge ─────────────────────────────────────────────────────
+function IrdaiBadge({ status }) {
+  const variants = {
+    Verified: "bg-green-100 text-green-700",
+    Pending: "bg-yellow-100 text-yellow-700",
+  };
+  return (
+    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${variants[status] || variants.Pending}`}>
+      {status}
+    </span>
+  );
+}
+
 // ── Main page ────────────────────────────────────────────────────
 export default function IRDAIApprovals() {
   const [showModal, setShowModal] = useState(false);
@@ -239,16 +252,15 @@ export default function IRDAIApprovals() {
   // }, []);
 
   function formatDate(dateString) {
-  if (!dateString) return "-";
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "-";
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
 
-  const date = new Date(dateString);
-
-  return date.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-}
 
   const filtered = (rows || []).filter((r) => {
     const matchSearch =
@@ -334,20 +346,19 @@ export default function IRDAIApprovals() {
   ];
 
   if (isLoading) return <IRDAISkeleton />;
-  console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaa", selectedSubmission);
   return (
-    <div className="flex min-h-screen bg-[#f0f2ee] font-sans">
+    <div className="flex min-h-screen bg-[#f0f2ee] font-sans overflow-x-hidden w-full">
       {/* Mobile overlay */}
       {/* {showSidebar && (
         <div className="fixed inset-0 bg-black/45 z-40 md:hidden" onClick={() => setShowSidebar(false)} />
       )} */}
 
       {/* Main area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-x-hidden w-full">
         {/* Topbar */}
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 max-md:p-3.5">
+        <div className="flex-1 overflow-y-auto p-6 max-md:p-3.5 w-full">
           {/* Stat cards */}
           <div className="flex flex-wrap gap-4 mb-5">
             {/* Pending */}
@@ -480,8 +491,8 @@ export default function IRDAIApprovals() {
                       </span>
                     </div>
                     <div className="text-[11px] text-gray-400 mt-0.5 break-all sm:break-normal">
-                      {r.licenseNo} &bull; {r.type} &bull; {r.plan} &bull;{" "}
-                      {r.submittedAt}
+                      {r.licenseNo} &bull; {r.profession} &bull; {r.plan} &bull;{" "}
+                      {formatDate(r.submittedAt)}
                     </div>
                   </div>
 

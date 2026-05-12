@@ -28,8 +28,9 @@ function Avatar({
           src={src}
           alt={alt || "avatar"}
           fill
-          className="object-cover"
           sizes="40px"
+          unoptimized
+          className="object-cover"
           onError={(e) => {
             e.currentTarget.style.display = "none";
           }}
@@ -40,6 +41,16 @@ function Avatar({
     </div>
   );
 }
+
+const formatDate = (dateString) => {
+  if (!dateString) return "—";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "—";
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
 // ── Badge color map keyed by badgeBg hex ────────────────────────
 // Since badge colors come from data, we encode them as Tailwind classes directly in the data
@@ -112,7 +123,7 @@ export default function SubscriptionsPage() {
   }
 
   return (
-    <div className="flex min-h-screen font-sans bg-gray-100">
+    <div className="flex min-h-screen font-sans bg-gray-100 overflow-x-hidden w-full">
       {/* Mobile overlay */}
       {showSidebar && (
         <div
@@ -122,9 +133,9 @@ export default function SubscriptionsPage() {
       )}
 
       {/* Main */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-x-hidden w-full">
         {/* Content */}
-        <div className="flex-1 p-6 max-md:p-3.5 overflow-y-auto">
+        <div className="flex-1 p-6 max-md:p-3.5 overflow-y-auto w-full">
           <div className="bg-white rounded-2xl p-6 shadow-sm">
             {/* Header */}
             <div className="flex items-center gap-2.5 mb-4">
@@ -183,9 +194,7 @@ export default function SubscriptionsPage() {
                         </div>
                         <div className="text-[11px] text-gray-400 mt-0.5">
                           {item.plan} •{" "}
-                          {item.expiry
-                            ? new Date(item.expiry).toLocaleDateString()
-                            : "—"}{" "}
+                          {formatDate(item.expiry)} {" "}
                           • ₹{item.amount}
                         </div>
                       </div>

@@ -7,10 +7,10 @@ import PaymentsSkeleton from "./loading";
 import Image from "next/image";
 
 const transactions = [
-  { id: 1, initials: "KM", avatarBg: "bg-[#E8833A]", name: "Krishna Mohan", location: "Nellore, AP", plan: "Gold",   amount: "₹2,999", method: "UPI",        date: "Jan 2, 2026", txnId: "TXN2025010501", status: "Sucess" },
-  { id: 2, initials: "PS", avatarBg: "bg-[#3AAFA9]", name: "Priya Sharma",  location: "Nellore, AP", plan: "Gold",   amount: "₹2,999", method: "Card",        date: "Jan 2, 2026", txnId: "TXN2025010501", status: "Sucess" },
-  { id: 3, initials: "PS", avatarBg: "bg-[#3AAFA9]", name: "Priya Sharma",  location: "Hyderabad",   plan: "Silver", amount: "₹2,999", method: "Net Banking", date: "Jan 2, 2026", txnId: "TXN2025010501", status: "Sucess" },
-  { id: 4, initials: "PS", avatarBg: "bg-[#3AAFA9]", name: "Priya Sharma",  location: "Nellore, AP", plan: "Gold",   amount: "₹2,999", method: "Card",        date: "Jan 2, 2026", txnId: "TXN2025010501", status: "Sucess" },
+  { id: 1, initials: "KM", avatarBg: "bg-[#E8833A]", name: "Krishna Mohan", location: "Nellore, AP", plan: "Gold",   amount: "₹2,999", method: "UPI",        date: "02/01/2026", txnId: "TXN2025010501", status: "Sucess" },
+  { id: 2, initials: "PS", avatarBg: "bg-[#3AAFA9]", name: "Priya Sharma",  location: "Nellore, AP", plan: "Gold",   amount: "₹2,999", method: "Card",        date: "02/01/2026", txnId: "TXN2025010501", status: "Sucess" },
+  { id: 3, initials: "PS", avatarBg: "bg-[#3AAFA9]", name: "Priya Sharma",  location: "Hyderabad",   plan: "Silver", amount: "₹2,999", method: "Net Banking", date: "02/01/2026", txnId: "TXN2025010501", status: "Sucess" },
+  { id: 4, initials: "PS", avatarBg: "bg-[#3AAFA9]", name: "Priya Sharma",  location: "Nellore, AP", plan: "Gold",   amount: "₹2,999", method: "Card",        date: "02/01/2026", txnId: "TXN2025010501", status: "Sucess" },
 ];
 
 function Avatar({ initials, size = "md" }) {
@@ -85,7 +85,7 @@ const stats = data?.revenue || {};
   }
 
   return (
-    <div className="flex min-h-screen font-sans bg-[#EDEEE6]">
+    <div className="flex min-h-screen font-sans bg-[#EDEEE6] overflow-x-hidden w-full">
 
       {/* Mobile overlay */}
       {showSidebar && (
@@ -94,7 +94,7 @@ const stats = data?.revenue || {};
 
 
       {/* Main */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-x-hidden w-full">
 
 
         {/* Body */}
@@ -197,6 +197,8 @@ const stats = data?.revenue || {};
     src={txn.profile_pic || "/default-avatar.png"}
     alt={txn.name || "User"}
     fill
+    sizes="40px"
+    unoptimized
     className="object-cover"
   />
 </div>
