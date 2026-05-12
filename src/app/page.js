@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import AdminLogin from "@/components/AdminLogin";
 import YVITYLoadingPage from "./loading/page";
 
+
 export default function Home() {
   const { admin, loading } = useAdmin();
   const router = useRouter();
