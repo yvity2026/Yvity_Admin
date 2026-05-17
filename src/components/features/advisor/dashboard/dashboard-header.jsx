@@ -3,7 +3,7 @@ import { Bell } from "lucide-react";
 export default function DashboardHeader() {
   return (
     <div className="flex justify-between items-center bg-white px-6 py-4 border-b border-gray-200 w-full sticky top-0 z-10">
-      <h1 className="text-xl font-bold text-gray-900 font-poppins">
+      <h1 className="text-xl font-bold text-gray-900 font-cormorant">
         Dashboard
       </h1>
 
