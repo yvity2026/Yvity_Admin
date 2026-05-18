@@ -10,17 +10,14 @@ import { getPaginationData } from "@/lib/pagination";
 
 const PAYMENTS_PER_PAGE = 5;
 
-
 function Avatar({ initials, size = "md" }) {
   const sizeClass = size === "sm" ? "w-8 h-8 text-xs" : "w-10 h-10 text-sm";
   return (
-    <div className={`${sizeClass} rounded-full bg-yellow-600 text-white flex items-center justify-center font-bold shrink-0`}>
+    <div className={`${sizeClass} rounded-full bg-[#F59E0B] text-white flex items-center justify-center font-bold shrink-0`}>
       {initials}
     </div>
   );
 }
-
-
 
 function PlanBadge({ plan }) {
   const isGold = plan === "gold";
@@ -33,44 +30,16 @@ function PlanBadge({ plan }) {
 
 export default function PaymentsDashboard() {
   const [selectedPayment, setSelectedPayment] = useState(null);
-  const [activeNav, setActiveNav]             = useState("Payments");
-  const [search, setSearch]                   = useState("");
-  const [showSidebar, setShowSidebar]         = useState(false);
-  const [currentPage, setCurrentPage]         = useState(1);
-  
-  // const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-  // const [error, setError] = useState(null);
+  const [activeNav, setActiveNav] = useState("Payments");
+  const [search, setSearch] = useState("");
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-    const {
-    data,
-    isLoading,
-    error,
-  } = usePayments();
-const transactions = data?.data || [];
-const stats = data?.revenue || {};
+  const { data, isLoading, error } = usePayments();
+  const transactions = data?.data || [];
+  const stats = data?.revenue || {};
 
-  // useEffect(() => {
-  //   const fetchTransactions = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const res = await fetch("/api/admin/payments");
-  //       if (!res.ok) throw new Error("Failed to fetch payments");
-  //       const { data, revenue } = await res.json();
-  //       setTransactions(data || []);
-  //       setStats(revenue || null)
-  //     } catch (err) {
-  //       console.error(err);
-  //       setError("Unable to load payments.");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchTransactions();
-  // }, []);
-
-const filtered = transactions.filter(
+  const filtered = transactions.filter(
     (t) =>
       t.name?.toLowerCase().includes(search.toLowerCase()) ||
       t.txnId?.toLowerCase().includes(search.toLowerCase()) ||
@@ -79,86 +48,74 @@ const filtered = transactions.filter(
   const pagination = getPaginationData(filtered, currentPage, PAYMENTS_PER_PAGE);
   const paginatedTransactions = pagination.items;
 
-    if (isLoading) {
-    return (
-      <PaymentsSkeleton />
-    );
+  if (isLoading) {
+    return <PaymentsSkeleton />;
   }
 
   return (
-    <div className="flex min-h-screen font-sans bg-[#EDEEE6] overflow-x-hidden w-full">
-
-      {/* Mobile overlay */}
+    <div className="flex min-h-screen font-poppins bg-[#F8F6F1] overflow-x-hidden w-full">
       {showSidebar && (
         <div className="fixed inset-0 bg-black/45 z-40 md:hidden" onClick={() => setShowSidebar(false)} />
       )}
 
-
-      {/* Main */}
       <div className="flex-1 flex flex-col overflow-x-hidden w-full">
-
-
-        {/* Body */}
         <main className="flex-1 overflow-y-auto p-[22px_26px] max-md:p-3.5">
-
           {/* Stat Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 mb-5">
-
             {/* Revenue This Month */}
-            <div className="bg-white rounded-2xl p-[16px_18px] border border-[#E3E6DC] flex justify-between items-start">
+            <div className="bg-white rounded-2xl p-[16px_18px] border border-[#E5E7EB] flex justify-between items-start shadow-sm">
               <div>
                 <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full mb-2">
                   ↑ 18%
                 </span>
-                <div className="text-[22px] font-extrabold text-[#1A2B22] leading-tight">{stats?.thisMonth}</div>
-                <div className="text-[11px] text-gray-400 mt-0.5 font-medium">Revenue This Month</div>
+                <div className="text-[22px] font-extrabold text-[#0a4a4a] leading-tight">{stats?.thisMonth}</div>
+                <div className="text-[11px] text-gray-500 mt-0.5 font-medium">Revenue This Month</div>
               </div>
               <div className="w-[38px] h-[38px] rounded-xl bg-orange-50 flex items-center justify-center text-[19px]">💰</div>
             </div>
 
             {/* Gold Plan Revenue */}
-            <div className="bg-white rounded-2xl p-[16px_18px] border border-[#E3E6DC] flex justify-between items-start">
+            <div className="bg-white rounded-2xl p-[16px_18px] border border-[#E5E7EB] flex justify-between items-start shadow-sm">
               <div className="pt-[22px]">
-                <div className="text-[22px] font-extrabold text-[#1A2B22] leading-tight">{stats?.goldPlan}</div>
-                <div className="text-[11px] text-gray-400 mt-0.5 font-medium">Gold Plan Revenue</div>
+                <div className="text-[22px] font-extrabold text-[#0a4a4a] leading-tight">{stats?.goldPlan}</div>
+                <div className="text-[11px] text-gray-500 mt-0.5 font-medium">Gold Plan Revenue</div>
               </div>
               <div className="w-[38px] h-[38px] rounded-xl bg-yellow-50 flex items-center justify-center text-[19px]">🏅</div>
             </div>
 
             {/* Silver Plan Revenue */}
-            <div className="bg-white rounded-2xl p-[16px_18px] border border-[#E3E6DC] flex justify-between items-start">
+            <div className="bg-white rounded-2xl p-[16px_18px] border border-[#E5E7EB] flex justify-between items-start shadow-sm">
               <div className="pt-[22px]">
-                <div className="text-[22px] font-extrabold text-[#1A2B22] leading-tight">{stats?.silverPlan}</div>
-                <div className="text-[11px] text-gray-400 mt-0.5 font-medium">Silver Plan Revenue</div>
+                <div className="text-[22px] font-extrabold text-[#0a4a4a] leading-tight">{stats?.silverPlan}</div>
+                <div className="text-[11px] text-gray-500 mt-0.5 font-medium">Silver Plan Revenue</div>
               </div>
               <div className="w-[38px] h-[38px] rounded-xl bg-slate-50 flex items-center justify-center text-[19px]">🥈</div>
             </div>
           </div>
 
-          {/* Recent Transactions panel */}
-          <div className="bg-white rounded-2xl border border-[#E3E6DC] p-[18px_22px]">
-
-            {/* Panel title */}
+          {/* Recent Transactions Panel */}
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-[18px_22px] shadow-sm">
+            {/* Panel Title */}
             <div className="flex items-center gap-2 mb-3.5">
               <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
-                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="#1C3829" strokeWidth="1.8" strokeLinecap="round" />
-                <rect x="9" y="3" width="6" height="4" rx="1" stroke="#1C3829" strokeWidth="1.8" />
-                <line x1="9" y1="12" x2="15" y2="12" stroke="#1C3829" strokeWidth="1.8" strokeLinecap="round" />
-                <line x1="9" y1="16" x2="13" y2="16" stroke="#1C3829" strokeWidth="1.8" strokeLinecap="round" />
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="#0a4a4a" strokeWidth="1.8" strokeLinecap="round" />
+                <rect x="9" y="3" width="6" height="4" rx="1" stroke="#0a4a4a" strokeWidth="1.8" />
+                <line x1="9" y1="12" x2="15" y2="12" stroke="#0a4a4a" strokeWidth="1.8" strokeLinecap="round" />
+                <line x1="9" y1="16" x2="13" y2="16" stroke="#0a4a4a" strokeWidth="1.8" strokeLinecap="round" />
               </svg>
-              <span className="font-bold text-[13px] text-[#1A2B22]">Recent Transactions</span>
+              <span className="font-bold text-[13px] text-[#0a4a4a] font-cormorant">Recent Transactions</span>
             </div>
 
             {/* Search */}
             <div className="flex flex-col md:flex-row gap-3 mb-4 items-stretch md:items-center">
-              <div className="flex items-center bg-[#0A4A4A] rounded-full px-6 gap-2.5 flex-1 h-12">
+              <div className="flex items-center bg-[#0a4a4a] rounded-full px-6 gap-2.5 flex-1 h-12">
                 <svg width="16" height="16" fill="none" stroke="rgba(255,255,255,0.45)" viewBox="0 0 24 24">
                   <circle cx="11" cy="11" r="8" strokeWidth="2" />
                   <path d="M21 21l-4.35-4.35" strokeWidth="2" />
                 </svg>
                 <input
                   type="text"
-                  className="border-none bg-transparent outline-none text-[13px] text-white flex-1 min-w-0 placeholder-white/70"
+                  className="border-none bg-transparent outline-none text-[13px] text-white flex-1 min-w-0 placeholder-white/70 font-poppins"
                   placeholder="Search transactions..."
                   value={search}
                   onChange={(e) => {
@@ -170,8 +127,8 @@ const filtered = transactions.filter(
               </div>
             </div>
 
-            {/* Mobile scroll hint */}
-            <div className="md:hidden text-[11px] text-gray-400 text-right mb-1">
+            {/* Mobile Scroll Hint */}
+            <div className="md:hidden text-[11px] text-gray-500 text-right mb-1">
               ← Scroll to see all columns →
             </div>
 
@@ -179,9 +136,9 @@ const filtered = transactions.filter(
             <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: "touch" }}>
               <table className="min-w-[750px] w-full border-collapse">
                 <thead>
-                  <tr className="border-b border-[#E3E6DC]">
+                  <tr className="border-b border-[#E5E7EB]">
                     {["Adviser", "Plan", "Amount", "Method", "Date", "Txn Id", "Status", "Actions"].map((h) => (
-                      <th key={h} className="text-left pb-2.5 pr-3 text-[10px] font-bold text-gray-400 tracking-[0.07em] uppercase">
+                      <th key={h} className="text-left pb-2.5 pr-3 text-[10px] font-bold text-gray-500 tracking-[0.07em] uppercase font-poppins">
                         {h}
                       </th>
                     ))}
@@ -191,42 +148,44 @@ const filtered = transactions.filter(
                   {paginatedTransactions.map((txn, i) => (
                     <tr
                       key={txn.id}
-                      className={`hover:bg-gray-50 ${i < paginatedTransactions.length - 1 ? "border-b border-[#F3F6F0]" : ""}`}
+                      className={`hover:bg-gray-50 ${i < paginatedTransactions.length - 1 ? "border-b border-[#E5E7EB]" : ""}`}
                     >
                       {/* Adviser */}
                       <td className="py-2.5 pr-3">
                         <div className="flex items-center gap-2">
                           <div className="w-[30px] h-[30px] rounded-full overflow-hidden shrink-0 relative bg-gray-200">
-  <Image
-    src={txn.profile_pic || "/default-avatar.png"}
-    alt={txn.name || "User"}
-    fill
-    sizes="40px"
-    unoptimized
-    className="object-cover"
-  />
-</div>
+                            <Image
+                              src={txn.profile_pic || "/default-avatar.png"}
+                              alt={txn.name || "User"}
+                              fill
+                              sizes="40px"
+                              unoptimized
+                              className="object-cover"
+                            />
+                          </div>
                           <div>
-                            <div className="text-xs font-semibold text-[#1A2B22]">{txn.name}</div>
-                            <div className="text-[10px] text-gray-400">{txn.location}</div>
+                            <div className="text-xs font-semibold text-[#0a4a4a]">{txn.name}</div>
+                            <div className="text-[10px] text-gray-500">{txn.location}</div>
                           </div>
                         </div>
                       </td>
 
                       {/* Plan */}
-                      <td className="pr-3"><PlanBadge plan={txn.plan} /></td>
+                      <td className="pr-3">
+                        <PlanBadge plan={txn.plan} />
+                      </td>
 
                       {/* Amount */}
-                      <td className="pr-3 text-xs font-semibold text-[#1A2B22]">{txn.amount}</td>
+                      <td className="pr-3 text-xs font-semibold text-[#0a4a4a]">{txn.amount}</td>
 
                       {/* Method */}
-                      <td className="pr-3 text-xs text-gray-500">{txn.method}</td>
+                      <td className="pr-3 text-xs text-gray-600">{txn.method}</td>
 
                       {/* Date */}
-                      <td className="pr-3 text-xs text-gray-500">{txn.date}</td>
+                      <td className="pr-3 text-xs text-gray-600">{txn.date}</td>
 
                       {/* Txn ID */}
-                      <td className="pr-3 text-[11px] text-gray-400 font-mono">{`TXN${txn.txn_id}`}</td>
+                      <td className="pr-3 text-[11px] text-gray-500 font-mono">{`TXN${txn.txn_id}`}</td>
 
                       {/* Status */}
                       <td className="pr-3">
@@ -242,7 +201,7 @@ const filtered = transactions.filter(
                       <td>
                         <button
                           onClick={() => setSelectedPayment(txn)}
-                          className="bg-[#0A4A4A] hover:bg-[#155e5e] text-white px-3 py-1 rounded-md text-xs font-medium cursor-pointer border-none"
+                          className="bg-[#0a4a4a] hover:bg-[#0d5a5a] text-white px-3 py-1 rounded-md text-xs font-medium cursor-pointer border-none transition-colors"
                         >
                           View
                         </button>
@@ -252,7 +211,7 @@ const filtered = transactions.filter(
 
                   {filtered.length === 0 && (
                     <tr>
-                      <td colSpan={8} className="text-center py-7 text-gray-400 text-[13px]">
+                      <td colSpan={8} className="text-center py-7 text-gray-500 text-[13px]">
                         No transactions found.
                       </td>
                     </tr>
@@ -261,11 +220,7 @@ const filtered = transactions.filter(
               </table>
             </div>
 
-            <PaginationControls
-              pagination={pagination}
-              onPageChange={setCurrentPage}
-              label="transactions"
-            />
+            <PaginationControls pagination={pagination} onPageChange={setCurrentPage} label="transactions" />
           </div>
         </main>
       </div>
