@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
-import { Bar } from "react-chartjs-pro";
+import { Bar } from "react-chartjs-2";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const BAR_MONTHS = [
   { m: "Jan", h: 2400, gold: true, val: "₹2,400" },
