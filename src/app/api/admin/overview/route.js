@@ -1,4 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
+import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
+import { NextResponse } from "next/server";
 
 function normalizeProfession(profession) {
   if (typeof profession !== "string") {
@@ -12,6 +14,15 @@ function normalizeProfession(profession) {
 
 export async function GET() {
   try {
+    // Check authentication
+    const admin = await getAuthenticatedAdmin();
+    if (!admin) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const supabase = createAdminClient();
 
     const [
@@ -71,6 +82,23 @@ export async function GET() {
         `),
     ]);
 
+    // Check for errors in any query
+    if (totalRes.error) {
+      console.error("Failed to fetch total advisors:", totalRes.error);
+      return NextResponse.json(
+        { error: "Failed to fetch dashboard data" },
+        { status: 500 }
+      );
+    }
+
+    if (cityRes.error || companyRes.error || serviceRes.error) {
+      console.error("Analytics query failed:", { cityRes: cityRes.error, companyRes: companyRes.error, serviceRes: serviceRes.error });
+      return NextResponse.json(
+        { error: "Failed to fetch analytics data" },
+        { status: 500 }
+      );
+    }
+
     const professionCounts = new Map();
 
     for (const item of roleWiseRes.data || []) {
@@ -97,7 +125,7 @@ export async function GET() {
         ]
       : topProfessions;
 
-    return Response.json({
+    return NextResponse.json({
       advisors: {
         total: totalRes.count || 0,
         free: freeRes.count || 0,
@@ -110,15 +138,29 @@ export async function GET() {
         total: totalUsersRes.count || 0,
       },
 
+      subscriptions: {
+        active: silverRes.count + goldRes.count || 0,
+      },
+
+      revenue: {
+        total: 0,
+      },
+
+      approvals: {
+        pending: underReviewRes.count || 0,
+      },
+
       analytics: {
         cities: cityRes.data || [],
         companies: companyRes.data || [],
         services: serviceRes.data || [],
+        serviceWise: serviceRes.data || [],
         roleWise,
       },
     });
   } catch (error) {
-    return Response.json(
+    console.error("GET /api/admin/overview failed:", error);
+    return NextResponse.json(
       { error: "Internal Server Error", details: error.message },
       { status: 500 }
     );
