@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { sendWhatsAppOtp } from "@/lib/auth/sendWhatsappOtp";
 import { hashOtp, hashPhone, normalizePhone } from "@/lib/auth/hash";
-import crypto from 'crypto'
+import crypto from "crypto";
 import { createAdminClient } from "@/lib/supabase/server";
+import { isDevAdminPhone, isDevAdminAuthEnabled } from "@/lib/admin-dev-auth";
 
 const generateOtp = () => crypto.randomInt(100000, 1000000).toString();
 const OTP_TTL_SECONDS = 5 * 60;
@@ -19,6 +20,13 @@ export async function POST(request) {
 
     if (!/^[6-9]\d{9}$/.test(mobile)) {
       return NextResponse.json({ error: "Invalid phone" }, { status: 400 });
+    }
+
+    if (isDevAdminAuthEnabled() && isDevAdminPhone(mobile)) {
+      return NextResponse.json({
+        success: true,
+        message: "Dev OTP enabled (use 123456)",
+      });
     }
 
     const supabase = createAdminClient();

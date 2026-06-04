@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { hashOtp, hashPhone } from "@/lib/auth/hash";
+import { hashOtp, hashPhone, normalizePhone } from "@/lib/auth/hash";
 import { normalizePermissions } from "@/lib/admin/permissions";
 import { createAdminClient } from "@/lib/supabase/server";
+import {
+  devAdminSession,
+  isDevAdminPhone,
+  isDevAdminAuthEnabled,
+  verifyDevAdminOtp,
+} from "@/lib/admin-dev-auth";
 
 export async function POST(request) {
   try {
@@ -13,6 +19,30 @@ export async function POST(request) {
         { error: "Phone and OTP required" },
         { status: 400 },
       );
+    }
+
+    const mobile = normalizePhone(phone);
+
+    if (isDevAdminAuthEnabled() && isDevAdminPhone(mobile) && verifyDevAdminOtp(otp)) {
+      const session = devAdminSession();
+      const response = NextResponse.json({
+        success: true,
+        admin: {
+          id: session.admin_id,
+          role: session.role,
+          permissions: session.permissions,
+        },
+      });
+
+      response.cookies.set("admin_session", JSON.stringify(session), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 60 * 60 * 24 * 7,
+        path: "/",
+      });
+
+      return response;
     }
 
     const supabase = createAdminClient();

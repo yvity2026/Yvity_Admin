@@ -1,6 +1,42 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/server";
+import {
+  approveLocalProfile,
+  listLocalApprovals,
+  rejectLocalProfile,
+  useLocalApprovals,
+} from "@/lib/local-data/advisor-approvals";
+import { goldAppBaseUrl } from "@/lib/local-data/paths";
+
+function useGoldApprovalsApi() {
+  if (process.env.YVITY_GOLD_APPROVALS_API === "false") return false;
+  return useLocalApprovals();
+}
+
+async function fetchGoldApprovals() {
+  const base = goldAppBaseUrl();
+  const res = await fetch(`${base}/api/admin/approvals`, { cache: "no-store" });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(json?.error || "Unable to load approvals from YVITY Gold");
+  }
+  return json;
+}
+
+async function postGoldApproval(payload) {
+  const base = goldAppBaseUrl();
+  const res = await fetch(`${base}/api/admin/approvals`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(json?.error || "Unable to update approval in YVITY Gold");
+  }
+  return json;
+}
 
 async function parseAdminSession() {
   const cookieStore = await cookies();
@@ -31,6 +67,10 @@ export async function GET() {
     const adminSession = await requireAdmin();
     if (!adminSession) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (useLocalApprovals()) {
+      return NextResponse.json(listLocalApprovals());
     }
 
     const supabase = createAdminClient();
@@ -87,10 +127,11 @@ export async function GET() {
         status,
         submittedAt: item.created_at,
         updatedAt: item.updated_at,
-        licenseNo: item.services[0].license,
+        licenseNo: item.services?.[0]?.license,
         plan: item.subscription_plan || item.plan || "Free",
         is_hero: item.is_hero || false,
         is_landing: item.is_landing || false,
+        type: item.designation || "Insurance Advisor",
       };
     });
 
@@ -118,10 +159,9 @@ export async function POST(request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { action, advisorId, is_hero, is_landing, replaceAdvisorId, priorityType } = payload;
-  console.log(payload);
+  const { action, advisorId, is_hero, is_landing, replaceAdvisorId, priorityType, reason, note } =
+    payload;
 
-  // advisorId required
   if (!advisorId) {
     return NextResponse.json(
       { error: "advisorId is required" },
@@ -129,12 +169,71 @@ export async function POST(request) {
     );
   }
 
-  // optional validation for action
   if (action !== undefined && !["approve", "reject"].includes(action)) {
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   }
 
-  // optional validation for booleans
+  if (useGoldApprovalsApi() && (action === "approve" || action === "reject")) {
+    try {
+      return NextResponse.json(
+        await postGoldApproval({
+          action,
+          advisorId,
+          reason: reason || note,
+          note,
+        }),
+      );
+    } catch (error) {
+      console.error("Gold approvals POST failed, falling back to local files", error);
+    }
+  }
+
+  if (useLocalApprovals()) {
+    if (action === "approve") {
+      const profile = approveLocalProfile(advisorId);
+      if (!profile) {
+        return NextResponse.json({ error: "Advisor profile not found" }, { status: 404 });
+      }
+      return NextResponse.json({
+        success: true,
+        advisor: {
+          id: profile.id,
+          advisor_id: profile.user_id,
+          account_status: profile.account_status,
+          profile_status: profile.profile_status,
+        },
+      });
+    }
+
+    if (action === "reject") {
+      const profile = rejectLocalProfile(
+        advisorId,
+        reason || note || "Profile requires changes",
+      );
+      if (!profile) {
+        return NextResponse.json({ error: "Advisor profile not found" }, { status: 404 });
+      }
+      return NextResponse.json({
+        success: true,
+        advisor: {
+          id: profile.id,
+          advisor_id: profile.user_id,
+          account_status: profile.account_status,
+          profile_status: profile.profile_status,
+        },
+      });
+    }
+
+    if (is_hero !== undefined || is_landing !== undefined) {
+      return NextResponse.json(
+        { error: "Hero and landing priority are not available for local approvals yet" },
+        { status: 400 },
+      );
+    }
+
+    return NextResponse.json({ error: "No action specified" }, { status: 400 });
+  }
+
   if (is_hero !== undefined && typeof is_hero !== "boolean") {
     return NextResponse.json(
       { error: "is_hero must be boolean" },
@@ -283,7 +382,6 @@ export async function POST(request) {
     );
   }
 
-  // 2. fetch user BEFORE updating roles
   const { data: user } = await supabase
     .from("users")
     .select("id, roles")
@@ -292,7 +390,6 @@ export async function POST(request) {
 
   if (user) {
     const currentRoles = Array.isArray(user.roles) ? user.roles : [];
-
     const updatedRoles = [...new Set([...currentRoles, "advisor"])];
 
     await supabase

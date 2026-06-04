@@ -1,7 +1,6 @@
 # For detailed configuration reference documentation, visit:
 # https://supabase.com/docs/guides/local-development/cli/config
-# A string used to distinguish different Supabase projects on the same host. Defaults to the
-# working directory name when running `supabase init`.
+# Schema owner for YVITY + YVITY-Dashboard. Default local ports (543xx).
 project_id = "YVITY-Dashboard"
 
 [api]

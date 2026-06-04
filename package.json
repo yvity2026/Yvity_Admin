@@ -3,10 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack -p 3000 -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "supabase:start": "npx supabase@latest start",
+    "supabase:stop": "npx supabase@latest stop",
+    "supabase:status": "npx supabase@latest status",
+    "supabase:reset": "npx supabase@latest db reset",
+    "supabase:sync-from-remote": "powershell -ExecutionPolicy Bypass -File ./scripts/sync-remote-to-local.ps1"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1036.0",
@@ -43,6 +48,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
+    "supabase": "^2.92.1",
     "tailwindcss": "^4"
   }
 }

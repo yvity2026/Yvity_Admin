@@ -1,3 +1,4 @@
+import { devAdminSession, isDevAdminAuthEnabled } from "@/lib/admin-dev-auth";
 import { validateAdmin } from "@/lib/auth/validateAdmin";
 import { createAdminClient } from "@/lib/supabase/server";
 
@@ -6,6 +7,18 @@ export async function getAuthenticatedAdmin() {
 
   if (!session?.admin_id) {
     return null;
+  }
+
+  if (isDevAdminAuthEnabled() && session.admin_id === devAdminSession().admin_id) {
+    const dev = devAdminSession();
+    return {
+      id: dev.admin_id,
+      role: dev.role,
+      permissions: dev.permissions,
+      name: "Local Admin",
+      phone_number: "+919876543210",
+      is_active: true,
+    };
   }
 
   const supabase = createAdminClient();
