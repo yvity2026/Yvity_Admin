@@ -42,10 +42,10 @@ const SuccessReviewModal = ({ isOpen, onClose, score = 12 }) => {
 
           <div className="flex flex-col items-start mb-2">
             <Image
-              src="/images/Adivisor/Navbar/navlogo.png"
+              src="/images/yvity-logo.png"
               height={100}
               width={100}
-              alt="Navbar logo"
+              alt="YVITY logo"
             />
           </div>
           <h2 className="text-white text-[32px] font-bold font-cormorant leading-normal">Insurance Advisor Profile</h2>

@@ -9,16 +9,19 @@ function PaginationButton({
   active = false,
   onClick,
   className = "",
+  ariaLabel,
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
+      aria-label={ariaLabel}
+      aria-current={active ? "page" : undefined}
       className={`cursor-pointer rounded-lg border px-3 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
         active
           ? "border-[#0A4A4A] bg-[#0A4A4A] text-white"
-          : "border-gray-200 bg-white text-gray-700 hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+          : "border-[#E6ECEA] bg-white text-[#183534] hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
       } ${className}`}
     >
       {children}
@@ -47,8 +50,11 @@ export default function PaginationControls({
   } = pagination;
 
   return (
-    <div className="mt-6 flex flex-col gap-3 border-t border-gray-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-gray-500">
+    <nav
+      className="mt-6 flex flex-col gap-3 border-t border-[#EEF2F0] pt-4 sm:flex-row sm:items-center sm:justify-between"
+      aria-label={`${label} pagination`}
+    >
+      <p className="text-sm text-[#7A928D]">
         Showing {startItem}-{endItem} of {totalItems} {label}
       </p>
 
@@ -58,14 +64,15 @@ export default function PaginationControls({
             disabled={!hasPreviousPage}
             onClick={() => onPageChange(currentPage - 1)}
             className="flex-1"
+            ariaLabel="Previous page"
           >
             <span className="inline-flex items-center justify-center gap-1">
-              <FiChevronLeft />
+              <FiChevronLeft aria-hidden />
               Prev
             </span>
           </PaginationButton>
 
-          <div className="min-w-[88px] text-center text-sm font-semibold text-gray-600">
+          <div className="min-w-[88px] text-center text-sm font-semibold text-[#5C7571]">
             {currentPage} / {totalPages}
           </div>
 
@@ -73,10 +80,11 @@ export default function PaginationControls({
             disabled={!hasNextPage}
             onClick={() => onPageChange(currentPage + 1)}
             className="flex-1"
+            ariaLabel="Next page"
           >
             <span className="inline-flex items-center justify-center gap-1">
               Next
-              <FiChevronRight />
+              <FiChevronRight aria-hidden />
             </span>
           </PaginationButton>
         </div>
@@ -86,7 +94,8 @@ export default function PaginationControls({
             pageNumber === PAGINATION_DOTS ? (
               <span
                 key={`${pageNumber}-${index}`}
-                className="px-1 text-sm font-semibold text-gray-400"
+                className="px-1 text-sm font-semibold text-[#9AB0AB]"
+                aria-hidden
               >
                 {pageNumber}
               </span>
@@ -96,6 +105,7 @@ export default function PaginationControls({
                 active={pageNumber === currentPage}
                 onClick={() => onPageChange(pageNumber)}
                 className="min-w-10"
+                ariaLabel={`Page ${pageNumber}`}
               >
                 {pageNumber}
               </PaginationButton>
@@ -107,9 +117,10 @@ export default function PaginationControls({
           <PaginationButton
             disabled={!hasPreviousPage}
             onClick={() => onPageChange(currentPage - 1)}
+            ariaLabel="Previous page"
           >
             <span className="inline-flex items-center gap-1">
-              <FiChevronLeft />
+              <FiChevronLeft aria-hidden />
               Previous
             </span>
           </PaginationButton>
@@ -119,7 +130,8 @@ export default function PaginationControls({
               pageNumber === PAGINATION_DOTS ? (
                 <span
                   key={`${pageNumber}-${index}`}
-                  className="px-1 text-sm font-semibold text-gray-400"
+                  className="px-1 text-sm font-semibold text-[#9AB0AB]"
+                  aria-hidden
                 >
                   {pageNumber}
                 </span>
@@ -129,6 +141,8 @@ export default function PaginationControls({
                   active={pageNumber === currentPage}
                   onClick={() => onPageChange(pageNumber)}
                   className="min-w-10"
+                  ariaLabel={`Page ${pageNumber}`}
+                  aria-current={pageNumber === currentPage ? "page" : undefined}
                 >
                   {pageNumber}
                 </PaginationButton>
@@ -139,14 +153,15 @@ export default function PaginationControls({
           <PaginationButton
             disabled={!hasNextPage}
             onClick={() => onPageChange(currentPage + 1)}
+            ariaLabel="Next page"
           >
             <span className="inline-flex items-center gap-1">
               Next
-              <FiChevronRight />
+              <FiChevronRight aria-hidden />
             </span>
           </PaginationButton>
         </div>
       </div>
-    </div>
+    </nav>
   );
 }

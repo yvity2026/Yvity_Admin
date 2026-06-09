@@ -88,10 +88,10 @@ const AdvisorProfileModal = ({ isOpen, onClose, onContinue, form }) => {
 
           <div className="mb-">
             <Image
-              src="/images/Adivisor/Navbar/navlogo.png"
+              src="/images/yvity-logo.png"
               height={100}
               width={100}
-              alt="Navbar logo"
+              alt="YVITY logo"
             />
           </div>
 

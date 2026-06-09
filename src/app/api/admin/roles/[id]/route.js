@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
-import { canAccessRolesSection, hasPermission, normalizePermissions } from "@/lib/admin/permissions";
+import {
+  canAccessRolesSection,
+  hasPermission,
+  normalizePermissions,
+  serializePermissionsForStorage,
+} from "@/lib/admin/permissions";
+import { extractRoleTemplateFromPermissions } from "@/lib/admin/roleDefinitions";
 import { serializeAdminUser } from "@/lib/admin/adminUsers";
 import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -108,8 +114,16 @@ export async function PUT(request, { params }) {
       updates.name = name;
     }
 
-    if (body?.permissions !== undefined) {
-      updates.permissions = normalizePermissions(body.permissions);
+    if (body?.permissions !== undefined || body?.role_template !== undefined) {
+      const roleTemplate =
+        body?.role_template !== undefined
+          ? String(body.role_template || "").trim() || null
+          : extractRoleTemplateFromPermissions(existingAdminUser.permissions);
+      const basePermissions =
+        body?.permissions !== undefined
+          ? normalizePermissions(body.permissions)
+          : normalizePermissions(existingAdminUser.permissions);
+      updates.permissions = serializePermissionsForStorage(basePermissions, roleTemplate);
     }
 
     if (body?.profile_image_url !== undefined) {

@@ -1,8 +1,10 @@
 import { devAdminSession, isDevAdminAuthEnabled } from "@/lib/admin-dev-auth";
 import { validateAdmin } from "@/lib/auth/validateAdmin";
 import { createAdminClient } from "@/lib/supabase/server";
+import { ensurePlatformDataReady } from "@/lib/supabase/platform-data-bootstrap";
 
 export async function getAuthenticatedAdmin() {
+  await ensurePlatformDataReady();
   const session = await validateAdmin();
 
   if (!session?.admin_id) {

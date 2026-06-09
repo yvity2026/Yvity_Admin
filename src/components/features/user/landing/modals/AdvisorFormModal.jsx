@@ -151,10 +151,10 @@ const AdvisorFormModal = ({ isOpen, onClose, onContinue, onBack, form }) => {
           </button>
           <div className="">
             <Image
-              src="/images/Adivisor/Navbar/navlogo.png"
+              src="/images/yvity-logo.png"
               height={100}
               width={100}
-              alt="Navbar logo"
+              alt="YVITY logo"
             />
           </div>
           <h2 className="text-[32px] font-cormorant font-bold rounded-lg">

@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-build:
+    name: Lint & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Yvity_Admin
+
+    steps:
+      - name: Checkout Admin
+        uses: actions/checkout@v4
+        with:
+          path: Yvity_Admin
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: Yvity_Admin/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+          SUPABASE_SERVICE_ROLE_KEY: placeholder
+          JWT_SECRET_KEY: ci-placeholder-secret
+
+      - name: Verify Admin modules (CI mode)
+        run: npm run verify:integration -- --ci
+
+  integration:
+    name: Admin ↔ Users wiring
+    runs-on: ubuntu-latest
+    if: vars.YVITY_USERS_REPO != ''
+
+    steps:
+      - name: Checkout Admin
+        uses: actions/checkout@v4
+        with:
+          path: Yvity_Admin
+
+      - name: Checkout Users
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.YVITY_USERS_REPO }}
+          path: Yvity_Users
+          token: ${{ secrets.GH_PAT || github.token }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Seed minimal shared .data
+        working-directory: Yvity_Admin
+        run: node scripts/seed-minimal-shared-data.mjs
+
+      - name: Full integration verify
+        working-directory: Yvity_Admin
+        run: npm run verify:integration
+        env:
+          YVITY_FORCE_LOCAL_DATA: "true"

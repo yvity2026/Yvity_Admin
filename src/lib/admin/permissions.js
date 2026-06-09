@@ -1,39 +1,18 @@
-export const PERMISSION_KEYS = [
-  "overview",
-  "subscribers",
-  "customers",
-  "irdai_approvals",
-  "testimonials",
-  "payments",
-  "settings",
-  "roles_permissions",
-  "create_admin_user",
-  "delete_admin_user",
-];
+import {
+  LEGACY_PERMISSION_ALIASES,
+  PERMISSION_GROUPS,
+  PERMISSION_KEYS,
+  PERMISSION_LABELS,
+} from "@/lib/admin/permissionKeys";
+import {
+  NAV_PERMISSION_KEYS,
+  buildAdminSectionRouteMap,
+} from "@/lib/admin/navConfig";
 
-export const SIDEBAR_PERMISSION_KEYS = [
-  "overview",
-  "subscribers",
-  "customers",
-  "irdai_approvals",
-  "testimonials",
-  "payments",
-  "settings",
-  "roles_permissions",
-];
+export { PERMISSION_GROUPS, PERMISSION_KEYS, PERMISSION_LABELS };
 
-export const PERMISSION_LABELS = {
-  overview: "Overview",
-  subscribers: "Subscribers",
-  customers: "Customers",
-  irdai_approvals: "IRDAI Approvals",
-  testimonials: "Testimonials",
-  payments: "Payments",
-  settings: "Settings",
-  roles_permissions: "Roles & Permissions",
-  create_admin_user: "Create Admin User",
-  delete_admin_user: "Delete Admin User",
-};
+/** Permission keys referenced in the current nav tree. */
+export const SIDEBAR_PERMISSION_KEYS = NAV_PERMISSION_KEYS;
 
 export const DEFAULT_ADMIN_PERMISSIONS = PERMISSION_KEYS.reduce(
   (accumulator, key) => {
@@ -43,52 +22,8 @@ export const DEFAULT_ADMIN_PERMISSIONS = PERMISSION_KEYS.reduce(
   {},
 );
 
-export const ADMIN_SECTION_ROUTE_MAP = [
-  {
-    permissionKey: "overview",
-    pagePrefixes: ["/admin"],
-    apiPrefixes: ["/api/admin/overview"],
-  },
-  {
-    permissionKey: "subscribers",
-    pagePrefixes: ["/admin/subscribers", "/admin/subscriptions", "/admin/advisors"],
-    apiPrefixes: [
-      "/api/admin/subscriptions",
-      "/api/admin/advisors",
-    ],
-  },
-  {
-    permissionKey: "customers",
-    pagePrefixes: ["/admin/customers"],
-    apiPrefixes: ["/api/admin/customers"],
-  },
-  {
-    permissionKey: "irdai_approvals",
-    pagePrefixes: ["/admin/irdaiapprovals"],
-    apiPrefixes: ["/api/admin/approvals", "/api/admin/irdai"],
-  },
-  {
-    permissionKey: "testimonials",
-    pagePrefixes: ["/admin/testimonials"],
-    apiPrefixes: ["/api/admin/testimonials"],
-  },
-  {
-    permissionKey: "payments",
-    pagePrefixes: ["/admin/payments"],
-    apiPrefixes: ["/api/admin/payments"],
-  },
-  {
-    permissionKey: "settings",
-    pagePrefixes: ["/admin/settings"],
-    apiPrefixes: [],
-  },
-  {
-    permissionKey: "roles_permissions",
-    pagePrefixes: ["/admin/roles"],
-    apiPrefixes: ["/api/admin/roles"],
-    alternatePermissionKeys: ["create_admin_user", "delete_admin_user"],
-  },
-];
+/** Built from navConfig — order matches sidebar priority for redirects. */
+export const ADMIN_SECTION_ROUTE_MAP = buildAdminSectionRouteMap();
 
 export function normalizePermissions(permissions) {
   const safePermissions =
@@ -102,8 +37,30 @@ export function normalizePermissions(permissions) {
   }, {});
 }
 
+/** Strip boolean permission keys for DB write; preserves role template metadata. */
+export function serializePermissionsForStorage(permissions, roleTemplate) {
+  const normalized = normalizePermissions(permissions);
+  if (roleTemplate) {
+    return { ...normalized, _roleTemplate: roleTemplate };
+  }
+  return normalized;
+}
+
 export function isSuperAdmin(admin) {
   return admin?.role === "super_admin";
+}
+
+function permissionGranted(normalizedPermissions, permissionKey) {
+  if (normalizedPermissions[permissionKey] === true) return true;
+
+  const aliases = LEGACY_PERMISSION_ALIASES[permissionKey];
+  if (aliases?.some((key) => normalizedPermissions[key] === true)) return true;
+
+  return Object.entries(LEGACY_PERMISSION_ALIASES).some(
+    ([legacyKey, mappedKeys]) =>
+      normalizedPermissions[legacyKey] === true &&
+      mappedKeys.includes(permissionKey),
+  );
 }
 
 export function hasPermission(admin, permissionKey) {
@@ -112,7 +69,7 @@ export function hasPermission(admin, permissionKey) {
   }
 
   const normalizedPermissions = normalizePermissions(admin?.permissions);
-  return normalizedPermissions[permissionKey] === true;
+  return permissionGranted(normalizedPermissions, permissionKey);
 }
 
 export function hasAnyPermission(admin, permissionKeys = []) {

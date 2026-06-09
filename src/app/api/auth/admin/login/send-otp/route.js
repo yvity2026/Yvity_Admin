@@ -4,6 +4,12 @@ import { hashOtp, hashPhone, normalizePhone } from "@/lib/auth/hash";
 import crypto from "crypto";
 import { createAdminClient } from "@/lib/supabase/server";
 import { isDevAdminPhone, isDevAdminAuthEnabled } from "@/lib/admin-dev-auth";
+import {
+  devDummyOtpCode,
+  isDevDummyOtpEnabled,
+  storeDevDummyOtp,
+} from "@/lib/auth/devDummyOtp";
+import { mapAdminLoginApiError } from "@/lib/auth/adminLoginApiError";
 
 const generateOtp = () => crypto.randomInt(100000, 1000000).toString();
 const OTP_TTL_SECONDS = 5 * 60;
@@ -42,6 +48,14 @@ export async function POST(request) {
       return NextResponse.json({ error: "Admin not found" }, { status: 404 });
     }
 
+    if (isDevDummyOtpEnabled()) {
+      storeDevDummyOtp(phone, admin.id);
+      return NextResponse.json({
+        success: true,
+        message: `Dev OTP: ${devDummyOtpCode()}`,
+      });
+    }
+
     const otp = generateOtp();
 
     const phoneHash = hashPhone(phone);
@@ -59,9 +73,10 @@ export async function POST(request) {
       used: false,
     });
 
-    return NextResponse.json({ success: true },{OTP : otp});
+    return NextResponse.json({ success: true });
   } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.error("[admin/login/send-otp]", err);
+    const { error, status } = mapAdminLoginApiError(err);
+    return NextResponse.json({ error }, { status });
   }
 }

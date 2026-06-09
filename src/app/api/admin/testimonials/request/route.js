@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-
-// import { ValidateAdvisor } from "@/lib/auth/ValidateAdvisor";
-// import { createAdminClient } from "@/lib/supabase/server";
+import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
+import { resolveTestimonialRecipientById } from "@/lib/admin/platform-reviews/resolveTestimonialRecipient";
 import { sendWhatsAppTestimonialRequest } from "@/lib/whatsapp/triggers";
 
 export const runtime = "nodejs";
@@ -40,108 +39,52 @@ function resolveTestimonialBaseUrl(request) {
   return `${protocol}://${host}`;
 }
 
-// export async function GET(request) {
-//   try {
-//     const advisor = await ValidateAdvisor();
-
-//     if (!advisor?.id) {
-//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-//     }
-
-//     const mobile = normalizeIndianMobile(
-//       request.nextUrl.searchParams.get("mobile")
-//     );
-
-//     if (!/^[6-9]\d{9}$/.test(mobile)) {
-//       return NextResponse.json(
-//         { error: "Enter valid 10-digit mobile number" },
-//         { status: 400 }
-//       );
-//     }
-
-//     const supabase = createAdminClient();
-//     const client = await findUserByMobile(supabase, mobile);
-
-//     if (!client?.id) {
-//       return NextResponse.json(
-//         { error: "No user found with this mobile number" },
-//         { status: 404 }
-//       );
-//     }
-
-//     return NextResponse.json({
-//       success: true,
-//       data: {
-//         id: client.id,
-//         name: client.name || "",
-//         mobile: client.mobile || mobile,
-//       },
-//     });
-//   } catch (error) {
-//     return NextResponse.json(
-//       { error: error.message || "Failed to find client" },
-//       { status: 500 }
-//     );
-//   }
-// }
-
 export async function POST(request) {
   try {
-    // const advisor = await ValidateAdvisor();
-
-    // if (!advisor?.id) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
+    const admin = await getAuthenticatedAdmin();
+    if (!admin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const body = await request.json();
-
-    const name = String(body?.name || "").trim();
-    const mobile = String(body?.mobile || "").trim();
+    const userId = String(body?.userId || "").trim();
     const personalMessage = String(body?.message || "").trim();
 
-    if (!name) {
+    if (!userId) {
       return NextResponse.json(
-        { error: "Client name is required" },
-        { status: 400 }
+        { error: "Select a user to send the testimonial request" },
+        { status: 400 },
       );
     }
 
-    if (!/^[6-9]\d{9}$/.test(mobile)) {
+    const recipient = await resolveTestimonialRecipientById(userId);
+
+    if (!recipient) {
       return NextResponse.json(
-        { error: "Enter valid 10-digit mobile number" },
-        { status: 400 }
+        { error: "User not found or has no valid mobile on file" },
+        { status: 404 },
       );
     }
-
-    // const supabase = createAdminClient();
-    // const client = await findUserByMobile(supabase, mobile);
-
-    // if (!client?.id) {
-    //   return NextResponse.json(
-    //     { error: "No user found with this mobile number" },
-    //     { status: 404 }
-    //   );
-    // }
 
     const baseUrl = resolveTestimonialBaseUrl(request);
 
     if (!baseUrl) {
       return NextResponse.json(
         { error: "Unable to build testimonial link" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const query = new URLSearchParams({
-      name,
-      mobile,
+      name: recipient.name,
+      mobile: recipient.mobile,
       source: "whatsapp",
     });
 
     const profileLink = `${baseUrl}${TESTIMONIAL_PUBLIC_PATH}?${query.toString()}`;
 
-    await sendWhatsAppTestimonialRequest(mobile, {
-      client_name: name,
+    await sendWhatsAppTestimonialRequest(recipient.mobile, {
+      client_name: recipient.name,
       personal_message: personalMessage || DEFAULT_PERSONAL_MESSAGE,
       profile_link: profileLink,
     });
@@ -149,13 +92,17 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       message: "Testimonial request sent successfully",
+      recipient: {
+        id: recipient.id,
+        name: recipient.name,
+      },
     });
   } catch (error) {
     console.error("[TESTIMONIAL_REQUEST][ERROR]", error);
 
     return NextResponse.json(
       { error: error.message || "Failed to send testimonial request" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

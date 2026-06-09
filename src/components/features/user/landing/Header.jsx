@@ -119,10 +119,10 @@ const Header = () => {
             {/* Left Side: Logo */}
             <div className="flex items-center space-x-2">
               <Image
-                src="/images/Adivisor/Navbar/navlogo.png"
+                src="/images/yvity-logo.png"
                 height={90}
                 width={90}
-                alt="Navbar logo"
+                alt="YVITY logo"
               />
             </div>
 

@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
-import { canAccessRolesSection, hasPermission, normalizePermissions } from "@/lib/admin/permissions";
+import {
+  canAccessRolesSection,
+  hasPermission,
+  normalizePermissions,
+  serializePermissionsForStorage,
+} from "@/lib/admin/permissions";
+import { getDefaultPermissionsForTemplate } from "@/lib/admin/roleDefinitions";
+import { getAllTemplateOverrides } from "@/lib/admin/roleTemplateStore";
 import { serializeAdminUser, normalizeAdminPhoneNumber } from "@/lib/admin/adminUsers";
 import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -58,7 +65,13 @@ export async function POST(request) {
     const body = await request.json();
     const name = String(body?.name || "").trim();
     const phoneNumber = normalizeAdminPhoneNumber(body?.phone_number);
-    const permissions = normalizePermissions(body?.permissions);
+    const roleTemplate = String(body?.role_template || "").trim() || null;
+    const overrides = getAllTemplateOverrides();
+    const permissions = serializePermissionsForStorage(
+      body?.permissions ||
+        (roleTemplate ? getDefaultPermissionsForTemplate(roleTemplate, overrides) : {}),
+      roleTemplate,
+    );
     const profileImageUrl =
       typeof body?.profile_image_url === "string" && body.profile_image_url.trim()
         ? body.profile_image_url.trim()

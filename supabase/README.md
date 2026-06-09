@@ -64,9 +64,11 @@ npm run supabase:sync-from-remote
 
 | Bucket | Used for |
 |--------|----------|
-| `verification-docs` | IRDAI / setup documents |
 | `selfies` | Profile photos |
+| `gallery` | Gallery photos |
 | `intro-video` | Introduction videos |
+| `verification-docs` | IRDAI / setup documents (private — served via API) |
+| `testimonials` | Testimonial audio/video |
 
 ---
 

@@ -2,9 +2,21 @@
 
 import {
   DEFAULT_ADMIN_PERMISSIONS,
+  PERMISSION_GROUPS,
   PERMISSION_KEYS,
   PERMISSION_LABELS,
 } from "@/lib/admin/permissions";
+
+const PERMISSION_HINTS = {
+  view_complaint_pii:
+    "Decrypt reporter phone/email on complaint detail only (audit logged).",
+  send_campaigns:
+    "Send platform announcements and marketing messages from Communication Center.",
+  moderate_advisor_testimonials:
+    "Hide or restore advisor client reviews flagged or reported.",
+  campaigns: "Compose drafts in Communication Center (audience + message).",
+  view_audit_logs: "View PII access audit trail.",
+};
 
 export default function PermissionsChecklist({
   permissions,
@@ -73,38 +85,46 @@ export default function PermissionsChecklist({
         )}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {PERMISSION_KEYS.map((permissionKey) => (
-          <label
-            key={permissionKey}
-            className={`flex items-start gap-3 rounded-xl border px-4 py-3 transition-colors ${
-              permissions[permissionKey]
-                ? "border-[#0A4A4A] bg-[#0A4A4A]/5"
-                : "border-gray-200 bg-white"
-            } ${disabled ? "cursor-default" : "cursor-pointer hover:border-[#0A4A4A]/40"}`}
-          >
-            <input
-              type="checkbox"
-              checked={Boolean(permissions[permissionKey])}
-              onChange={() => handleToggle(permissionKey)}
-              disabled={disabled}
-              className="mt-1 h-4 w-4 rounded border-gray-300 text-[#0A4A4A] focus:ring-[#0A4A4A]"
-            />
-            <div>
-              <p className="text-sm font-semibold text-gray-900">
-                {PERMISSION_LABELS[permissionKey]}
-              </p>
-              <p className="text-xs text-gray-500">
-                {permissionKey === "create_admin_user"
-                  ? "Allows opening the create-admin flow."
-                  : permissionKey === "delete_admin_user"
-                    ? "Allows deleting other admin users."
-                  : permissionKey === "roles_permissions"
-                    ? "Allows access to the Roles & Permissions section."
-                    : `Shows the ${PERMISSION_LABELS[permissionKey]} section in the sidebar.`}
-              </p>
+      <div className="space-y-5">
+        {Object.values(PERMISSION_GROUPS).map((group) => (
+          <div key={group.label}>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#7A928D]">
+              {group.label}
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {group.keys.map((permissionKey) => (
+                <label
+                  key={permissionKey}
+                  className={`flex items-start gap-3 rounded-xl border px-4 py-3 transition-colors ${
+                    permissions[permissionKey]
+                      ? "border-[#0A4A4A] bg-[#0A4A4A]/5"
+                      : "border-gray-200 bg-white"
+                  } ${disabled ? "cursor-default" : "cursor-pointer hover:border-[#0A4A4A]/40"}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={Boolean(permissions[permissionKey])}
+                    onChange={() => handleToggle(permissionKey)}
+                    disabled={disabled}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-[#0A4A4A] focus:ring-[#0A4A4A]"
+                  />
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {PERMISSION_LABELS[permissionKey]}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {PERMISSION_HINTS[permissionKey] ||
+                        (permissionKey === "create_admin_user"
+                          ? "Allows opening the create-admin flow."
+                          : permissionKey === "delete_admin_user"
+                            ? "Allows deleting other admin users."
+                            : `Access: ${PERMISSION_LABELS[permissionKey]}.`)}
+                    </p>
+                  </div>
+                </label>
+              ))}
             </div>
-          </label>
+          </div>
         ))}
       </div>
     </div>

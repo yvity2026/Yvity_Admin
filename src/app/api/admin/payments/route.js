@@ -1,130 +1,174 @@
-import { createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { createAdminClient } from "@/lib/supabase/server";
+import {
+  createPaymentLink,
+  getPaymentsSnapshot,
+  usePaymentsStore,
+} from "@/lib/local-data/payments-store";
 
-export async function GET(req) {
+async function parseAdminSession() {
+  const cookieStore = await cookies();
+  const sessionValue = cookieStore.get("admin_session")?.value;
+  if (!sessionValue) return null;
+
   try {
-    const supabase = createAdminClient();
-    const { searchParams } = new URL(req.url);
+    return JSON.parse(sessionValue);
+  } catch {
+    return null;
+  }
+}
 
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
+async function requireAdmin() {
+  const session = await parseAdminSession();
+  if (!session?.admin_id || !session?.role) return null;
+  return session;
+}
 
-    // ── Paginated payments query ──
-    const paymentsQuery = supabase
+async function getSupabasePayments(request) {
+  const supabase = createAdminClient();
+  const { searchParams } = new URL(request.url);
+
+  const page = parseInt(searchParams.get("page") || "1", 10);
+  const limit = parseInt(searchParams.get("limit") || "10", 10);
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  const { data: paymentsData, error: paymentsError, count } = await supabase
+    .from("advisor_payments")
+    .select("*, user:users(*)", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  if (paymentsError) throw paymentsError;
+
+  const now = new Date();
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
+
+  const sumRevenue = (arr) =>
+    (arr || []).reduce((acc, item) => acc + (item.amount || 0), 0) / 100;
+
+  const [goldRes, silverRes, thisMonthRes] = await Promise.all([
+    supabase.from("advisor_payments").select("amount").eq("plan_id", "gold").eq("status", "paid"),
+    supabase.from("advisor_payments").select("amount").eq("plan_id", "silver").eq("status", "paid"),
+    supabase
       .from("advisor_payments")
-      .select("*, user:users(*)", { count: "exact" })
-      .order("created_at", { ascending: false })
-      .range(from, to);
+      .select("amount")
+      .gte("paid_at", firstDay)
+      .lte("paid_at", lastDay)
+      .eq("status", "paid"),
+  ]);
 
-    const { data: paymentsData, error: paymentsError, count } = await paymentsQuery;
+  const output = (paymentsData || []).map((item) => {
+    const user = item.user || {};
+    return {
+      id: item.id,
+      userId: user.id,
+      advisorName: user.name || "User",
+      email: user.email || null,
+      phone: user.mobile || null,
+      city: user.city || null,
+      planKey: item.plan_id,
+      planLabel: item.plan_id,
+      amountInr: (item.amount || 0) / 100,
+      amountLabel: `₹${((item.amount || 0) / 100).toLocaleString("en-IN")}`,
+      status: item.status || "pending",
+      statusLabel: item.status || "pending",
+      razorpayOrderId: item.razorpay_order_id,
+      razorpayPaymentId: item.razorpay_payment_id,
+      paidAt: item.paid_at,
+      createdAt: item.created_at,
+      paymentMethod: item.payment_method || "Razorpay",
+    };
+  });
 
-    if (paymentsError) {
-      console.error("Query failed:", paymentsError);
+  return {
+    success: true,
+    overview: {
+      revenueThisMonthInr: sumRevenue(thisMonthRes.data),
+      revenueAllTimeInr: sumRevenue(goldRes.data) + sumRevenue(silverRes.data),
+      revenueByPlanInr: {
+        gold: sumRevenue(goldRes.data),
+        silver: sumRevenue(silverRes.data),
+      },
+      paidCount: output.filter((row) => row.status === "paid").length,
+      pendingCount: output.filter((row) => row.status === "created").length,
+    },
+    payments: output,
+    paymentLinks: [],
+    planOptions: [],
+    advisors: [],
+    pagination: {
+      page,
+      limit,
+      total: count || 0,
+      totalPages: Math.ceil((count || 0) / limit) || 1,
+    },
+  };
+}
+
+export async function GET(request) {
+  const adminSession = await requireAdmin();
+  if (!adminSession) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    if (usePaymentsStore()) {
+      const { searchParams } = new URL(request.url);
       return NextResponse.json(
-        { error: "Unable to load payments" },
-        { status: 500 }
+        getPaymentsSnapshot({
+          filter: searchParams.get("filter") || "all",
+          search: searchParams.get("search") || "",
+          sort: searchParams.get("sort") || "recent",
+          page: searchParams.get("page") || 1,
+          limit: searchParams.get("limit") || 20,
+        }),
       );
     }
 
-    // ── Revenue aggregations ──
-    const now = new Date();
-    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
-
-    const revenueThisMonth = await supabase
-      .from("advisor_payments")
-      .select("amount", { count: "exact", head: true }) // only need sum
-      .gte("paid_at", firstDay)
-      .lte("paid_at", lastDay)
-      .eq("status", "paid");
-
-    const sumThisMonth = await supabase
-      .from("advisor_payments")
-      .select("amount", { count: "exact" })
-      .gte("paid_at", firstDay)
-      .lte("paid_at", lastDay)
-      .eq("status", "paid");
-
-    const goldRevenueQuery = supabase
-      .from("advisor_payments")
-      .select("amount", { count: "exact" })
-      .eq("plan_id", "gold")
-      .eq("status", "paid");
-
-    const silverRevenueQuery = supabase
-      .from("advisor_payments")
-      .select("amount", { count: "exact" })
-      .eq("plan_id", "silver")
-      .eq("status", "paid");
-
-    // Execute all three queries in parallel
-    const [goldRes, silverRes, thisMonthRes] = await Promise.all([
-      goldRevenueQuery,
-      silverRevenueQuery,
-      supabase
-        .from("advisor_payments")
-        .select("amount", { count: "exact" }),
-    ]);
-
-    const sumRevenue = (arr) =>
-      (arr.data || []).reduce((acc, item) => acc + (item.amount || 0), 0) / 100;
-
-    const goldRevenue = sumRevenue(goldRes);
-    const silverRevenue = sumRevenue(silverRes);
-    const revenueThisMonthValue = sumRevenue(
-      await supabase
-        .from("advisor_payments")
-        .select("amount")
-        .gte("paid_at", firstDay)
-        .lte("paid_at", lastDay)
-        .eq("status", "paid")
-    );
-
-    // ── Map payment items ──
-    const output = (paymentsData || []).map((item) => {
-      const user = item.user || {};
-      return {
-        id: item.id,
-        name: user.name || "User",
-        location: user.city || "Unknown, IN",
-        email: user.email || null,
-        phone: user.mobile || null,
-        plan: item.plan_id,
-        amount: (item.amount || 0) / 100,
-        method: item.payment_method,
-        profile_pic: user.selfie_url || null,
-        date: item.paid_at || null,
-        txn_id: item.razorpay_order_id,
-        status: item.status || "pending",
-      };
-    });
-
-    return NextResponse.json({
-      success: true,
-      data: output,
-      pagination: {
-        page,
-        limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit),
-      },
-      revenue: {
-        thisMonth: revenueThisMonthValue,
-        goldPlan: goldRevenue,
-        silverPlan: silverRevenue,
-      },
-    });
+    return NextResponse.json(await getSupabasePayments(request));
   } catch (error) {
-    console.error("GET failed:", error);
+    console.error("Admin payments GET failed", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
 
+export async function POST(request) {
+  const adminSession = await requireAdmin();
+  if (!adminSession) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!usePaymentsStore()) {
     return NextResponse.json(
-      {
-        success: false,
-        error: "Internal server error",
-      },
-      { status: 500 }
+      { error: "Payment links are available in local data mode only for now" },
+      { status: 501 },
     );
+  }
+
+  let payload;
+  try {
+    payload = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const { action } = payload;
+
+  try {
+    if (action === "create_payment_link") {
+      const result = createPaymentLink(payload);
+      if (result.error) {
+        return NextResponse.json({ error: result.error }, { status: result.status || 400 });
+      }
+      return NextResponse.json(result);
+    }
+
+    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+  } catch (error) {
+    console.error("Admin payments POST failed", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

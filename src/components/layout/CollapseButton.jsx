@@ -5,9 +5,8 @@ import { motion } from "framer-motion";
 import { FiChevronLeft } from "react-icons/fi";
 
 const collapseButtonClass = clsx(
-  "hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-white text-[#0A4A4A]",
-  "fixed top-1/2 -translate-y-1/2 -translate-x-1/2 z-200 shadow-lg border border-gray-200",
-  "hover:scale-110 active:scale-95 transition cursor-pointer",
+  "admin-glass-card hidden md:flex h-10 w-10 items-center justify-center rounded-full text-[#0A4A4A]",
+  "fixed top-1/2 z-200 -translate-x-1/2 -translate-y-1/2 cursor-pointer transition hover:scale-110 active:scale-95",
 );
 
 export default function CollapseButton({ sidebarWidth }) {
@@ -20,7 +19,10 @@ export default function CollapseButton({ sidebarWidth }) {
 
   return (
     <motion.button
+      type="button"
       onClick={toggleCollapse}
+      aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+      aria-expanded={!collapsed}
       style={{
         left: `calc((100vw - min(1536px, 100vw)) / 2 + ${sidebarWidth}px)`,
       }}

@@ -3,17 +3,18 @@
 import { useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import PermissionsChecklist from "@/components/admin/roles/PermissionsChecklist";
+import RolePermissionsChecklist from "@/components/admin/roles/RolePermissionsChecklist";
 import { DEFAULT_ADMIN_PERMISSIONS } from "@/lib/admin/permissions";
 import { useAdminUser, useUpdateAdminUser } from "@/hooks/TanstankQuery/useAdminUsers";
 import { useAdmin } from "@/context/AuthAdminContext";
-import { IoClose } from "react-icons/io5";
+import AdminModal from "@/components/admin/ui/AdminModal";
 
 function buildFormState(adminUser) {
   return {
     name: adminUser.name || "",
     is_active: adminUser.is_active ?? true,
     profile_image_url: adminUser.profile_image_url || "",
+    role_template: adminUser.role_template || "custom",
     permissions: {
       ...DEFAULT_ADMIN_PERMISSIONS,
       ...(adminUser.permissions || {}),
@@ -65,7 +66,7 @@ function getInitials(name) {
   return initials || "KM";
 }
 
-function EditPermissionsForm({ adminUser, readOnly, onClose }) {
+function EditPermissionsForm({ adminUser, readOnly, onClose, roleTemplates = [] }) {
   const { admin: currentAdmin, setAdmin } = useAdmin();
   const updateAdminUser = useUpdateAdminUser();
   const [form, setForm] = useState(() => buildFormState(adminUser));
@@ -93,6 +94,7 @@ function EditPermissionsForm({ adminUser, readOnly, onClose }) {
           is_active: form.is_active,
           profile_image_url: profileImageUrl,
           permissions: form.permissions,
+          role_template: form.role_template,
         },
       });
 
@@ -108,7 +110,7 @@ function EditPermissionsForm({ adminUser, readOnly, onClose }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div className="rounded-2xl border border-gray-100 bg-[#F8F6F1] p-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-[#F59E0B] ring-2 ring-[#FEC564]">
@@ -185,7 +187,7 @@ function EditPermissionsForm({ adminUser, readOnly, onClose }) {
             Role
           </p>
           <p className="mt-1 text-sm font-semibold text-gray-900">
-            {adminUser.role}
+            {adminUser.role_template_label || adminUser.role}
           </p>
         </div>
 
@@ -209,17 +211,47 @@ function EditPermissionsForm({ adminUser, readOnly, onClose }) {
           </p>
         </div>
 
-        {/* <div>
+        <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
-            Last Login
+            Last login
           </p>
           <p className="mt-1 text-sm font-semibold text-gray-900">
             {adminUser.last_login_at
               ? new Date(adminUser.last_login_at).toLocaleString()
               : "Never"}
           </p>
-        </div> */}
+        </div>
       </div>
+
+      {!readOnly && adminUser.role !== "super_admin" ? (
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-gray-700">
+            Role template
+          </label>
+          <select
+            value={form.role_template}
+            onChange={(event) => {
+              const templateId = event.target.value;
+              const template = roleTemplates.find((row) => row.id === templateId);
+              setForm((current) => ({
+                ...current,
+                role_template: templateId,
+                permissions: template
+                  ? { ...DEFAULT_ADMIN_PERMISSIONS, ...template.permissions }
+                  : current.permissions,
+              }));
+            }}
+            className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-[#0A4A4A]"
+          >
+            {roleTemplates.map((template) => (
+              <option key={template.id} value={template.id}>
+                {template.name}
+              </option>
+            ))}
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+      ) : null}
 
       <div className="rounded-2xl border border-gray-100 p-4">
         <div className="flex items-center justify-between gap-4">
@@ -250,7 +282,7 @@ function EditPermissionsForm({ adminUser, readOnly, onClose }) {
         </div>
       </div>
 
-      <PermissionsChecklist
+      <RolePermissionsChecklist
         permissions={form.permissions}
         disabled={readOnly}
         setPermissions={(valueOrUpdater) =>
@@ -287,9 +319,11 @@ function EditPermissionsForm({ adminUser, readOnly, onClose }) {
 }
 
 export default function EditPermissionsModal({
+  open = true,
   adminUserId,
   readOnly = false,
   onClose,
+  roleTemplates = [],
 }) {
   const { data, isLoading, isError, error } = useAdminUser(
     adminUserId,
@@ -299,52 +333,38 @@ export default function EditPermissionsModal({
   const adminUser = data?.data;
 
   return (
-    <div className="fixed inset-0 z-290 flex items-center justify-center bg-black/45 px-4 py-6">
-      <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-start justify-between border-b border-gray-100 px-6 py-5">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">
-              {readOnly ? "View Permissions" : "Edit Permissions"}
-            </h2>
-            <p className="mt-1 text-sm text-gray-500">
-              Review this admin account and update access when needed.
-            </p>
-          </div>
+    <AdminModal
+      open={open}
+      onClose={onClose}
+      title={readOnly ? "View Permissions" : "Edit Permissions"}
+      size="lg"
+    >
+      <p className="mb-6 text-sm text-gray-500">
+        Review this admin account and update access when needed.
+      </p>
 
-          <button
-                     type="button"
-                     
-                     onClick={onClose}
-                     className="rounded-full p-2 text-gray-500 shrink-0 hover:bg-gray-100 cursor-pointer"
-                   >
-                     <IoClose size={24}/>
-                   </button>
+      {isLoading ? (
+        <div className="space-y-3">
+          <div className="h-5 w-40 animate-pulse rounded bg-gray-200" />
+          <div className="h-12 animate-pulse rounded-xl bg-gray-100" />
+          <div className="h-12 animate-pulse rounded-xl bg-gray-100" />
+          <div className="h-48 animate-pulse rounded-2xl bg-gray-100" />
         </div>
-
-        {isLoading ? (
-          <div className="space-y-3 px-6 py-6">
-            <div className="h-5 w-40 animate-pulse rounded bg-gray-200" />
-            <div className="h-12 animate-pulse rounded-xl bg-gray-100" />
-            <div className="h-12 animate-pulse rounded-xl bg-gray-100" />
-            <div className="h-48 animate-pulse rounded-2xl bg-gray-100" />
-          </div>
-        ) : isError || !adminUser ? (
-          <div className="px-6 py-6">
-            <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
-              <p className="text-sm font-semibold text-red-800">
-                {error?.message || "Unable to load this admin user."}
-              </p>
-            </div>
-          </div>
-        ) : (
-          <EditPermissionsForm
-            key={adminUser.id}
-            adminUser={adminUser}
-            readOnly={readOnly}
-            onClose={onClose}
-          />
-        )}
-      </div>
-    </div>
+      ) : isError || !adminUser ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4" role="alert">
+          <p className="text-sm font-semibold text-red-800">
+            {error?.message || "Unable to load this admin user."}
+          </p>
+        </div>
+      ) : (
+        <EditPermissionsForm
+          key={adminUser.id}
+          adminUser={adminUser}
+          readOnly={readOnly}
+          onClose={onClose}
+          roleTemplates={roleTemplates}
+        />
+      )}
+    </AdminModal>
   );
 }

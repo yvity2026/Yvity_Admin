@@ -8,10 +8,33 @@ import {
   useLocalApprovals,
 } from "@/lib/local-data/advisor-approvals";
 import { goldAppBaseUrl } from "@/lib/local-data/paths";
+import {
+  computeApprovalOverview,
+  mapApprovalRow,
+} from "@/lib/admin/approvals/mapApprovalRecord";
+import { listLocalProfileUpdateRequests } from "@/lib/local-data/profile-update-requests";
+import {
+  filterApprovalRows,
+  paginateRows,
+} from "@/lib/admin/approvals/filterApprovals";
 
 function useGoldApprovalsApi() {
   if (process.env.YVITY_GOLD_APPROVALS_API === "false") return false;
   return useLocalApprovals();
+}
+
+function parseListParams(searchParams) {
+  return {
+    page: searchParams.get("page") || 1,
+    limit: searchParams.get("limit") || 10,
+    q: searchParams.get("q") || "",
+    status: searchParams.get("status") || "all",
+    plan: searchParams.get("plan") || "all",
+    featured: searchParams.get("featured") || "all",
+    queue: searchParams.get("queue") || "all",
+    requestType: searchParams.get("requestType") || "all",
+    changeType: searchParams.get("changeType") || "all",
+  };
 }
 
 async function fetchGoldApprovals() {
@@ -62,15 +85,42 @@ async function requireAdmin() {
   return session;
 }
 
-export async function GET() {
+function buildApprovalsResponse(allRows, params, profileUpdates = []) {
+  const overview = computeApprovalOverview(allRows, profileUpdates);
+  const filtered = filterApprovalRows(allRows, params);
+  const { data, pagination } = paginateRows(
+    filtered,
+    params.page,
+    params.limit,
+  );
+
+  return {
+    success: true,
+    data,
+    profileUpdates,
+    stats: {
+      pending: overview.pendingApprovals,
+      approvedToday: overview.approvedToday,
+      rejectedToday: overview.rejectedToday,
+      profileUpdates: overview.profileUpdateRequests,
+    },
+    overview,
+    attention: overview.attention,
+    pagination,
+  };
+}
+
+export async function GET(request) {
   try {
     const adminSession = await requireAdmin();
     if (!adminSession) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const params = parseListParams(new URL(request.url).searchParams);
+
     if (useLocalApprovals()) {
-      return NextResponse.json(listLocalApprovals());
+      return NextResponse.json(listLocalApprovals(params));
     }
 
     const supabase = createAdminClient();
@@ -88,54 +138,22 @@ export async function GET() {
       );
     }
 
-    const stats = {
-      pending: 0,
-      approved: 0,
-      rejected: 0,
-      heroCount: 0,
-      lanCount: 0,
-    };
+    const allRows = (data || []).map((item) =>
+      mapApprovalRow(
+        {
+          ...item,
+          submitted_at: item.created_at,
+          advisor_id: item.advisor_id,
+          source: "supabase",
+        },
+        item.user || {},
+        [],
+      ),
+    );
 
-    const output = (data || []).map((item) => {
-      const user = item.user || {};
-      const status =
-        item.account_status === "active"
-          ? "approved"
-          : item.account_status === "action_required"
-            ? "rejected"
-            : "pending";
+    const profileUpdates = listLocalProfileUpdateRequests(params);
 
-      stats[status] += 1;
-      if (item.is_hero) {
-        stats.heroCount += 1;
-      }
-
-      if (item.is_landing) {
-        stats.lanCount += 1;
-      }
-
-      return {
-        id: item.id,
-        user_id: item.advisor_id,
-        name: user.name || "Advisor",
-        email: user.email || null,
-        phone: user.mobile || null,
-        profile_pic: user.selfie_url,
-        location: user.city || "Unknown, IN",
-        licenseUrl: item.iridai_certificate_url,
-        isVerified: item.profile_status,
-        status,
-        submittedAt: item.created_at,
-        updatedAt: item.updated_at,
-        licenseNo: item.services?.[0]?.license,
-        plan: item.subscription_plan || item.plan || "Free",
-        is_hero: item.is_hero || false,
-        is_landing: item.is_landing || false,
-        type: item.designation || "Insurance Advisor",
-      };
-    });
-
-    return NextResponse.json({ data: output, stats });
+    return NextResponse.json(buildApprovalsResponse(allRows, params, profileUpdates));
   } catch (error) {
     console.error("Admin approvals GET failed", error);
     return NextResponse.json(

@@ -10,6 +10,17 @@ function normalizeIndianMobile(phone) {
 
 export async function POST(request) {
   try {
+    const contentType = request.headers.get("content-type") || "";
+    if (contentType.includes("multipart/form-data")) {
+      const forward = await fetch(new URL("/api/platform-testimonials", request.url), {
+        method: "POST",
+        headers: { "content-type": contentType },
+        body: await request.formData(),
+      });
+      const json = await forward.json();
+      return NextResponse.json(json, { status: forward.status });
+    }
+
     const supabase = createAdminClient();
     const body = await request.json();
 

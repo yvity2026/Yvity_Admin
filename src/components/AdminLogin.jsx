@@ -4,6 +4,15 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaArrowRight, FaPhone, FaShieldAlt } from "react-icons/fa";
+import {
+  ADMIN_UI_PREVIEW_OTP,
+  isAdminUiPreviewEnabled,
+  setPreviewAdminSessionCookie,
+} from "@/lib/auth/adminUiPreview";
+import YvityLogo from "@/components/brand/YvityLogo";
+
+const uiPreview = isAdminUiPreviewEnabled();
+const devOtpHint = process.env.NEXT_PUBLIC_YVITY_ADMIN_DEV_OTP || "";
 
 export default function AdminLogin() {
   const [step, setStep] = useState("phone");
@@ -60,12 +69,26 @@ export default function AdminLogin() {
     setTimeout(() => otpRefs.current[5]?.focus(), 0);
   };
 
+  const goToDashboardPreview = () => {
+    setPreviewAdminSessionCookie();
+    router.replace("/admin");
+    router.refresh();
+  };
+
   const handleSendOtp = async (e) => {
     e.preventDefault();
     setError("");
 
     if (!isValidPhone(phone)) {
       setError("Enter valid 10-digit number starting with 6-9");
+      return;
+    }
+
+    if (uiPreview) {
+      setOtpArray(["", "", "", "", "", ""]);
+      setStep("otp");
+      setResendTimer(0);
+      setTimeout(() => otpRefs.current[0]?.focus(), 0);
       return;
     }
 
@@ -107,6 +130,15 @@ export default function AdminLogin() {
       return;
     }
 
+    if (uiPreview) {
+      if (otp !== ADMIN_UI_PREVIEW_OTP) {
+        setError(`UI preview: use OTP ${ADMIN_UI_PREVIEW_OTP}`);
+        return;
+      }
+      goToDashboardPreview();
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -139,6 +171,13 @@ export default function AdminLogin() {
 
     if (!isValidPhone(phone)) {
       setError("Enter valid 10-digit number");
+      return;
+    }
+
+    if (uiPreview) {
+      setOtpArray(["", "", "", "", "", ""]);
+      setResendTimer(60);
+      setTimeout(() => otpRefs.current[0]?.focus(), 0);
       return;
     }
 
@@ -183,25 +222,14 @@ export default function AdminLogin() {
         transition={{ type: "spring", stiffness: 120, damping: 18 }}
         className="relative z-10 backdrop-blur-xl bg-white/95 border-2 border-[#0a4a4a]/10 shadow-2xl rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 w-full max-w-md"
       >
-        {/* Logo Section - Responsive and Fixed */}
-        <div className="flex justify-center mb-4 sm:mb-6">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1 }}
-            className="p-2 sm:p-3 bg-gradient-to-br from-[#0a4a4a] to-[#0a4a4a]/80 rounded-full flex items-center justify-center"
-          >
-            <img
-              src="/images/Adivisor/Navbar/navlogo.png"
-              alt="YVITY Logo"
-              className="h-6 sm:h-8 md:h-10 w-auto object-contain"
-              onError={(e) => {
-                // Fallback if logo fails to load
-                e.target.style.display = "none";
-              }}
-            />
-          </motion.div>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+          className="flex justify-center mb-4 sm:mb-6"
+        >
+          <YvityLogo showName size="md" />
+        </motion.div>
 
         {/* Header - Using Cormorant Garamond for heading, Mobile responsive text */}
         <div className="text-center mb-6 sm:mb-8">
@@ -216,14 +244,34 @@ export default function AdminLogin() {
           <p className="text-[#0a4a4a]/70 text-xs sm:text-sm md:text-base font-poppins leading-relaxed px-2">
             {step === "phone"
               ? "Enter your mobile number to get started"
-              : "Enter the 6-digit code sent to your phone"}
+              : uiPreview
+                ? `UI preview — enter ${ADMIN_UI_PREVIEW_OTP} (no WhatsApp)`
+                : devOtpHint
+                  ? `Local dev — enter ${devOtpHint}`
+                  : "Enter the 6-digit code sent to your phone"}
           </p>
         </div>
+
+        {uiPreview && (
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 text-xs sm:text-sm font-poppins">
+            <strong>UI preview mode.</strong> No OTP API or database. Use any valid
+            mobile, OTP <span className="font-semibold">{ADMIN_UI_PREVIEW_OTP}</span>,
+            or skip below.
+          </div>
+        )}
+
+        {!uiPreview && devOtpHint && (
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900 text-xs sm:text-sm font-poppins">
+            <strong>Local dev.</strong> Registered admin numbers use OTP{" "}
+            <span className="font-semibold">{devOtpHint}</span> (same as Yvity_Users).
+          </div>
+        )}
 
         {/* Error Message with Animation - Mobile responsive */}
         <AnimatePresence>
           {error && (
             <motion.div
+              role="alert"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -259,6 +307,8 @@ export default function AdminLogin() {
                   value={phone}
                   onChange={handlePhoneChange}
                   placeholder="9876543210"
+                  autoComplete="tel"
+                  inputMode="numeric"
                   aria-label="Mobile number for admin login"
                   aria-describedby="phone-hint"
                   className="w-full p-3 sm:p-4 text-base sm:text-lg rounded-xl bg-white border-2 border-[#0a4a4a]/20 focus:border-[#F59E0B] focus:ring-2 focus:ring-[#F59E0B]/30 outline-none transition-all placeholder:text-[#0a4a4a]/40 font-poppins"
@@ -288,10 +338,24 @@ export default function AdminLogin() {
                 )}
               </motion.button>
 
+              {uiPreview && (
+                <button
+                  type="button"
+                  onClick={goToDashboardPreview}
+                  className="w-full py-3 sm:py-4 rounded-xl border-2 border-dashed border-[#0a4a4a]/30 text-[#0a4a4a] hover:bg-[#0a4a4a]/5 font-semibold text-sm sm:text-base font-poppins transition-colors"
+                >
+                  Skip to dashboard (UI preview)
+                </button>
+              )}
+
               {/* Security Note - Mobile responsive */}
               <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-[#0a4a4a]/70 bg-[#F59E0B]/10 p-2.5 sm:p-3 rounded-lg border border-[#F59E0B]/20 font-poppins">
                 <FaShieldAlt className="text-[#F59E0B] flex-shrink-0" size={14} />
-                <span>Your data is secure with bank-level encryption</span>
+                <span>
+                  {uiPreview
+                    ? "Preview only — not for production login"
+                    : "Your data is secure with bank-level encryption"}
+                </span>
               </div>
             </motion.form>
           ) : (
@@ -307,7 +371,7 @@ export default function AdminLogin() {
               {/* Phone Display - Mobile optimized */}
               <div className="text-center p-3 sm:p-4 bg-[#F59E0B]/10 rounded-lg border-2 border-[#F59E0B]/30">
                 <p className="text-xs sm:text-sm text-[#0a4a4a] font-poppins break-words">
-                  Code sent to{" "}
+                  {uiPreview ? "Preview login for" : "Code sent to"}{" "}
                   <span className="font-semibold text-[#F59E0B]">+91 {phone}</span>
                 </p>
               </div>
@@ -324,12 +388,13 @@ export default function AdminLogin() {
                       ref={(el) => (otpRefs.current[i] = el)}
                       type="text"
                       inputMode="numeric"
+                      autoComplete={i === 0 ? "one-time-code" : "off"}
                       value={digit}
                       onChange={(e) => handleOtpChange(i, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(i, e)}
                       onPaste={handlePaste}
                       maxLength={1}
-                      aria-label={`OTP digit ${i + 1}`}
+                      aria-label={`OTP digit ${i + 1} of 6`}
                       whileFocus={{ scale: 1.15 }}
                       className="w-10 h-12 sm:w-12 sm:h-14 md:w-14 md:h-16 text-center text-lg sm:text-xl md:text-2xl font-bold rounded-lg sm:rounded-xl border-2 border-[#0a4a4a]/30 bg-white focus:border-[#F59E0B] focus:ring-2 focus:ring-[#F59E0B]/30 outline-none transition-all font-poppins"
                     />

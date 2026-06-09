@@ -16,6 +16,7 @@ import { ModalProvider } from "@/context/ModalContext";
 // import { SidebarProvider } from "@/context/SidebarContext";
 // import AppShell from "@/components/Sidebar/Sidebar";
 import QueryProvider from "@/providers/QueryProvider";
+import ChunkLoadRecovery from "@/components/system/ChunkLoadRecovery";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,13 +49,23 @@ const poppins = Poppins({
 export const metadata = {
   title: "YVITY",
   description: "Credibility that Connects",
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
+  },
+  openGraph: {
+    title: "YVITY",
+    description: "Credibility that Connects",
+    images: [{ url: "/images/yvity-logo.png", alt: "YVITY logo" }],
+  },
 };
 
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }) {
@@ -64,9 +75,10 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${nunito.variable} ${poppins.variable} h-full antialiased bg-[#F8F6F1]`}
     >
     <body className={`${poppins.className} min-h-full flex flex-col`}>
+        <ChunkLoadRecovery />
         <main className="flex-1 flex flex-col">
           <Toaster
-            position="top-right"
+            position="top-center"
             toastOptions={{
               style: {
                 zIndex: 99999,

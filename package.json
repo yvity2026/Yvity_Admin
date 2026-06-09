@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3000 -H 0.0.0.0",
+    "dev:clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\" && next dev --webpack -p 3000 -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -11,7 +12,14 @@
     "supabase:stop": "npx supabase@latest stop",
     "supabase:status": "npx supabase@latest status",
     "supabase:reset": "npx supabase@latest db reset",
-    "supabase:sync-from-remote": "powershell -ExecutionPolicy Bypass -File ./scripts/sync-remote-to-local.ps1"
+    "supabase:sync-from-remote": "powershell -ExecutionPolicy Bypass -File ./scripts/sync-remote-to-local.ps1",
+    "verify:integration": "node scripts/verify-integration.mjs",
+    "verify:integration:ci": "node scripts/verify-integration.mjs --ci",
+    "seed:shared-data": "node scripts/seed-minimal-shared-data.mjs",
+    "smoke:admin": "node scripts/smoke-test-admin-apis.mjs",
+    "check:local": "npm run verify:integration && npm run smoke:admin",
+    "install:git-hooks": "node scripts/install-git-hooks.mjs",
+    "ci": "npm run build && npm run verify:integration:ci"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1036.0",
@@ -49,6 +57,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
     "supabase": "^2.92.1",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4",
+    "to-ico": "^1.1.5"
   }
 }

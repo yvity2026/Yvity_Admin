@@ -9,6 +9,37 @@ import {
   isDevAdminAuthEnabled,
   verifyDevAdminOtp,
 } from "@/lib/admin-dev-auth";
+import { isDevDummyOtpEnabled, verifyDevDummyOtp } from "@/lib/auth/devDummyOtp";
+import { mapAdminLoginApiError } from "@/lib/auth/adminLoginApiError";
+
+async function createAdminSessionResponse(admin) {
+  const response = NextResponse.json({
+    success: true,
+    admin: {
+      id: admin.id,
+      role: admin.role,
+      permissions: normalizePermissions(admin.permissions),
+    },
+  });
+
+  response.cookies.set(
+    "admin_session",
+    JSON.stringify({
+      admin_id: admin.id,
+      role: admin.role,
+      permissions: normalizePermissions(admin.permissions),
+    }),
+    {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+    },
+  );
+
+  return response;
+}
 
 export async function POST(request) {
   try {
@@ -46,8 +77,23 @@ export async function POST(request) {
     }
 
     const supabase = createAdminClient();
+
+    if (isDevDummyOtpEnabled() && verifyDevDummyOtp(phone, otp)) {
+      const { data: admin } = await supabase
+        .from("admin_users")
+        .select("id, role, permissions, is_active")
+        .eq("phone_number", `+91${mobile}`)
+        .eq("is_active", true)
+        .single();
+
+      if (!admin) {
+        return NextResponse.json({ error: "Admin not found" }, { status: 404 });
+      }
+
+      return createAdminSessionResponse(admin);
+    }
+
     const phoneHash = hashPhone(phone);
-    console.log(phoneHash);
     // 1. get latest OTP
     const { data: otpRecord, error } = await supabase
       .from("admin_otps")
@@ -57,7 +103,7 @@ export async function POST(request) {
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    console.log(error, otpRecord);
+
     if (error || !otpRecord) {
       return NextResponse.json({ error: "Invalid OTP" }, { status: 400 });
     }
@@ -82,7 +128,7 @@ export async function POST(request) {
     const { data: admin } = await supabase
       .from("admin_users")
       .select("id, role, permissions, is_active")
-      .eq("phone_number", `+91${phone}`)
+      .eq("phone_number", `+91${mobile}`)
       .eq("is_active", true)
       .single();
 
@@ -90,34 +136,10 @@ export async function POST(request) {
       return NextResponse.json({ error: "Admin not found" }, { status: 404 });
     }
 
-    const response = NextResponse.json({
-      success: true,
-      admin: {
-        id: admin.id,
-        role: admin.role,
-        permissions: normalizePermissions(admin.permissions),
-      },
-    });
-
-    response.cookies.set(
-      "admin_session",
-      JSON.stringify({
-        admin_id: admin.id,
-        role: admin.role,
-        permissions: normalizePermissions(admin.permissions),
-      }),
-      {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 60 * 60 * 24 * 7,
-        path: "/",
-      },
-    );
-
-    return response;
+    return createAdminSessionResponse(admin);
   } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.error("[admin/login/verify-otp]", err);
+    const { error, status } = mapAdminLoginApiError(err);
+    return NextResponse.json({ error }, { status });
   }
 }

@@ -1,4 +1,9 @@
 import { normalizePermissions } from "@/lib/admin/permissions";
+import {
+  extractRoleTemplateFromPermissions,
+  getRoleTemplateLabel,
+  resolveAdminRoleTemplate,
+} from "@/lib/admin/roleDefinitions";
 
 export function normalizeAdminPhoneNumber(phoneNumber) {
   const value = String(phoneNumber || "").trim();
@@ -21,8 +26,15 @@ export function serializeAdminUser(adminUser) {
     return null;
   }
 
+  const roleTemplate = resolveAdminRoleTemplate({
+    ...adminUser,
+    role_template: extractRoleTemplateFromPermissions(adminUser?.permissions),
+  });
+
   return {
     ...adminUser,
     permissions: normalizePermissions(adminUser.permissions),
+    role_template: roleTemplate,
+    role_template_label: getRoleTemplateLabel(roleTemplate),
   };
 }

@@ -1,0 +1,15 @@
+/** Time-of-day greeting in India Standard Time (matches Users app). */
+export function getTimeOfDayGreeting(timeZone = "Asia/Kolkata") {
+  const hour = Number(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      hour: "numeric",
+      hour12: false,
+    }).format(new Date()),
+  );
+
+  if (hour >= 5 && hour < 12) return "Good morning";
+  if (hour >= 12 && hour < 17) return "Good afternoon";
+  if (hour >= 17 && hour < 21) return "Good evening";
+  return "Good night";
+}

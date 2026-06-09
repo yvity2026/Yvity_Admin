@@ -2,14 +2,38 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-async function fetchApprovals() {
-  const res = await fetch("/api/admin/approvals");
+function buildApprovalsQuery(params = {}) {
+  const search = new URLSearchParams();
+
+  if (params.page) search.set("page", String(params.page));
+  if (params.limit) search.set("limit", String(params.limit));
+  if (params.q) search.set("q", params.q);
+  if (params.status && params.status !== "all") search.set("status", params.status);
+  if (params.plan && params.plan !== "all") search.set("plan", params.plan);
+  if (params.requestType && params.requestType !== "all") {
+    search.set("requestType", params.requestType);
+  }
+  if (params.changeType && params.changeType !== "all") {
+    search.set("changeType", params.changeType);
+  }
+  if (params.featured && params.featured !== "all") {
+    search.set("featured", params.featured);
+  }
+  if (params.queue && params.queue !== "all") search.set("queue", params.queue);
+
+  const query = search.toString();
+  return query ? `?${query}` : "";
+}
+
+async function fetchApprovals(params) {
+  const res = await fetch(`/api/admin/approvals${buildApprovalsQuery(params)}`);
+  const json = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    throw new Error("Failed to fetch approvals");
+    throw new Error(json?.error || "Failed to fetch approvals");
   }
 
-  return res.json();
+  return json;
 }
 
 async function updateApproval({ action, advisorId, reason, note }) {
@@ -35,13 +59,43 @@ async function updateApproval({ action, advisorId, reason, note }) {
   return json;
 }
 
-export function useApprovals() {
+export function useApprovals(params = {}) {
   return useQuery({
-    queryKey: ["approvals"],
-    queryFn: fetchApprovals,
-    staleTime: 1000 * 60 * 5,
+    queryKey: ["admin-approvals", params],
+    queryFn: () => fetchApprovals(params),
+    staleTime: 1000 * 60 * 2,
     refetchOnWindowFocus: false,
   });
+}
+
+async function updateProfileUpdateRequest({ action, requestId, reason, note, verificationNotes }) {
+  const res = await fetch("/api/admin/profile-update-requests", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action,
+      requestId,
+      reason,
+      note,
+      verificationNotes,
+    }),
+  });
+
+  const json = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(json?.error || "Failed to update profile request");
+  }
+
+  return json;
+}
+
+function invalidateApprovalQueries(queryClient) {
+  queryClient.invalidateQueries({ queryKey: ["admin-approvals"] });
+  queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
+  queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
 }
 
 export function useApprovalActions() {
@@ -51,9 +105,7 @@ export function useApprovalActions() {
     mutationFn: updateApproval,
 
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["approvals"],
-      });
+      invalidateApprovalQueries(queryClient);
     },
   });
 
@@ -68,6 +120,37 @@ export function useApprovalActions() {
       mutation.mutateAsync({
         action: "reject",
         advisorId,
+        reason,
+        note,
+      }),
+
+    isProcessing: mutation.isPending,
+  };
+}
+
+export function useProfileUpdateActions() {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: updateProfileUpdateRequest,
+
+    onSuccess: () => {
+      invalidateApprovalQueries(queryClient);
+    },
+  });
+
+  return {
+    approve: ({ requestId, verificationNotes }) =>
+      mutation.mutateAsync({
+        action: "approve",
+        requestId,
+        verificationNotes,
+      }),
+
+    reject: ({ requestId, reason, note }) =>
+      mutation.mutateAsync({
+        action: "reject",
+        requestId,
         reason,
         note,
       }),
