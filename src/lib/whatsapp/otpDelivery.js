@@ -30,15 +30,18 @@ function hasMetaMessageId(responseText) {
   }
 }
 
-function buildMetaOtpPayload(to, code, includeButton) {
+function buildMetaOtpPayload(to, code, { includeButton, buttonSubType }) {
   const templateName = getOtpTemplateName();
   if (!templateName) {
     throw new Error("[WHATSAPP] WHATSAPP_OTP_TEMPLATE_NAME is not configured");
   }
 
   const language = process.env.WHATSAPP_OTP_TEMPLATE_LANGUAGE?.trim() || "en";
-  const buttonSubType = process.env.WHATSAPP_OTP_BUTTON_SUB_TYPE?.trim() || "copy_code";
-  const buttonParamType = buttonSubType === "copy_code" ? "coupon_code" : "text";
+  const subType =
+    buttonSubType ||
+    process.env.WHATSAPP_OTP_BUTTON_SUB_TYPE?.trim() ||
+    "url";
+  const buttonParamType = subType === "copy_code" ? "coupon_code" : "text";
   const buttonParameter =
     buttonParamType === "coupon_code"
       ? { type: "coupon_code", coupon_code: code }
@@ -54,7 +57,7 @@ function buildMetaOtpPayload(to, code, includeButton) {
   if (includeButton) {
     components.push({
       type: "button",
-      sub_type: buttonSubType,
+      sub_type: subType,
       index: "0",
       parameters: [buttonParameter],
     });
@@ -74,7 +77,7 @@ function buildMetaOtpPayload(to, code, includeButton) {
 }
 
 async function postWhatsAppRequest({ url, token, body, preview, to }) {
-  let lastError = null;
+  let lastError;
 
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
@@ -90,6 +93,11 @@ async function postWhatsAppRequest({ url, token, body, preview, to }) {
       const responseText = await response.text();
       const isMeta = url.includes("graph.facebook.com");
       const metaAccepted = !isMeta || hasMetaMessageId(responseText);
+      const apiError = response.ok
+        ? metaAccepted
+          ? undefined
+          : "Meta API accepted request but returned no message id"
+        : parseWhatsAppApiError(responseText);
 
       console.log(
         `[WHATSAPP][OTP RESPONSE attempt ${attempt}]`,
@@ -98,61 +106,89 @@ async function postWhatsAppRequest({ url, token, body, preview, to }) {
       );
 
       if (response.ok && metaAccepted) {
-        return { status: response.status, responseText, preview, to };
+        return { ok: true };
       }
 
-      const detail = response.ok
-        ? "Meta API accepted request but returned no message id"
-        : parseWhatsAppApiError(responseText);
-
-      lastError = new Error(`[WHATSAPP] Gateway returned ${response.status}: ${detail}`);
+      lastError = apiError;
     } catch (error) {
-      lastError = error;
-      console.error(`[WHATSAPP][OTP RETRY ${attempt}]`, error?.message || error);
+      lastError = error instanceof Error ? error.message : "send failed";
+      console.error(`[WHATSAPP][OTP RETRY ${attempt}]`, lastError);
     }
   }
 
-  throw lastError || new Error("[WHATSAPP] Failed to send OTP after 3 attempts");
+  return { ok: false, error: lastError };
 }
 
 async function sendMetaOtpTemplate({ phone, code, apiUrl, apiToken }) {
   const includeButtonEnv = process.env.WHATSAPP_OTP_INCLUDE_BUTTON?.trim();
-  const attempts =
-    includeButtonEnv === "true"
-      ? [true]
-      : includeButtonEnv === "false"
-        ? [false]
-        : [false, true];
+  const explicitSubType = process.env.WHATSAPP_OTP_BUTTON_SUB_TYPE?.trim();
 
-  let lastError = null;
+  let attempts;
+  if (includeButtonEnv === "false") {
+    attempts = [{ includeButton: false }];
+  } else if (explicitSubType) {
+    attempts = [
+      { includeButton: false },
+      { includeButton: true, buttonSubType: explicitSubType },
+    ];
+  } else if (includeButtonEnv === "true") {
+    attempts = [{ includeButton: true, buttonSubType: "url" }];
+  } else {
+    attempts = [
+      { includeButton: false },
+      { includeButton: true, buttonSubType: "url" },
+      { includeButton: true, buttonSubType: "copy_code" },
+    ];
+  }
 
-  for (const includeButton of attempts) {
-    try {
-      const payload = buildMetaOtpPayload(phone, code, includeButton);
-      return await postWhatsAppRequest({
-        url: apiUrl,
-        token: apiToken,
-        body: payload,
-        preview: `template:${payload.template.name}${includeButton ? "+button" : ""}`,
-        to: phone,
-      });
-    } catch (error) {
-      lastError = error;
-      const message = error?.message || "";
-      const retryable =
-        !includeButton &&
-        (message.toLowerCase().includes("button") ||
-          message.toLowerCase().includes("component") ||
-          message.includes("132000") ||
-          message.toLowerCase().includes("parameter"));
+  let lastError;
 
-      if (!retryable || includeButtonEnv !== undefined) {
-        throw error;
-      }
+  for (const attempt of attempts) {
+    const payload = buildMetaOtpPayload(phone, code, attempt);
+    const label = attempt.includeButton
+      ? `+button:${attempt.buttonSubType || "url"}`
+      : "+body";
+
+    const result = await postWhatsAppRequest({
+      url: apiUrl,
+      token: apiToken,
+      body: payload,
+      preview: `template:${payload.template.name}${label}`,
+      to: phone,
+    });
+
+    if (result.ok) return result;
+    lastError = result.error;
+
+    const errorText = String(result.error || "").toLowerCase();
+    const needsUrlButton = errorText.includes("type url");
+    const needsCopyButton =
+      errorText.includes("copy_code") || errorText.includes("copy code");
+
+    if (needsUrlButton && attempt.includeButton && attempt.buttonSubType !== "url") {
+      continue;
+    }
+    if (
+      needsCopyButton &&
+      attempt.includeButton &&
+      attempt.buttonSubType !== "copy_code"
+    ) {
+      continue;
+    }
+
+    const retryable =
+      !attempt.includeButton &&
+      (errorText.includes("button") ||
+        errorText.includes("component") ||
+        String(result.error || "").includes("132000") ||
+        errorText.includes("parameter"));
+
+    if (!retryable || includeButtonEnv !== undefined || explicitSubType) {
+      return result;
     }
   }
 
-  throw lastError || new Error("[WHATSAPP] Failed to send Meta OTP template");
+  return { ok: false, error: lastError };
 }
 
 /**
@@ -170,16 +206,28 @@ export async function sendOtpViaGateway(phone, otp) {
 
   console.log("[WHATSAPP][OTP SEND]", { mode, url: apiUrl, to });
 
+  let result;
   if (useMetaOtpTemplate()) {
-    return sendMetaOtpTemplate({ phone: to, code: String(otp), apiUrl, apiToken });
+    result = await sendMetaOtpTemplate({
+      phone: to,
+      code: String(otp),
+      apiUrl,
+      apiToken,
+    });
+  } else {
+    const message = buildOtpWhatsAppMessage(otp);
+    result = await postWhatsAppRequest({
+      url: apiUrl,
+      token: apiToken,
+      body: { to, message },
+      preview: message.slice(0, 80),
+      to,
+    });
   }
 
-  const message = buildOtpWhatsAppMessage(otp);
-  return postWhatsAppRequest({
-    url: apiUrl,
-    token: apiToken,
-    body: { to, message },
-    preview: message.slice(0, 80),
-    to,
-  });
+  if (!result.ok) {
+    throw new Error(`[WHATSAPP] ${result.error || "Failed to send OTP via WhatsApp"}`);
+  }
+
+  return { to, mode };
 }
