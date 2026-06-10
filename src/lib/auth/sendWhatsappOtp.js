@@ -1,6 +1,4 @@
-import { useMetaOtpTemplate } from "@/lib/whatsapp/config";
 import { sendOtpViaGateway } from "@/lib/whatsapp/otpDelivery";
-import { sendWhatsAppTemplate } from "@/lib/whatsapp/sender";
 
 export async function sendWhatsAppOtp(phone, otp) {
   if (!phone) {
@@ -12,16 +10,6 @@ export async function sendWhatsAppOtp(phone, otp) {
   }
 
   try {
-    if (useMetaOtpTemplate()) {
-      return await sendWhatsAppTemplate({
-        to: phone,
-        templateKey: "LOGIN_OTP",
-        data: {
-          otp: String(otp),
-        },
-      });
-    }
-
     return await sendOtpViaGateway(phone, otp);
   } catch (error) {
     console.error("[WHATSAPP][OTP SEND ERROR]", {

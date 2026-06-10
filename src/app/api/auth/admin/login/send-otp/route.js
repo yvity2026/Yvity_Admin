@@ -71,10 +71,10 @@ export async function POST(request) {
     }
 
     if (!isWhatsAppOtpConfigured()) {
-      return NextResponse.json(
-        { error: "WhatsApp OTP is not configured" },
-        { status: 503 },
+      const { error, status, code } = mapAdminLoginApiError(
+        new Error("[WHATSAPP] Missing API config"),
       );
+      return NextResponse.json({ error, code }, { status });
     }
 
     const otp = generateOtp();
@@ -109,7 +109,7 @@ export async function POST(request) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[admin/login/send-otp]", err);
-    const { error, status } = mapAdminLoginApiError(err);
-    return NextResponse.json({ error }, { status });
+    const { error, status, code } = mapAdminLoginApiError(err);
+    return NextResponse.json({ error, code }, { status });
   }
 }

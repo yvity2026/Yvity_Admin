@@ -1,14 +1,7 @@
-/** Shared WhatsApp env — keeps WHATSAPP_ACCESS_TOKEN as the primary production secret. */
-export function getWhatsAppApiUrl() {
-  const explicit = (process.env.WHATSAPP_API_URL || "").trim();
-  if (explicit) return explicit;
-
-  const phoneNumberId = (process.env.WHATSAPP_PHONE_NUMBER_ID || "").trim();
-  if (!phoneNumberId) return "";
-
-  const version = (process.env.WHATSAPP_GRAPH_API_VERSION || "v21.0").trim();
-  return `https://graph.facebook.com/${version}/${phoneNumberId}/messages`;
-}
+/**
+ * WhatsApp env — aligned with Yvity_Users src/lib/server/otp/whatsapp-config.ts
+ * Keeps WHATSAPP_ACCESS_TOKEN as the primary production secret.
+ */
 
 export function getWhatsAppAccessToken() {
   return (
@@ -18,8 +11,8 @@ export function getWhatsAppAccessToken() {
   ).trim();
 }
 
-export function isWhatsAppApiConfigured() {
-  return Boolean(getWhatsAppApiUrl() && getWhatsAppAccessToken());
+export function getWhatsAppPhoneNumberId() {
+  return (process.env.WHATSAPP_PHONE_NUMBER_ID || "").trim();
 }
 
 export function getOtpTemplateName() {
@@ -31,20 +24,57 @@ export function getOtpTemplateName() {
 }
 
 /**
- * Meta Graph template send — only for graph.facebook.com URLs.
- * Yvity_Users-style gateways always use plain { to, message } even if a template name env exists.
+ * Resolved WhatsApp send endpoint (same rules as Yvity_Users).
+ * - Custom gateway: WHATSAPP_API_URL as-is
+ * - Meta Graph base URL + phone number id → .../messages
+ * - Phone number id only → graph.facebook.com/v21.0/{id}/messages
  */
+export function getWhatsAppMessagesUrl() {
+  const explicit = (process.env.WHATSAPP_API_URL || "").trim();
+
+  if (explicit) {
+    if (explicit.includes("/messages")) return explicit;
+
+    if (explicit.includes("graph.facebook.com")) {
+      const phoneNumberId = getWhatsAppPhoneNumberId();
+      let base = explicit.replace(/\/$/, "");
+      if (phoneNumberId && !base.includes(phoneNumberId)) {
+        base = `${base}/${phoneNumberId}`;
+      }
+      return `${base}/messages`;
+    }
+
+    return explicit;
+  }
+
+  const phoneNumberId = getWhatsAppPhoneNumberId();
+  if (!phoneNumberId) return "";
+
+  const version = (process.env.WHATSAPP_GRAPH_API_VERSION || "v21.0").trim();
+  return `https://graph.facebook.com/${version}/${phoneNumberId}/messages`;
+}
+
+/** @deprecated use getWhatsAppMessagesUrl */
+export function getWhatsAppApiUrl() {
+  return (process.env.WHATSAPP_API_URL || "").trim() || getWhatsAppMessagesUrl();
+}
+
+function isMetaGraphEndpoint() {
+  return getWhatsAppMessagesUrl().toLowerCase().includes("graph.facebook.com");
+}
+
+/** Meta Graph template send when a template name is configured and we're not in gateway mode. */
 export function useMetaOtpTemplate() {
   const mode = (process.env.WHATSAPP_OTP_DELIVERY_MODE || "").trim().toLowerCase();
   if (mode === "gateway") return false;
-  if (mode === "meta") return Boolean(getOtpTemplateName());
+  if (!getOtpTemplateName()) return false;
+  if (mode === "meta") return true;
 
-  const apiUrl = getWhatsAppApiUrl().toLowerCase();
-  if (!apiUrl.includes("graph.facebook.com")) {
-    return false;
-  }
+  return isMetaGraphEndpoint();
+}
 
-  return Boolean(getOtpTemplateName());
+export function isWhatsAppApiConfigured() {
+  return Boolean(getWhatsAppAccessToken() && getWhatsAppMessagesUrl());
 }
 
 export function isWhatsAppOtpConfigured() {

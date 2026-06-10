@@ -163,7 +163,7 @@ export async function POST(request) {
     return createAdminSessionResponse(admin);
   } catch (err) {
     console.error("[admin/login/verify-otp]", err);
-    const { error, status } = mapAdminLoginApiError(err);
-    return NextResponse.json({ error }, { status });
+    const { error, status, code } = mapAdminLoginApiError(err);
+    return NextResponse.json({ error, code }, { status });
   }
 }

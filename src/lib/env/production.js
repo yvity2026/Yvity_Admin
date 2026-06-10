@@ -111,6 +111,23 @@ export function getProductionEnvReport() {
         process.env.WHATSAPP_API_URL?.trim() ||
           process.env.WHATSAPP_PHONE_NUMBER_ID?.trim(),
       ),
+      hint: "Same trio as Yvity_Users: URL (or phone id), access token, OTP template name for Meta",
+    },
+    {
+      id: "whatsapp_phone_id",
+      label: "WHATSAPP_PHONE_NUMBER_ID",
+      required: false,
+      ok: Boolean(process.env.WHATSAPP_PHONE_NUMBER_ID?.trim()),
+    },
+    {
+      id: "whatsapp_template",
+      label: "WHATSAPP_OTP_TEMPLATE_NAME",
+      required: false,
+      ok: Boolean(
+        process.env.WHATSAPP_OTP_TEMPLATE_NAME?.trim() ||
+          process.env.WHATSAPP_TEMPLATE_NAME?.trim(),
+      ),
+      hint: "Required for Meta Graph OTP (with phone number id)",
     },
     {
       id: "whatsapp_token",
