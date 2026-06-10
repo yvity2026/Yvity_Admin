@@ -39,8 +39,9 @@ export async function sendOtpViaGateway(phone, otp) {
       console.log("[WHATSAPP][OTP GATEWAY RESPONSE]", response.status, responseText.slice(0, 500));
 
       if (!response.ok) {
+        const detail = responseText.slice(0, 300).trim();
         throw new Error(
-          responseText.slice(0, 300) || `[WHATSAPP] Gateway returned ${response.status}`,
+          `[WHATSAPP] Gateway returned ${response.status}${detail ? `: ${detail}` : ""}`,
         );
       }
 
@@ -51,5 +52,8 @@ export async function sendOtpViaGateway(phone, otp) {
     }
   }
 
-  throw new Error(lastError?.message || "[WHATSAPP] Failed to send OTP after 3 retries");
+  const errorMessage = lastError?.message || "Failed to send OTP after 3 retries";
+  throw new Error(
+    errorMessage.includes("[WHATSAPP]") ? errorMessage : `[WHATSAPP] ${errorMessage}`,
+  );
 }

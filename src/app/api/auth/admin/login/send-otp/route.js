@@ -88,6 +88,7 @@ export async function POST(request) {
         admin_id: admin.id,
         phone: phoneHash,
         otp: otpHash,
+        purpose: "login",
         expires_at: expiresAt,
         used: false,
       })

@@ -62,18 +62,23 @@ export function mapAdminLoginApiError(err) {
   if (
     message.includes("NEXT_PUBLIC_SUPABASE_URL") ||
     message.includes("SUPABASE_SERVICE_ROLE_KEY") ||
-    message.toLowerCase().includes("supabase")
+    message.toLowerCase().includes("supabase") ||
+    message.includes("Failed to store OTP") ||
+    String(err?.code || "").startsWith("PGRST") ||
+    err?.code === "23505" ||
+    /invalid api key|jwt|row-level security/i.test(message)
   ) {
     return {
       status: dev ? 503 : 500,
       error: devMessage(
-        "Database is not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local (run npm run supabase:status for local values)."
+        `Database error during login: ${message}`,
+        "Unable to complete login. Please try again later.",
       ),
     };
   }
 
   return {
     status: 500,
-    error: dev && message ? message : PRODUCTION_FALLBACK,
+    error: devMessage(message || PRODUCTION_FALLBACK, PRODUCTION_FALLBACK),
   };
 }

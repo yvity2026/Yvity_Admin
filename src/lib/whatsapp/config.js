@@ -23,8 +23,20 @@ export function getOtpTemplateName() {
   ).trim();
 }
 
-/** Meta Graph template send — only when an OTP template name is configured. */
+/**
+ * Meta Graph template send — only for graph.facebook.com URLs.
+ * Yvity_Users-style gateways always use plain { to, message } even if a template name env exists.
+ */
 export function useMetaOtpTemplate() {
+  const mode = (process.env.WHATSAPP_OTP_DELIVERY_MODE || "").trim().toLowerCase();
+  if (mode === "gateway") return false;
+  if (mode === "meta") return Boolean(getOtpTemplateName());
+
+  const apiUrl = getWhatsAppApiUrl().toLowerCase();
+  if (!apiUrl.includes("graph.facebook.com")) {
+    return false;
+  }
+
   return Boolean(getOtpTemplateName());
 }
 
