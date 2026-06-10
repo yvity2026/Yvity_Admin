@@ -10,6 +10,7 @@ import {
   storeDevDummyOtp,
 } from "@/lib/auth/devDummyOtp";
 import { mapAdminLoginApiError } from "@/lib/auth/adminLoginApiError";
+import { isWhatsAppOtpConfigured } from "@/lib/whatsapp/config";
 
 const generateOtp = () => crypto.randomInt(100000, 1000000).toString();
 const OTP_TTL_SECONDS = 5 * 60;
@@ -56,22 +57,40 @@ export async function POST(request) {
       });
     }
 
-    const otp = generateOtp();
+    if (!isWhatsAppOtpConfigured()) {
+      return NextResponse.json(
+        { error: "WhatsApp OTP is not configured" },
+        { status: 503 },
+      );
+    }
 
+    const otp = generateOtp();
     const phoneHash = hashPhone(phone);
     const otpHash = hashOtp(otp);
-
     const expiresAt = new Date(Date.now() + OTP_TTL_SECONDS * 1000).toISOString();
 
-    await sendWhatsAppOtp(`+91${mobile}`, otp);
+    const { data: otpRow, error: insertError } = await supabase
+      .from("admin_otps")
+      .insert({
+        admin_id: admin.id,
+        phone: phoneHash,
+        otp: otpHash,
+        expires_at: expiresAt,
+        used: false,
+      })
+      .select("id")
+      .single();
 
-    await supabase.from("admin_otps").insert({
-      admin_id: admin.id,
-      phone: phoneHash,
-      otp: otpHash,
-      expires_at: expiresAt,
-      used: false,
-    });
+    if (insertError || !otpRow?.id) {
+      throw insertError || new Error("Failed to store OTP");
+    }
+
+    try {
+      await sendWhatsAppOtp(`+91${mobile}`, otp);
+    } catch (sendError) {
+      await supabase.from("admin_otps").delete().eq("id", otpRow.id);
+      throw sendError;
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

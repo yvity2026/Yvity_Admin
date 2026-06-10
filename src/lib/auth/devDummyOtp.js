@@ -1,4 +1,5 @@
 import { hashPhone } from "@/lib/auth/hash";
+import { isWhatsAppOtpConfigured } from "@/lib/whatsapp/config";
 
 const OTP_TTL_MS = 5 * 60 * 1000;
 const otpByPhoneHash = new Map();
@@ -7,10 +8,12 @@ export function devDummyOtpCode() {
   return process.env.YVITY_ADMIN_DEV_OTP || "123456";
 }
 
-/** Same idea as Yvity_Users: fixed OTP in development, no WhatsApp. */
+/** Demo OTP only when explicitly allowed or local dev without WhatsApp configured. */
 export function isDevDummyOtpEnabled() {
+  if (process.env.YVITY_ALLOW_DEMO_OTP === "true") return true;
   if (process.env.YVITY_ADMIN_DEV_AUTH === "false") return false;
-  return process.env.NODE_ENV === "development";
+  if (process.env.NODE_ENV === "production") return false;
+  return !isWhatsAppOtpConfigured();
 }
 
 export function storeDevDummyOtp(phone, adminId) {

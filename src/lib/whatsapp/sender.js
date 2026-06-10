@@ -1,3 +1,4 @@
+import { getWhatsAppAccessToken, getWhatsAppApiUrl } from "@/lib/whatsapp/config";
 import { WHATSAPP_TEMPLATES } from "@/lib/whatsapp/templates";
 
 export function toWhatsAppFormat(phone) {
@@ -142,8 +143,8 @@ export async function sendWhatsAppTemplate({ to, templateKey, data }) {
   console.log("[WHATSAPP][PAYLOAD]");
   console.log(JSON.stringify(maskTemplatePayload(payload), null, 2));
 
-  const apiUrl = process.env.WHATSAPP_API_URL;
-  const token = process.env.WHATSAPP_ACCESS_TOKEN;
+  const apiUrl = getWhatsAppApiUrl();
+  const token = getWhatsAppAccessToken();
 
   if (!apiUrl || !token) {
     throw new Error("[WHATSAPP] Missing API config");

@@ -4,14 +4,13 @@ import {
   getCampaignTypeLabel,
   getChannelLabel,
 } from "@/lib/communications/constants";
+import { isWhatsAppApiConfigured } from "@/lib/whatsapp/config";
 import { sendWhatsAppTemplate } from "@/lib/whatsapp/sender";
 
 const BATCH_SIZE = 25;
 
 function isWhatsAppConfigured() {
-  return Boolean(
-    process.env.WHATSAPP_ACCESS_TOKEN && process.env.WHATSAPP_API_URL,
-  );
+  return isWhatsAppApiConfigured();
 }
 
 function serializeCampaign(row) {

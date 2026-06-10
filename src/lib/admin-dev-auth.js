@@ -3,6 +3,7 @@ import { useLocalApprovals } from "@/lib/local-data/advisor-approvals";
 const DEV_OTP = process.env.YVITY_ADMIN_DEV_OTP || "123456";
 
 export function isDevAdminAuthEnabled() {
+  if (process.env.NODE_ENV === "production") return false;
   if (process.env.YVITY_ADMIN_DEV_AUTH === "false") return false;
   return useLocalApprovals();
 }

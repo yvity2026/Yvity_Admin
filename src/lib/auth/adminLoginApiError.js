@@ -15,11 +15,14 @@ export function mapAdminLoginApiError(err) {
   const message = err?.message || String(err);
   const dev = isDevelopment();
 
-  if (message.includes("[WHATSAPP] Missing API config")) {
+  if (
+    message.includes("[WHATSAPP] Missing API config") ||
+    message.includes("WhatsApp OTP is not configured")
+  ) {
     return {
       status: dev ? 503 : 500,
       error: devMessage(
-        "WhatsApp OTP is not configured. Add WHATSAPP_API_URL and WHATSAPP_ACCESS_TOKEN to .env.local, then restart the dev server."
+        "WhatsApp OTP is not configured. Set WHATSAPP_API_URL and WHATSAPP_ACCESS_TOKEN (same gateway as Yvity_Users), then restart the server."
       ),
     };
   }

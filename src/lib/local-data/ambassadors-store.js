@@ -9,6 +9,7 @@ import {
   mapReferralRow,
   mapRewardRow,
 } from "@/lib/admin/ambassadors/mapAmbassadorRecord";
+import { isWhatsAppApiConfigured } from "@/lib/whatsapp/config";
 import { createCoupon } from "@/lib/local-data/coupons-store";
 import { localDataAvailable } from "@/lib/local-data/advisor-approvals";
 import { useSupabasePersistence } from "@/lib/supabase/persistence-mode";
@@ -187,9 +188,7 @@ function mapCampaignRow(campaign = {}) {
 }
 
 async function deliverCampaignMessage({ phone, messageBody }) {
-  const hasWhatsApp = Boolean(
-    process.env.WHATSAPP_ACCESS_TOKEN && process.env.WHATSAPP_API_URL,
-  );
+  const hasWhatsApp = isWhatsAppApiConfigured();
 
   if (!hasWhatsApp) {
     console.log("[AMBASSADOR-CAMPAIGN][DEV] Simulated WhatsApp send", {
@@ -674,7 +673,7 @@ export async function sendAmbassadorCampaign(campaignId, adminId = null) {
     campaign: mapCampaignRow(updated),
     sentCount,
     failedCount,
-    simulated: !Boolean(process.env.WHATSAPP_ACCESS_TOKEN && process.env.WHATSAPP_API_URL),
+    simulated: !isWhatsAppApiConfigured(),
   };
 }
 

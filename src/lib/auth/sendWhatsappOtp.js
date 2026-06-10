@@ -1,5 +1,6 @@
-import { sendWhatsAppTemplate } from "../whatsapp/sender";
-
+import { useMetaOtpTemplate } from "@/lib/whatsapp/config";
+import { sendOtpViaGateway } from "@/lib/whatsapp/otpDelivery";
+import { sendWhatsAppTemplate } from "@/lib/whatsapp/sender";
 
 export async function sendWhatsAppOtp(phone, otp) {
   if (!phone) {
@@ -11,21 +12,23 @@ export async function sendWhatsAppOtp(phone, otp) {
   }
 
   try {
-    return await sendWhatsAppTemplate({
-      to: phone,                 
-      templateKey: "LOGIN_OTP", 
-      data: {
-        otp: String(otp),     
-      },
-    });
+    if (useMetaOtpTemplate()) {
+      return await sendWhatsAppTemplate({
+        to: phone,
+        templateKey: "LOGIN_OTP",
+        data: {
+          otp: String(otp),
+        },
+      });
+    }
+
+    return await sendOtpViaGateway(phone, otp);
   } catch (error) {
     console.error("[WHATSAPP][OTP SEND ERROR]", {
       phone,
       message: error.message,
     });
 
-    throw new Error(
-      error.message || "Failed to send OTP via WhatsApp"
-    );
+    throw new Error(error.message || "Failed to send OTP via WhatsApp");
   }
 }
