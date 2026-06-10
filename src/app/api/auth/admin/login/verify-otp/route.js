@@ -10,6 +10,7 @@ import {
   verifyDevAdminOtp,
 } from "@/lib/admin-dev-auth";
 import { isDevDummyOtpEnabled, verifyDevDummyOtp } from "@/lib/auth/devDummyOtp";
+import { findActiveAdminByPhone } from "@/lib/admin/adminUsers";
 import { mapAdminLoginApiError } from "@/lib/auth/adminLoginApiError";
 
 async function createAdminSessionResponse(admin) {
@@ -79,15 +80,27 @@ export async function POST(request) {
     const supabase = createAdminClient();
 
     if (isDevDummyOtpEnabled() && verifyDevDummyOtp(phone, otp)) {
-      const { data: admin } = await supabase
-        .from("admin_users")
-        .select("id, role, permissions, is_active")
-        .eq("phone_number", `+91${mobile}`)
-        .eq("is_active", true)
-        .single();
+      const { admin, error: adminLookupError } = await findActiveAdminByPhone(
+        supabase,
+        mobile,
+      );
+
+      if (adminLookupError) {
+        console.error("[admin/login/verify-otp] admin lookup failed:", adminLookupError);
+        return NextResponse.json(
+          { error: "Unable to verify admin account" },
+          { status: 503 },
+        );
+      }
 
       if (!admin) {
-        return NextResponse.json({ error: "Admin not found" }, { status: 404 });
+        return NextResponse.json(
+          {
+            error:
+              "This mobile number is not registered as an admin. Ask a super admin to add you under Roles & Permissions.",
+          },
+          { status: 404 },
+        );
       }
 
       return createAdminSessionResponse(admin);
@@ -124,16 +137,27 @@ export async function POST(request) {
       .update({ used: true })
       .eq("id", otpRecord.id);
 
-    // 5. get admin
-    const { data: admin } = await supabase
-      .from("admin_users")
-      .select("id, role, permissions, is_active")
-      .eq("phone_number", `+91${mobile}`)
-      .eq("is_active", true)
-      .single();
+    const { admin, error: adminLookupError } = await findActiveAdminByPhone(
+      supabase,
+      mobile,
+    );
+
+    if (adminLookupError) {
+      console.error("[admin/login/verify-otp] admin lookup failed:", adminLookupError);
+      return NextResponse.json(
+        { error: "Unable to verify admin account" },
+        { status: 503 },
+      );
+    }
 
     if (!admin) {
-      return NextResponse.json({ error: "Admin not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          error:
+            "This mobile number is not registered as an admin. Ask a super admin to add you under Roles & Permissions.",
+        },
+        { status: 404 },
+      );
     }
 
     return createAdminSessionResponse(admin);

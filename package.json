@@ -17,6 +17,7 @@
     "verify:integration:ci": "node scripts/verify-integration.mjs --ci",
     "seed:shared-data": "node scripts/seed-minimal-shared-data.mjs",
     "smoke:admin": "node scripts/smoke-test-admin-apis.mjs",
+    "bootstrap:admin": "node scripts/bootstrap-admin-users.mjs",
     "check:local": "npm run verify:integration && npm run smoke:admin",
     "install:git-hooks": "node scripts/install-git-hooks.mjs",
     "ci": "npm run build && npm run verify:integration:ci"

@@ -10,6 +10,7 @@ import {
   storeDevDummyOtp,
 } from "@/lib/auth/devDummyOtp";
 import { mapAdminLoginApiError } from "@/lib/auth/adminLoginApiError";
+import { findActiveAdminByPhone } from "@/lib/admin/adminUsers";
 import { isWhatsAppOtpConfigured } from "@/lib/whatsapp/config";
 
 const generateOtp = () => crypto.randomInt(100000, 1000000).toString();
@@ -38,15 +39,27 @@ export async function POST(request) {
 
     const supabase = createAdminClient();
 
-    const { data: admin } = await supabase
-      .from("admin_users")
-      .select("id, phone_number")
-      .eq("phone_number", `+91${mobile}`)
-      .eq("is_active", true)
-      .single();
+    const { admin, error: adminLookupError } = await findActiveAdminByPhone(
+      supabase,
+      mobile,
+    );
+
+    if (adminLookupError) {
+      console.error("[admin/login/send-otp] admin lookup failed:", adminLookupError);
+      return NextResponse.json(
+        { error: "Unable to verify admin account" },
+        { status: 503 },
+      );
+    }
 
     if (!admin) {
-      return NextResponse.json({ error: "Admin not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          error:
+            "This mobile number is not registered as an admin. Ask a super admin to add you under Roles & Permissions.",
+        },
+        { status: 404 },
+      );
     }
 
     if (isDevDummyOtpEnabled()) {
