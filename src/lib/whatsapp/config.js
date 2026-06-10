@@ -1,6 +1,13 @@
 /** Shared WhatsApp env — keeps WHATSAPP_ACCESS_TOKEN as the primary production secret. */
 export function getWhatsAppApiUrl() {
-  return (process.env.WHATSAPP_API_URL || "").trim();
+  const explicit = (process.env.WHATSAPP_API_URL || "").trim();
+  if (explicit) return explicit;
+
+  const phoneNumberId = (process.env.WHATSAPP_PHONE_NUMBER_ID || "").trim();
+  if (!phoneNumberId) return "";
+
+  const version = (process.env.WHATSAPP_GRAPH_API_VERSION || "v21.0").trim();
+  return `https://graph.facebook.com/${version}/${phoneNumberId}/messages`;
 }
 
 export function getWhatsAppAccessToken() {

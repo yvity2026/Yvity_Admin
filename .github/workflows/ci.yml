@@ -41,6 +41,9 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: placeholder
           JWT_SECRET_KEY: ci-placeholder-secret
 
+      - name: Verify production env (CI mode)
+        run: npm run verify:env:ci
+
       - name: Verify Admin modules (CI mode)
         run: npm run verify:integration -- --ci
 

@@ -22,7 +22,7 @@ export function mapAdminLoginApiError(err) {
     return {
       status: dev ? 503 : 500,
       error: devMessage(
-        "WhatsApp OTP is not configured. Set WHATSAPP_API_URL and WHATSAPP_ACCESS_TOKEN (same gateway as Yvity_Users), then restart the server."
+        "WhatsApp OTP is not configured. Set WHATSAPP_API_URL (or WHATSAPP_PHONE_NUMBER_ID) and WHATSAPP_ACCESS_TOKEN, then restart the server."
       ),
     };
   }
