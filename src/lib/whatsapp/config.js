@@ -1,6 +1,5 @@
 /**
  * WhatsApp env — aligned with Yvity_Users src/lib/server/otp/whatsapp-config.ts
- * Keeps WHATSAPP_ACCESS_TOKEN as the primary production secret.
  */
 
 export function getWhatsAppAccessToken() {
@@ -23,35 +22,46 @@ export function getOtpTemplateName() {
   ).trim();
 }
 
-/**
- * Resolved WhatsApp send endpoint (same rules as Yvity_Users).
- * - Custom gateway: WHATSAPP_API_URL as-is
- * - Meta Graph base URL + phone number id → .../messages
- * - Phone number id only → graph.facebook.com/v21.0/{id}/messages
- */
-export function getWhatsAppMessagesUrl() {
+function getGraphApiVersion() {
+  return (process.env.WHATSAPP_GRAPH_API_VERSION || "v21.0").trim();
+}
+
+/** Meta Cloud API messages endpoint — ignores legacy gateway WHATSAPP_API_URL when in meta mode. */
+export function getMetaOtpMessagesUrl() {
   const explicit = (process.env.WHATSAPP_API_URL || "").trim();
+  const phoneNumberId = getWhatsAppPhoneNumberId();
 
-  if (explicit) {
-    if (explicit.includes("/messages")) return explicit;
-
-    if (explicit.includes("graph.facebook.com")) {
-      const phoneNumberId = getWhatsAppPhoneNumberId();
-      let base = explicit.replace(/\/$/, "");
-      if (phoneNumberId && !base.includes(phoneNumberId)) {
-        base = `${base}/${phoneNumberId}`;
-      }
-      return `${base}/messages`;
-    }
-
+  if (explicit?.includes("/messages") && explicit.includes("graph.facebook.com")) {
     return explicit;
   }
 
-  const phoneNumberId = getWhatsAppPhoneNumberId();
+  if (explicit?.includes("graph.facebook.com")) {
+    let base = explicit.replace(/\/$/, "");
+    if (phoneNumberId && !base.includes(phoneNumberId)) {
+      base = `${base}/${phoneNumberId}`;
+    }
+    return `${base}/messages`;
+  }
+
   if (!phoneNumberId) return "";
 
-  const version = (process.env.WHATSAPP_GRAPH_API_VERSION || "v21.0").trim();
-  return `https://graph.facebook.com/${version}/${phoneNumberId}/messages`;
+  return `https://graph.facebook.com/${getGraphApiVersion()}/${phoneNumberId}/messages`;
+}
+
+/**
+ * Resolved WhatsApp send endpoint (same rules as Yvity_Users).
+ * - Meta OTP: Graph API when template + phone id (or mode=meta).
+ * - Gateway: WHATSAPP_API_URL as-is.
+ */
+export function getWhatsAppMessagesUrl() {
+  if (useMetaOtpTemplate()) {
+    return getMetaOtpMessagesUrl();
+  }
+
+  const explicit = (process.env.WHATSAPP_API_URL || "").trim();
+  if (explicit) return explicit;
+
+  return getMetaOtpMessagesUrl();
 }
 
 /** @deprecated use getWhatsAppMessagesUrl */
@@ -60,7 +70,9 @@ export function getWhatsAppApiUrl() {
 }
 
 function isMetaGraphEndpoint() {
-  return getWhatsAppMessagesUrl().toLowerCase().includes("graph.facebook.com");
+  const explicit = (process.env.WHATSAPP_API_URL || "").trim();
+  if (explicit?.includes("graph.facebook.com")) return true;
+  return Boolean(getWhatsAppPhoneNumberId());
 }
 
 /** Meta Graph template send when a template name is configured and we're not in gateway mode. */
@@ -69,6 +81,7 @@ export function useMetaOtpTemplate() {
   if (mode === "gateway") return false;
   if (!getOtpTemplateName()) return false;
   if (mode === "meta") return true;
+  if (getWhatsAppPhoneNumberId()) return true;
 
   return isMetaGraphEndpoint();
 }
@@ -87,4 +100,17 @@ export function buildOtpWhatsAppMessage(code) {
     return template.replaceAll("{code}", String(code));
   }
   return `Your YVITY verification code is ${code}. Valid for 5 minutes. Do not share this code with anyone.`;
+}
+
+export function describeWhatsAppOtpConfig() {
+  return {
+    configured: isWhatsAppOtpConfigured(),
+    deliveryMode: useMetaOtpTemplate() ? "meta" : "gateway",
+    messagesUrl: getWhatsAppMessagesUrl() || null,
+    hasAccessToken: Boolean(getWhatsAppAccessToken()),
+    phoneNumberId: getWhatsAppPhoneNumberId() || null,
+    templateName: getOtpTemplateName() || null,
+    templateLanguage: process.env.WHATSAPP_OTP_TEMPLATE_LANGUAGE?.trim() || "en",
+    graphApiVersion: getGraphApiVersion(),
+  };
 }

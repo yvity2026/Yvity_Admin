@@ -34,8 +34,12 @@ loadEnvFile(".env");
 const { getProductionEnvReport, ADMIN_UNUSED_ENV_KEYS } = await import(
   "../src/lib/env/production.js"
 );
-const { getWhatsAppApiUrl, isWhatsAppApiConfigured, useMetaOtpTemplate } =
-  await import("../src/lib/whatsapp/config.js");
+const {
+  describeWhatsAppOtpConfig,
+  getWhatsAppMessagesUrl,
+  isWhatsAppApiConfigured,
+  useMetaOtpTemplate,
+} = await import("../src/lib/whatsapp/config.js");
 
 const report = getProductionEnvReport();
 
@@ -49,9 +53,10 @@ for (const item of report.checks) {
 }
 
 console.log("\nWhatsApp runtime:");
-console.log(`  API URL resolved: ${getWhatsAppApiUrl() || "(empty)"}`);
+console.log(`  API URL resolved: ${getWhatsAppMessagesUrl() || "(empty)"}`);
 console.log(`  Configured: ${isWhatsAppApiConfigured() ? "yes" : "no"}`);
 console.log(`  Delivery mode: ${useMetaOtpTemplate() ? "meta template" : "gateway (Yvity_Users)"}`);
+console.log(`  Config detail: ${JSON.stringify(describeWhatsAppOtpConfig())}`);
 
 if (process.env.WHATSAPP_OTP_TEMPLATE_NAME?.trim() && !useMetaOtpTemplate()) {
   console.log(

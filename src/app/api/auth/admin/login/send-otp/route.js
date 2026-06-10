@@ -11,7 +11,10 @@ import {
 } from "@/lib/auth/devDummyOtp";
 import { mapAdminLoginApiError } from "@/lib/auth/adminLoginApiError";
 import { findActiveAdminByPhone } from "@/lib/admin/adminUsers";
-import { isWhatsAppOtpConfigured } from "@/lib/whatsapp/config";
+import {
+  describeWhatsAppOtpConfig,
+  isWhatsAppOtpConfigured,
+} from "@/lib/whatsapp/config";
 
 const generateOtp = () => crypto.randomInt(100000, 1000000).toString();
 const OTP_TTL_SECONDS = 5 * 60;
@@ -71,10 +74,10 @@ export async function POST(request) {
     }
 
     if (!isWhatsAppOtpConfigured()) {
-      const { error, status, code } = mapAdminLoginApiError(
+      const { error, status, code, hint } = mapAdminLoginApiError(
         new Error("[WHATSAPP] Missing API config"),
       );
-      return NextResponse.json({ error, code }, { status });
+      return NextResponse.json({ error, code, hint }, { status });
     }
 
     const otp = generateOtp();
@@ -108,8 +111,8 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("[admin/login/send-otp]", err);
-    const { error, status, code } = mapAdminLoginApiError(err);
-    return NextResponse.json({ error, code }, { status });
+    console.error("[admin/login/send-otp]", err, describeWhatsAppOtpConfig());
+    const { error, status, code, hint } = mapAdminLoginApiError(err);
+    return NextResponse.json({ error, code, hint }, { status });
   }
 }

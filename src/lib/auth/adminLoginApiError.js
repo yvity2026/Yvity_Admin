@@ -10,6 +10,31 @@ function devMessage(message, productionMessage = PRODUCTION_FALLBACK) {
   return isDevelopment() ? message : productionMessage;
 }
 
+function whatsAppErrorHint(message) {
+  const lower = message.toLowerCase();
+
+  if (lower.includes("missing api config")) {
+    return "Set WHATSAPP_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID (Meta) or WHATSAPP_API_URL (gateway) on Vercel.";
+  }
+  if (lower.includes("template") && lower.includes("not configured")) {
+    return "Set WHATSAPP_OTP_TEMPLATE_NAME to your approved Meta template name.";
+  }
+  if (message.includes("132001") || lower.includes("does not exist")) {
+    return "Template name or language mismatch. Check WHATSAPP_OTP_TEMPLATE_NAME and WHATSAPP_OTP_TEMPLATE_LANGUAGE.";
+  }
+  if (message.includes("190") || lower.includes("access token") || lower.includes("oauth")) {
+    return "WhatsApp access token is invalid or expired. Regenerate in Meta Business Suite.";
+  }
+  if (lower.includes("phone number")) {
+    return "Recipient number is not on WhatsApp or not in the allowed test list.";
+  }
+  if (lower.includes("no message id")) {
+    return "Meta accepted the request but did not queue a message. Check template approval and phone number ID.";
+  }
+
+  return "Copy the same WhatsApp env vars from Yvity_Users Vercel project (token, phone id, template name).";
+}
+
 /**
  * Maps thrown errors from admin login routes to safe API responses.
  */
@@ -24,6 +49,7 @@ export function mapAdminLoginApiError(err) {
     return {
       status: dev ? 503 : 500,
       code: "WHATSAPP_NOT_CONFIGURED",
+      hint: whatsAppErrorHint(message),
       error: devMessage(
         "WhatsApp OTP is not configured. Set WHATSAPP_ACCESS_TOKEN plus WHATSAPP_API_URL or WHATSAPP_PHONE_NUMBER_ID (and WHATSAPP_OTP_TEMPLATE_NAME for Meta), same as Yvity_Users.",
         PRODUCTION_WHATSAPP_FALLBACK,
@@ -59,6 +85,7 @@ export function mapAdminLoginApiError(err) {
     return {
       status: 502,
       code: "WHATSAPP_SEND_FAILED",
+      hint: whatsAppErrorHint(message),
       error: devMessage(
         message.replace(/^\[WHATSAPP\]\s*/i, "").trim() ||
           "WhatsApp could not deliver the OTP. Check template approval and API credentials.",

@@ -21,6 +21,15 @@ function parseWhatsAppApiError(responseText) {
   }
 }
 
+function hasMetaMessageId(responseText) {
+  try {
+    const data = JSON.parse(responseText);
+    return Boolean(data?.messages?.[0]?.id);
+  } catch {
+    return false;
+  }
+}
+
 function buildMetaOtpPayload(to, code, includeButton) {
   const templateName = getOtpTemplateName();
   if (!templateName) {
@@ -65,24 +74,45 @@ function buildMetaOtpPayload(to, code, includeButton) {
 }
 
 async function postWhatsAppRequest({ url, token, body, preview, to }) {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
+  let lastError = null;
 
-  const responseText = await response.text();
-  console.log("[WHATSAPP][OTP RESPONSE]", response.status, responseText.slice(0, 500));
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
 
-  if (!response.ok) {
-    const detail = parseWhatsAppApiError(responseText);
-    throw new Error(`[WHATSAPP] Gateway returned ${response.status}: ${detail}`);
+      const responseText = await response.text();
+      const isMeta = url.includes("graph.facebook.com");
+      const metaAccepted = !isMeta || hasMetaMessageId(responseText);
+
+      console.log(
+        `[WHATSAPP][OTP RESPONSE attempt ${attempt}]`,
+        response.status,
+        responseText.slice(0, 500),
+      );
+
+      if (response.ok && metaAccepted) {
+        return { status: response.status, responseText, preview, to };
+      }
+
+      const detail = response.ok
+        ? "Meta API accepted request but returned no message id"
+        : parseWhatsAppApiError(responseText);
+
+      lastError = new Error(`[WHATSAPP] Gateway returned ${response.status}: ${detail}`);
+    } catch (error) {
+      lastError = error;
+      console.error(`[WHATSAPP][OTP RETRY ${attempt}]`, error?.message || error);
+    }
   }
 
-  return { status: response.status, responseText, preview, to };
+  throw lastError || new Error("[WHATSAPP] Failed to send OTP after 3 attempts");
 }
 
 async function sendMetaOtpTemplate({ phone, code, apiUrl, apiToken }) {
