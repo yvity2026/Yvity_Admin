@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { hasAnyPermission } from "@/lib/admin/permissions";
 import { previewAudience } from "@/lib/communications/communicationsFacade";
+import { prepareCommunicationsRuntime } from "@/lib/communications/prepareRuntime";
 import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function POST(request) {
   try {
+    await prepareCommunicationsRuntime();
     const admin = await getAuthenticatedAdmin();
 
     if (!admin) {

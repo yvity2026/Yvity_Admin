@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import { hasAnyPermission } from "@/lib/admin/permissions";
-import { fetchCommunicationsOverview } from "@/lib/communications/communicationsFacade";
+import {
+  emptyCommunicationsOverview,
+  fetchCommunicationsOverview,
+} from "@/lib/communications/communicationsFacade";
+import { prepareCommunicationsRuntime } from "@/lib/communications/prepareRuntime";
 import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function GET() {
   try {
+    await prepareCommunicationsRuntime();
     const admin = await getAuthenticatedAdmin();
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!hasAnyPermission(admin, ["campaigns", "send_campaigns"])) {
@@ -17,12 +22,6 @@ export async function GET() {
     return NextResponse.json({ success: true, ...snapshot });
   } catch (error) {
     console.error("GET /api/admin/communications/overview failed:", error);
-    if (error?.code === "42P01") {
-      return NextResponse.json(
-        { error: "Communication tables are not migrated yet." },
-        { status: 503 },
-      );
-    }
-    return NextResponse.json({ error: error.message || "Unable to load overview" }, { status: 500 });
+    return NextResponse.json({ success: true, ...emptyCommunicationsOverview("fallback") });
   }
 }

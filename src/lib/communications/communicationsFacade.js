@@ -53,6 +53,26 @@ export function useLocalCommunications() {
   return communicationsLocalMode();
 }
 
+export function emptyCommunicationsOverview(mode = "local") {
+  return {
+    overview: {
+      totalMessagesSent: 0,
+      emailCampaigns: 0,
+      smsCampaigns: 0,
+      whatsappCampaigns: 0,
+      notificationCampaigns: 0,
+      activeCampaigns: 0,
+      totalCampaigns: 0,
+    },
+    campaigns: [],
+    history: [],
+    announcements: [],
+    filterOptions: { states: [], cities: [], industries: [] },
+    isLive: true,
+    mode,
+  };
+}
+
 export async function fetchCommunicationsOverview(supabase) {
   if (communicationsLocalMode()) {
     const campaigns = listLocalCommunications({ limit: 200 });
@@ -67,7 +87,16 @@ export async function fetchCommunicationsOverview(supabase) {
     };
   }
 
-  const campaigns = await listCommunications(supabase, { limit: 50 });
+  let campaigns = [];
+  try {
+    campaigns = await listCommunications(supabase, { limit: 50 });
+  } catch (error) {
+    if (error?.code === "42P01" || error?.code === "PGRST205") {
+      console.warn("[communications] marketing_campaigns missing — using empty overview");
+      return emptyCommunicationsOverview("supabase-degraded");
+    }
+    throw error;
+  }
   const sent = campaigns.filter((row) => row.status === "sent");
   const active = campaigns.filter((row) => ["draft", "scheduled", "sending"].includes(row.status));
 

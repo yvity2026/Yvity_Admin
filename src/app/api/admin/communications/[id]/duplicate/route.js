@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { hasPermission } from "@/lib/admin/permissions";
 import { duplicateCampaign } from "@/lib/communications/communicationsFacade";
+import { prepareCommunicationsRuntime } from "@/lib/communications/prepareRuntime";
 import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function POST(_request, { params }) {
   try {
+    await prepareCommunicationsRuntime();
     const admin = await getAuthenticatedAdmin();
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!hasPermission(admin, "campaigns")) {

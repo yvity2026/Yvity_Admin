@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { localDataAvailable } from "@/lib/local-data/advisor-approvals";
 import { readJsonFile, writeJsonFile } from "@/lib/local-data/paths";
+import { useSupabasePersistence } from "@/lib/supabase/persistence-mode";
 import {
   CAMPAIGN_TYPES,
   getAudienceLabel,
@@ -302,6 +303,7 @@ export function createLocalAnnouncement(payload) {
   return row;
 }
 
+/** JSON store on sibling .data (dev) or Vercel runtime bootstrap (production). */
 export function communicationsLocalMode() {
-  return localDataAvailable();
+  return localDataAvailable() || useSupabasePersistence();
 }
