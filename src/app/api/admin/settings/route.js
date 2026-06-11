@@ -12,9 +12,11 @@ import {
   testWhatsappSettings,
 } from "@/lib/local-data/settings-store";
 import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
+import { ensurePlatformDataReady } from "@/lib/supabase/platform-data-bootstrap";
 
 export async function GET() {
   try {
+    await ensurePlatformDataReady();
     const admin = await getAuthenticatedAdmin();
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!hasPermission(admin, "settings")) {

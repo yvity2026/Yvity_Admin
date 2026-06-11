@@ -1,9 +1,6 @@
 import { cookies } from "next/headers";
-import { ensurePlatformDataReady } from "@/lib/supabase/platform-data-bootstrap";
 
 export async function getAdminSession() {
-  await ensurePlatformDataReady();
-
   const cookieStore = await cookies();
   const sessionValue = cookieStore.get("admin_session")?.value;
   if (!sessionValue) return null;

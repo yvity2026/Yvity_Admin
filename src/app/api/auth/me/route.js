@@ -37,11 +37,11 @@ export async function GET() {
 
     return response;
   } catch (error) {
-    console.error("API ERROR:", error);
+    console.error("[api/auth/me]", error);
 
     return NextResponse.json(
-      { success: false, message: "Internal Server Error" },
-      { status: 500 }
+      { success: false, message: "Unauthorized" },
+      { status: 401 },
     );
   }
 }

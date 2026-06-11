@@ -2,6 +2,18 @@ import { createAdminClient } from "@/lib/supabase/server";
 
 const TABLE = "platform_documents";
 
+function isMissingTableError(error) {
+  if (!error) return false;
+  const code = String(error.code || "");
+  const message = String(error.message || "").toLowerCase();
+  return (
+    code === "42P01" ||
+    code === "PGRST205" ||
+    message.includes("platform_documents") ||
+    message.includes("schema cache")
+  );
+}
+
 export async function readPlatformDocument(documentKey, fallback = null) {
   const supabase = createAdminClient();
   const { data, error } = await supabase
@@ -11,10 +23,8 @@ export async function readPlatformDocument(documentKey, fallback = null) {
     .maybeSingle();
 
   if (error) {
-    if (error.code === "42P01") {
-      throw new Error(
-        "platform_documents table missing — run Supabase migration 20260609120000_platform_documents.sql",
-      );
+    if (isMissingTableError(error)) {
+      return fallback;
     }
     throw error;
   }
@@ -35,10 +45,9 @@ export async function writePlatformDocument(documentKey, document) {
   );
 
   if (error) {
-    if (error.code === "42P01") {
-      throw new Error(
-        "platform_documents table missing — run Supabase migration 20260609120000_platform_documents.sql",
-      );
+    if (isMissingTableError(error)) {
+      console.warn("[platform_documents] table missing — skipping sync");
+      return;
     }
     throw error;
   }
@@ -49,7 +58,7 @@ export async function listPlatformDocuments() {
   const { data, error } = await supabase.from(TABLE).select("document_key, document");
 
   if (error) {
-    if (error.code === "42P01") return [];
+    if (isMissingTableError(error)) return [];
     throw error;
   }
 

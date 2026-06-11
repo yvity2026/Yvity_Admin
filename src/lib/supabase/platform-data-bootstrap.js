@@ -67,6 +67,7 @@ const DEFAULT_DOCUMENTS = {
 };
 
 let bootstrapPromise = null;
+let bootstrapFailed = false;
 
 function runtimeDataDir() {
   return path.join(os.tmpdir(), "yvity-admin-data");
@@ -78,6 +79,7 @@ export function isRuntimeDataBootstrapped() {
 
 /**
  * On Vercel (no sibling .data), hydrate /tmp JSON from Supabase so existing stores work unchanged.
+ * Never throws — auth and dashboard APIs must stay available if bootstrap fails.
  */
 export async function ensurePlatformDataReady() {
   if (!useSupabasePersistence()) return true;
@@ -86,11 +88,17 @@ export async function ensurePlatformDataReady() {
     return true;
   }
 
+  if (bootstrapFailed) return false;
+
   if (!bootstrapPromise) {
-    bootstrapPromise = bootstrapRuntimeData().catch((error) => {
-      bootstrapPromise = null;
-      throw error;
-    });
+    bootstrapPromise = bootstrapRuntimeData()
+      .then(() => true)
+      .catch((error) => {
+        bootstrapFailed = true;
+        bootstrapPromise = null;
+        console.error("[platform-data-bootstrap] failed:", error);
+        return false;
+      });
   }
 
   return bootstrapPromise;
@@ -116,8 +124,12 @@ async function bootstrapRuntimeData() {
     }
   }
 
-  const { hydrateCoreTablesToRuntimeData } = await import("@/lib/supabase/hydrate-runtime-data");
-  await hydrateCoreTablesToRuntimeData(dir);
+  try {
+    const { hydrateCoreTablesToRuntimeData } = await import("@/lib/supabase/hydrate-runtime-data");
+    await hydrateCoreTablesToRuntimeData(dir);
+  } catch (error) {
+    console.warn("[platform-data-bootstrap] core table hydrate skipped:", error?.message || error);
+  }
 
   process.env.YVITY_RUNTIME_DATA_DIR = dir;
   return true;
