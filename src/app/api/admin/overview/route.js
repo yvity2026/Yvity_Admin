@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
+import { queryCount, queryRows } from "@/lib/admin/overviewDefaults";
 import { NextResponse } from "next/server";
 
 function normalizeProfession(profession) {
@@ -295,24 +296,9 @@ export async function GET() {
         .in("status", ["open", "in_review"]),
     ]);
 
-    if (totalRes.error) {
-      console.error("Failed to fetch total advisors:", totalRes.error);
-      return NextResponse.json({ error: "Failed to fetch dashboard data" }, { status: 500 });
-    }
-
-    if (cityRes.error) console.warn("city_counts unavailable:", cityRes.error.message);
-    if (companyRes.error) console.warn("company_counts unavailable:", companyRes.error.message);
-    if (serviceRes.error) console.warn("service_counts unavailable:", serviceRes.error.message);
-    if (complaintsOpenRes.error) {
-      console.warn("platform_complaints unavailable:", complaintsOpenRes.error.message);
-    }
-    if (recentComplaintsRes.error) {
-      console.warn("recent complaints unavailable:", recentComplaintsRes.error.message);
-    }
-
     const professionCounts = new Map();
 
-    for (const item of roleWiseRes.data || []) {
+    for (const item of queryRows(roleWiseRes, "roleWise")) {
       const profession = normalizeProfession(item.profession);
       professionCounts.set(profession, (professionCounts.get(profession) || 0) + 1);
     }
@@ -328,9 +314,9 @@ export async function GET() {
       ? [...topProfessions, { profession: "Others", total: remainingTotal }]
       : topProfessions;
 
-    const paidPayments = paidPaymentsRes.data || [];
-    const goldRevenue = sumRevenue(goldPaymentsRes.data || []);
-    const silverRevenue = sumRevenue(silverPaymentsRes.data || []);
+    const paidPayments = queryRows(paidPaymentsRes, "paidPayments");
+    const goldRevenue = sumRevenue(queryRows(goldPaymentsRes, "goldPayments"));
+    const silverRevenue = sumRevenue(queryRows(silverPaymentsRes, "silverPayments"));
     const totalRevenue = sumRevenue(paidPayments);
 
     const now = new Date();
@@ -338,47 +324,52 @@ export async function GET() {
     const thisMonthPayments = paidPayments.filter((p) => p.paid_at && p.paid_at >= firstDay);
     const revenueThisMonth = sumRevenue(thisMonthPayments);
 
-    const advisorSignupDates = (advisorSignupsRes.data || []).map((row) => row.created_at);
-    const userSignupDates = (userSignupsRes.data || []).map((row) => row.created_at);
+    const advisorSignupDates = queryRows(advisorSignupsRes, "advisorSignups").map(
+      (row) => row.created_at,
+    );
+    const userSignupDates = queryRows(userSignupsRes, "userSignups").map((row) => row.created_at);
     const signupDates = [...advisorSignupDates, ...userSignupDates];
 
     const signupsLast30 = signupDates.filter((iso) => iso >= thirtyDaysAgo).length;
     const signupsPrev30 = signupDates.filter((iso) => iso >= sixtyDaysAgo && iso < thirtyDaysAgo).length;
 
-    const totalProfessionals = totalRes.count || 0;
-    const totalUsers = totalUsersRes.count || 0;
+    const totalProfessionals = queryCount(totalRes, "totalAdvisors");
+    const totalUsers = queryCount(totalUsersRes, "totalUsers");
     const totalCustomers = Math.max(0, totalUsers - totalProfessionals);
     const pendingVerifications =
-      (underReviewRes.count || 0) + (actionRequiredRes.count || 0);
+      queryCount(underReviewRes, "underReview") +
+      queryCount(actionRequiredRes, "actionRequired");
 
     const activity = buildActivityFeed({
-      recentUsers: recentUsersRes.data || [],
-      recentActiveProfiles: recentActiveProfilesRes.data || [],
-      recentPayments: recentPaymentsRes.data || [],
-      recentTestimonials: recentTestimonialsRes.data || [],
-      recentComplaints: recentComplaintsRes.error ? [] : recentComplaintsRes.data || [],
+      recentUsers: queryRows(recentUsersRes, "recentUsers"),
+      recentActiveProfiles: queryRows(recentActiveProfilesRes, "recentActiveProfiles"),
+      recentPayments: queryRows(recentPaymentsRes, "recentPayments"),
+      recentTestimonials: queryRows(recentTestimonialsRes, "recentTestimonials"),
+      recentComplaints: queryRows(recentComplaintsRes, "recentComplaints"),
     });
 
     return NextResponse.json({
       advisors: {
         total: totalProfessionals,
-        free: freeRes.count || 0,
-        silver: silverRes.count || 0,
-        gold: goldRes.count || 0,
-        under_review: underReviewRes.count || 0,
-        action_required: actionRequiredRes.count || 0,
-        live: liveProfilesRes.count || 0,
+        free: queryCount(freeRes, "free"),
+        silver: queryCount(silverRes, "silver"),
+        gold: queryCount(goldRes, "gold"),
+        under_review: queryCount(underReviewRes, "underReview"),
+        action_required: queryCount(actionRequiredRes, "actionRequired"),
+        live: queryCount(liveProfilesRes, "live"),
       },
 
       users: {
         total: totalUsers,
         customers: totalCustomers,
         professionals: totalProfessionals,
-        registrationsToday: (usersTodayRes.count || 0) + (advisorsTodayRes.count || 0),
+        registrationsToday:
+          queryCount(usersTodayRes, "usersToday") +
+          queryCount(advisorsTodayRes, "advisorsToday"),
       },
 
       subscriptions: {
-        active: (silverRes.count || 0) + (goldRes.count || 0),
+        active: queryCount(silverRes, "silver") + queryCount(goldRes, "gold"),
       },
 
       revenue: {
@@ -386,26 +377,28 @@ export async function GET() {
         gold: goldRevenue,
         silver: silverRevenue,
         thisMonth: revenueThisMonth,
-        payments: monthPaymentsRes.data || [],
-        recentUpgrades: recentUpgradesRes.data || [],
+        payments: queryRows(monthPaymentsRes, "monthPayments"),
+        recentUpgrades: queryRows(recentUpgradesRes, "recentUpgrades"),
       },
 
       approvals: {
         pending: pendingVerifications,
-        under_review: underReviewRes.count || 0,
+        under_review: queryCount(underReviewRes, "underReview"),
       },
 
       operations: {
         pendingVerifications,
-        openComplaints: complaintsOpenRes.error ? 0 : complaintsOpenRes.count || 0,
-        pendingReviews: pendingTestimonialsRes.count || 0,
-        newReviewsToday: reviewsTodayRes.count || 0,
-        profileCompletionPct: averageProfileCompletion(profileFieldsRes.data || []),
+        openComplaints: queryCount(complaintsOpenRes, "openComplaints"),
+        pendingReviews: queryCount(pendingTestimonialsRes, "pendingTestimonials"),
+        newReviewsToday: queryCount(reviewsTodayRes, "reviewsToday"),
+        profileCompletionPct: averageProfileCompletion(
+          queryRows(profileFieldsRes, "profileFields"),
+        ),
       },
 
       growth: {
-        advisorsLast30: advisorsLast30Res.count || 0,
-        advisorsPrev30: advisorsPrev30Res.count || 0,
+        advisorsLast30: queryCount(advisorsLast30Res, "advisorsLast30"),
+        advisorsPrev30: queryCount(advisorsPrev30Res, "advisorsPrev30"),
         signupsLast30,
         signupsPrev30,
         signupDates,
@@ -413,27 +406,25 @@ export async function GET() {
 
       quickActions: {
         pendingVerifications,
-        pendingProfiles: underReviewRes.count || 0,
-        openComplaints: complaintsOpenRes.error ? 0 : complaintsOpenRes.count || 0,
-        pendingTestimonials: pendingTestimonialsRes.count || 0,
-        paymentsToday: paymentsTodayRes.count || 0,
+        pendingProfiles: queryCount(underReviewRes, "underReview"),
+        openComplaints: queryCount(complaintsOpenRes, "openComplaints"),
+        pendingTestimonials: queryCount(pendingTestimonialsRes, "pendingTestimonials"),
+        paymentsToday: queryCount(paymentsTodayRes, "paymentsToday"),
       },
 
       activity,
 
       analytics: {
-        cities: cityRes.error ? [] : cityRes.data || [],
-        companies: companyRes.error ? [] : companyRes.data || [],
-        services: serviceRes.error ? [] : serviceRes.data || [],
-        serviceWise: serviceRes.error ? [] : serviceRes.data || [],
+        cities: queryRows(cityRes, "cities"),
+        companies: queryRows(companyRes, "companies"),
+        services: queryRows(serviceRes, "services"),
+        serviceWise: queryRows(serviceRes, "serviceWise"),
         roleWise,
       },
     });
   } catch (error) {
     console.error("GET /api/admin/overview failed:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error", details: error.message },
-      { status: 500 },
-    );
+    const { emptyDashboardPayload } = await import("@/lib/admin/overviewDefaults");
+    return NextResponse.json(emptyDashboardPayload(), { status: 200 });
   }
 }

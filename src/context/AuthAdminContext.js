@@ -14,8 +14,12 @@ export function AuthProvider({ children }) {
         setLoading(true);
         const response = await fetch("/api/auth/me");
         const result = await response.json();
-        const currentUser = result.data;
-        setAdmin(currentUser);
+
+        if (response.ok && result?.success && result?.data) {
+          setAdmin(result.data);
+        } else {
+          setAdmin(null);
+        }
       } catch (error) {
         console.error("Auth fetch error:", error);
         setAdmin(null);
@@ -29,9 +33,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={{ admin, setAdmin, loading, setLoading }}>
-    <SidebarProvider>
-      {children}
-    </SidebarProvider>
+      <SidebarProvider>{children}</SidebarProvider>
     </AuthContext.Provider>
   );
 }
