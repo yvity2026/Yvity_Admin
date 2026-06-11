@@ -25,7 +25,14 @@ export const PLATFORM_DOCUMENT_FILES = [
 ];
 
 const DEFAULT_DOCUMENTS = {
-  "admin-platform-settings.json": null,
+  "admin-platform-settings.json": {
+    platform: {
+      name: "YVITY",
+      tagline: "Credibility that Connects",
+      status: "active",
+    },
+    updatedAt: null,
+  },
   "membership-plans-config.json": { plans: [] },
   "feature-controls-config.json": { planLimits: {}, globalFlags: {}, updatedAt: null },
   "coupons.json": { coupons: {} },

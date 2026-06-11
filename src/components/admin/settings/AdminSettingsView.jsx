@@ -194,13 +194,13 @@ export default function AdminSettingsView() {
     ),
     email: (
       <div className="grid gap-4 md:grid-cols-2">
-        <AdminField label="SMTP host"><Input value={s.email.smtpHost} onChange={(e) => setSectionValue("email", "smtpHost", e.target.value)} /></AdminField>
-        <AdminField label="SMTP port"><Input value={s.email.smtpPort} onChange={(e) => setSectionValue("email", "smtpPort", e.target.value)} /></AdminField>
-        <AdminField label="SMTP user"><Input value={s.email.smtpUser} onChange={(e) => setSectionValue("email", "smtpUser", e.target.value)} /></AdminField>
-        <AdminField label="SMTP password"><Input type="password" value={s.email.smtpPassword} onChange={(e) => setSectionValue("email", "smtpPassword", e.target.value)} /></AdminField>
-        <AdminField label="Sender name"><Input value={s.email.senderName} onChange={(e) => setSectionValue("email", "senderName", e.target.value)} /></AdminField>
-        <AdminField label="Sender email"><Input value={s.email.senderEmail} onChange={(e) => setSectionValue("email", "senderEmail", e.target.value)} /></AdminField>
-        <AdminField label="Test email recipient"><Input value={s.email.testRecipient} onChange={(e) => setSectionValue("email", "testRecipient", e.target.value)} /></AdminField>
+        <AdminField label="SMTP host"><AdminInput value={s.email.smtpHost} onChange={(e) => setSectionValue("email", "smtpHost", e.target.value)} /></AdminField>
+        <AdminField label="SMTP port"><AdminInput value={s.email.smtpPort} onChange={(e) => setSectionValue("email", "smtpPort", e.target.value)} /></AdminField>
+        <AdminField label="SMTP user"><AdminInput value={s.email.smtpUser} onChange={(e) => setSectionValue("email", "smtpUser", e.target.value)} /></AdminField>
+        <AdminField label="SMTP password"><AdminInput type="password" value={s.email.smtpPassword} onChange={(e) => setSectionValue("email", "smtpPassword", e.target.value)} /></AdminField>
+        <AdminField label="Sender name"><AdminInput value={s.email.senderName} onChange={(e) => setSectionValue("email", "senderName", e.target.value)} /></AdminField>
+        <AdminField label="Sender email"><AdminInput value={s.email.senderEmail} onChange={(e) => setSectionValue("email", "senderEmail", e.target.value)} /></AdminField>
+        <AdminField label="Test email recipient"><AdminInput value={s.email.testRecipient} onChange={(e) => setSectionValue("email", "testRecipient", e.target.value)} /></AdminField>
         <AdminField label="Email footer" hint="Appended to all outbound emails.">
           <AdminTextarea rows={3} value={s.email.footer} onChange={(e) => setSectionValue("email", "footer", e.target.value)} />
         </AdminField>
@@ -222,14 +222,14 @@ export default function AdminSettingsView() {
             <option value="custom">Custom</option>
           </AdminSelect>
         </AdminField>
-        <AdminField label="API URL"><Input value={s.smsWhatsapp.apiUrl} onChange={(e) => setSectionValue("smsWhatsapp", "apiUrl", e.target.value)} /></AdminField>
-        <AdminField label="API key"><Input type="password" value={s.smsWhatsapp.apiKey} onChange={(e) => setSectionValue("smsWhatsapp", "apiKey", e.target.value)} /></AdminField>
-        <AdminField label="Test phone number"><Input value={s.smsWhatsapp.testPhone} onChange={(e) => setSectionValue("smsWhatsapp", "testPhone", e.target.value)} /></AdminField>
+        <AdminField label="API URL"><AdminInput value={s.smsWhatsapp.apiUrl} onChange={(e) => setSectionValue("smsWhatsapp", "apiUrl", e.target.value)} /></AdminField>
+        <AdminField label="API key"><AdminInput type="password" value={s.smsWhatsapp.apiKey} onChange={(e) => setSectionValue("smsWhatsapp", "apiKey", e.target.value)} /></AdminField>
+        <AdminField label="Test phone number"><AdminInput value={s.smsWhatsapp.testPhone} onChange={(e) => setSectionValue("smsWhatsapp", "testPhone", e.target.value)} /></AdminField>
       </div>
     ),
     security: (
       <div className="grid gap-4 md:grid-cols-2">
-        <AdminField label="Session timeout (minutes)"><Input type="number" value={s.security.sessionTimeoutMinutes} onChange={(e) => setSectionValue("security", "sessionTimeoutMinutes", Number(e.target.value))} /></AdminField>
+        <AdminField label="Session timeout (minutes)"><AdminInput type="number" value={s.security.sessionTimeoutMinutes} onChange={(e) => setSectionValue("security", "sessionTimeoutMinutes", Number(e.target.value))} /></AdminField>
         <AdminField label="Admin login security">
           <AdminSelect value={s.security.adminLoginSecurity} onChange={(e) => setSectionValue("security", "adminLoginSecurity", e.target.value)}>
             <option value="otp">OTP only</option>
@@ -237,8 +237,8 @@ export default function AdminSettingsView() {
             <option value="otp_password">OTP + Password</option>
           </AdminSelect>
         </AdminField>
-        <AdminField label="Minimum password length"><Input type="number" value={s.security.passwordMinLength} onChange={(e) => setSectionValue("security", "passwordMinLength", Number(e.target.value))} /></AdminField>
-        <AdminField label="Login attempt limit"><Input type="number" value={s.security.loginAttemptLimit} onChange={(e) => setSectionValue("security", "loginAttemptLimit", Number(e.target.value))} /></AdminField>
+        <AdminField label="Minimum password length"><AdminInput type="number" value={s.security.passwordMinLength} onChange={(e) => setSectionValue("security", "passwordMinLength", Number(e.target.value))} /></AdminField>
+        <AdminField label="Login attempt limit"><AdminInput type="number" value={s.security.loginAttemptLimit} onChange={(e) => setSectionValue("security", "loginAttemptLimit", Number(e.target.value))} /></AdminField>
         <AdminToggle label="Require uppercase letters" checked={s.security.requireUppercase} onChange={(v) => setSectionValue("security", "requireUppercase", v)} />
         <AdminToggle label="Require numbers" checked={s.security.requireNumbers} onChange={(v) => setSectionValue("security", "requireNumbers", v)} />
         <AdminToggle label="Two-factor authentication" checked={s.security.twoFactorEnabled} onChange={(v) => setSectionValue("security", "twoFactorEnabled", v)} />
@@ -246,26 +246,26 @@ export default function AdminSettingsView() {
     ),
     general: (
       <div className="grid gap-4 md:grid-cols-2">
-        <AdminField label="Default country"><Input value={s.general.defaultCountry} onChange={(e) => setSectionValue("general", "defaultCountry", e.target.value)} /></AdminField>
-        <AdminField label="Default timezone"><Input value={s.general.defaultTimezone} onChange={(e) => setSectionValue("general", "defaultTimezone", e.target.value)} /></AdminField>
-        <AdminField label="Default language"><Input value={s.general.defaultLanguage} onChange={(e) => setSectionValue("general", "defaultLanguage", e.target.value)} /></AdminField>
-        <AdminField label="Date format"><Input value={s.general.dateFormat} onChange={(e) => setSectionValue("general", "dateFormat", e.target.value)} /></AdminField>
-        <AdminField label="Currency format"><Input value={s.general.currencyFormat} onChange={(e) => setSectionValue("general", "currencyFormat", e.target.value)} /></AdminField>
+        <AdminField label="Default country"><AdminInput value={s.general.defaultCountry} onChange={(e) => setSectionValue("general", "defaultCountry", e.target.value)} /></AdminField>
+        <AdminField label="Default timezone"><AdminInput value={s.general.defaultTimezone} onChange={(e) => setSectionValue("general", "defaultTimezone", e.target.value)} /></AdminField>
+        <AdminField label="Default language"><AdminInput value={s.general.defaultLanguage} onChange={(e) => setSectionValue("general", "defaultLanguage", e.target.value)} /></AdminField>
+        <AdminField label="Date format"><AdminInput value={s.general.dateFormat} onChange={(e) => setSectionValue("general", "dateFormat", e.target.value)} /></AdminField>
+        <AdminField label="Currency format"><AdminInput value={s.general.currencyFormat} onChange={(e) => setSectionValue("general", "currencyFormat", e.target.value)} /></AdminField>
       </div>
     ),
     legal: (
       <div className="grid gap-4 md:grid-cols-2">
-        <AdminField label="Terms & conditions URL"><Input value={s.legal.termsUrl} onChange={(e) => setSectionValue("legal", "termsUrl", e.target.value)} /></AdminField>
-        <AdminField label="Privacy policy URL"><Input value={s.legal.privacyUrl} onChange={(e) => setSectionValue("legal", "privacyUrl", e.target.value)} /></AdminField>
+        <AdminField label="Terms & conditions URL"><AdminInput value={s.legal.termsUrl} onChange={(e) => setSectionValue("legal", "termsUrl", e.target.value)} /></AdminField>
+        <AdminField label="Privacy policy URL"><AdminInput value={s.legal.privacyUrl} onChange={(e) => setSectionValue("legal", "privacyUrl", e.target.value)} /></AdminField>
         <AdminField label="Disclaimer text"><AdminTextarea rows={4} value={s.legal.disclaimerText} onChange={(e) => setSectionValue("legal", "disclaimerText", e.target.value)} /></AdminField>
         <AdminToggle label="Consent required on signup" checked={s.legal.consentRequired} onChange={(v) => setSectionValue("legal", "consentRequired", v)} />
       </div>
     ),
     media: (
       <div className="grid gap-4 md:grid-cols-2">
-        <AdminField label="Max image upload (MB)"><Input type="number" value={s.media.maxImageUploadMb} onChange={(e) => setSectionValue("media", "maxImageUploadMb", Number(e.target.value))} /></AdminField>
-        <AdminField label="Max video upload (MB)"><Input type="number" value={s.media.maxVideoUploadMb} onChange={(e) => setSectionValue("media", "maxVideoUploadMb", Number(e.target.value))} /></AdminField>
-        <AdminField label="Allowed file types" hint="Comma-separated extensions."><Input value={s.media.allowedFileTypes} onChange={(e) => setSectionValue("media", "allowedFileTypes", e.target.value)} /></AdminField>
+        <AdminField label="Max image upload (MB)"><AdminInput type="number" value={s.media.maxImageUploadMb} onChange={(e) => setSectionValue("media", "maxImageUploadMb", Number(e.target.value))} /></AdminField>
+        <AdminField label="Max video upload (MB)"><AdminInput type="number" value={s.media.maxVideoUploadMb} onChange={(e) => setSectionValue("media", "maxVideoUploadMb", Number(e.target.value))} /></AdminField>
+        <AdminField label="Allowed file types" hint="Comma-separated extensions."><AdminInput value={s.media.allowedFileTypes} onChange={(e) => setSectionValue("media", "allowedFileTypes", e.target.value)} /></AdminField>
         <AdminField label="Storage provider">
           <AdminSelect value={s.media.storageProvider} onChange={(e) => setSectionValue("media", "storageProvider", e.target.value)}>
             <option value="s3">Amazon S3</option>
