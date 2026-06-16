@@ -1,18 +1,25 @@
 import { createAdminClient } from "@/lib/supabase/server";
+import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
+import { escapeIlike } from "@/lib/search/escapeIlike";
 import { NextResponse } from "next/server";
 
 export async function GET(req) {
   try {
+    const admin = await getAuthenticatedAdmin();
+    if (!admin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const supabase = createAdminClient();
     const { searchParams } = new URL(req.url);
 
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
+    const q = (searchParams.get("q") || "").trim();
 
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
-    // Base query
     let query = supabase
       .from("users")
       .select(
@@ -25,14 +32,18 @@ export async function GET(req) {
       .order("created_at", { ascending: false })
       .range(from, to);
 
-    // Execute query
+    if (q) {
+      const safe = escapeIlike(q);
+      query = query.or(`name.ilike.%${safe}%,email.ilike.%${safe}%,city.ilike.%${safe}%`);
+    }
+
     const { data, error, count } = await query;
 
     if (error) {
-      console.error("Admin approvals query failed:", error);
+      console.error("Admin customers query failed:", error);
 
       return NextResponse.json(
-        { error: "Unable to load advisors" },
+        { error: "Unable to load customers" },
         { status: 500 }
       );
     }

@@ -34,7 +34,7 @@
     "**/*.mts",
     "**/*.ts",
     "**/*.tsx"
-, "src/app/auth/init/page.jsx", "src/app/dashboard/[id]/page.jsx"  ],
+  ],
   "exclude": [
     "node_modules"
   ]

@@ -76,7 +76,7 @@ export default function UserDetailView({ userId }) {
   const handleAction = async (action) => {
     if (!action.action) return;
 
-    const ok = await confirm({
+    const { confirmed } = await confirm({
       title: action.action === "delete" ? "Delete user" : action.label,
       message:
         action.action === "delete"
@@ -86,7 +86,7 @@ export default function UserDetailView({ userId }) {
       variant: action.action === "activate" ? "primary" : "danger",
     });
 
-    if (!ok) return;
+    if (!confirmed) return;
 
     try {
       await userActions.mutateAsync({ id: userId, action: action.action });

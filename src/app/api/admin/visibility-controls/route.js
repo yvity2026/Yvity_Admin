@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { requireAdminSession } from "@/lib/admin/adminSession";
 import { createAdminClient } from "@/lib/supabase/server";
 import { HERO_SLOT_LIMIT, LANDING_SLOT_LIMIT } from "@/lib/admin/visibility/limits";
 import {
@@ -7,24 +7,6 @@ import {
   updateLocalVisibility,
   useLocalVisibilityControls,
 } from "@/lib/local-data/visibility-controls";
-
-async function parseAdminSession() {
-  const cookieStore = await cookies();
-  const sessionValue = cookieStore.get("admin_session")?.value;
-  if (!sessionValue) return null;
-
-  try {
-    return JSON.parse(sessionValue);
-  } catch {
-    return null;
-  }
-}
-
-async function requireAdmin() {
-  const session = await parseAdminSession();
-  if (!session?.admin_id || !session?.role) return null;
-  return session;
-}
 
 function parseListParams(searchParams) {
   return {
@@ -210,7 +192,7 @@ async function updateSupabaseVisibility(payload) {
 }
 
 export async function GET(request) {
-  const adminSession = await requireAdmin();
+  const adminSession = await requireAdminSession();
   if (!adminSession) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -230,7 +212,7 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const adminSession = await requireAdmin();
+  const adminSession = await requireAdminSession();
   if (!adminSession) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

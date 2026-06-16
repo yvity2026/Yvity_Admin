@@ -1,15 +1,53 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import CustomerProfile from "@/components/CustomerProfile";
 import PaginationControls from "@/components/common/PaginationControls";
-import { getPaginationData } from "@/lib/pagination";
-import { FiUsers, FiCalendar, FiUser } from "react-icons/fi";
+import { FiUsers, FiUser } from "react-icons/fi";
 import { HiOutlineArrowNarrowRight } from "react-icons/hi";
 
-const FETCH_LIMIT = 5000;
-const CUSTOMERS_PER_PAGE = 5;
+const CUSTOMERS_PER_PAGE = 10;
+
+function buildPagination(page, limit, total) {
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const safePage = Math.min(Math.max(page, 1), totalPages);
+  const startItem = total === 0 ? 0 : (safePage - 1) * limit + 1;
+  const endItem = Math.min(safePage * limit, total);
+  const DOTS = "...";
+
+  function range(start, end) {
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  let pageNumbers;
+  if (totalPages <= 7) {
+    pageNumbers = range(1, totalPages);
+  } else {
+    const left = Math.max(safePage - 1, 1);
+    const right = Math.min(safePage + 1, totalPages);
+    const showLeftDots = left > 2;
+    const showRightDots = right < totalPages - 1;
+    if (!showLeftDots && showRightDots) {
+      pageNumbers = [...range(1, 5), DOTS, totalPages];
+    } else if (showLeftDots && !showRightDots) {
+      pageNumbers = [1, DOTS, ...range(totalPages - 4, totalPages)];
+    } else {
+      pageNumbers = [1, DOTS, ...range(left, right), DOTS, totalPages];
+    }
+  }
+
+  return {
+    currentPage: safePage,
+    totalPages,
+    totalItems: total,
+    startItem,
+    endItem,
+    hasPreviousPage: safePage > 1,
+    hasNextPage: safePage < totalPages,
+    pageNumbers,
+  };
+}
 
 function Avatar({ src, initials, size = "md" }) {
   const sizeClass = size === "sm" ? "w-8 h-8 text-xs" : "w-10 h-10 text-sm";
@@ -33,33 +71,51 @@ function Avatar({ src, initials, size = "md" }) {
   );
 }
 
-// Helper function to format date to DD/MM/YYYY
 const formatDate = (dateString) => {
   if (!dateString) return "—";
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return "—";
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
   return `${day}/${month}/${year}`;
 };
 
 export default function CustomersDashboard() {
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const debounceRef = useRef(null);
 
-  // Data fetching
+  useEffect(() => {
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(search);
+      setCurrentPage(1);
+    }, 350);
+    return () => clearTimeout(debounceRef.current);
+  }, [search]);
+
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/admin/customers?page=1&limit=${FETCH_LIMIT}`);
+        const params = new URLSearchParams({
+          page: currentPage,
+          limit: CUSTOMERS_PER_PAGE,
+        });
+        if (debouncedSearch) params.set("q", debouncedSearch);
+        const res = await fetch(`/api/admin/customers?${params}`);
         const json = await res.json();
         setCustomers(json.data || []);
+        setTotal(json.pagination?.total || 0);
+        setTotalPages(json.pagination?.totalPages || 1);
       } catch (error) {
         console.error("Failed to fetch customers:", error);
       } finally {
@@ -67,29 +123,15 @@ export default function CustomersDashboard() {
       }
     };
     fetchCustomers();
-  }, []);
+  }, [currentPage, debouncedSearch]);
 
-  // Filtering data
-  const filtered = customers.filter(
-    (c) =>
-      (c.name || "").toLowerCase().includes(search.toLowerCase()) ||
-      (c.email || "").toLowerCase().includes(search.toLowerCase()) ||
-      (c.location || "").toLowerCase().includes(search.toLowerCase())
-  );
-  const pagination = getPaginationData(
-    filtered,
-    currentPage,
-    CUSTOMERS_PER_PAGE,
-  );
-  const paginatedCustomers = pagination.items;
+  const pagination = buildPagination(currentPage, CUSTOMERS_PER_PAGE, total);
 
   return (
     <div className="flex flex-col min-h-screen font-sans bg-gray-100 overflow-x-hidden w-full">
 
       {/* ═══════════════════════════════════════════════════════════════════
           SECTION 1 — STAT CARDS
-          sticky so they don't scroll away on mobile.
-          The layout's own navbar/sidebar handles all navigation.
       ═══════════════════════════════════════════════════════════════════ */}
       <div className="sticky top-0 bg-gray-100 px-6 max-md:px-3.5 pt-6 max-md:pt-3.5 pb-3 shrink-0 w-full">
         <div className="flex flex-col sm:flex-row gap-4 max-w-[280px] sm:max-w-full">
@@ -100,40 +142,19 @@ export default function CustomersDashboard() {
               <div className="w-10 h-10 rounded-xl bg-[#eef4f2] flex items-center justify-center shrink-0">
                 <FiUsers size={22} stroke="#1a7a5a" strokeWidth={2} />
               </div>
-              <span className="bg-[#e6f5f0] text-[#1a7a5a] text-[11px] font-bold rounded-full px-2.5 py-0.5 shrink-0">
-                ↑ 34%
-              </span>
             </div>
             <div className="text-[28px] max-md:text-2xl font-extrabold text-gray-900 leading-tight">
-              {customers.length}
+              {loading ? "—" : total}
             </div>
             <div className="text-xs text-gray-400 mt-0.5 font-medium">
               Total Customers
             </div>
           </div>
 
-          {/* Joined Today */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm flex-1 min-w-[160px] max-w-[240px] max-md:max-w-full">
-            <div className="flex items-start justify-between mb-2">
-              <div className="w-10 h-10 rounded-xl bg-[#eef4f2] flex items-center justify-center shrink-0">
-                <FiCalendar size={22} stroke="#2255bb" strokeWidth={2} />
-              </div>
-              <span className="bg-[#e6f0ff] text-[#2255bb] text-[11px] font-bold rounded-full px-2.5 py-0.5 shrink-0">
-                +48
-              </span>
-            </div>
-            <div className="text-[28px] max-md:text-2xl font-extrabold text-gray-900 leading-tight">
-              48
-            </div>
-            <div className="text-xs text-gray-400 mt-0.5 font-medium">
-              Joined Today
-            </div>
-          </div>
-
         </div>
       </div>
-      
-      <div className="flex-1 px-6 max-md:px-3.5 pb-6 max-md:pb-3.5 w-full overflow-x-hidden ">
+
+      <div className="flex-1 px-6 max-md:px-3.5 pb-6 max-md:pb-3.5 w-full overflow-x-hidden">
 
         {/* Sub-header */}
         <div className="flex items-center gap-2 mb-1 mt-1">
@@ -141,7 +162,7 @@ export default function CustomersDashboard() {
           <span className="text-base font-bold text-gray-900">All Customers</span>
         </div>
         <div className="text-xs text-gray-400 mb-4">
-          {`${filtered.length} registered users`}
+          {loading ? "Loading…" : `${total} registered users`}
         </div>
 
         {/* Search */}
@@ -151,10 +172,7 @@ export default function CustomersDashboard() {
               className="border-none bg-transparent outline-none text-sm text-white flex-1 placeholder-white/70"
               placeholder="Search"
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => setSearch(e.target.value)}
             />
             <HiOutlineArrowNarrowRight size={20} className="text-white cursor-pointer shrink-0" />
           </div>
@@ -168,7 +186,6 @@ export default function CustomersDashboard() {
             ← swipe left / right to see all columns →
           </div>
 
-          {/* overflow-x-auto is the ONLY horizontal scroll zone */}
           <div
             className="overflow-x-auto w-full"
             style={{ WebkitOverflowScrolling: "touch" }}
@@ -176,7 +193,7 @@ export default function CustomersDashboard() {
             <table className="w-full border-collapse">
               <thead>
                 <tr>
-                  {["Name","Mobile","Email","City","Profession","Reviews","Last Login","Joined","Actions"].map((h) => (
+                  {["Name", "Mobile", "Email", "City", "Profession", "Reviews", "Last Login", "Joined", "Actions"].map((h) => (
                     <th
                       key={h}
                       className="text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wide px-3 py-2.5 bg-gray-50 border-b border-gray-200 whitespace-nowrap"
@@ -187,30 +204,24 @@ export default function CustomersDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {!loading && paginatedCustomers.length === 0 && (
+                {loading && (
                   <tr>
-                    <td
-                      colSpan={9}
-                      className="px-4 py-10 text-center text-sm text-gray-500"
-                    >
+                    <td colSpan={9} className="px-4 py-10 text-center text-sm text-gray-500">
+                      Loading customers…
+                    </td>
+                  </tr>
+                )}
+
+                {!loading && customers.length === 0 && (
+                  <tr>
+                    <td colSpan={9} className="px-4 py-10 text-center text-sm text-gray-500">
                       No customers match the current search.
                     </td>
                   </tr>
                 )}
 
-                {loading && (
-                  <tr>
-                    <td
-                      colSpan={9}
-                      className="px-4 py-10 text-center text-sm text-gray-500"
-                    >
-                      Loading customers...
-                    </td>
-                  </tr>
-                )}
-
-                {paginatedCustomers.map((c, i) => (
-                  <tr key={i} className="border-b border-gray-100 hover:bg-gray-50">
+                {!loading && customers.map((c) => (
+                  <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="px-3 py-3 align-middle">
                       <div className="flex items-center gap-2.5">
                         <Avatar
@@ -227,9 +238,9 @@ export default function CustomersDashboard() {
                         </span>
                       </div>
                     </td>
-                    <td className="px-3 py-3 text-xs text-gray-700 align-middle whitespace-nowrap">{`+91 ${c.phone}`}</td>
-                    <td className="px-3 py-3 text-xs text-gray-700 align-middle whitespace-nowrap">{c.email}</td>
-                    <td className="px-3 py-3 text-xs text-gray-700 align-middle whitespace-nowrap">{c.location}</td>
+                    <td className="px-3 py-3 text-xs text-gray-700 align-middle whitespace-nowrap">{c.phone ? `+91 ${c.phone}` : "—"}</td>
+                    <td className="px-3 py-3 text-xs text-gray-700 align-middle whitespace-nowrap">{c.email || "—"}</td>
+                    <td className="px-3 py-3 text-xs text-gray-700 align-middle whitespace-nowrap">{c.location || "—"}</td>
                     <td className="px-3 py-3 text-xs text-gray-700 align-middle whitespace-nowrap">{c.profession || "—"}</td>
                     <td className="px-3 py-3 align-middle">
                       <span className="bg-green-100 text-green-800 rounded-full px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap">
@@ -265,9 +276,6 @@ export default function CustomersDashboard() {
         </div>
 
       </div>
-      {/* ═══════════════════════════════════════════════════════════════════
-          END SECTION 2
-      ═══════════════════════════════════════════════════════════════════ */}
 
       {showCustomerModal && (
         <CustomerProfile

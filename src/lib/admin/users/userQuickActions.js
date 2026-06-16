@@ -50,6 +50,16 @@ export const USER_QUICK_ACTIONS = [
     icon: "delete",
     primary: false,
     destructive: true,
+    showWhen: "not_deleted",
+  },
+  {
+    id: "restore",
+    label: "Restore user",
+    action: "restore",
+    live: true,
+    icon: "activate",
+    primary: false,
+    showWhen: "deleted",
   },
 ];
 
@@ -66,6 +76,14 @@ export function getUserQuickActions(user) {
     }
 
     if (action.showWhen === "suspended" && user.status !== "suspended") {
+      return false;
+    }
+
+    if (action.showWhen === "deleted" && user.status !== "deleted") {
+      return false;
+    }
+
+    if (action.showWhen === "not_deleted" && user.status === "deleted") {
       return false;
     }
 

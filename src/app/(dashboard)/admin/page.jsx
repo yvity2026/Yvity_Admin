@@ -6,10 +6,6 @@ import AdminDashboardView from "@/components/admin/dashboard/AdminDashboardView"
 import AdminDashboardSkeleton from "@/components/admin/dashboard/AdminDashboardSkeleton";
 import { useDashboard } from "@/hooks/TanstankQuery/useDashboard";
 import { buildDashboardData } from "@/lib/admin/buildDashboardData";
-import {
-  DASHBOARD_MOCK,
-  USE_DASHBOARD_MOCK,
-} from "@/lib/admin/dashboardMockData";
 import { AdminErrorState } from "@/components/admin/ui";
 
 export default function AdminDashboardPage() {
@@ -20,28 +16,15 @@ export default function AdminDashboardPage() {
     admin?.name || (admin?.role === "super_admin" ? "Admin" : "Team");
 
   const dashboardData = useMemo(() => {
-    if (USE_DASHBOARD_MOCK) {
-      return {
-        ...DASHBOARD_MOCK,
-        meta: {
-          ...DASHBOARD_MOCK.meta,
-          adminName: displayName,
-        },
-      };
-    }
-
-    if (!data) {
-      return null;
-    }
-
+    if (!data) return null;
     return buildDashboardData(data, displayName);
   }, [data, displayName]);
 
-  if (!USE_DASHBOARD_MOCK && isLoading) {
+  if (isLoading) {
     return <AdminDashboardSkeleton />;
   }
 
-  if (!USE_DASHBOARD_MOCK && isError) {
+  if (isError) {
     return (
       <AdminErrorState
         title="Could not load dashboard"
@@ -54,9 +37,8 @@ export default function AdminDashboardPage() {
   return (
     <AdminDashboardView
       data={dashboardData}
-      showMockBadge={USE_DASHBOARD_MOCK}
-      isLive={!USE_DASHBOARD_MOCK}
-      isRefreshing={!USE_DASHBOARD_MOCK && isFetching && !isLoading}
+      isLive
+      isRefreshing={isFetching && !isLoading}
     />
   );
 }

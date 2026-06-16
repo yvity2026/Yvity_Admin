@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
+import { escapeIlike } from "@/lib/search/escapeIlike";
 import { hasPermission } from "@/lib/admin/permissions";
 import { mapComplaintRow } from "@/lib/admin/complaints/mapComplaintRecord";
 import {
@@ -15,9 +16,6 @@ import {
 } from "@/lib/pii/complaintContact";
 import { NextResponse } from "next/server";
 
-function escapeIlike(value) {
-  return String(value || "").replace(/[%_,]/g, "");
-}
 
 async function fetchEvents(supabase, complaintIds = []) {
   if (!complaintIds.length) return new Map();

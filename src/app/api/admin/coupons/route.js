@@ -1,38 +1,20 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { requireAdminSession } from "@/lib/admin/adminSession";
 import {
   createCoupon,
   getCouponsSnapshot,
   revokeCoupon,
-  useCouponsStore,
 } from "@/lib/local-data/coupons-store";
-
-async function parseAdminSession() {
-  const cookieStore = await cookies();
-  const sessionValue = cookieStore.get("admin_session")?.value;
-  if (!sessionValue) return null;
-
-  try {
-    return JSON.parse(sessionValue);
-  } catch {
-    return null;
-  }
-}
-
-async function requireAdmin() {
-  const session = await parseAdminSession();
-  if (!session?.admin_id || !session?.role) return null;
-  return session;
-}
+import { localDataAvailable } from "@/lib/local-data/advisor-approvals";
 
 export async function GET() {
-  const adminSession = await requireAdmin();
+  const adminSession = await requireAdminSession();
   if (!adminSession) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    if (!useCouponsStore()) {
+    if (!localDataAvailable()) {
       return NextResponse.json(
         { error: "Coupons are available in local data mode only for now" },
         { status: 501 },
@@ -47,12 +29,12 @@ export async function GET() {
 }
 
 export async function POST(request) {
-  const adminSession = await requireAdmin();
+  const adminSession = await requireAdminSession();
   if (!adminSession) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!useCouponsStore()) {
+  if (!localDataAvailable()) {
     return NextResponse.json(
       { error: "Coupons are available in local data mode only for now" },
       { status: 501 },

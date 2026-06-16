@@ -1,32 +1,12 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { requireAdminSession } from "@/lib/admin/adminSession";
 import { createAdminClient } from "@/lib/supabase/server";
 import { buildPlansResponse } from "@/lib/admin/plans/mapPlanRecord";
-import { listLocalMembershipPlans, useLocalMembershipPlans } from "@/lib/local-data/membership-plans";
 import {
-  getMembershipPlansSnapshot,
   listConfiguredPlans,
   updatePlanEntitlements,
-  useMembershipPlansStore,
 } from "@/lib/local-data/membership-plans-store";
-
-async function parseAdminSession() {
-  const cookieStore = await cookies();
-  const sessionValue = cookieStore.get("admin_session")?.value;
-  if (!sessionValue) return null;
-
-  try {
-    return JSON.parse(sessionValue);
-  } catch {
-    return null;
-  }
-}
-
-async function requireAdmin() {
-  const session = await parseAdminSession();
-  if (!session?.admin_id || !session?.role) return null;
-  return session;
-}
+import { localDataAvailable } from "@/lib/local-data/advisor-approvals";
 
 async function countSupabaseSubscribers(planIds = []) {
   const supabase = createAdminClient();
@@ -47,16 +27,12 @@ async function countSupabaseSubscribers(planIds = []) {
 }
 
 export async function GET() {
-  const adminSession = await requireAdmin();
+  const adminSession = await requireAdminSession();
   if (!adminSession) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    if (useLocalMembershipPlans()) {
-      return NextResponse.json(listLocalMembershipPlans());
-    }
-
     const configuredPlans = listConfiguredPlans();
     const subscriberCounts = await countSupabaseSubscribers(
       configuredPlans.map((plan) => plan.id),
@@ -69,12 +45,12 @@ export async function GET() {
 }
 
 export async function POST(request) {
-  const adminSession = await requireAdmin();
+  const adminSession = await requireAdminSession();
   if (!adminSession) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!useMembershipPlansStore()) {
+  if (!localDataAvailable()) {
     return NextResponse.json(
       { error: "Plan entitlements are editable in local data mode only for now" },
       { status: 501 },

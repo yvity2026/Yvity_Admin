@@ -6,15 +6,15 @@ export function shortUserId(id) {
 }
 
 export function maskPhone(user = {}) {
-  if (user.phone_last4) return `••••${user.phone_last4}`;
-  if (user.mobile && String(user.mobile).length >= 4) {
-    return `••••${String(user.mobile).slice(-4)}`;
-  }
+  const phone = user.mobile || user.phone || "";
+  if (String(phone).length >= 4) return `••••${String(phone).slice(-4)}`;
   return "—";
 }
 
 export function maskEmail(user = {}) {
-  if (user.email_domain) return `***@${user.email_domain}`;
+  const email = user.email || "";
+  const atIndex = email.indexOf("@");
+  if (atIndex > 0) return `***@${email.slice(atIndex + 1)}`;
   return "—";
 }
 

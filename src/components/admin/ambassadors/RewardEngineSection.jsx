@@ -224,13 +224,13 @@ export default function RewardEngineSection({ campaigns = [], rewardTypes = [] }
                   disabled={isProcessing}
                   onClick={() => {
                     void (async () => {
-                      const ok = await confirm({
+                      const { confirmed } = await confirm({
                         title: "Delete campaign",
                         message: `Delete "${campaign.name}"? This cannot be undone.`,
                         confirmLabel: "Delete",
                         variant: "danger",
                       });
-                      if (!ok) return;
+                      if (!confirmed) return;
                       void runAction("Campaign deleted", () => deleteRewardCampaign(campaign.id));
                     })();
                   }}

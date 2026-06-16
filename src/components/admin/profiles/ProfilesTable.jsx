@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { FiExternalLink, FiEye, FiMoreHorizontal, FiShield } from "react-icons/fi";
+import { FiExternalLink, FiEye, FiEyeOff, FiMoreHorizontal, FiShield } from "react-icons/fi";
 import { AdminEmptyState } from "@/components/admin/ui";
 
 const STATUS_STYLES = {
@@ -10,6 +11,7 @@ const STATUS_STYLES = {
   pending: "bg-[#FFF6E8] text-[#B45309]",
   rejected: "bg-[#FFF1F0] text-[#DC2626]",
   hidden: "bg-[#F8FAFC] text-[#475569]",
+  deleted: "bg-[#FFF1F0] text-[#DC2626]",
 };
 
 const VERIFY_STYLES = {
@@ -48,7 +50,9 @@ function Avatar({ src, name }) {
   );
 }
 
-function RowMenu({ profile }) {
+function RowMenu({ profile, onToggleHide }) {
+  const [open, setOpen] = useState(false);
+
   return (
     <div className="flex items-center justify-end gap-2">
       {profile.publicUrl && profile.profileStatus === "published" ? (
@@ -81,19 +85,62 @@ function RowMenu({ profile }) {
         </Link>
       )}
 
-      <button
-        type="button"
-        className="rounded-xl border border-[#E6ECEA] p-2 text-[#9AB0AB]"
-        aria-label="More actions coming in phase 2"
-        title="Hide and feature controls coming soon"
-      >
-        <FiMoreHorizontal size={16} />
-      </button>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="rounded-xl border border-[#E6ECEA] p-2 text-[#5C7571] transition hover:border-[#0A4A4A]/20 hover:text-[#0A4A4A]"
+          aria-label="More actions"
+        >
+          <FiMoreHorizontal size={16} />
+        </button>
+
+        {open && (
+          <>
+            <button
+              type="button"
+              className="fixed inset-0 z-10 cursor-default"
+              onClick={() => setOpen(false)}
+              aria-label="Close menu"
+            />
+            <div className="absolute right-0 z-20 mt-1 min-w-[160px] rounded-2xl border border-[#E6ECEA] bg-white p-1.5 shadow-[0_12px_32px_rgba(10,74,74,0.12)]">
+              <Link
+                href={`/admin/users/${profile.userId}`}
+                className="flex items-center gap-2 rounded-xl px-3 py-2 text-[12px] font-medium text-[#183534] hover:bg-[#F4F8F7]"
+                onClick={() => setOpen(false)}
+              >
+                <FiEye size={13} />
+                View user
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  onToggleHide?.(profile);
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-[12px] font-medium text-[#183534] hover:bg-[#F4F8F7]"
+              >
+                {profile.isHidden ? (
+                  <>
+                    <FiEye size={13} />
+                    Unhide profile
+                  </>
+                ) : (
+                  <>
+                    <FiEyeOff size={13} />
+                    Hide profile
+                  </>
+                )}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
 
-export default function ProfilesTable({ profiles = [] }) {
+export default function ProfilesTable({ profiles = [], onToggleHide }) {
   if (!profiles.length) {
     return (
       <AdminEmptyState
@@ -135,6 +182,11 @@ export default function ProfilesTable({ profiles = [] }) {
                         {profile.isLanding && "Landing · "}
                         {profile.profileSlug || profile.userShortId}
                       </p>
+                      {profile.userAccountStatus === "deleted" && (
+                        <span className="mt-0.5 inline-block rounded-full bg-[#FFF1F0] px-2 py-0.5 text-[10px] font-bold uppercase text-[#DC2626]">
+                          User deleted
+                        </span>
+                      )}
                     </div>
                   </div>
                 </td>
@@ -181,7 +233,7 @@ export default function ProfilesTable({ profiles = [] }) {
                   {formatDate(profile.createdAt)}
                 </td>
                 <td className="px-4 py-3">
-                  <RowMenu profile={profile} />
+                  <RowMenu profile={profile} onToggleHide={onToggleHide} />
                 </td>
               </tr>
             ))}

@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaCrown } from "react-icons/fa";
 import { MdOutlineLogout } from "react-icons/md";
 import clsx from "clsx";
@@ -32,7 +32,7 @@ const SIDEBAR_TRANSITION = {
 
 function AppShellInner({ children }) {
   const { collapsed } = useSidebar();
-  const { setLoading, setAdmin, admin } = useAdmin();
+  const { setAdmin, admin } = useAdmin();
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -48,33 +48,15 @@ function AppShellInner({ children }) {
 
   const sidebarWidth = collapsed ? 80 : 260;
 
-  const [tooltip, setTooltip] = useState({
-    visible: false,
-    text: "",
-    x: 0,
-    y: 0,
-  });
+  const [tooltip, setTooltip] = useState({ visible: false, text: "" });
+  const tooltipRef = useRef(null);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch("/api/auth/me");
-        const data = await res.json();
-
-        if (!res.ok || !data.success) {
-          return;
-        }
-
-        setAdmin(data.data);
-      } catch {
-        // Session fetch failed — layout auth guard handles redirect.
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, [pathname, setLoading, setAdmin]);
+  const moveTooltip = useCallback((x, y) => {
+    if (tooltipRef.current) {
+      tooltipRef.current.style.left = `${x}px`;
+      tooltipRef.current.style.top = `${y}px`;
+    }
+  }, []);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -203,6 +185,7 @@ function AppShellInner({ children }) {
               collapsed={collapsed}
               fallbackRoute={fallbackRoute}
               setTooltip={setTooltip}
+              moveTooltip={moveTooltip}
             />
           </div>
 
@@ -314,12 +297,8 @@ function AppShellInner({ children }) {
 
       {tooltip.visible && collapsed ? (
         <div
-          style={{
-            position: "fixed",
-            top: tooltip.y,
-            left: tooltip.x,
-            zIndex: 99999,
-          }}
+          ref={tooltipRef}
+          style={{ position: "fixed", left: 0, top: 0, zIndex: 99999 }}
           className="pointer-events-none whitespace-nowrap rounded-lg border border-white/15 bg-[#0A4A4A]/95 px-3 py-1.5 font-poppins text-xs text-white shadow-lg backdrop-blur-md"
         >
           {tooltip.text}

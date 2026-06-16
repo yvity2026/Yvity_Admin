@@ -42,27 +42,20 @@ function NavLink({
   fallbackRoute,
   onNavigate,
   setTooltip,
+  moveTooltip,
 }) {
   const isActive = isNavItemActive(pathname, item);
 
   return (
     <motion.div
       onMouseEnter={() =>
-        setTooltip?.((prev) => ({
-          ...prev,
-          visible: true,
-          text: item.label,
-        }))
+        setTooltip?.((prev) => ({ ...prev, visible: true, text: item.label }))
       }
       onMouseLeave={() =>
         setTooltip?.((prev) => ({ ...prev, visible: false }))
       }
       onMouseMove={(event) =>
-        setTooltip?.((prev) => ({
-          ...prev,
-          x: event.clientX + 12,
-          y: event.clientY + 12,
-        }))
+        moveTooltip?.(event.clientX + 12, event.clientY + 12)
       }
       whileHover={{ scale: 1.01 }}
       transition={{ duration: 0.15, ease: "easeOut" }}
@@ -118,6 +111,7 @@ function AccordionSection({
   fallbackRoute,
   onNavigate,
   setTooltip,
+  moveTooltip,
 }) {
   const hasActive = section.navitems.some((item) =>
     isNavItemActive(pathname, item),
@@ -168,6 +162,7 @@ function AccordionSection({
                   fallbackRoute={fallbackRoute}
                   onNavigate={onNavigate}
                   setTooltip={setTooltip}
+                  moveTooltip={moveTooltip}
                 />
               ))}
             </div>
@@ -185,6 +180,7 @@ export default function SidebarNav({
   fallbackRoute,
   onNavigate,
   setTooltip,
+  moveTooltip,
 }) {
   const [openSections, setOpenSections] = useState(() =>
     getDefaultOpenSections(sections, pathname),
@@ -238,6 +234,7 @@ export default function SidebarNav({
               fallbackRoute={fallbackRoute}
               onNavigate={onNavigate}
               setTooltip={setTooltip}
+              moveTooltip={moveTooltip}
             />
           )),
         )}
@@ -262,6 +259,7 @@ export default function SidebarNav({
                   fallbackRoute={fallbackRoute}
                   onNavigate={onNavigate}
                   setTooltip={setTooltip}
+                  moveTooltip={moveTooltip}
                 />
               ))}
             </div>
@@ -280,6 +278,7 @@ export default function SidebarNav({
             fallbackRoute={fallbackRoute}
             onNavigate={onNavigate}
             setTooltip={setTooltip}
+            moveTooltip={moveTooltip}
           />
         );
       })}

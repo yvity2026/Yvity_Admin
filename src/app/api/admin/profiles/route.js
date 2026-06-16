@@ -3,10 +3,7 @@ import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
 import { mapProfileRow } from "@/lib/admin/profiles/mapProfileRecord";
 import { listLocalProfiles, useLocalProfiles } from "@/lib/local-data/profiles";
 import { NextResponse } from "next/server";
-
-function escapeIlike(value) {
-  return String(value || "").replace(/[%_,]/g, "");
-}
+import { escapeIlike } from "@/lib/search/escapeIlike";
 
 async function resolveSearchProfileIds(supabase, query) {
   const term = escapeIlike(query.trim());
@@ -100,6 +97,8 @@ async function fetchOverview(supabase) {
     hiddenRes,
     heroRes,
     landingRes,
+    verificationPendingRes,
+    updateRequestsRes,
   ] = await Promise.all([
     supabase.from("advisor_profiles").select("*", { count: "exact", head: true }),
     supabase
@@ -128,6 +127,15 @@ async function fetchOverview(supabase) {
       .from("advisor_profiles")
       .select("*", { count: "exact", head: true })
       .eq("is_landing", true),
+    supabase
+      .from("advisor_profiles")
+      .select("*", { count: "exact", head: true })
+      .eq("account_status", "under_review")
+      .not("iridai_certificate_url", "is", null),
+    supabase
+      .from("profile_update_requests")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "pending"),
   ]);
 
   const pendingCount = pendingRes.count || 0;
@@ -142,8 +150,8 @@ async function fetchOverview(supabase) {
     featuredLanding: landingRes.count || 0,
     attention: {
       pendingReview: pendingCount,
-      verificationPending: pendingCount,
-      updateRequests: 0,
+      verificationPending: verificationPendingRes.count || 0,
+      updateRequests: updateRequestsRes.count || 0,
     },
   };
 }
@@ -199,7 +207,7 @@ export async function GET(req) {
       .select(
         `
         *,
-        user:users(id, name, city, profession, selfie_url)
+        user:users(id, name, city, profession, selfie_url, account_status)
       `,
         { count: "exact" },
       )
@@ -266,5 +274,56 @@ export async function GET(req) {
       { error: "Internal server error", details: error.message },
       { status: 500 },
     );
+  }
+}
+
+export async function PATCH(req) {
+  try {
+    const admin = await getAuthenticatedAdmin();
+    if (!admin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    }
+
+    const { profileId, action } = body;
+
+    if (!profileId) {
+      return NextResponse.json({ error: "profileId is required" }, { status: 400 });
+    }
+
+    if (!["hide", "unhide"].includes(action)) {
+      return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+    }
+
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("advisor_profiles")
+      .update({
+        ispublic_profile: action === "unhide",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", profileId)
+      .select("id, ispublic_profile")
+      .maybeSingle();
+
+    if (error) {
+      console.error("PATCH /api/admin/profiles failed:", error);
+      return NextResponse.json({ error: "Unable to update profile" }, { status: 500 });
+    }
+
+    if (!data) {
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
+    console.error("PATCH /api/admin/profiles failed:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

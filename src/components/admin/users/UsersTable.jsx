@@ -47,7 +47,7 @@ function formatDate(value) {
   });
 }
 
-function RowMenu({ user, onSuspend, onActivate }) {
+function RowMenu({ user, onSuspend, onActivate, onDelete, onRestore }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -80,25 +80,37 @@ function RowMenu({ user, onSuspend, onActivate }) {
             {user.status === "active" && (
               <button
                 type="button"
-                onClick={() => {
-                  setOpen(false);
-                  onSuspend?.(user);
-                }}
+                onClick={() => { setOpen(false); onSuspend?.(user); }}
                 className="block w-full rounded-xl px-3 py-2 text-left text-[12px] font-medium text-[#B45309] hover:bg-[#FFF6E8]"
               >
                 Suspend
               </button>
             )}
             {user.status === "suspended" && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => { setOpen(false); onActivate?.(user); }}
+                  className="block w-full rounded-xl px-3 py-2 text-left text-[12px] font-medium text-[#1A7A5A] hover:bg-[#E8F5F0]"
+                >
+                  Activate
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setOpen(false); onDelete?.(user); }}
+                  className="block w-full rounded-xl px-3 py-2 text-left text-[12px] font-medium text-[#DC2626] hover:bg-[#FFF1F0]"
+                >
+                  Delete
+                </button>
+              </>
+            )}
+            {user.status === "deleted" && (
               <button
                 type="button"
-                onClick={() => {
-                  setOpen(false);
-                  onActivate?.(user);
-                }}
+                onClick={() => { setOpen(false); onRestore?.(user); }}
                 className="block w-full rounded-xl px-3 py-2 text-left text-[12px] font-medium text-[#1A7A5A] hover:bg-[#E8F5F0]"
               >
-                Activate
+                Restore
               </button>
             )}
           </div>
@@ -108,7 +120,7 @@ function RowMenu({ user, onSuspend, onActivate }) {
   );
 }
 
-export default function UsersTable({ users = [], onSuspend, onActivate }) {
+export default function UsersTable({ users = [], onSuspend, onActivate, onDelete, onRestore }) {
   if (!users.length) {
     return (
       <AdminEmptyState
@@ -184,7 +196,7 @@ export default function UsersTable({ users = [], onSuspend, onActivate }) {
                       <FiEye size={13} />
                       View
                     </Link>
-                    <RowMenu user={user} onSuspend={onSuspend} onActivate={onActivate} />
+                    <RowMenu user={user} onSuspend={onSuspend} onActivate={onActivate} onDelete={onDelete} onRestore={onRestore} />
                   </div>
                 </td>
               </tr>

@@ -9,8 +9,8 @@ import {
   sendAmbassadorCampaign,
   setProgramStatus,
   updateProgramConfig,
-  useAmbassadorsStore,
 } from "@/lib/local-data/ambassadors-store";
+import { localDataAvailable } from "@/lib/local-data/advisor-approvals";
 import {
   createRewardEngineCampaign,
   deleteRewardEngineCampaign,
@@ -33,7 +33,7 @@ export async function GET(request) {
   }
 
   try {
-    if (!useAmbassadorsStore()) {
+    if (!localDataAvailable()) {
       return NextResponse.json(
         { error: "Ambassador program storage unavailable. Check Supabase configuration." },
         { status: 501 },
@@ -58,7 +58,7 @@ export async function POST(request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!useAmbassadorsStore()) {
+  if (!localDataAvailable()) {
     return NextResponse.json(
       { error: "Ambassador program is available in local data mode only for now" },
       { status: 501 },

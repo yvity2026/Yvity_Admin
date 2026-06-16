@@ -128,36 +128,32 @@ export default function AdminUsersView() {
   }, [query]);
 
   const runUserAction = async (user, action) => {
-    const labels = {
-      suspend: "suspend",
-      activate: "activate",
-      delete: "delete",
+    if (!["suspend", "activate", "delete", "restore"].includes(action)) return;
+
+    const titles = { delete: "Delete user", suspend: "Suspend user", activate: "Activate user", restore: "Restore user" };
+    const messages = {
+      delete: `Delete ${user.name}? This soft-deletes the account.`,
+      suspend: `Suspend ${user.name}?`,
+      activate: `Activate ${user.name}?`,
+      restore: `Restore ${user.name}? Their account will become active again.`,
     };
+    const labels = { delete: "Delete", suspend: "Suspend", activate: "Activate", restore: "Restore" };
 
-    const label = labels[action];
-    if (!label) return;
-
-    const ok = await confirm({
-      title:
-        action === "delete"
-          ? "Delete user"
-          : action === "suspend"
-            ? "Suspend user"
-            : "Activate user",
-      message:
-        action === "delete"
-          ? `Delete ${user.name}? This soft-deletes the account.`
-          : `${action === "suspend" ? "Suspend" : "Activate"} ${user.name}?`,
-      confirmLabel:
-        action === "delete" ? "Delete" : action === "suspend" ? "Suspend" : "Activate",
-      variant: action === "activate" ? "primary" : "danger",
+    const { confirmed, reason } = await confirm({
+      title: titles[action],
+      message: messages[action],
+      confirmLabel: labels[action],
+      variant: action === "delete" ? "danger" : "primary",
+      requireReason: action === "suspend" || action === "delete",
+      reasonLabel: action === "delete" ? "Reason for deletion (optional)" : "Reason for suspension (optional)",
     });
 
-    if (!ok) return;
+    if (!confirmed) return;
 
     try {
-      await userActions.mutateAsync({ id: user.id, action });
-      toast.success(`User ${action === "delete" ? "deleted" : `${action}d`} successfully`);
+      await userActions.mutateAsync({ id: user.id, action, reason: reason || undefined });
+      const successMsg = { delete: "deleted", suspend: "suspended", activate: "activated", restore: "restored" };
+      toast.success(`User ${successMsg[action]} successfully`);
       refetch();
     } catch (actionError) {
       toast.error(actionError.message || "Action failed");
@@ -219,6 +215,8 @@ export default function AdminUsersView() {
           users={users}
           onSuspend={(user) => runUserAction(user, "suspend")}
           onActivate={(user) => runUserAction(user, "activate")}
+          onDelete={(user) => runUserAction(user, "delete")}
+          onRestore={(user) => runUserAction(user, "restore")}
         />
 
         {pagination && pagination.total > 0 && (

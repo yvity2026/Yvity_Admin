@@ -65,6 +65,8 @@ export default function AmbassadorCampaignModal({
 
   const { createCampaign, sendCampaign, isProcessing } = useAmbassadorActions();
 
+  const { confirm, dialogProps } = useConfirmDialog();
+
   const [form, setForm] = useState(DEFAULT_FORM);
 
   const [previewCount, setPreviewCount] = useState(null);
@@ -131,7 +133,7 @@ export default function AmbassadorCampaignModal({
 
       if (sendNow) {
 
-        const ok = await confirm({
+        const { confirmed } = await confirm({
 
           title: "Send campaign",
 
@@ -143,7 +145,7 @@ export default function AmbassadorCampaignModal({
 
         });
 
-        if (!ok) {
+        if (!confirmed) {
 
           onClose();
 
@@ -183,7 +185,7 @@ export default function AmbassadorCampaignModal({
 
   const handleSendDraft = async (campaign) => {
 
-    const ok = await confirm({
+    const { confirmed } = await confirm({
 
       title: "Send campaign",
 
@@ -195,7 +197,7 @@ export default function AmbassadorCampaignModal({
 
     });
 
-    if (!ok) return;
+    if (!confirmed) return;
 
 
 

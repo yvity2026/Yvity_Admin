@@ -1,10 +1,16 @@
 import { createAdminClient } from "@/lib/supabase/server";
+import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
 import { NextResponse } from "next/server";
 import { listLocalApprovals, useLocalApprovals } from "@/lib/local-data/advisor-approvals";
 import { goldAppBaseUrl } from "@/lib/local-data/paths";
 
 export async function GET() {
   try {
+    const admin = await getAuthenticatedAdmin();
+    if (!admin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     if (useLocalApprovals()) {
       const base = goldAppBaseUrl();
       const res = await fetch(`${base}/api/admin/irdai/stats`, { cache: "no-store" });

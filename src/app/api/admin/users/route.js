@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
+import { escapeIlike } from "@/lib/search/escapeIlike";
 import { mapUserRow } from "@/lib/admin/users/mapUserRecord";
 import { listLocalUsers, useLocalUsers } from "@/lib/local-data/users";
 import { NextResponse } from "next/server";
@@ -10,12 +11,11 @@ function startOfTodayIso() {
   return d.toISOString();
 }
 
-function escapeIlike(value) {
-  return String(value || "").replace(/[%_,]/g, "");
-}
 
 async function getProfessionalUserIds(supabase) {
-  const { data, error } = await supabase.from("advisor_profiles").select("advisor_id");
+  const { data, error } = await supabase
+    .from("advisor_profiles")
+    .select("advisor_id");
 
   if (error) {
     console.warn("Failed to load advisor ids:", error.message);
@@ -29,6 +29,7 @@ async function getPlanUserIds(supabase, plan) {
   const { data, error } = await supabase
     .from("advisor_profiles")
     .select("advisor_id")
+    .neq("account_status", "deleted")
     .eq("subscription_plan", plan);
 
   if (error) {
@@ -245,7 +246,8 @@ export async function GET(req) {
     } else if (status === "deleted") {
       query = query.eq("account_status", "deleted");
     } else {
-      query = query.in("account_status", ["active", "deactivated", "deleted"]);
+      // "all" → active + suspended only; deleted only visible via explicit "deleted" filter
+      query = query.in("account_status", ["active", "deactivated"]);
     }
 
     if (registeredFrom) {

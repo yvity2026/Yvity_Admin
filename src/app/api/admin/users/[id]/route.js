@@ -264,7 +264,7 @@ export async function PATCH(req, { params }) {
     const body = await req.json();
     const action = String(body?.action || "").trim();
 
-    if (!["suspend", "activate", "delete"].includes(action)) {
+    if (!["suspend", "activate", "delete", "restore"].includes(action)) {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
@@ -305,6 +305,13 @@ export async function PATCH(req, { params }) {
         account_status_updated_at: now,
         account_status_reason: body?.reason || "Deleted by admin",
       };
+    } else if (action === "restore") {
+      updates = {
+        account_status: "active",
+        deleted_at: null,
+        account_status_updated_at: now,
+        account_status_reason: null,
+      };
     }
 
     const { data, error } = await supabase
@@ -325,6 +332,16 @@ export async function PATCH(req, { params }) {
     if (!data) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
+
+    supabase.from("admin_action_log").insert({
+      admin_id: admin.id,
+      action,
+      entity_type: "user",
+      entity_id: data.id,
+      reason: body?.reason || null,
+    }).then(({ error: logErr }) => {
+      if (logErr) console.warn("audit log insert failed:", logErr.message);
+    });
 
     return NextResponse.json({
       success: true,

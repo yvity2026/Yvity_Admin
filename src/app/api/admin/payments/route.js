@@ -1,29 +1,11 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { requireAdminSession } from "@/lib/admin/adminSession";
 import { createAdminClient } from "@/lib/supabase/server";
 import {
   createPaymentLink,
   getPaymentsSnapshot,
-  usePaymentsStore,
 } from "@/lib/local-data/payments-store";
-
-async function parseAdminSession() {
-  const cookieStore = await cookies();
-  const sessionValue = cookieStore.get("admin_session")?.value;
-  if (!sessionValue) return null;
-
-  try {
-    return JSON.parse(sessionValue);
-  } catch {
-    return null;
-  }
-}
-
-async function requireAdmin() {
-  const session = await parseAdminSession();
-  if (!session?.admin_id || !session?.role) return null;
-  return session;
-}
+import { localDataAvailable } from "@/lib/local-data/advisor-approvals";
 
 async function getSupabasePayments(request) {
   const supabase = createAdminClient();
@@ -109,13 +91,13 @@ async function getSupabasePayments(request) {
 }
 
 export async function GET(request) {
-  const adminSession = await requireAdmin();
+  const adminSession = await requireAdminSession();
   if (!adminSession) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    if (usePaymentsStore()) {
+    if (localDataAvailable()) {
       const { searchParams } = new URL(request.url);
       return NextResponse.json(
         getPaymentsSnapshot({
@@ -136,12 +118,12 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const adminSession = await requireAdmin();
+  const adminSession = await requireAdminSession();
   if (!adminSession) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!usePaymentsStore()) {
+  if (!localDataAvailable()) {
     return NextResponse.json(
       { error: "Payment links are available in local data mode only for now" },
       { status: 501 },
