@@ -13,7 +13,7 @@ import {
 } from "@/lib/admin/plans/planPricing";
 import { localDataAvailable } from "@/lib/local-data/advisor-approvals";
 import { useSupabasePersistence } from "@/lib/supabase/persistence-mode";
-import { DATA_DIR, readJsonFile, writeJsonFile } from "@/lib/local-data/paths";
+import { getDataDir, readJsonFile, writeJsonFile } from "@/lib/local-data/paths";
 
 const CONFIG_FILE = "membership-plans-config.json";
 const PROFILES_FILE = "advisor-profiles.json";
@@ -193,7 +193,7 @@ export function enrichPlanConfig(plan) {
 }
 
 function loadConfigDb() {
-  const filePath = path.join(DATA_DIR, CONFIG_FILE);
+  const filePath = path.join(getDataDir(), CONFIG_FILE);
   if (!fs.existsSync(filePath)) {
     return {
       plans: DEFAULT_PLANS_CONFIG.map(normalizeStoredPlan),

@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
+import { escapeIlike } from "@/lib/search/escapeIlike";
 import { hasPermission } from "@/lib/admin/permissions";
 import { mapAdvisorReviewRow } from "@/lib/admin/advisor-reviews/mapAdvisorReviewRecord";
 import {
@@ -13,9 +14,6 @@ import {
 } from "@/lib/local-data/advisor-reviews";
 import { NextResponse } from "next/server";
 
-function escapeIlike(value) {
-  return String(value || "").replace(/[%_,]/g, "");
-}
 
 async function resolveAdvisorIds(supabase, query) {
   const term = escapeIlike(query.trim());

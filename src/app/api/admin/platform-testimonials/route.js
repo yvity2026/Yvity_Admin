@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
+import { escapeIlike } from "@/lib/search/escapeIlike";
 import {
   computePlatformOverview,
   filterPlatformReviewRows,
@@ -13,9 +14,6 @@ import {
 } from "@/lib/local-data/platform-reviews";
 import { NextResponse } from "next/server";
 
-function escapeIlike(value) {
-  return String(value || "").replace(/[%_,]/g, "");
-}
 
 function mapStatusFilter(status) {
   if (status === "published") return ["approved"];

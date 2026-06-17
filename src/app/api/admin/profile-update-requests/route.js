@@ -1,39 +1,11 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import {
-  approveLocalProfileUpdateRequest,
-  rejectLocalProfileUpdateRequest,
-  useLocalProfileUpdateRequests,
-} from "@/lib/local-data/profile-update-requests";
-
-async function parseAdminSession() {
-  const cookieStore = await cookies();
-  const sessionValue = cookieStore.get("admin_session")?.value;
-
-  if (!sessionValue) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(sessionValue);
-  } catch (error) {
-    console.error("Invalid admin session cookie", error);
-    return null;
-  }
-}
-
-async function requireAdmin() {
-  const session = await parseAdminSession();
-  if (!session || !session.admin_id || !session.role) {
-    return null;
-  }
-  return session;
-}
+import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
+import { createAdminClient } from "@/lib/supabase/server";
+import { mapProfileUpdateRequest } from "@/lib/admin/approvals/mapProfileUpdateRequest";
 
 export async function POST(request) {
-  const adminSession = await requireAdmin();
-
-  if (!adminSession) {
+  const admin = await getAuthenticatedAdmin();
+  if (!admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -54,32 +26,47 @@ export async function POST(request) {
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   }
 
-  if (!useLocalProfileUpdateRequests()) {
-    return NextResponse.json(
-      { error: "Profile update requests are not available in this environment" },
-      { status: 501 },
-    );
-  }
-
   try {
+    const supabase = createAdminClient();
+    const now = new Date().toISOString();
+
+    const updates = {
+      reviewed_by: admin.id,
+      updated_at: now,
+    };
+
     if (action === "approve") {
-      const updated = approveLocalProfileUpdateRequest(requestId, verificationNotes);
-      if (!updated) {
-        return NextResponse.json({ error: "Profile update request not found" }, { status: 404 });
-      }
-      return NextResponse.json({ success: true, request: updated });
+      updates.status = "approved";
+      updates.approved_at = now;
+      updates.rejection_reason = null;
+      if (verificationNotes) updates.verification_notes = verificationNotes;
+    } else {
+      updates.status = "rejected";
+      updates.rejected_at = now;
+      updates.rejection_reason = reason || note || "Profile update requires changes";
     }
 
-    const updated = rejectLocalProfileUpdateRequest(
-      requestId,
-      reason || note || "Profile update requires changes",
-    );
-    if (!updated) {
-      return NextResponse.json({ error: "Profile update request not found" }, { status: 404 });
+    const { data, error } = await supabase
+      .from("profile_update_requests")
+      .update(updates)
+      .eq("id", requestId)
+      .select(`*, user:users(id, name)`)
+      .single();
+
+    if (error) {
+      console.error("profile-update-requests POST failed:", error.message);
+      return NextResponse.json({ error: "Failed to update request" }, { status: 500 });
     }
-    return NextResponse.json({ success: true, request: updated });
+
+    return NextResponse.json({
+      success: true,
+      request: mapProfileUpdateRequest({
+        ...data,
+        name: data.user?.name || "Advisor",
+      }),
+    });
   } catch (error) {
-    console.error("Profile update request POST failed", error);
+    console.error("profile-update-requests POST error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

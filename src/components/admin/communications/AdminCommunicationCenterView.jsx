@@ -92,13 +92,13 @@ export default function AdminCommunicationCenterView() {
       toast.error("You do not have permission to send campaigns.");
       return;
     }
-    const ok = await confirm({
+    const { confirmed } = await confirm({
       title: "Send campaign",
       message: `Send "${campaign.name}" to ${campaign.recipientCount} recipients?`,
       confirmLabel: "Send now",
       variant: "primary",
     });
-    if (!ok) return;
+    if (!confirmed) return;
     try {
       const result = await sendCampaign.mutateAsync(campaign.id);
       toast.success(result.message || "Campaign sent");

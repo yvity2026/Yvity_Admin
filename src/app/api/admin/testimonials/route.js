@@ -1,8 +1,14 @@
 import { createAdminClient } from "@/lib/supabase/server";
+import { getAuthenticatedAdmin } from "@/lib/auth/getAuthenticatedAdmin";
 import { NextResponse } from "next/server";
 
 export async function GET(req) {
   try {
+    const admin = await getAuthenticatedAdmin();
+    if (!admin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const supabase = createAdminClient();
     const { searchParams } = new URL(req.url);
 
@@ -84,6 +90,11 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
+    const admin = await getAuthenticatedAdmin();
+    if (!admin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const supabase = createAdminClient();
     const body = await req.json();
     const testimonialId = String(body?.testimonialId || "").trim();

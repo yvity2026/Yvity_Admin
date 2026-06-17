@@ -120,7 +120,7 @@ export default function BulkTestimonialRequestModal({
 
 
 
-    const ok = await confirm({
+    const { confirmed } = await confirm({
 
       title: "Send testimonial requests",
 
@@ -134,7 +134,7 @@ export default function BulkTestimonialRequestModal({
 
 
 
-    if (!ok) return;
+    if (!confirmed) return;
 
 
 

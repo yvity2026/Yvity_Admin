@@ -59,8 +59,8 @@ export function useUsers(params = {}) {
   return useQuery({
     queryKey: ["admin-users", params],
     queryFn: () => fetchUsers(params),
-    staleTime: 1000 * 60 * 2,
-    refetchOnWindowFocus: false,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -69,8 +69,8 @@ export function useUser(id) {
     queryKey: ["admin-user", id],
     queryFn: () => fetchUser(id),
     enabled: Boolean(id),
-    staleTime: 1000 * 60 * 2,
-    refetchOnWindowFocus: false,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 }
 

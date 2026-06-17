@@ -1,29 +1,11 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { requireAdminSession } from "@/lib/admin/adminSession";
 import { createAdminClient } from "@/lib/supabase/server";
 import { buildPlansResponse } from "@/lib/admin/plans/mapPlanRecord";
 import { buildLocalProductsPlansOverview } from "@/lib/admin/products-plans/buildProductsPlansOverview";
 import { formatInr } from "@/lib/admin/payments/mapPaymentRecord";
 import { listConfiguredPlans, useMembershipPlansStore } from "@/lib/local-data/membership-plans-store";
 import { localDataAvailable } from "@/lib/local-data/advisor-approvals";
-
-async function parseAdminSession() {
-  const cookieStore = await cookies();
-  const sessionValue = cookieStore.get("admin_session")?.value;
-  if (!sessionValue) return null;
-
-  try {
-    return JSON.parse(sessionValue);
-  } catch {
-    return null;
-  }
-}
-
-async function requireAdmin() {
-  const session = await parseAdminSession();
-  if (!session?.admin_id || !session?.role) return null;
-  return session;
-}
 
 async function countSupabaseSubscribers(planIds = []) {
   const supabase = createAdminClient();
@@ -152,7 +134,7 @@ async function buildSupabaseOverview() {
 }
 
 export async function GET() {
-  const adminSession = await requireAdmin();
+  const adminSession = await requireAdminSession();
   if (!adminSession) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

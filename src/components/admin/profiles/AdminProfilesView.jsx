@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import PaginationControls from "@/components/common/PaginationControls";
 import { getPaginationData } from "@/lib/pagination";
 import DashboardMetricTile from "@/components/admin/dashboard/DashboardMetricTile";
-import { useProfiles } from "@/hooks/TanstankQuery/useProfiles";
+import { useProfileActions, useProfiles } from "@/hooks/TanstankQuery/useProfiles";
 import ProfilesSearchBar from "./ProfilesSearchBar";
 import ProfilesTable from "./ProfilesTable";
 import ProfilesSkeleton from "./ProfilesSkeleton";
@@ -69,63 +70,45 @@ function buildOverviewMetrics(overview = {}) {
   ];
 }
 
-function AttentionStrip({ attention = {}, onFilterPending }) {
-  const items = [
-    {
-      id: "pending",
-      label: "Pending review",
-      count: attention.pendingReview || 0,
-      onClick: onFilterPending,
-    },
-    {
-      id: "verification",
-      label: "Verification pending",
-      count: attention.verificationPending || 0,
-    },
-    {
-      id: "updates",
-      label: "Update requests",
-      count: attention.updateRequests || 0,
-      soon: true,
-    },
-  ];
-
+function AttentionStrip({ attention = {}, onFilterPending, onFilterVerification }) {
   return (
     <section className="rounded-[24px] border border-[#F59E0B]/20 bg-gradient-to-r from-[#FFF9F0] to-[#F8F6F1] px-4 py-4">
       <p className="mb-3 font-poppins text-[11px] font-semibold uppercase tracking-[0.14em] text-[#7A928D]">
         Needs attention
       </p>
       <div className="flex flex-wrap gap-2">
-        {items.map((item) =>
-          item.onClick ? (
-            <button
-              key={item.id}
-              type="button"
-              onClick={item.onClick}
-              className="inline-flex items-center gap-2 rounded-full border border-[#F59E0B]/30 bg-white px-3 py-1.5 text-[12px] font-semibold text-[#0A4A4A] transition hover:bg-[#FFF6E8]"
-            >
-              {item.label}
-              <span className="admin-num rounded-full bg-[#FFF6E8] px-2 py-0.5 text-[11px] text-[#B45309]">
-                {item.count}
-              </span>
-            </button>
-          ) : (
-            <span
-              key={item.id}
-              className="inline-flex items-center gap-2 rounded-full border border-[#E6ECEA] bg-white/80 px-3 py-1.5 text-[12px] font-medium text-[#5C7571]"
-            >
-              {item.label}
-              <span className="admin-num rounded-full bg-[#F8FAFC] px-2 py-0.5 text-[11px]">
-                {item.count}
-              </span>
-              {item.soon && (
-                <span className="text-[10px] uppercase tracking-[0.12em] text-[#9AB0AB]">
-                  Soon
-                </span>
-              )}
-            </span>
-          ),
-        )}
+        <button
+          type="button"
+          onClick={onFilterPending}
+          className="inline-flex items-center gap-2 rounded-full border border-[#F59E0B]/30 bg-white px-3 py-1.5 text-[12px] font-semibold text-[#0A4A4A] transition hover:bg-[#FFF6E8]"
+        >
+          Pending review
+          <span className="admin-num rounded-full bg-[#FFF6E8] px-2 py-0.5 text-[11px] text-[#B45309]">
+            {attention.pendingReview || 0}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={onFilterVerification}
+          className="inline-flex items-center gap-2 rounded-full border border-[#F59E0B]/30 bg-white px-3 py-1.5 text-[12px] font-semibold text-[#0A4A4A] transition hover:bg-[#FFF6E8]"
+        >
+          Verification pending
+          <span className="admin-num rounded-full bg-[#FFF6E8] px-2 py-0.5 text-[11px] text-[#B45309]">
+            {attention.verificationPending || 0}
+          </span>
+        </button>
+
+        <Link
+          href="/admin/irdaiapprovals"
+          className="inline-flex items-center gap-2 rounded-full border border-[#E6ECEA] bg-white/80 px-3 py-1.5 text-[12px] font-semibold text-[#0A4A4A] transition hover:bg-[#F4F8F7]"
+        >
+          Update requests
+          <span className="admin-num rounded-full bg-[#F8FAFC] px-2 py-0.5 text-[11px]">
+            {attention.updateRequests || 0}
+          </span>
+        </Link>
+
         <Link
           href="/admin/irdaiapprovals"
           className="inline-flex items-center gap-2 rounded-full bg-[#0A4A4A] px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-[#0D6060]"
@@ -160,6 +143,7 @@ export default function AdminProfilesView() {
   );
 
   const { data, isLoading, isError, error, refetch, isFetching } = useProfiles(params);
+  const profileActions = useProfileActions();
 
   useEffect(() => {
     setPage(1);
@@ -224,6 +208,7 @@ export default function AdminProfilesView() {
         <AttentionStrip
           attention={attention}
           onFilterPending={() => setStatus("pending")}
+          onFilterVerification={() => setStatus("pending")}
         />
 
         <ProfilesSearchBar
@@ -239,7 +224,20 @@ export default function AdminProfilesView() {
           onIndustryChange={setIndustry}
         />
 
-        <ProfilesTable profiles={profiles} />
+        <ProfilesTable
+          profiles={profiles}
+          onToggleHide={async (profile) => {
+            try {
+              await profileActions.mutateAsync({
+                profileId: profile.id,
+                action: profile.isHidden ? "unhide" : "hide",
+              });
+              toast.success(profile.isHidden ? "Profile unhidden" : "Profile hidden");
+            } catch (err) {
+              toast.error(err.message || "Action failed");
+            }
+          }}
+        />
 
         {pagination && pagination.total > 0 && (
           <PaginationControls

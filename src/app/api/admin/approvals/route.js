@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { requireAdminSession } from "@/lib/admin/adminSession";
 import { createAdminClient } from "@/lib/supabase/server";
 import {
   approveLocalProfile,
@@ -12,7 +12,7 @@ import {
   computeApprovalOverview,
   mapApprovalRow,
 } from "@/lib/admin/approvals/mapApprovalRecord";
-import { listLocalProfileUpdateRequests } from "@/lib/local-data/profile-update-requests";
+import { fetchProfileUpdateRequests } from "@/lib/admin/approvals/fetchProfileUpdateRequests";
 import {
   filterApprovalRows,
   paginateRows,
@@ -61,30 +61,6 @@ async function postGoldApproval(payload) {
   return json;
 }
 
-async function parseAdminSession() {
-  const cookieStore = await cookies();
-  const sessionValue = cookieStore.get("admin_session")?.value;
-
-  if (!sessionValue) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(sessionValue);
-  } catch (error) {
-    console.error("Invalid admin session cookie", error);
-    return null;
-  }
-}
-
-async function requireAdmin() {
-  const session = await parseAdminSession();
-  if (!session || !session.admin_id || !session.role) {
-    return null;
-  }
-  return session;
-}
-
 function buildApprovalsResponse(allRows, params, profileUpdates = []) {
   const overview = computeApprovalOverview(allRows, profileUpdates);
   const filtered = filterApprovalRows(allRows, params);
@@ -112,7 +88,7 @@ function buildApprovalsResponse(allRows, params, profileUpdates = []) {
 
 export async function GET(request) {
   try {
-    const adminSession = await requireAdmin();
+    const adminSession = await requireAdminSession();
     if (!adminSession) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -151,7 +127,7 @@ export async function GET(request) {
       ),
     );
 
-    const profileUpdates = listLocalProfileUpdateRequests(params);
+    const profileUpdates = await fetchProfileUpdateRequests(params);
 
     return NextResponse.json(buildApprovalsResponse(allRows, params, profileUpdates));
   } catch (error) {
@@ -164,7 +140,7 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const adminSession = await requireAdmin();
+  const adminSession = await requireAdminSession();
 
   if (!adminSession) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

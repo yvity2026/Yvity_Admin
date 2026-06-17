@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 function buildProfilesQuery(params = {}) {
   const search = new URLSearchParams();
@@ -32,7 +32,26 @@ export function useProfiles(params = {}) {
   return useQuery({
     queryKey: ["admin-profiles", params],
     queryFn: () => fetchProfiles(params),
-    staleTime: 1000 * 60 * 2,
-    refetchOnWindowFocus: false,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+  });
+}
+
+async function patchProfile({ profileId, action }) {
+  const res = await fetch("/api/admin/profiles", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ profileId, action }),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || "Profile action failed");
+  return json;
+}
+
+export function useProfileActions() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: patchProfile,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-profiles"] }),
   });
 }

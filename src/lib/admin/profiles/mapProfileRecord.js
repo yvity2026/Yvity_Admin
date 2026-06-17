@@ -27,6 +27,10 @@ export function mapProfileStatus(profile = {}) {
   const accountStatus = profile.account_status || "under_review";
   const isPublic = profile.ispublic_profile !== false;
 
+  if (accountStatus === "deleted") {
+    return { key: "deleted", label: "Deleted", tone: "danger" };
+  }
+
   if (accountStatus === "action_required") {
     return { key: "rejected", label: "Rejected", tone: "danger" };
   }
@@ -67,7 +71,7 @@ export function mapIndustry(profile = {}, user = {}) {
   if (ROLE_LABELS[roleId]) return ROLE_LABELS[roleId];
   if (profile.designation) return profile.designation;
   if (user?.profession) return user.profession;
-  return "Insurance";
+  return "—";
 }
 
 export function publicProfileUrl(profile = {}) {
@@ -114,6 +118,7 @@ export function mapProfileRow(item = {}, services = []) {
     isHidden: item.ispublic_profile === false,
     profilePic: user.selfie_url || user.selfieUrl || null,
     city: user.city || null,
+    userAccountStatus: user.account_status || "active",
     canReview: ["pending", "rejected"].includes(profileStatus.key) ||
       item.account_status === "under_review" ||
       item.account_status === "action_required",

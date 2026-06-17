@@ -128,13 +128,13 @@ export default function AdminRolesPermissionsView() {
   ];
 
   const handleDisableAdmin = async (adminUser) => {
-    const ok = await confirm({
+    const { confirmed } = await confirm({
       title: "Disable admin access",
       message: `Disable access for ${adminUser.name}? They will no longer be able to log in.`,
       confirmLabel: "Disable access",
       variant: "danger",
     });
-    if (!ok) return;
+    if (!confirmed) return;
     try {
       await updateAdminUser.mutateAsync({
         id: adminUser.id,

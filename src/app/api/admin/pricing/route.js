@@ -1,48 +1,48 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { requireAdminSession } from "@/lib/admin/adminSession";
 import { buildPlansResponse } from "@/lib/admin/plans/mapPlanRecord";
+import { createAdminClient } from "@/lib/supabase/server";
 import {
   createPlanConfig,
-  getMembershipPlansSnapshot,
+  listFeaturedProducts,
   listConfiguredPlans,
   updateFeaturedProductPricing,
   updatePlanPricing,
-  useMembershipPlansStore,
 } from "@/lib/local-data/membership-plans-store";
+import { localDataAvailable } from "@/lib/local-data/advisor-approvals";
 
-async function parseAdminSession() {
-  const cookieStore = await cookies();
-  const sessionValue = cookieStore.get("admin_session")?.value;
-  if (!sessionValue) return null;
-
-  try {
-    return JSON.parse(sessionValue);
-  } catch {
-    return null;
+async function countSupabaseSubscribers(planIds = []) {
+  const supabase = createAdminClient();
+  const counts = {};
+  for (const planId of planIds) {
+    const { count, error } = await supabase
+      .from("advisor_profiles")
+      .select("*", { count: "exact", head: true })
+      .eq("account_status", "active")
+      .eq("subscription_plan", planId);
+    if (error) throw error;
+    counts[planId] = count || 0;
   }
-}
-
-async function requireAdmin() {
-  const session = await parseAdminSession();
-  if (!session?.admin_id || !session?.role) return null;
-  return session;
+  return counts;
 }
 
 export async function GET() {
-  const adminSession = await requireAdmin();
+  const adminSession = await requireAdminSession();
   if (!adminSession) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    if (!useMembershipPlansStore()) {
+    if (!localDataAvailable()) {
       return NextResponse.json(
         { error: "Editable pricing is available in local data mode only for now" },
         { status: 501 },
       );
     }
 
-    const { plans, featuredProducts, subscriberCounts } = getMembershipPlansSnapshot();
+    const plans = listConfiguredPlans();
+    const featuredProducts = listFeaturedProducts();
+    const subscriberCounts = await countSupabaseSubscribers(plans.map((p) => p.id));
     const response = buildPlansResponse(plans, subscriberCounts);
     const discountedPlans = plans.filter((plan) => plan.hasDiscount).length;
 
@@ -55,7 +55,7 @@ export async function GET() {
         featuredProducts: featuredProducts.length,
         featuredOnDiscount: featuredProducts.filter((item) => item.hasDiscount).length,
       },
-      templates: listConfiguredPlans().map((plan) => ({
+      templates: plans.map((plan) => ({
         id: plan.id,
         name: plan.name,
       })),
@@ -67,12 +67,12 @@ export async function GET() {
 }
 
 export async function POST(request) {
-  const adminSession = await requireAdmin();
+  const adminSession = await requireAdminSession();
   if (!adminSession) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!useMembershipPlansStore()) {
+  if (!localDataAvailable()) {
     return NextResponse.json(
       { error: "Editable pricing is available in local data mode only for now" },
       { status: 501 },

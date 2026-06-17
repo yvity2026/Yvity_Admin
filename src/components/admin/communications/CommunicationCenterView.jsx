@@ -140,14 +140,14 @@ export default function CommunicationCenterView() {
       return;
     }
 
-    const ok = await confirm({
+    const { confirmed } = await confirm({
       title: "Send communication",
       message: `Send "${communication.name}" to ${communication.recipientCount} recipients via WhatsApp?`,
       confirmLabel: "Send now",
       variant: "primary",
     });
 
-    if (!ok) return;
+    if (!confirmed) return;
 
     setSendingId(communication.id);
 

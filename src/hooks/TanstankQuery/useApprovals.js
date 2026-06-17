@@ -63,8 +63,8 @@ export function useApprovals(params = {}) {
   return useQuery({
     queryKey: ["admin-approvals", params],
     queryFn: () => fetchApprovals(params),
-    staleTime: 1000 * 60 * 2,
-    refetchOnWindowFocus: false,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 }
 

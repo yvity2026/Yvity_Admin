@@ -204,8 +204,8 @@ export async function GET() {
         .select("*", { count: "exact", head: true })
         .eq("account_status", "active")
         .eq("profile_status", true),
-      supabase.from("users").select("*", { count: "exact", head: true }),
-      supabase.from("users").select("*", { count: "exact", head: true }).gte("created_at", todayIso),
+      supabase.from("users").select("*", { count: "exact", head: true }).neq("account_status", "deleted"),
+      supabase.from("users").select("*", { count: "exact", head: true }).neq("account_status", "deleted").gte("created_at", todayIso),
       supabase.from("advisor_profiles").select("*", { count: "exact", head: true }).gte("created_at", todayIso),
       supabase.from("city_counts").select("*"),
       supabase.from("company_counts").select("*"),

@@ -71,13 +71,13 @@ export default function AdminSettingsView() {
   };
 
   const handleReset = async () => {
-    const ok = await confirm({
+    const { confirmed } = await confirm({
       title: "Reset settings",
       message: "Reset all settings to defaults? This cannot be undone.",
       confirmLabel: "Reset",
       variant: "danger",
     });
-    if (!ok) return;
+    if (!confirmed) return;
     try {
       const result = await runAction.mutateAsync({ action: "reset" });
       setForm(result.data);
