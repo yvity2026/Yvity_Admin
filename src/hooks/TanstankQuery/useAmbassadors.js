@@ -8,6 +8,7 @@ async function fetchAmbassadors(search = "") {
   const query = params.toString();
   const res = await fetch(`/api/admin/ambassadors${query ? `?${query}` : ""}`);
   const json = await res.json().catch(() => ({}));
+  if (res.status === 501) return { _localOnly: true, message: json?.error };
   if (!res.ok) throw new Error(json?.error || "Failed to fetch ambassadors");
   return json;
 }

@@ -142,6 +142,15 @@ export default function AdminAmbassadorsView() {
 
   if (isLoading) return <AmbassadorsSkeleton />;
 
+  if (data?._localOnly) {
+    return (
+      <AdminErrorState
+        title="Ambassador program — coming soon"
+        message="The referral and rewards program is not yet available in the cloud environment."
+      />
+    );
+  }
+
   if (isError) {
     return (
       <AdminErrorState

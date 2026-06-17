@@ -96,6 +96,15 @@ export default function AdminBillingView() {
     return <AdminPageSkeleton layout="default" />;
   }
 
+  if (data?._localOnly) {
+    return (
+      <AdminErrorState
+        title="Billing — coming soon"
+        message="Subscription lifecycle management is not yet available in the cloud environment."
+      />
+    );
+  }
+
   if (isError) {
     return (
       <AdminErrorState

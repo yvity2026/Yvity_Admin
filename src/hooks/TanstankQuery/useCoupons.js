@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 async function fetchCoupons() {
   const res = await fetch("/api/admin/coupons");
   const json = await res.json().catch(() => ({}));
+  if (res.status === 501) return { _localOnly: true, message: json?.error };
   if (!res.ok) throw new Error(json?.error || "Failed to fetch coupons");
   return json;
 }

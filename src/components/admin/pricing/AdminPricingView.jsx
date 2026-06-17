@@ -101,6 +101,15 @@ export default function AdminPricingView() {
     return <AdminPageSkeleton layout="default" />;
   }
 
+  if (data?._localOnly) {
+    return (
+      <AdminErrorState
+        title="Pricing — coming soon"
+        message="Editable pricing is not yet available in the cloud environment."
+      />
+    );
+  }
+
   if (isError) {
     return (
       <AdminErrorState

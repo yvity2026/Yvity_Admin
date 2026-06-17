@@ -85,6 +85,15 @@ export default function AdminCouponsView() {
     return <AdminPageSkeleton layout="default" />;
   }
 
+  if (data?._localOnly) {
+    return (
+      <AdminErrorState
+        title="Coupons — coming soon"
+        message="Coupon management is not yet available in the cloud environment."
+      />
+    );
+  }
+
   if (isError) {
     return (
       <AdminErrorState
