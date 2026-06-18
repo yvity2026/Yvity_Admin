@@ -32,6 +32,7 @@ export async function getFeatureControlsFromSupabase() {
   const booleanFeatures = LIMIT_FIELD_DEFS.filter((f) => f.type === "boolean").length;
 
   return {
+    planTiers: tiers,
     planLimits,
     globalFlags,
     globalFlagDefs: Object.keys(globalFlags).map((key) => ({ key, enabled: Boolean(globalFlags[key]) })),

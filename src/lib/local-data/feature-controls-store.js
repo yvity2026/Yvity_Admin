@@ -135,6 +135,7 @@ export function getFeatureControlsSnapshot() {
   });
 
   return {
+    planTiers,
     planLimits,
     globalFlags,
     globalFlagDefs: Object.keys(globalFlags).map((key) => ({
