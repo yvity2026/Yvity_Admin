@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 async function fetchFeatureControls() {
   const res = await fetch("/api/admin/feature-controls");
   const json = await res.json().catch(() => ({}));
+  if (res.status === 501) return { _localOnly: true, message: json?.error };
   if (!res.ok) throw new Error(json?.error || "Failed to fetch feature controls");
   return json;
 }

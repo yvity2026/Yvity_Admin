@@ -193,7 +193,7 @@ export default function AdminPaymentsView() {
               setSearch(value);
               setPage(1);
             }}
-            placeholder="Advisor, email, or order id"
+            placeholder="Name, email, phone, plan, or order id"
           />
         </section>
 

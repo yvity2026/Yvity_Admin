@@ -42,6 +42,7 @@ export function mapBillingRow(input = {}) {
     userId: input.user_id || input.id,
     profileId: input.profile_id || input.id,
     advisorName: input.advisor_name || "Advisor",
+    designation: input.designation || null,
     email: input.email || null,
     phone: input.phone || null,
     city: input.city || null,

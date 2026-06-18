@@ -95,6 +95,15 @@ export default function AdminFeatureControlsView() {
     return <AdminPageSkeleton layout="default" />;
   }
 
+  if (data?._localOnly) {
+    return (
+      <AdminErrorState
+        title="Feature controls — coming soon"
+        message="This section is managed via local config files and is not yet available in the cloud environment."
+      />
+    );
+  }
+
   if (isError) {
     return (
       <AdminErrorState

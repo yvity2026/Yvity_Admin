@@ -1,6 +1,8 @@
 "use client";
 
 import AdminModal from "@/components/admin/ui/AdminModal";
+import { PiiField } from "@/components/admin/ui";
+import { maskEmail, maskPhone } from "@/lib/pii";
 
 function formatDate(value) {
   if (!value) return "—";
@@ -31,14 +33,34 @@ export default function PaymentDetailModal({ payment, onClose }) {
         <Row label="Amount" value={payment.amountLabel} bold />
         <Row label="Plan" value={`${payment.planLabel} (${payment.checkoutKind})`} />
         <Row label="Status" value={payment.statusLabel} />
-        <Row label="Advisor email" value={payment.email || "—"} />
-        <Row label="Phone" value={payment.phone || "—"} />
+        <Row
+          label="Email"
+          value={
+            <PiiField
+              masked={maskEmail(payment.email)}
+              full={payment.email}
+              type="email"
+              entityType="payment"
+              entityId={payment.id}
+              href={payment.email ? `mailto:${payment.email}` : undefined}
+            />
+          }
+        />
+        <Row
+          label="Phone"
+          value={
+            <PiiField
+              masked={maskPhone(payment.phone)}
+              full={payment.phone}
+              type="phone"
+              entityType="payment"
+              entityId={payment.id}
+            />
+          }
+        />
         <Row label="Coupon" value={payment.couponCode || "—"} />
         {payment.couponDiscountInr > 0 ? (
-          <Row
-            label="Coupon discount"
-            value={`₹${payment.couponDiscountInr.toLocaleString("en-IN")}`}
-          />
+          <Row label="Coupon discount" value={`₹${payment.couponDiscountInr.toLocaleString("en-IN")}`} />
         ) : null}
         {payment.creditInr > 0 ? (
           <Row label="Upgrade credit" value={`₹${payment.creditInr.toLocaleString("en-IN")}`} />
@@ -56,7 +78,7 @@ export default function PaymentDetailModal({ payment, onClose }) {
 function Row({ label, value, bold = false, mono = false }) {
   return (
     <div className="flex items-start justify-between gap-4 border-b border-[#F3F6F5] py-2 last:border-0">
-      <span className="text-[#7A928D]">{label}</span>
+      <span className="shrink-0 text-[#7A928D]">{label}</span>
       <span
         className={`text-right text-[#183534] ${bold ? "font-bold" : "font-medium"} ${
           mono ? "font-mono text-xs" : ""
