@@ -1,6 +1,7 @@
 "use client";
 
-import { AdminEmptyState } from "@/components/admin/ui";
+import { AdminEmptyState, PiiField } from "@/components/admin/ui";
+import { maskEmail, maskPhone } from "@/lib/pii";
 
 const STATUS_STYLES = {
   paid: "bg-[#E8F5F0] text-[#1A7A5A]",
@@ -45,8 +46,6 @@ export default function PaymentsTable({ payments = [], onView }) {
           <tbody>
             {payments.map((payment) => (
               <tr key={payment.id} className="border-b border-[#F3F6F5] last:border-0 hover:bg-[#FAFCFB]">
-
-                {/* Advisor name + designation */}
                 <td className="px-5 py-4">
                   <p className="text-sm font-semibold text-[#183534]">{payment.advisorName}</p>
                   {payment.designation ? (
@@ -57,31 +56,29 @@ export default function PaymentsTable({ payments = [], onView }) {
                   ) : null}
                 </td>
 
-                {/* Email + phone */}
                 <td className="px-5 py-4">
-                  {payment.email ? (
-                    <a
-                      href={`mailto:${payment.email}`}
-                      className="block text-[12px] font-medium text-[#0A4A4A] hover:underline"
-                    >
-                      {payment.email}
-                    </a>
-                  ) : (
-                    <p className="text-[12px] text-[#AABAB6]">No email</p>
-                  )}
-                  {payment.phone ? (
-                    <a
-                      href={`tel:${payment.phone.replace(/\s/g, "")}`}
-                      className="mt-0.5 block text-[12px] text-[#5C7571] hover:underline"
-                    >
-                      {payment.phone}
-                    </a>
-                  ) : (
-                    <p className="mt-0.5 text-[12px] text-[#AABAB6]">No phone</p>
-                  )}
+                  <div className="text-[12px]">
+                    <PiiField
+                      masked={maskEmail(payment.email)}
+                      full={payment.email}
+                      type="email"
+                      entityType="payment"
+                      entityId={payment.id}
+                      href={payment.email ? `mailto:${payment.email}` : undefined}
+                    />
+                  </div>
+                  <div className="mt-1 text-[12px]">
+                    <PiiField
+                      masked={maskPhone(payment.phone)}
+                      full={payment.phone}
+                      type="phone"
+                      entityType="payment"
+                      entityId={payment.id}
+                      href={payment.phone ? `tel:${payment.phone.replace(/\s/g, "")}` : undefined}
+                    />
+                  </div>
                 </td>
 
-                {/* Plan */}
                 <td className="px-5 py-4">
                   <span className="rounded-full bg-[#F8FBFA] px-2.5 py-1 text-[11px] font-semibold text-[#0A4A4A]">
                     {payment.planLabel}
@@ -91,12 +88,10 @@ export default function PaymentsTable({ payments = [], onView }) {
                   ) : null}
                 </td>
 
-                {/* Amount */}
                 <td className="px-5 py-4 text-sm font-bold text-[#0A4A4A]">
                   {payment.amountLabel}
                 </td>
 
-                {/* Coupon */}
                 <td className="px-5 py-4 text-sm text-[#5C7571]">
                   {payment.couponCode ? (
                     <>
@@ -107,12 +102,9 @@ export default function PaymentsTable({ payments = [], onView }) {
                         </p>
                       ) : null}
                     </>
-                  ) : (
-                    "—"
-                  )}
+                  ) : "—"}
                 </td>
 
-                {/* Status */}
                 <td className="px-5 py-4">
                   <span
                     className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${
@@ -123,12 +115,10 @@ export default function PaymentsTable({ payments = [], onView }) {
                   </span>
                 </td>
 
-                {/* Date */}
                 <td className="px-5 py-4 text-[12px] text-[#5C7571]">
                   {formatDate(payment.paidAt || payment.createdAt)}
                 </td>
 
-                {/* Order ID */}
                 <td className="px-5 py-4 font-mono text-[11px] text-[#5C7571]">
                   {payment.razorpayOrderId ? (
                     <span title={payment.razorpayOrderId}>
@@ -139,7 +129,6 @@ export default function PaymentsTable({ payments = [], onView }) {
                   ) : "—"}
                 </td>
 
-                {/* Actions */}
                 <td className="px-5 py-4 text-right">
                   <button
                     type="button"

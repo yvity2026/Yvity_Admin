@@ -21,3 +21,4 @@ export { default as AdminFilterBar } from "./AdminFilterBar";
 export { default as AdminSearchInput } from "./AdminSearchInput";
 export { default as AdminFilterSelect } from "./AdminFilterSelect";
 export * from "./tokens";
+export { default as PiiField } from "./PiiField";
