@@ -36,7 +36,8 @@ async function fetchAllRows() {
       id: profile.id,
       profile_id: profile.id,
       user_id: userId,
-      advisor_name: profile.designation || user.name || "Advisor",
+      advisor_name: user.name || "Advisor",
+      designation: profile.designation || null,
       email: user.email || null,
       phone: user.mobile || null,
       city: user.city || null,
@@ -112,7 +113,7 @@ export async function getBillingSnapshotFromSupabase(options = {}) {
 
   if (search) {
     rows = rows.filter((row) =>
-      [row.advisorName, row.email, row.planLabel, row.planKey, row.userId, row.lastPaymentOrderId]
+      [row.advisorName, row.email, row.phone, row.planLabel, row.planKey, row.userId, row.lastPaymentOrderId]
         .filter(Boolean)
         .join(" ")
         .toLowerCase()

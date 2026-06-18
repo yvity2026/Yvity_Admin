@@ -170,7 +170,7 @@ export default function AdminBillingView() {
               setSearch(e.target.value);
               setPage(1);
             }}
-            placeholder="Search advisor, email, plan, order id…"
+            placeholder="Search name, email, phone, plan, order id…"
             className="w-full rounded-xl border border-[#D7E5E1] bg-[#FAFCFB] px-4 py-3 text-sm text-[#183534] outline-none focus:border-[#0A4A4A]"
           />
         </section>
