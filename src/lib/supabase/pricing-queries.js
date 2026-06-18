@@ -124,6 +124,22 @@ export async function createPlanInSupabase(payload = {}) {
   return { success: true, plan: enrichPlanConfig(plan) };
 }
 
+export async function updatePlanEntitlementsInSupabase(planId, { included, excluded } = {}) {
+  const db = await loadPricingConfig();
+  const index = db.plans.findIndex((p) => p.id === planId);
+  if (index < 0) return { error: "Plan not found", status: 404 };
+
+  const current = db.plans[index];
+  db.plans[index] = {
+    ...current,
+    included: Array.isArray(included) ? included.filter(Boolean) : current.included,
+    excluded: Array.isArray(excluded) ? excluded.filter(Boolean) : current.excluded,
+    updatedAt: new Date().toISOString(),
+  };
+  await setPlatformConfig(KEY, db);
+  return { success: true, plan: enrichPlanConfig(db.plans[index]) };
+}
+
 export async function updateFeaturedPricingInSupabase(productId, updates = {}) {
   const db = await loadPricingConfig();
   const index = db.featuredProducts.findIndex((p) => p.id === productId);
