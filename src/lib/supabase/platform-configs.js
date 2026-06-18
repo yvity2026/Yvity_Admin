@@ -15,6 +15,9 @@ export async function setPlatformConfig(key, config) {
   const { error } = await supabase
     .from("platform_configs")
     .upsert({ key, config, updated_at: new Date().toISOString() }, { onConflict: "key" });
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("[platform-configs] upsert failed", { key, error: error.message });
+    throw new Error(error.message);
+  }
   return config;
 }

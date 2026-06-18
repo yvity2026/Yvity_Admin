@@ -77,7 +77,8 @@ export async function POST(request) {
 
   try {
     if (action === "update") {
-      const { planId, ...updates } = payload;
+      // eslint-disable-next-line no-unused-vars
+      const { planId, action: _a, ...updates } = payload;
       if (!planId) return NextResponse.json({ error: "planId is required" }, { status: 400 });
       const result = local
         ? updatePlanPricing(planId, updates)
@@ -87,13 +88,16 @@ export async function POST(request) {
     }
 
     if (action === "create") {
-      const result = local ? createPlanConfig(payload) : await createPlanInSupabase(payload);
+      // eslint-disable-next-line no-unused-vars
+      const { action: _a, ...createPayload } = payload;
+      const result = local ? createPlanConfig(createPayload) : await createPlanInSupabase(createPayload);
       if (result.error) return NextResponse.json({ error: result.error }, { status: result.status || 400 });
       return NextResponse.json(result);
     }
 
     if (action === "update_featured") {
-      const { productId, ...updates } = payload;
+      // eslint-disable-next-line no-unused-vars
+      const { productId, action: _a, ...updates } = payload;
       if (!productId) return NextResponse.json({ error: "productId is required" }, { status: 400 });
       const result = local
         ? updateFeaturedProductPricing(productId, updates)
