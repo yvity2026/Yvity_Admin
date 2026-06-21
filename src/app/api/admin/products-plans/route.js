@@ -4,8 +4,9 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { buildPlansResponse } from "@/lib/admin/plans/mapPlanRecord";
 import { buildLocalProductsPlansOverview } from "@/lib/admin/products-plans/buildProductsPlansOverview";
 import { formatInr } from "@/lib/admin/payments/mapPaymentRecord";
-import { listConfiguredPlans, useMembershipPlansStore } from "@/lib/local-data/membership-plans-store";
+import { useMembershipPlansStore } from "@/lib/local-data/membership-plans-store";
 import { localDataAvailable } from "@/lib/local-data/advisor-approvals";
+import { getPricingFromSupabase } from "@/lib/supabase/pricing-queries";
 
 async function countSupabaseSubscribers(planIds = []) {
   const supabase = createAdminClient();
@@ -26,28 +27,33 @@ async function countSupabaseSubscribers(planIds = []) {
 }
 
 async function buildSupabaseOverview() {
-  const configuredPlans = listConfiguredPlans();
-  const subscriberCounts = await countSupabaseSubscribers(configuredPlans.map((plan) => plan.id));
-  const plansResponse = buildPlansResponse(configuredPlans, subscriberCounts);
   const supabase = createAdminClient();
 
-  const { data: recentPayments } = await supabase
-    .from("advisor_payments")
-    .select("*, user:users(*)")
-    .eq("status", "paid")
-    .order("paid_at", { ascending: false })
-    .limit(5);
+  // Use live prices from platform_configs (same source as Pricing page)
+  const pricingData = await getPricingFromSupabase();
+  const livePlans = pricingData.plans || [];
+  const subscriberCounts = await countSupabaseSubscribers(livePlans.map((plan) => plan.id));
+  const plansResponse = buildPlansResponse(livePlans, subscriberCounts);
 
-  const now = new Date();
-  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const { data: monthPayments } = await supabase
-    .from("advisor_payments")
-    .select("amount")
-    .gte("paid_at", firstDay)
-    .eq("status", "paid");
+  const [recentPaymentsRes, monthPaymentsRes] = await Promise.all([
+    supabase
+      .from("advisor_payments")
+      .select("*, user:users(*)")
+      .eq("status", "paid")
+      .order("paid_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("advisor_payments")
+      .select("amount")
+      .gte("paid_at", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString())
+      .eq("status", "paid"),
+  ]);
 
-  const revenueThisMonth =
-    (monthPayments || []).reduce((sum, row) => sum + (Number(row.amount) || 0), 0) / 100;
+  const recentPayments = recentPaymentsRes.data || [];
+  const revenueThisMonth = (monthPaymentsRes.data || []).reduce(
+    (sum, row) => sum + (Number(row.amount) || 0),
+    0,
+  );
 
   const planTiers = configuredPlans
     .filter((plan) => plan.status === "active")
@@ -114,13 +120,13 @@ async function buildSupabaseOverview() {
       name: row.user?.name || "Advisor",
       city: row.user?.city || null,
       plan: row.plan_id,
-      amount: formatInr((row.amount || 0) / 100),
+      amount: formatInr(row.amount || 0),
       time: row.paid_at ? new Date(row.paid_at).toLocaleDateString("en-IN") : "Recently",
     })),
     activity: (recentPayments || []).map((row) => ({
       id: `payment-${row.id}`,
       title: `${String(row.plan_id || "Plan").replace(/^./, (c) => c.toUpperCase())} upgrade`,
-      detail: `${formatInr((row.amount || 0) / 100)} · ${row.user?.name || "Advisor"}`,
+      detail: `${formatInr(row.amount || 0)} · ${row.user?.name || "Advisor"}`,
       time: row.paid_at ? new Date(row.paid_at).toLocaleDateString("en-IN") : "Recently",
       tone: row.plan_id === "gold" ? "gold" : "success",
     })),

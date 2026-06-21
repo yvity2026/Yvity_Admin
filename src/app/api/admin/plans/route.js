@@ -3,12 +3,9 @@ import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/server";
 import { buildPlansResponse } from "@/lib/admin/plans/mapPlanRecord";
 import { listLocalMembershipPlans, useLocalMembershipPlans } from "@/lib/local-data/membership-plans";
-import {
-  listConfiguredPlans,
-  updatePlanEntitlements,
-} from "@/lib/local-data/membership-plans-store";
+import { updatePlanEntitlements } from "@/lib/local-data/membership-plans-store";
 import { localDataAvailable } from "@/lib/local-data/advisor-approvals";
-import { updatePlanEntitlementsInSupabase } from "@/lib/supabase/pricing-queries";
+import { getPricingFromSupabase, updatePlanEntitlementsInSupabase } from "@/lib/supabase/pricing-queries";
 
 async function parseAdminSession() {
   const cookieStore = await cookies();
@@ -47,13 +44,18 @@ export async function GET() {
   if (!adminSession) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    if (useLocalMembershipPlans()) {
+    // localDataAvailable() = true only in local dev (sibling .data dir exists)
+    // useLocalMembershipPlans() also returns true on Vercel (useSupabasePersistence),
+    // which incorrectly falls back to hardcoded defaults. Use localDataAvailable() instead.
+    if (localDataAvailable()) {
       return NextResponse.json(listLocalMembershipPlans());
     }
 
-    const configuredPlans = listConfiguredPlans();
-    const subscriberCounts = await countSupabaseSubscribers(configuredPlans.map((plan) => plan.id));
-    return NextResponse.json(buildPlansResponse(configuredPlans, subscriberCounts));
+    // Live prices from platform_configs — same source as Pricing page
+    const pricingData = await getPricingFromSupabase();
+    const livePlans = pricingData.plans || [];
+    const subscriberCounts = await countSupabaseSubscribers(livePlans.map((plan) => plan.id));
+    return NextResponse.json(buildPlansResponse(livePlans, subscriberCounts));
   } catch (error) {
     console.error("Admin plans GET failed", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
