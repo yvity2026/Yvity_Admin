@@ -14,7 +14,7 @@ function normalizeProfession(profession) {
 }
 
 function sumRevenue(rows = []) {
-  return rows.reduce((acc, item) => acc + (Number(item.amount) || 0), 0) / 100;
+  return rows.reduce((acc, item) => acc + (Number(item.amount) || 0), 0);
 }
 
 function startOfTodayIso() {
@@ -96,7 +96,7 @@ function buildActivityFeed({
   for (const payment of recentPayments) {
     const user = payment.user || {};
     const plan = payment.plan_id || "plan";
-    const amount = (Number(payment.amount) || 0) / 100;
+    const amount = Number(payment.amount) || 0;
     const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
     items.push({
       id: `payment-${payment.id}`,
