@@ -86,7 +86,7 @@ async function getSupabasePayments(request) {
     supabase.from("advisor_payments").select("id", { count: "exact", head: true }).eq("status", "created"),
   ]);
 
-  const sumInr = (arr) => (arr || []).reduce((acc, r) => acc + (r.amount || 0), 0) / 100;
+  const sumInr = (arr) => (arr || []).reduce((acc, r) => acc + (r.amount || 0), 0);
 
   const output = allRows.map((item) => {
     const user = item.user || {};
@@ -101,11 +101,11 @@ async function getSupabasePayments(request) {
       city: user.city || null,
       planKey: item.plan_id,
       planLabel: formatPlanLabel(item.plan_id),
-      amountInr: (item.amount || 0) / 100,
-      amountLabel: `₹${((item.amount || 0) / 100).toLocaleString("en-IN")}`,
+      amountInr: item.amount || 0,
+      amountLabel: `₹${(item.amount || 0).toLocaleString("en-IN")}`,
       checkoutKind: item.checkout_kind || "purchase",
       couponCode: item.coupon_code || null,
-      couponDiscountInr: (item.coupon_discount || 0) / 100,
+      couponDiscountInr: item.coupon_discount || 0,
       status: item.status || "created",
       statusLabel: item.status === "paid" ? "Paid" : item.status === "failed" ? "Failed" : "Pending",
       razorpayOrderId: item.razorpay_order_id || null,

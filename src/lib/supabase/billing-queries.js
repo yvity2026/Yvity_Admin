@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { mapBillingRow } from "@/lib/admin/billing/mapBillingRecord";
-import { listConfiguredPlans } from "@/lib/local-data/membership-plans-store";
+import { getPlatformConfig } from "@/lib/supabase/platform-configs";
 
 async function fetchAllRows() {
   const supabase = createAdminClient();
@@ -79,14 +79,24 @@ function sortRows(rows, sort) {
   );
 }
 
-function buildOverview(rows) {
+async function loadLivePriceMap() {
+  try {
+    const stored = await getPlatformConfig("plan_pricing");
+    if (stored?.plans?.length) {
+      return Object.fromEntries(
+        stored.plans.map((p) => [p.id, Number(p.salePriceInr) || 0]),
+      );
+    }
+  } catch {}
+  return {};
+}
+
+async function buildOverview(rows) {
   const paid = rows.filter((r) => r.isPaid);
   const active = paid.filter((r) => r.billingStatus === "active");
   let annualRunRate = 0;
   try {
-    const priceMap = Object.fromEntries(
-      listConfiguredPlans().map((p) => [p.id, p.salePriceInr || 0]),
-    );
+    const priceMap = await loadLivePriceMap();
     annualRunRate = active.reduce((sum, r) => sum + (priceMap[r.planKey] || 0), 0);
   } catch {}
   return {
@@ -124,7 +134,7 @@ export async function getBillingSnapshotFromSupabase(options = {}) {
   const total = rows.length;
   const paginated = rows.slice((page - 1) * limit, page * limit);
   return {
-    overview: buildOverview(allRows),
+    overview: await buildOverview(allRows),
     subscriptions: paginated,
     pagination: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) },
     filters: { applied: filter, sort, search },

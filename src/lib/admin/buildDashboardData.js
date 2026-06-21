@@ -54,7 +54,7 @@ function buildMonthlyRevenue(payments = [], monthCount = 6) {
     const key = monthKey(paidAt);
     const bucket = bucketMap.get(key);
     if (bucket) {
-      bucket.amount += (Number(payment.amount) || 0) / 100;
+      bucket.amount += Number(payment.amount) || 0;
     }
   }
 
