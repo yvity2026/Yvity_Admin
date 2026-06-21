@@ -106,7 +106,7 @@ function mapRecentUpgrades(rows = []) {
   return rows.map((row) => {
     const user = row.user || {};
     const plan = row.plan_id || "plan";
-    const amount = (Number(row.amount) || 0) / 100;
+    const amount = Number(row.amount) || 0;
     return {
       id: row.id,
       name: user.name || "Advisor",
