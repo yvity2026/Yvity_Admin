@@ -44,11 +44,14 @@ export async function GET() {
   if (!adminSession) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    if (useLocalMembershipPlans()) {
+    // localDataAvailable() = true only in local dev (sibling .data dir exists)
+    // useLocalMembershipPlans() also returns true on Vercel (useSupabasePersistence),
+    // which incorrectly falls back to hardcoded defaults. Use localDataAvailable() instead.
+    if (localDataAvailable()) {
       return NextResponse.json(listLocalMembershipPlans());
     }
 
-    // Use live prices from platform_configs (same source as Pricing page)
+    // Live prices from platform_configs — same source as Pricing page
     const pricingData = await getPricingFromSupabase();
     const livePlans = pricingData.plans || [];
     const subscriberCounts = await countSupabaseSubscribers(livePlans.map((plan) => plan.id));
