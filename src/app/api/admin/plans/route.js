@@ -6,6 +6,8 @@ import { listLocalMembershipPlans, useLocalMembershipPlans } from "@/lib/local-d
 import { updatePlanEntitlements } from "@/lib/local-data/membership-plans-store";
 import { localDataAvailable } from "@/lib/local-data/advisor-approvals";
 import { getPricingFromSupabase, updatePlanEntitlementsInSupabase } from "@/lib/supabase/pricing-queries";
+import { getPlatformConfig } from "@/lib/supabase/platform-configs";
+import { getDefaultPlanLimits } from "@/lib/admin/features/featureCatalog";
 
 async function parseAdminSession() {
   const cookieStore = await cookies();
@@ -52,10 +54,22 @@ export async function GET() {
     }
 
     // Live prices from platform_configs — same source as Pricing page
-    const pricingData = await getPricingFromSupabase();
+    const [pricingData, featureConfig] = await Promise.all([
+      getPricingFromSupabase(),
+      getPlatformConfig("feature_controls").catch(() => null),
+    ]);
     const livePlans = pricingData.plans || [];
     const subscriberCounts = await countSupabaseSubscribers(livePlans.map((plan) => plan.id));
-    return NextResponse.json(buildPlansResponse(livePlans, subscriberCounts));
+
+    // Merge default limits with any overrides saved in feature_controls
+    const defaultLimits = getDefaultPlanLimits();
+    const savedLimits = featureConfig?.planLimits || {};
+    const planLimits = {};
+    for (const planId of Object.keys(defaultLimits)) {
+      planLimits[planId] = { ...defaultLimits[planId], ...(savedLimits[planId] || {}) };
+    }
+
+    return NextResponse.json(buildPlansResponse(livePlans, subscriberCounts, planLimits));
   } catch (error) {
     console.error("Admin plans GET failed", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

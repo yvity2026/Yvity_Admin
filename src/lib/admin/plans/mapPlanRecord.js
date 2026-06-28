@@ -22,14 +22,20 @@ function allComparisonLabelsFromPlans(plans = []) {
   return rows;
 }
 
-export function mapPlanRow(plan, subscriberCount = 0) {
+export function mapPlanRow(plan, subscriberCount = 0, allPlanLimits = null) {
   const planId = plan.id || plan.limitsTemplate || "free";
   const templateId = plan.limitsTemplate || plan.id || "free";
-  let limits = PLAN_LIMITS[templateId] || PLAN_LIMITS.free;
-  try {
-    limits = getConfiguredPlanLimits(planId, templateId);
-  } catch {
-    limits = PLAN_LIMITS[templateId] || PLAN_LIMITS.free;
+  let limits;
+  if (allPlanLimits) {
+    // Live limits passed from API (Supabase) — preferred path on Vercel
+    limits = allPlanLimits[planId] || allPlanLimits[templateId] || PLAN_LIMITS[templateId] || PLAN_LIMITS.free;
+  } else {
+    // Local dev fallback: read from local JSON
+    try {
+      limits = getConfiguredPlanLimits(planId, templateId);
+    } catch {
+      limits = PLAN_LIMITS[templateId] || PLAN_LIMITS.free;
+    }
   }
 
   return {
@@ -71,9 +77,9 @@ export function mapPlanRow(plan, subscriberCount = 0) {
   };
 }
 
-export function buildPlansResponse(configuredPlans = [], subscriberCounts = {}) {
+export function buildPlansResponse(configuredPlans = [], subscriberCounts = {}, planLimits = null) {
   const plans = configuredPlans.map((plan) =>
-    mapPlanRow(plan, subscriberCounts[plan.id] || 0),
+    mapPlanRow(plan, subscriberCounts[plan.id] || 0, planLimits),
   );
 
   const totalSubscribers = plans.reduce((sum, plan) => sum + plan.subscriberCount, 0);
