@@ -2,6 +2,20 @@ import { shortUserId } from "@/lib/admin/users/mapUserRecord";
 
 import { resolveGoldAssetUrl } from "@/lib/local-data/paths";
 
+const YVITY_META_MARKER = "\n---YVITY-META---\n";
+
+function parseLicenseFromSummary(shortSummary) {
+  if (!shortSummary) return null;
+  const idx = shortSummary.indexOf(YVITY_META_MARKER);
+  if (idx === -1) return null;
+  try {
+    const meta = JSON.parse(shortSummary.slice(idx + YVITY_META_MARKER.length));
+    return meta?.licenseHolder?.licenseNumber?.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
 
 
 const REQUEST_TYPE_LABELS = {
@@ -118,23 +132,16 @@ export function mapApprovalRow(item = {}, user = {}, services = []) {
 
 
 
-  const licenseUrl = resolveGoldAssetUrl(
+  const certUrl = item.iridai_certificate_url?.trim();
+  const resolvedCert =
+    certUrl && certUrl !== "pending" ? resolveGoldAssetUrl(certUrl) : null;
 
-    item.iridai_certificate_url && item.iridai_certificate_url !== "pending"
+  const licenseUrl = resolvedCert || resolveGoldAssetUrl(item.document_urls?.[0] || item.licenseUrl || null);
 
-      ? item.iridai_certificate_url
-
-      : item.document_urls?.[0] || item.licenseUrl || null,
-
-  );
-
-
-
-  const documentUrls = (item.document_urls || [])
-
-    .map((url) => resolveGoldAssetUrl(url))
-
-    .filter(Boolean);
+  // Deduplicated proof URLs: certificate first, then any additional document_urls
+  const docUrlsRaw = (item.document_urls || []).map((url) => resolveGoldAssetUrl(url)).filter(Boolean);
+  const documentUrlsSet = new Set(resolvedCert ? [resolvedCert, ...docUrlsRaw] : docUrlsRaw);
+  const documentUrls = [...documentUrlsSet];
 
 
 
@@ -144,21 +151,28 @@ export function mapApprovalRow(item = {}, user = {}, services = []) {
 
   const service = primaryService(services);
 
-  const serviceDetails = services.map((entry) => ({
-    id: entry.id,
-    title: entry.title || entry.category || "Service",
-    provider: entry.provider || "—",
-    category: entry.category || "—",
-    roleLabel: entry.roleLabel || entry.role || "—",
-    verificationStatus: entry.verification?.status || (entry.verified ? "verified" : "pending"),
-    documents: (entry.verification?.documents || [])
-      .map((doc) => ({
-        id: doc.id,
-        url: resolveGoldAssetUrl(doc.url),
-        label: doc.label || doc.filename || "Verification document",
-      }))
-      .filter((doc) => doc.url),
-  }));
+  const serviceDetails = services.map((entry) => {
+    // Handle both local format (title/provider) and Supabase DB rows (service_type/company)
+    const title = entry.title || entry.category || entry.service_type || "Service";
+    const provider = entry.provider || entry.company || "—";
+    const licenseNumber = parseLicenseFromSummary(entry.short_summary);
+    return {
+      id: entry.id,
+      title,
+      provider,
+      category: entry.category || "—",
+      roleLabel: entry.roleLabel || entry.role || "—",
+      licenseNumber,
+      verificationStatus: entry.verification?.status || (entry.verified ? "verified" : "pending"),
+      documents: (entry.verification?.documents || [])
+        .map((doc) => ({
+          id: doc.id,
+          url: resolveGoldAssetUrl(doc.url),
+          label: doc.label || doc.filename || "Verification document",
+        }))
+        .filter((doc) => doc.url),
+    };
+  });
 
 
 
@@ -204,7 +218,7 @@ export function mapApprovalRow(item = {}, user = {}, services = []) {
 
     licenseUrl,
 
-    licenseNo: item.advisor_role_id || item.licenseNo || "—",
+    licenseNo: parseLicenseFromSummary(services[0]?.short_summary) || item.licenseNo || "—",
 
     documentUrls,
 

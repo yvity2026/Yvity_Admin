@@ -99,8 +99,13 @@ export default function ApprovalRequestModal({
                     <div>
                       <p className="text-sm font-semibold text-[#183534]">{service.title}</p>
                       <p className="mt-1 text-[12px] text-[#5C7571]">
-                        {service.provider} · {service.roleLabel}
+                        {service.provider}{service.roleLabel && service.roleLabel !== "—" ? ` · ${service.roleLabel}` : ""}
                       </p>
+                      {service.licenseNumber && (
+                        <p className="mt-0.5 text-[11px] text-[#5C7571]">
+                          Licence: <span className="font-semibold text-[#183534]">{service.licenseNumber}</span>
+                        </p>
+                      )}
                     </div>
                     <span
                       className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${

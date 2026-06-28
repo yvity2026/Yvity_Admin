@@ -114,6 +114,20 @@ export async function GET(request) {
       );
     }
 
+    // Fetch services for all advisors in one query
+    const advisorIds = (data || []).map((p) => p.advisor_id).filter(Boolean);
+    let servicesByAdvisor = {};
+    if (advisorIds.length > 0) {
+      const { data: servicesData } = await supabase
+        .from("advisor_services")
+        .select("id, advisor_id, service_type, company, short_summary, key_services")
+        .in("advisor_id", advisorIds);
+      for (const row of servicesData || []) {
+        if (!servicesByAdvisor[row.advisor_id]) servicesByAdvisor[row.advisor_id] = [];
+        servicesByAdvisor[row.advisor_id].push(row);
+      }
+    }
+
     const allRows = (data || []).map((item) =>
       mapApprovalRow(
         {
@@ -123,7 +137,7 @@ export async function GET(request) {
           source: "supabase",
         },
         item.user || {},
-        [],
+        servicesByAdvisor[item.advisor_id] || [],
       ),
     );
 
